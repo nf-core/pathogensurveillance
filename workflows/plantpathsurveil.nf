@@ -37,7 +37,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INPUT_CHECK            } from '../subworkflows/local/input_check'
+include { COARSE_SAMPLE_TAXONOMY } from '../subworkflows/local/coarse_sample_taxonomy'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,6 +84,13 @@ workflow PLANTPATHSURVEIL {
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+    //
+    // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
+    //
+    COARSE_SAMPLE_TAXONOMY (
+        INPUT_CHECK.out.reads
     )
 
     //
