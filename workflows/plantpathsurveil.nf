@@ -39,6 +39,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK            } from '../subworkflows/local/input_check'
 include { COARSE_SAMPLE_TAXONOMY } from '../subworkflows/local/coarse_sample_taxonomy'
+include { BACTERIAPIPELINE      } from '../subworkflows/local/bacteriapipeline'
+include { EUKARYOTEPIPELINE      } from '../subworkflows/local/eukaryotepipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,6 +93,18 @@ workflow PLANTPATHSURVEIL {
     //
     COARSE_SAMPLE_TAXONOMY (
         INPUT_CHECK.out.reads
+    )
+    COARSE_SAMPLE_TAXONOMY.out.taxon.branch {
+        bacteria: it == "Bacteria"
+        eukaryote: it == "Eukaryota"
+        unknown: true 
+    }
+    .set { organism }
+    BACTERIAPIPELINE (
+        organism.bacteria
+    )
+    EUKARYOTEPIPELINE (
+        organism.eukaryote
     )
 
     //
