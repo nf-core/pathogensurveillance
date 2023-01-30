@@ -1,5 +1,5 @@
 process BBMAP_SENDSKETCH {
-    tag "$file"
+    tag "$meta.id"
     label 'process_low'
 
     conda "bioconda::bbmap=39.01"

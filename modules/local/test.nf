@@ -1,6 +1,6 @@
 
 process TEST {
-    tag "test_module"
+    tag "$meta.id"
     label 'process_single'
 
     conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
@@ -9,7 +9,7 @@ process TEST {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    val org
+    tuple val(meta), val(taxon)
 
     output:
     path "output.txt"           , emit: output
@@ -19,6 +19,6 @@ process TEST {
 
     script:
     """
-    echo $org > output.txt
+    echo $taxon > output.txt
     """
 }

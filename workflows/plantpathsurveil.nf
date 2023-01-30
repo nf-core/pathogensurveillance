@@ -94,9 +94,9 @@ workflow PLANTPATHSURVEIL {
     COARSE_SAMPLE_TAXONOMY (
         INPUT_CHECK.out.reads
     )
-    COARSE_SAMPLE_TAXONOMY.out.taxon.branch {
-        bacteria: it == "Bacteria"
-        eukaryote: it == "Eukaryota"
+    COARSE_SAMPLE_TAXONOMY.out.result.branch {
+        bacteria: it[1] == "Bacteria"
+        eukaryote: it[1] == "Eukaryota"
         unknown: true 
     }
     .set { organism }
