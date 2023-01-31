@@ -11,12 +11,11 @@ WorkflowPlantpathsurveil.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-if (params.fasta) { ch_fasta = file(params.fasta) } else { exit 1, 'Input samplesheet not specified!' }
 
 
 
@@ -40,8 +39,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK          } from '../subworkflows/local/input_check'
-include { MAKE_REFERENCE_INDEX } from '../subworkflows/local/make_ref_index'
+include { INPUT_CHECK            } from '../subworkflows/local/input_check'
+include { COARSE_SAMPLE_TAXONOMY } from '../subworkflows/local/coarse_sample_taxonomy'
+include { BACTERIAPIPELINE      } from '../subworkflows/local/bacteriapipeline'
+include { EUKARYOTEPIPELINE      } from '../subworkflows/local/eukaryotepipeline'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,18 +78,39 @@ workflow PLANTPATHSURVEIL {
     INPUT_CHECK (
         ch_input
     )
+    ch_reads = INPUT_CHECK.out.reads_and_ref.map { it[0..1] }
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        INPUT_CHECK.out.reads
+        ch_reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
+    //
+    // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
+    //
+    COARSE_SAMPLE_TAXONOMY (
+        INPUT_CHECK.out.reads_and_ref
+    )
+    COARSE_SAMPLE_TAXONOMY.out.result.branch {
+        bacteria: it[1] == "Bacteria"
+        eukaryote: it[1] == "Eukaryota"
+        unknown: true 
+    }
+    .set { subpipeline_input }
+
+    BACTERIAPIPELINE (
+        subpipeline_input.bacteria
+    )
+    EUKARYOTEPIPELINE (
+        subpipeline_input.eukaryote
     )
 
     //
@@ -114,10 +137,6 @@ workflow PLANTPATHSURVEIL {
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 
-    //
-    // SUBWORKFLOW  Make Reference Index
-    //
-    MAKE_REFERENCE_INDEX ( ch_fasta )
 
 }
 
