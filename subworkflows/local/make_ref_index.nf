@@ -46,7 +46,7 @@ workflow MAKE_REFERENCE_INDEX{
     ch_versions = ch_versions.mix (BWA_INDEX.out.versions)
 
     emit:
-    dict        = PICARD_CREATESEQUENCEDICTIONARY.out.dict
+    reference_dict        = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
 
 
 

@@ -1,4 +1,8 @@
-include { TEST } from '../../modules/local/test'
+
+include { MAKE_REFERENCE_INDEX } from './make_ref_index'  // this is being called from subworflows
+
+
+
 
 workflow BACTERIAPIPELINE {
 
@@ -12,10 +16,11 @@ workflow BACTERIAPIPELINE {
     ch_reference = input.map { [it[0], it[4]] }
     ch_versions = Channel.empty()
 
-    TEST( ch_taxon )
+    MAKE_REFERENCE_INDEX ( ch_reference )
 
     emit:
-    output = TEST.output
+    output = MAKE_REFERENCE_INDEX.out.reference_dict
+
 
 }
 
