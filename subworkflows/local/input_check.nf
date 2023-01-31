@@ -10,35 +10,43 @@ workflow INPUT_CHECK {
 
     main:
     SAMPLESHEET_CHECK ( samplesheet )
+    SAMPLESHEET_CHECK.out
         .csv
         .splitCsv ( header:true, sep:',' )
-        .map { create_fastq_channel(it) }
-        .set { reads }
+        .map { create_reads_ref_channel(it) }
+        .set { reads_and_ref }
 
     emit:
-    reads                                     // channel: [ val(meta), [ reads ] ]
+    reads_and_ref                             // channel: [ val(meta), [ reads ], ref ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
-def create_fastq_channel(LinkedHashMap row) {
+def create_reads_ref_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
     meta.id         = row.sample
     meta.single_end = row.single_end.toBoolean()
 
-    // add path(s) of the fastq file(s) to the meta map
-    def fastq_meta = []
+    // check for presence of input files
+    if (!file(row.reference).exists()) {
+        exit 1, "ERROR: Please check input samplesheet -> Reference file does not exist!\n${row.reference}"
+    }
     if (!file(row.fastq_1).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
     }
+
+    // add path(s) of the fastq file(s) to the meta map
+    def fastq_meta = []
     if (meta.single_end) {
-        fastq_meta = [ meta, [ file(row.fastq_1) ] ]
+        fastq_meta = [ meta, [ file(row.fastq_1) ], file(row.reference) ]
     } else {
         if (!file(row.fastq_2).exists()) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
         }
-        fastq_meta = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
+        fastq_meta = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], file(row.reference) ]
     }
     return fastq_meta
 }
+
+

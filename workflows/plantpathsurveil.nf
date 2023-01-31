@@ -11,7 +11,7 @@ WorkflowPlantpathsurveil.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
@@ -74,13 +74,14 @@ workflow PLANTPATHSURVEIL {
     INPUT_CHECK (
         ch_input
     )
+    ch_reads = INPUT_CHECK.out.reads_and_ref.map { it[0..1] }
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        INPUT_CHECK.out.reads
+        ch_reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
@@ -92,19 +93,20 @@ workflow PLANTPATHSURVEIL {
     // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
     //
     COARSE_SAMPLE_TAXONOMY (
-        INPUT_CHECK.out.reads
+        INPUT_CHECK.out.reads_and_ref
     )
     COARSE_SAMPLE_TAXONOMY.out.result.branch {
         bacteria: it[1] == "Bacteria"
         eukaryote: it[1] == "Eukaryota"
         unknown: true 
     }
-    .set { organism }
+    .set { subpipeline_input }
+
     BACTERIAPIPELINE (
-        organism.bacteria
+        subpipeline_input.bacteria
     )
     EUKARYOTEPIPELINE (
-        organism.eukaryote
+        subpipeline_input.eukaryote
     )
 
     //
