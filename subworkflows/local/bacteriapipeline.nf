@@ -19,7 +19,10 @@ workflow BACTERIAPIPELINE {
     MAKE_REFERENCE_INDEX ( ch_reference )
 
     emit:
-    output = MAKE_REFERENCE_INDEX.out.reference_dict
+    picard_dict  = MAKE_REFERENCE_INDEX.out.reference_dict
+    samtools_fai = MAKE_REFERENCE_INDEX.out.fai
+    samtools_gzi = MAKE_REFERENCE_INDEX.out.gzi
+    bwa_index    = MAKE_REFERENCE_INDEX.out.index 
 
 
 }
