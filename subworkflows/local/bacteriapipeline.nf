@@ -18,8 +18,11 @@ workflow BACTERIAPIPELINE {
 
     MAKE_REFERENCE_INDEX ( ch_reference )
 
+    ALIGN_READS_TO_REF ( ch_reads, ch_reference, MAKE_REFERENCE_INDEX.out.fai, MAKE_REFERENCE_INDEX.out.index)
+
     emit:
-    output = MAKE_REFERENCE_INDEX.out.reference_dict
+    reference_dict = MAKE_REFERENCE_INDEX.out.reference_dict 
+    versions = ch_versions                           // channel: [ versions.yml ]
 
 
 }

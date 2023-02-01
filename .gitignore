@@ -8,3 +8,4 @@ testing*
 *.pyc
 scratch/
 null/
+*.swp
