@@ -46,10 +46,10 @@ workflow MAKE_REFERENCE_INDEX{
     ch_versions = ch_versions.mix (BWA_INDEX.out.versions)
 
     emit:
-    reference_dict        = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
-    fai                   = SAMTOOLS_FAIDX.out.fai
-    gzi                   = SAMTOOLS_FAIDX.out.gzi
-    index                 = BWA_INDEX.out.index
+    picard_dict        = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
+    samtools_fai                   = SAMTOOLS_FAIDX.out.fai
+    samtools_gzi                   = SAMTOOLS_FAIDX.out.gzi
+    bwa_index                 = BWA_INDEX.out.index
 
 
     versions = ch_versions                        // channel: [ versions.yml ]
