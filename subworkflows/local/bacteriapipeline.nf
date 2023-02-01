@@ -17,8 +17,13 @@ workflow BACTERIAPIPELINE {
     ch_versions = Channel.empty()
 
     MAKE_REFERENCE_INDEX ( ch_reference )
-
-    ALIGN_READS_TO_REF ( ch_reads, ch_reference, MAKE_REFERENCE_INDEX.out.fai, MAKE_REFERENCE_INDEX.out.index)
+    
+    ALIGN_READS_TO_REF (
+        ch_reads
+        .join(ch_reference)
+        .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
+        .join(MAKE_REFERENCE_INDEX.out.bwa_index)
+    )
 
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict
