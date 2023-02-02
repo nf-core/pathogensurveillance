@@ -1,6 +1,7 @@
 
 include { MAKE_REFERENCE_INDEX } from './make_ref_index'  // this is being called from subworflows
 include { ALIGN_READS_TO_REF   } from './align_reads_to_ref'
+include { CALL_VARIANTS        } from './call_variants'
 
 
 
@@ -23,6 +24,11 @@ workflow BACTERIAPIPELINE {
         .join(ch_reference)
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.bwa_index)
+    )
+
+    CALL_VARIANTS (
+        ALIGN_READS_TO_REF.out.bam.
+        join(ch_reference)
     )
 
     emit:
