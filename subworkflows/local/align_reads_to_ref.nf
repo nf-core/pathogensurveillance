@@ -1,8 +1,8 @@
-include { BWA_MEM                            } from '../../../modules/nf-core/bwa/mem/main'
-include { PICARD_ADDORREPLACEREADGROUPS      } from '../../../modules/nf-core/picard/addorreplacereadgroups/main'
-include { PICARD_SORTSAM as PICARD_SORTSAM_1 } from '../../../modules/nf-core/picard/sortsam/main'
-include { PICARD_SORTSAM as PICARD_SORTSAM_2 } from '../../../modules/nf-core/picard/sortsam/main'
-include { PICARD_MARKDUPLICATES              } from '../../../modules/nf-core/picard/markduplicates/main'
+include { BWA_MEM                            } from '../../modules/nf-core/bwa/mem/main'
+include { PICARD_ADDORREPLACEREADGROUPS      } from '../../modules/nf-core/picard/addorreplacereadgroups/main'
+include { PICARD_SORTSAM as PICARD_SORTSAM_1 } from '../../modules/nf-core/picard/sortsam/main'
+include { PICARD_SORTSAM as PICARD_SORTSAM_2 } from '../../modules/nf-core/picard/sortsam/main'
+include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
 
 
 workflow ALIGN_READS_TO_REF {
@@ -28,7 +28,7 @@ workflow ALIGN_READS_TO_REF {
     ch_reference = ch_input.map { it[2] }
     ch_ref_index = ch_input.map { it[3] }
     PICARD_MARKDUPLICATES (
-        PICARD_SORTSAM.out.bam,
+        PICARD_SORTSAM_1.out.bam,
         ch_reference,
         ch_ref_index
     )

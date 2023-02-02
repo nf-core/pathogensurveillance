@@ -1,6 +1,6 @@
 
 include { MAKE_REFERENCE_INDEX } from './make_ref_index'  // this is being called from subworflows
-
+include { ALIGN_READS_TO_REF   } from './align_reads_to_ref'
 
 
 
