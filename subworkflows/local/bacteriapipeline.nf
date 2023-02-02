@@ -8,13 +8,13 @@ include { CALL_VARIANTS        } from './call_variants'
 workflow BACTERIAPIPELINE {
 
     take:
-    input // channel: [ tuple val(meta), env(TAXON), path(hits), path(reads), path(reference) ]
+    input // channel: [ val(meta), val(taxon), path(hits), path(reads), path(reference), val(ref_meta) ]
 
     main:
     ch_taxon     = input.map { [it[0], it[1]] } 
     ch_bbsketch  = input.map { [it[0], it[2]] }
     ch_reads     = input.map { [it[0], it[3]] }
-    ch_reference = input.map { [it[0], it[4]] }
+    ch_reference = input.map { [it[0], it[4], it[5]] }
     ch_versions = Channel.empty()
 
     MAKE_REFERENCE_INDEX ( ch_reference )

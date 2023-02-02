@@ -8,14 +8,14 @@ include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picar
 workflow ALIGN_READS_TO_REF {
 
     take:
-    ch_input     // channel: [ val(meta), [ fastq_1, fastq_2 ], reference, reference_index, bam_index ]
+    ch_input     // channel: [ val(meta), [ fastq_1, fastq_2 ], reference, ref_meta, reference_index, bam_index ]
 
     main:
 
     ch_versions = Channel.empty()
 
     ch_reads     = ch_input.map { [it[0], it[1]] }
-    ch_bwa_index = ch_input.map { [it[0], it[4]] }
+    ch_bwa_index = ch_input.map { [it[0], it[5]] }
     BWA_MEM ( ch_reads, ch_bwa_index, false )
     ch_versions = ch_versions.mix(BWA_MEM.out.versions.first())
 
@@ -26,7 +26,7 @@ workflow ALIGN_READS_TO_REF {
     ch_versions = ch_versions.mix(PICARD_SORTSAM_1.out.versions.first())
     
     ch_reference = ch_input.map { it[2] }
-    ch_ref_index = ch_input.map { it[3] }
+    ch_ref_index = ch_input.map { it[4] }
     PICARD_MARKDUPLICATES (
         PICARD_SORTSAM_1.out.bam,
         ch_reference,

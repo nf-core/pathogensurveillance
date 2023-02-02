@@ -4,16 +4,19 @@ include { GRAPHTYPER_GENOTYPE                } from '../../modules/nf-core/graph
 workflow CALL_VARIANTS {
 
     take:
-    ch_input     // channel: [ val(meta), bam, reference ]
+    ch_input     // channel: [ val(meta), file(bam), file(reference), val(ref_meta) ]
 
     main:
 
     ch_versions = Channel.empty()
-    ch_input.view()
     
-    // make list of chromosome (fasta headers) names compatible with graphtyper
-
     // group samples by reference genome
+    //    ch_ref_grouped: [val(ref_meta), file(ref), [val(meta)], [file(bam)]]
+    ch_ref_grouped = ch_input
+        .groupTuple(by: 3)
+        .map { [it[3], it[2][0], it[0], it[1]] } // remove redundant reference genome paths
+
+    // make list of chromosome (fasta headers) names compatible with graphtyper
 
     // Run graphtyper on each group of samples for all chromosomes
 

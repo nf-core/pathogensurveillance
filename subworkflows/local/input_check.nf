@@ -17,7 +17,7 @@ workflow INPUT_CHECK {
         .set { reads_and_ref }
 
     emit:
-    reads_and_ref                             // channel: [ val(meta), [ reads ], ref ]
+    reads_and_ref                             // channel: [ val(meta), [ file(reads) ], file(ref), val(ref_meta) ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
@@ -37,16 +37,18 @@ def create_reads_ref_channel(LinkedHashMap row) {
     }
 
     // add path(s) of the fastq file(s) to the meta map
-    def fastq_meta = []
+    def ref_meta = [:]
+    ref_meta.id = row.reference_id ?: row.reference
+    def output = []
     if (meta.single_end) {
-        fastq_meta = [ meta, [ file(row.fastq_1) ], file(row.reference) ]
+        output = [ meta, [ file(row.fastq_1) ], file(row.reference), ref_meta ]
     } else {
         if (!file(row.fastq_2).exists()) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
         }
-        fastq_meta = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], file(row.reference) ]
+        output = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], file(row.reference), ref_meta ]
     }
-    return fastq_meta
+    return output
 }
 
 

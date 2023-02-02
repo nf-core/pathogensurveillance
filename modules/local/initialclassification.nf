@@ -8,11 +8,11 @@ process INITIALCLASSIFICATION {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    tuple val(meta), path(hits), path(reads), path(reference)
+    tuple val(meta), path(hits), path(reads), path(reference), val(ref_name)
 
     output:
-    tuple val(meta), env(TAXON), path(hits), path(reads), path(reference), emit: result
-    tuple val(meta), env(CLASS),                                           emit: classification
+    tuple val(meta), env(TAXON), path(hits), path(reads), path(reference), val(ref_name), emit: result
+    tuple val(meta), env(CLASS),                                                          emit: classification
     path "versions.yml", emit: versions
 
     when:
