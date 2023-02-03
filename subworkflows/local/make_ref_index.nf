@@ -48,7 +48,7 @@ workflow MAKE_REFERENCE_INDEX{
     //    odd cross + map needed since join does not duplicate things
     picard_dict = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
         .cross(ch_reference.map { [it[2], it[0]] } )
-        .map { [it[1][1], it[0][1]] } 
+        .map { [it[1][1], it[0][1]] }
     samtools_fai = SAMTOOLS_FAIDX.out.fai
         .cross(ch_reference.map { [it[2], it[0]] } )
         .map { [it[1][1], it[0][1]] } 
