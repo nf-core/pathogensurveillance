@@ -1,4 +1,5 @@
-include { GRAPHTYPER_GENOTYPE                } from '../../modules/nf-core/graphtyper/genotype/main'
+include { GRAPHTYPER_GENOTYPE   } from '../../modules/nf-core/graphtyper/genotype/main'
+include { MAKEREGIONFILE        } from '../../modules/local/makeregionfile'
 
 
 workflow CALL_VARIANTS {
@@ -15,8 +16,12 @@ workflow CALL_VARIANTS {
     ch_ref_grouped = ch_input
         .groupTuple(by: 3)
         .map { [it[3], it[2][0], it[0], it[1]] } // remove redundant reference genome paths
+    
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
+    ch_ref = ch_ref_grouped.map { it[0..1] }
+    MAKEREGIONFILE ( ch_ref ) 
+    MAKEREGIONFILE.out.regions.view()
 
     // Run graphtyper on each group of samples for all chromosomes
 

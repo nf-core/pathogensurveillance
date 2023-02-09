@@ -38,7 +38,7 @@ def create_reads_ref_channel(LinkedHashMap row) {
 
     // add path(s) of the fastq file(s) to the meta map
     def ref_meta = [:]
-    ref_meta.id = row.reference_id ?: row.reference
+    ref_meta.id = row.reference_id ?: row.reference.replaceAll('/', '_')
     def output = []
     if (meta.single_end) {
         output = [ meta, [ file(row.fastq_1) ], file(row.reference), ref_meta ]
