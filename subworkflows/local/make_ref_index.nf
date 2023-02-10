@@ -26,15 +26,15 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 
 workflow MAKE_REFERENCE_INDEX{
     take:
-    ch_reference     // [ val(meta), file(reference), val(ref_meta) ]
+    ch_reference     // [ val(meta), val(ref_meta), file(reference) ]
 
     main:
     ch_versions = Channel.empty()
 
     // make channel for each unique reference
     ch_unique_ref = ch_reference
-        .map { [it[2], it[1]] }
-        .unique { it[0] } // make unique based on reference name
+        .map { it[1..2] }
+        .unique { it[0] } // make unique based on reference metadata
     PICARD_CREATESEQUENCEDICTIONARY ( ch_unique_ref )
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
@@ -47,16 +47,16 @@ workflow MAKE_REFERENCE_INDEX{
     // duplicate and recombine unique reference results with sample data
     //    odd cross + map needed since join does not duplicate things
     picard_dict = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
-        .cross(ch_reference.map { [it[2], it[0]] } )
+        .cross(ch_reference.map { [it[1], it[0]] } )
         .map { [it[1][1], it[0][1]] }
     samtools_fai = SAMTOOLS_FAIDX.out.fai
-        .cross(ch_reference.map { [it[2], it[0]] } )
+        .cross(ch_reference.map { [it[1], it[0]] } )
         .map { [it[1][1], it[0][1]] } 
     samtools_gzi = SAMTOOLS_FAIDX.out.gzi
-        .cross(ch_reference.map { [it[2], it[0]] } )
+        .cross(ch_reference.map { [it[1], it[0]] } )
         .map { [it[1][1], it[0][1]] } 
     bwa_index = BWA_INDEX.out.index
-        .cross(ch_reference.map { [it[2], it[0]] } )
+        .cross(ch_reference.map { [it[1], it[0]] } )
         .map { [it[1][1], it[0][1]] } 
 
     emit:

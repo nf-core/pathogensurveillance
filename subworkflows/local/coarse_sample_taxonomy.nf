@@ -4,7 +4,7 @@ include { INITIALCLASSIFICATION  } from '../../modules/local/initialclassificati
 workflow COARSE_SAMPLE_TAXONOMY {
 
     take:
-    ch_reads_ref  // channel: [ val(meta), [ file(fastq) ], file(reference), val(ref_name) ]
+    ch_reads_ref  // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(reference) ]
 
     main:
     ch_versions = Channel.empty()
@@ -18,9 +18,8 @@ workflow COARSE_SAMPLE_TAXONOMY {
     ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.first())
 
     emit:
-    result          = INITIALCLASSIFICATION.out.result  // channel: [ val(meta), env(TAXON), path(hits), path(reads), path(reference), val(ref_name) ]
+    result          = INITIALCLASSIFICATION.out.result          // channel: [ val(meta), env(TAXON), file(hits), [ file(reads)], val(ref_meta), path(reference) ]
     classification  = INITIALCLASSIFICATION.out.classification  // channel: [ val(meta), [ classification ] ]
-    hits            = BBMAP_SENDSKETCH.out.hits     // channel: [ val(meta), [ hits ] ]
-
-    versions = ch_versions                     // channel: [ versions.yml ]
+    hits            = BBMAP_SENDSKETCH.out.hits                 // channel: [ val(meta), [ hits ] ]
+    versions        = ch_versions                               // channel: [ versions.yml ]
 }

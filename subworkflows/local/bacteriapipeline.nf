@@ -3,12 +3,10 @@ include { MAKE_REFERENCE_INDEX } from './make_ref_index'  // this is being calle
 include { ALIGN_READS_TO_REF   } from './align_reads_to_ref'
 include { CALL_VARIANTS        } from './call_variants'
 
-
-
 workflow BACTERIAPIPELINE {
 
     take:
-    input // channel: [ val(meta), val(taxon), path(hits), path(reads), path(reference), val(ref_meta) ]
+    input // channel: [ val(meta), val(taxon), path(hits), path(reads), val(ref_meta), path(reference) ]
 
     main:
     ch_taxon     = input.map { [it[0], it[1]] } 
@@ -27,8 +25,11 @@ workflow BACTERIAPIPELINE {
     )
 
     CALL_VARIANTS (
-        ALIGN_READS_TO_REF.out.bam.
-        join(ch_reference)
+        ALIGN_READS_TO_REF.out.bam
+        .join(ALIGN_READS_TO_REF.out.bai)
+        .join(ch_reference)
+        .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
+        .join(MAKE_REFERENCE_INDEX.out.picard_dict)
     )
 
     emit:
