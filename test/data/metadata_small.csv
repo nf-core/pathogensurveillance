@@ -1,0 +1,4 @@
+sample,fastq_1,fastq_2,reference,reference_id
+sample_id_1,test/data/reads_small/22-311_R1.fastq.gz,test/data/reads_small/22-311_R2.fastq.gz,test/data/refs/reference-22-331.fna,22_331_assembly
+sample_id_2,test/data/reads_small/22-324_R1.fastq.gz,test/data/reads_small/22-324_R2.fastq.gz,test/data/refs/reference-22-331.fna,22_331_assembly
+sample_id_3,test/data/reads_small/22-335_R1.fastq.gz,test/data/reads_small/22-335_R2.fastq.gz,test/data/refs/reference-22-331.fna,22_331_assembly
