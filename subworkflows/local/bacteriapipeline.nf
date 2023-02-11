@@ -1,7 +1,8 @@
 
-include { MAKE_REFERENCE_INDEX } from './make_ref_index'  // this is being called from subworflows
-include { ALIGN_READS_TO_REF   } from './align_reads_to_ref'
-include { CALL_VARIANTS        } from './call_variants'
+include { MAKE_REFERENCE_INDEX   } from './make_ref_index'  // this is being called from subworflows
+include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
+include { CALL_VARIANTS          } from './call_variants'
+include { VARIANT_CALLING_REPORT } from './variant_calling_report'
 
 workflow BACTERIAPIPELINE {
 
@@ -30,6 +31,10 @@ workflow BACTERIAPIPELINE {
         .join(ch_reference)
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.picard_dict)
+    )
+    
+    VARIANT_CALLING_REPORT (
+        CALL_VARIANTS.out.vcf
     )
 
     emit:
