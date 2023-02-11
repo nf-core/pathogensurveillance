@@ -17,7 +17,6 @@ process MAKEREGIONFILE {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
     grep '>' ${ref} | sed 's/>//g' | sed 's/ .*//g' > ${prefix}.txt
