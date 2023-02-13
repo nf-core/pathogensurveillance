@@ -11,3 +11,4 @@ null/
 *.swp
 .Rproj.user
 *.Rproj
+.Rhistory

@@ -1,29 +1,54 @@
 ---
-title: "Untitled"
+title: "Test report for variant calling"
 output: html_document
-date: "2023-02-13"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  fasta_align: NULL
+  metadata: NULL
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Prepare
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+# install.packages("adegenet")
+# install.packages("poppr")
+# library(ade4)
+library(adegenet)
+library(poppr)
+# library(igraph)
+library(ape)
+library(tidyverse)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Load metadata
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+metadata <- read_tsv(params$metadata)
+print(metadata)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Load fasta alignments
+
+```{r}
+pangenome <- read.dna(params$fasta_align, format = "fasta") #Graphtyper
+pangenome <- pangenome[which(rownames(pangenome) != "REF"),] #remove REF seq
+pangenome.gi <- DNAbin2genind(pangenome)
+```
+
+
+## Plot 
+
+```{r}
+pgpist <- as.genclone(pangenome.gi)
+mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 3 
+ms.loc <- poppr.msn(pgpist,
+                    distmat = bitwise.dist(pgpist, percent = FALSE),
+                    include.ties = TRUE,
+                    mlg=FALSE)
+```
+

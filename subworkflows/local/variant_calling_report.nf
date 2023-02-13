@@ -6,6 +6,7 @@ workflow VARIANT_CALLING_REPORT {
 
     take:
     ch_input // channel: [ val(ref_meta), vcf ]
+    ch_samplesheet // channel: path
 
     main:
 
@@ -17,7 +18,7 @@ workflow VARIANT_CALLING_REPORT {
     VCFTOSNPALN ( VCFTOTAB.out.tab )
     ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.first()) 
 
-    VARIANTREPORT ( VCFTOSNPALN.out.fasta )
+    VARIANTREPORT ( VCFTOSNPALN.out.fasta, ch_samplesheet )
     ch_versions = ch_versions.mix(VARIANTREPORT.out.versions.first())             
                
 

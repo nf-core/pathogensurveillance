@@ -107,7 +107,8 @@ workflow PLANTPATHSURVEIL {
     .set { subpipeline_input }
 
     BACTERIAPIPELINE (
-        subpipeline_input.bacteria
+        subpipeline_input.bacteria,
+        ch_input
     )
     EUKARYOTEPIPELINE (
         subpipeline_input.eukaryote

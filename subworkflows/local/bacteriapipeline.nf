@@ -8,6 +8,7 @@ workflow BACTERIAPIPELINE {
 
     take:
     input // channel: [ val(meta), val(taxon), path(hits), path(reads), val(ref_meta), path(reference) ]
+    ch_samplesheet // channel: path
 
     main:
     ch_taxon     = input.map { [it[0], it[1]] } 
@@ -34,7 +35,8 @@ workflow BACTERIAPIPELINE {
     )
     
     VARIANT_CALLING_REPORT (
-        CALL_VARIANTS.out.vcf
+        CALL_VARIANTS.out.vcf,
+        ch_samplesheet
     )
 
     emit:
