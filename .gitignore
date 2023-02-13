@@ -9,3 +9,5 @@ testing*
 scratch/
 null/
 *.swp
+.Rproj.user
+*.Rproj

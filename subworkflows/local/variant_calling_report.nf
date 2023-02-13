@@ -1,5 +1,6 @@
 include { VCFTOTAB      } from '../../modules/local/vcftotab'                   
 include { VCFTOSNPALN   } from '../../modules/local/vcftosnpaln'                   
+include { VARIANTREPORT } from '../../modules/local/variantreport'                
 
 workflow VARIANT_CALLING_REPORT {
 
@@ -14,7 +15,11 @@ workflow VARIANT_CALLING_REPORT {
     ch_versions = ch_versions.mix(VCFTOTAB.out.versions.first())
 
     VCFTOSNPALN ( VCFTOTAB.out.tab )
-    ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.first())                
+    ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.first()) 
+
+    VARIANTREPORT ( VCFTOSNPALN.out.fasta )
+    ch_versions = ch_versions.mix(VARIANTREPORT.out.versions.first())             
+               
 
     emit:
     tab      = VCFTOTAB.out.tab           // channel: [ val(ref_meta), tab ]
