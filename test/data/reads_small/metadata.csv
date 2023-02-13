@@ -1,3 +1,0 @@
-sample,fastq_1,fastq_2,reference
-sample_id_1,test/data/reads_small/22-299_S9_L001_R1_001.fastq.gz,test/data/reads_small/22-299_S9_L001_R2_001.fastq.gz,test/data/genome.fa
-sample_id_2,test/data/reads_small/22-300_S10_L001_R1_001.fastq.gz,test/data/reads_small/22-300_S10_L001_R2_001.fastq.gz,test/data/genome.fa
