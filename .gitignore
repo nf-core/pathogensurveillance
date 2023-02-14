@@ -12,3 +12,4 @@ null/
 .Rproj.user
 *.Rproj
 .Rhistory
+assets/*.html
