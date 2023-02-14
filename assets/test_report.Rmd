@@ -3,8 +3,8 @@ title: "Test report for variant calling"
 output: html_document
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
-  fasta_align: NULL
-  metadata: NULL
+  fasta_align: "/media/fosterz/external_ssd_2/files/projects/work/current/nf-core-plantpathsurveil/work/0d/19e8496f01141f3a52e729a1e541ba/22_331_assembly.fasta"
+  metadata: "/media/fosterz/external_ssd_2/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_small.csv"
 ---
 
 ```{r setup, include=FALSE}
@@ -13,26 +13,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Prepare
 
+Load required libraries.
+
 ```{r}
-# install.packages("adegenet")
-# install.packages("poppr")
-# library(ade4)
 library(adegenet)
 library(poppr)
-# library(igraph)
 library(ape)
 library(readr)
+library(igraph)
 ```
 
 
-Load metadata
+Load metadata.
 
 ```{r}
-metadata <- read_tsv(params$metadata)
+metadata <- read_csv(params$metadata)
+metadata$sample <- paste0(metadata$sample, "_T1")
 print(metadata)
 ```
 
-Load fasta alignments
+Load variants data encoded as a FASTA multiple sequence alignment.
 
 ```{r}
 pangenome <- read.dna(params$fasta_align, format = "fasta") #Graphtyper
@@ -40,15 +40,71 @@ pangenome <- pangenome[which(rownames(pangenome) != "REF"),] #remove REF seq
 pangenome.gi <- DNAbin2genind(pangenome)
 ```
 
+## Set up data for plotting
+
+Match order of `genind` object with metadata table, edit `NA` to `"Unknown"`
+
+```{r}
+metadata <- metadata[match(indNames(pangenome.gi), metadata$sample),]
+```
+
+Prepare data for plotting. 
+
+```{r}
+#change for year, host, Cultivar, Gr-Key, Br-Key
+metadata$year[is.na(metadata$year)] <- "Unknown"
+
+# Set Strata and Pop
+strata(pangenome.gi) <- metadata[,c("sample", "year", "host", "cv_key", "date_received")]
+setPop(pangenome.gi) <- ~year
+
+#Set colors
+#myColors <- rainbow(length(unique(metadata$Year)))
+mycolyear <- gray.colors(n = 7, start = 0.2, end = 0.8)
+names(mycolyear) <- sort(levels(as.factor(metadata$year)))
+mycolyear["Unknown"] <- "#808080"
+mycolyear
+
+# Convert to genclone
+pgpist <- as.genclone(pangenome.gi)
+```
+
+Filter genotypes at 5 nucleotides (with the default farthest_neighbor algorithm).
+
+```{r}
+mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 6
+```
+
 
 ## Plot 
 
+Simple plot.
+
 ```{r}
-pgpist <- as.genclone(pangenome.gi)
-mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 6
 ms.loc <- poppr.msn(pgpist,
                     distmat = bitwise.dist(pgpist, percent = FALSE),
                     include.ties = TRUE,
                     mlg=FALSE)
+```
+
+Annotated plot.
+
+```{r}
+edges <- E(ms.loc$graph)$weight
+if (! is.null(edges)) {
+plot_poppr_msn(
+  pgpist,
+  poppr_msn = ms.loc,
+  palette = mycolyear,
+  mlg = FALSE,
+  quantiles = FALSE,
+  wscale = FALSE,
+  layfun = layout_with_lgl,
+  edge.label = edges,
+  edge.label.font = 2,
+  edge.label.cex = 1,
+  edge.lable.family = "Helvetica",
+  edge.label.color = "blue")
+}
 ```
 

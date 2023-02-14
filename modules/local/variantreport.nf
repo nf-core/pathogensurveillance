@@ -2,7 +2,7 @@ process VARIANTREPORT {
     tag "$ref_meta.id"
     label 'process_low'
 
-    conda "conda-forge::r-base conda-forge::r-rmarkdown conda-forge::r-yaml conda-forge::r-poppr conda-forge::r-adegenet conda-forge::r-ape conda-forge::r-readr"
+    conda "conda-forge::r-base conda-forge::r-rmarkdown conda-forge::r-yaml conda-forge::r-poppr conda-forge::r-adegenet conda-forge::r-ape conda-forge::r-readr conda-forge::r-igraph"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' :
         'quay.io/biocontainers/mulled-v2-31ad840d814d356e5f98030a4ee308a16db64ec5:0e852a1e4063fdcbe3f254ac2c7469747a60e361-0' }"
