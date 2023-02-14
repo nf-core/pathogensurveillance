@@ -1,3 +1,4 @@
 !data/
 data/reads
-output
+output_small
+output_full

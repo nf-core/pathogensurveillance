@@ -45,7 +45,7 @@ pangenome.gi <- DNAbin2genind(pangenome)
 
 ```{r}
 pgpist <- as.genclone(pangenome.gi)
-mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 3 
+mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 6
 ms.loc <- poppr.msn(pgpist,
                     distmat = bitwise.dist(pgpist, percent = FALSE),
                     include.ties = TRUE,
