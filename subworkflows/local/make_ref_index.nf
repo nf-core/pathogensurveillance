@@ -64,8 +64,6 @@ workflow MAKE_REFERENCE_INDEX{
     samtools_fai
     samtools_gzi
     bwa_index
-
-
     versions = ch_versions                        // channel: [ versions.yml ]
 
 }

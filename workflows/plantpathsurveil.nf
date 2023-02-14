@@ -89,16 +89,13 @@ workflow PLANTPATHSURVEIL {
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
-
     //
     // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
     //
     COARSE_SAMPLE_TAXONOMY (
         INPUT_CHECK.out.reads_and_ref
     )
+    ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
     COARSE_SAMPLE_TAXONOMY.out.result.branch {
         bacteria: it[1] == "Bacteria"
         eukaryote: it[1] == "Eukaryota"
@@ -110,10 +107,18 @@ workflow PLANTPATHSURVEIL {
         subpipeline_input.bacteria,
         ch_input
     )
+    ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
     EUKARYOTEPIPELINE (
         subpipeline_input.eukaryote
     )
+    //ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions.first())
 
+    // Save version info                                                        
+    CUSTOM_DUMPSOFTWAREVERSIONS (                                               
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')         
+    )
+
+                                                                          
     //
     // MODULE: MultiQC
     //

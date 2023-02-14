@@ -18,6 +18,7 @@ workflow BACTERIAPIPELINE {
     ch_versions = Channel.empty()
 
     MAKE_REFERENCE_INDEX ( ch_reference )
+    ch_versions = ch_versions.mix(MAKE_REFERENCE_INDEX.out.versions)      
     
     ALIGN_READS_TO_REF (
         ch_reads
@@ -25,6 +26,7 @@ workflow BACTERIAPIPELINE {
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.bwa_index)
     )
+    ch_versions = ch_versions.mix(ALIGN_READS_TO_REF.out.versions)       
 
     CALL_VARIANTS (
         ALIGN_READS_TO_REF.out.bam
@@ -33,11 +35,13 @@ workflow BACTERIAPIPELINE {
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.picard_dict)
     )
+    ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
     
     VARIANT_CALLING_REPORT (
         CALL_VARIANTS.out.vcf,
         ch_samplesheet
     )
+    ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
 
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict
