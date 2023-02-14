@@ -34,7 +34,8 @@ workflow MAKE_REFERENCE_INDEX{
     // make channel for each unique reference
     ch_unique_ref = ch_reference
         .map { it[1..2] }
-        .unique { it[0] } // make unique based on reference metadata
+        .groupTuple() // make unique based on reference metadata
+        .map { [it[0],it[1].sort()[0]] } // picks first sorted ref link so the cache works
     PICARD_CREATESEQUENCEDICTIONARY ( ch_unique_ref )
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 

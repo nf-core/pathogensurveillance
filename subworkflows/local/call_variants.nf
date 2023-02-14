@@ -18,7 +18,7 @@ workflow CALL_VARIANTS {
     //    ch_ref_grouped: [val(ref_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
     ch_ref_grouped = ch_input
         .groupTuple(by: 3)
-        .map { [it[3], it[4][0], it[5][0], it[6][0], it[0], it[1], it[2]] } // remove redundant reference genome paths
+        .map { [it[3], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[0], it[1], it[2]] } // remove redundant reference genome paths
     
 
     // make list of chromosome (fasta headers) names compatible with graphtyper

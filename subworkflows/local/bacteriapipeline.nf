@@ -1,5 +1,5 @@
 
-include { MAKE_REFERENCE_INDEX   } from './make_ref_index'  // this is being called from subworflows
+include { MAKE_REFERENCE_INDEX   } from './make_ref_index'  // this is being called from subworkflows
 include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
 include { CALL_VARIANTS          } from './call_variants'
 include { VARIANT_CALLING_REPORT } from './variant_calling_report'
