@@ -13,13 +13,13 @@ workflow VARIANT_CALLING_REPORT {
     ch_versions = Channel.empty()
 
     VCFTOTAB ( ch_input )
-    ch_versions = ch_versions.mix(VCFTOTAB.out.versions.first())
+    ch_versions = ch_versions.mix(VCFTOTAB.out.versions.toSortedList().map{it[0]})
 
     VCFTOSNPALN ( VCFTOTAB.out.tab )
-    ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.first()) 
+    ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.toSortedList().map{it[0]}) 
 
     VARIANTREPORT ( VCFTOSNPALN.out.fasta, ch_samplesheet )
-    ch_versions = ch_versions.mix(VARIANTREPORT.out.versions.first())             
+    ch_versions = ch_versions.mix(VARIANTREPORT.out.versions.toSortedList().map{it[0]})             
                
 
     emit:

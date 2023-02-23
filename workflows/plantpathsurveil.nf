@@ -87,7 +87,7 @@ workflow PLANTPATHSURVEIL {
     FASTQC (
         ch_reads
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = ch_versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
 
     //
     // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
@@ -116,12 +116,13 @@ workflow PLANTPATHSURVEIL {
     EUKARYOTEPIPELINE (
         subpipeline_input.eukaryote
     )
-    //ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions.first())
+    //ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions)
 
-    // Save version info                                                        
+    // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')         
+        ch_versions.unique().toSortedList().flatten().collectFile(name: 'collated_versions.yml')
     )
+    //ch_versions.unique().collectFile(name: 'collated_versions.yml').view()
 
                                                                           
     //

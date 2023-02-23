@@ -37,13 +37,13 @@ workflow MAKE_REFERENCE_INDEX{
         .groupTuple() // make unique based on reference metadata
         .map { [it[0],it[1].sort()[0]] } // picks first sorted ref link so the cache works
     PICARD_CREATESEQUENCEDICTIONARY ( ch_unique_ref )
-    ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
+    ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions.toSortedList().map{it[0]})
 
     SAMTOOLS_FAIDX ( ch_unique_ref )
-    ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions)
+    ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions.toSortedList().map{it[0]})
 
     BWA_INDEX ( ch_unique_ref ) 
-    ch_versions = ch_versions.mix (BWA_INDEX.out.versions)
+    ch_versions = ch_versions.mix (BWA_INDEX.out.versions.toSortedList().map{it[0]})
 
     // duplicate and recombine unique reference results with sample data
     //    odd cross + map needed since join does not duplicate things

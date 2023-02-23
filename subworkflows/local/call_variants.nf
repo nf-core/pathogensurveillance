@@ -33,15 +33,15 @@ workflow CALL_VARIANTS {
         ch_ref_grouped.map { [it[0], it[2]] },
         ch_ref_grouped.map { it[7] },
     )
-    ch_versions = ch_versions.mix(GRAPHTYPER_GENOTYPE.out.versions.first())
+    ch_versions = ch_versions.mix(GRAPHTYPER_GENOTYPE.out.versions.toSortedList().map{it[0]})
 
     // Combine graphtyper VCFs for each group of samples
     GRAPHTYPER_VCFCONCATENATE ( GRAPHTYPER_GENOTYPE.out.vcf )
-    ch_versions = ch_versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions.first())
+    ch_versions = ch_versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions.toSortedList().map{it[0]})
 
     // Make tbi index for combined VCF
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
-    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first())
+    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.toSortedList().map{it[0]})
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // ensure inputs in same order
@@ -54,11 +54,11 @@ workflow CALL_VARIANTS {
         vf_input.map { it[4] },
         vf_input.map { it[5] }
     )
-    ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions.first())             
+    ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions.toSortedList().map{it[0]})             
 
     // SelectVariants on the variant level, excluding non-variant sites:
     VCFLIB_VCFFILTER ( GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi) )
-    ch_versions = ch_versions.mix(VCFLIB_VCFFILTER.out.versions.first()) 
+    ch_versions = ch_versions.mix(VCFLIB_VCFFILTER.out.versions.toSortedList().map{it[0]}) 
 
     emit:
     vcf      = VCFLIB_VCFFILTER.out.vcf        // channel: [ ref_meta, vcf ]

@@ -11,10 +11,10 @@ workflow COARSE_SAMPLE_TAXONOMY {
 
     ch_fastq = ch_reads_ref.map { it[0..1] }
     BBMAP_SENDSKETCH ( ch_fastq )
-    ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.first())
+    ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
 
     INITIALCLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
-    ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.first())
+    ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.toSortedList().map{it[0]})
 
     emit:
     taxon           = INITIALCLASSIFICATION.out.taxon           // channel: [ val(meta), val(taxon) ]

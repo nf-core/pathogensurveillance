@@ -17,13 +17,13 @@ workflow ALIGN_READS_TO_REF {
     ch_reads     = ch_input.map { [it[0], it[1]] }
     ch_bwa_index = ch_input.map { [it[0], it[5]] }
     BWA_MEM ( ch_reads, ch_bwa_index, false )
-    ch_versions = ch_versions.mix(BWA_MEM.out.versions.first())
+    ch_versions = ch_versions.mix(BWA_MEM.out.versions.toSortedList().map{it[0]})
 
     PICARD_ADDORREPLACEREADGROUPS ( BWA_MEM.out.bam )
-    ch_versions = ch_versions.mix(PICARD_ADDORREPLACEREADGROUPS.out.versions.first())
+    ch_versions = ch_versions.mix(PICARD_ADDORREPLACEREADGROUPS.out.versions.toSortedList().map{it[0]})
 
     PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
-    ch_versions = ch_versions.mix(PICARD_SORTSAM_1.out.versions.first())
+    ch_versions = ch_versions.mix(PICARD_SORTSAM_1.out.versions.toSortedList().map{it[0]})
     
     ch_reference = ch_input.map { [it[0], it[3]] } // channel: [ val(meta), file(reference) ]
     ch_ref_index = ch_input.map { [it[0], it[4]] } // channel: [ val(meta), file(ref_index) ]
@@ -36,12 +36,12 @@ workflow ALIGN_READS_TO_REF {
         picard_input.map { it[2] },
         picard_input.map { it[3] }
     )
-    ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions.first())
+    ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions.toSortedList().map{it[0]})
 
     PICARD_SORTSAM_2 ( PICARD_MARKDUPLICATES.out.bam, 'coordinate' )
 
     SAMTOOLS_INDEX ( PICARD_SORTSAM_2.out.bam )
-    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
+    ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.toSortedList().map{it[0]})
 
     emit:
     bam      = PICARD_SORTSAM_2.out.bam        // channel: [ val(meta), [ bam ] ]
