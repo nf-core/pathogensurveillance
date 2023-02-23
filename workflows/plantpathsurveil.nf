@@ -96,7 +96,11 @@ workflow PLANTPATHSURVEIL {
         INPUT_CHECK.out.reads_and_ref
     )
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
-    COARSE_SAMPLE_TAXONOMY.out.result
+    
+    
+    COARSE_SAMPLE_TAXONOMY.out.taxon
+    .join(COARSE_SAMPLE_TAXONOMY.out.hits)
+    .join(INPUT_CHECK.out.reads_and_ref)
     .branch {
         bacteria: it[1] == "Bacteria"
         eukaryote: it[1] == "Eukaryota"

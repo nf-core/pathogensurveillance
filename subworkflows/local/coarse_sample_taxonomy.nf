@@ -1,4 +1,4 @@
-include { BBMAP_SENDSKETCH      } from '../../modules/local/sendsketch'
+include { BBMAP_SENDSKETCH       } from '../../modules/local/sendsketch'
 include { INITIALCLASSIFICATION  } from '../../modules/local/initialclassification'
 
 workflow COARSE_SAMPLE_TAXONOMY {
@@ -12,14 +12,13 @@ workflow COARSE_SAMPLE_TAXONOMY {
     ch_fastq = ch_reads_ref.map { it[0..1] }
     BBMAP_SENDSKETCH ( ch_fastq )
     ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.first())
-    ch_hits_reads_ref = BBMAP_SENDSKETCH.out.hits.join(ch_reads_ref)
 
-    INITIALCLASSIFICATION ( ch_hits_reads_ref )
+    INITIALCLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
     ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.first())
 
     emit:
-    result          = INITIALCLASSIFICATION.out.result          // channel: [ val(meta), env(TAXON), file(hits), [ file(reads)], val(ref_meta), path(reference) ]
-    classification  = INITIALCLASSIFICATION.out.classification  // channel: [ val(meta), [ classification ] ]
-    hits            = BBMAP_SENDSKETCH.out.hits                 // channel: [ val(meta), [ hits ] ]
+    taxon           = INITIALCLASSIFICATION.out.taxon           // channel: [ val(meta), val(taxon) ]
+    classification  = INITIALCLASSIFICATION.out.classification  // channel: [ val(meta), val(classification) ]
+    hits            = BBMAP_SENDSKETCH.out.hits                 // channel: [ val(meta), file(hits) ]
     versions        = ch_versions                               // channel: [ versions.yml ]
 }

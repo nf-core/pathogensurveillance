@@ -25,12 +25,16 @@ workflow ALIGN_READS_TO_REF {
     PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
     ch_versions = ch_versions.mix(PICARD_SORTSAM_1.out.versions.first())
     
-    ch_reference = ch_input.map { it[3] }
-    ch_ref_index = ch_input.map { it[4] }
+    ch_reference = ch_input.map { [it[0], it[3]] } // channel: [ val(meta), file(reference) ]
+    ch_ref_index = ch_input.map { [it[0], it[4]] } // channel: [ val(meta), file(ref_index) ]
+    picard_input = PICARD_SORTSAM_1.out.bam // joined to associated right reference with each sample
+        .join(ch_reference)
+        .join(ch_ref_index)
+
     PICARD_MARKDUPLICATES (
-        PICARD_SORTSAM_1.out.bam,
-        ch_reference,
-        ch_ref_index
+        picard_input.map { it[0..1] },
+        picard_input.map { it[2] },
+        picard_input.map { it[3] }
     )
     ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions.first())
 
