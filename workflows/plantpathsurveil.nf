@@ -120,10 +120,8 @@ workflow PLANTPATHSURVEIL {
 
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
-        ch_versions.unique().toSortedList().flatten().collectFile(name: 'collated_versions.yml')
+        ch_versions.unique().collect(sort:true)
     )
-    //ch_versions.unique().collectFile(name: 'collated_versions.yml').view()
-
                                                                           
     //
     // MODULE: MultiQC

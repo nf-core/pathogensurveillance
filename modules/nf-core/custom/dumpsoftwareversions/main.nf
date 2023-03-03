@@ -8,7 +8,7 @@ process CUSTOM_DUMPSOFTWAREVERSIONS {
         'quay.io/biocontainers/multiqc:1.13--pyhdfd78af_0' }"
 
     input:
-    path versions
+    path versions, stageAs: "?/*"
 
     output:
     path "software_versions.yml"    , emit: yml
@@ -20,5 +20,6 @@ process CUSTOM_DUMPSOFTWAREVERSIONS {
 
     script:
     def args = task.ext.args ?: ''
+    versions = versions instanceof List ? versions.join(" ") : versions
     template 'dumpsoftwareversions.py'
 }

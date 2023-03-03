@@ -51,8 +51,12 @@ versions_this_module["${task.process}"] = {
     "yaml": yaml.__version__,
 }
 
-with open("$versions") as f:
-    versions_by_process = yaml.load(f, Loader=yaml.BaseLoader) | versions_this_module
+versions_by_process = versions_this_module
+
+print("$versions")
+for path in "$versions".split():
+    with open(path) as f:
+        versions_by_process = yaml.load(f, Loader=yaml.BaseLoader) | versions_by_process
 
 # aggregate versions by the module name (derived from fully-qualified process name)
 versions_by_module = {}
