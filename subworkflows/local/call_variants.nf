@@ -2,6 +2,7 @@ include { GRAPHTYPER_GENOTYPE       } from '../../modules/nf-core/graphtyper/gen
 include { MAKEREGIONFILE            } from '../../modules/local/makeregionfile'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../modules/nf-core/graphtyper/vcfconcatenate/main'
 include { TABIX_TABIX               } from '../../modules/nf-core/tabix/tabix/main'
+include { BGZIP_MAKE_GZIP           } from '../../modules/local/bgzip_make_gzip'
 include { GATK4_VARIANTFILTRATION   } from '../../modules/nf-core/gatk4/variantfiltration/main'
 include { VCFLIB_VCFFILTER          } from '../../modules/nf-core/vcflib/vcffilter/main'
 
@@ -43,16 +44,22 @@ workflow CALL_VARIANTS {
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
     ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.toSortedList().map{it[0]})
 
+    // Make .gzi file from reference in case it is gzipped
+    BGZIP_MAKE_GZIP ( ch_ref )
+    ch_versions = ch_versions.mix(BGZIP_MAKE_GZIP.out.versions.toSortedList().map{it[0]})
+
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // ensure inputs in same order
         .join(TABIX_TABIX.out.tbi)
         .join(ch_ref_grouped.map { it[0..3] })
-    // vf_input: [val(ref_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict)]]
+        .join(BGZIP_MAKE_GZIP.out.gzi)
+    // vf_input: [val(ref_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
         vf_input.map { it[3] },
         vf_input.map { it[4] },
-        vf_input.map { it[5] }
+        vf_input.map { it[5] },
+        vf_input.map { it[6] }
     )
     ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions.toSortedList().map{it[0]})             
 

@@ -30,20 +30,33 @@ process GRAPHTYPER_GENOTYPE {
         error "GRAPHTYPER_GENOTYPE requires either a region file or a region specified using '--region' in ext.args"
     }
     """
+    # Decompress reference file if needed and set file names
+    if [[ $ref =~ \\.gz\$ ]]; then
+        gzip -dc $ref > __my__reference__.fasta
+    else
+        ln -s $ref __my__reference__.fasta
+    fi
+    ln -s $ref_fai __my__reference__.fasta.fai
+
+    # Make file of file names to pass BAM paths to graphtyper
     printf "$bam_path_text" > bam_list.txt
+
+    # Call graphtyper genotype
     graphtyper \\
         genotype \\
-        $ref \\
+        __my__reference__.fasta \\
         $args \\
         --sams bam_list.txt \\
         --threads $task.cpus \\
         $region_text
 
+    # Move result files into working directory for output
     find results -maxdepth 2 -name '*.vcf*' > output_paths.txt
     sed 's_results/__g' output_paths.txt | sed 's_/_-_g' > output_names.txt
     paste -d ' ' output_paths.txt output_names.txt | xargs -I {} echo "mv {}" > mv_commands.sh
     source mv_commands.sh
 
+    # Save version information for graphtyper
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         graphtyper: \$(graphtyper --help | tail -n 1 | sed 's/^   //')

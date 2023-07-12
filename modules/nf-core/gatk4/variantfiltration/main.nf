@@ -12,6 +12,7 @@ process GATK4_VARIANTFILTRATION {
     path  fasta
     path  fai
     path  dict
+    path  gzi // only needed if reference is gzipped
 
     output:
     tuple val(meta), path("*.vcf.gz"), emit: vcf
@@ -24,7 +25,14 @@ process GATK4_VARIANTFILTRATION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-
+    
+    // Infer .dict file name that gatk expects, even if ends in .fasta.gz
+    def dict_name = fasta.getBaseName()
+    if (dict_name ==~ /^.*\.(fasta|fna|fa)$/) {
+        dict_name = dict_name.replaceAll(/\.(fasta|fna|fa)$/, "")
+    }
+    dict_name = "${dict_name}.dict"
+    
     def avail_mem = 3
     if (!task.memory) {
         log.info '[GATK VariantFiltration] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
@@ -32,6 +40,11 @@ process GATK4_VARIANTFILTRATION {
         avail_mem = task.memory.toGiga()
     }
     """
+    # Make sure the .dict file is named correctly
+    if [[ $dict_name != $dict ]]; then
+        ln -s $dict $dict_name
+    fi
+
     gatk --java-options "-Xmx${avail_mem}G" VariantFiltration \\
         --variant $vcf \\
         --output ${prefix}.vcf.gz \\

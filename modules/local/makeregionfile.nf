@@ -19,6 +19,6 @@ process MAKEREGIONFILE {
     script:
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    grep '>' ${ref} | sed 's/>//g' | sed 's/ .*//g' > ${prefix}.txt
+    zgrep '>' ${ref} | sed 's/>//g' | sed 's/ .*//g' > ${prefix}.txt
     """
 }

@@ -3,8 +3,8 @@ title: "Test report for variant calling"
 output: html_document
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
-  fasta_align: "/media/fosterz/external_ssd_2/files/projects/work/current/nf-core-plantpathsurveil/work/0d/19e8496f01141f3a52e729a1e541ba/22_331_assembly.fasta"
-  metadata: "/media/fosterz/external_ssd_2/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_small.csv"
+  fasta_align: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/0c/bac4d3567b175ccebf06334ce61d3c/PR-102_v3.1.fasta"
+  metadata: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_small.csv"
 ---
 
 ```{r setup, include=FALSE}
@@ -39,6 +39,14 @@ pangenome <- read.dna(params$fasta_align, format = "fasta") #Graphtyper
 pangenome <- pangenome[which(rownames(pangenome) != "REF"),] #remove REF seq
 pangenome.gi <- DNAbin2genind(pangenome)
 ```
+
+```{r}
+if (is.null(pangenome.gi)) {
+  print("No variants to analyze. Aborting the rest of the analysis.")
+  knitr::opts_chunk$set(eval = FALSE)
+}
+```
+
 
 ## Set up data for plotting
 
