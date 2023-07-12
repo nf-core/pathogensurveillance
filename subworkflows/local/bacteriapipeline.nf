@@ -3,6 +3,7 @@ include { MAKE_REFERENCE_INDEX   } from './make_ref_index'  // this is being cal
 include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
 include { CALL_VARIANTS          } from './call_variants'
 include { VARIANT_CALLING_REPORT } from './variant_calling_report'
+include { GENOME_ASSEMBLY        } from './genome_assembly'
 
 workflow BACTERIAPIPELINE {
 
@@ -43,6 +44,11 @@ workflow BACTERIAPIPELINE {
     )
     ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
 
+    GENOME_ASSEMBLY (
+        ch_reads
+    )
+    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
+      
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict
     samtools_fai = MAKE_REFERENCE_INDEX.out.samtools_fai
