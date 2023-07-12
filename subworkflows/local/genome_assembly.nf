@@ -1,6 +1,6 @@
-include { FASTP  } from '../../modules/nf-core/fastp/main'
-include { SPADES } from '../../modules/nf-core/spades/main'
-include { QUAST  } from '../../modules/nf-core/quast/main'
+include { FASTP           } from '../../modules/nf-core/fastp/main'
+include { SPADES          } from '../../modules/nf-core/spades/main'
+include { FILTER_ASSEMBLY } from '../../modules/local/filter_assembly'
 
 
 workflow GENOME_ASSEMBLY {
@@ -21,6 +21,11 @@ workflow GENOME_ASSEMBLY {
         []  // val hmm
     )
     ch_versions = ch_versions.mix(SPADES.out.versions.first())
+
+    FILTER_ASSEMBLY (
+        SPADES.out.scaffolds
+    )
+    ch_versions = ch_versions.mix(FILTER_ASSEMBLY.out.versions.first())
 
     emit:
     reads    = FASTP.out.reads           // channel: [ val(meta), [ fastq_1, fastq_2 ] ]
