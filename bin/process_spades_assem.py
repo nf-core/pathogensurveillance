@@ -56,7 +56,6 @@ for rec in infile:
         sys.stderr.write("Unable to find valid coverage from header {} - value {}\n".format(rec.id,data[5]))
     else:
         cov = float(data[5])
-        sys.stderr.write(str(cov))
         if cov > args.cov_cutoff and len(rec.seq) > args.len_cutoff:
             if args.len_max > 0 and len(rec.seq) > args.len_max:
                 continue

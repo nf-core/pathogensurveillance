@@ -10,8 +10,8 @@ process FILTER_ASSEMBLY {
     tuple val(meta), path(scaffold)
 
     output:
-    path '*.fasta'     , emit: filtered
-    path "versions.yml", emit: versions
+    tuple val(meta), path("*_filtered.fasta"), emit: filtered
+    path "versions.yml"             , emit: versions
 
     script:
     def args = task.ext.args ?: ''                                              
@@ -23,7 +23,7 @@ process FILTER_ASSEMBLY {
         --verbose \\
         --summary ${prefix}.summary \\
         $args \\
-        ${prefix}_unzipped.fasta > ${prefix}.fasta
+        ${prefix}_unzipped.fasta > ${prefix}_filtered.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -46,6 +46,7 @@ workflow BACTERIAPIPELINE {
 
     GENOME_ASSEMBLY (
         ch_reads
+        .join(ch_reference)
     )
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
       
