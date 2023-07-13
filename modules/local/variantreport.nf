@@ -23,11 +23,12 @@ process VARIANTREPORT {
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
     Rscript -e "workdir<-getwd()
-        rmarkdown::render('$projectDir/assets/test_report.Rmd',
+        rmarkdown::render('${projectDir}/assets/test_report.Rmd',
         params = list(
         fasta_align = \\\"$fasta\\\",
         metadata = \\\"$samplesheet\\\"
         ),
+        output_file = \\\"${prefix}_report.html\\\",
         knit_root_dir=workdir,
         output_dir=workdir)"
 

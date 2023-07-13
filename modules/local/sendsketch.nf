@@ -11,7 +11,7 @@ process BBMAP_SENDSKETCH {
     tuple val(meta), path(file)
 
     output:
-    tuple val(meta), path('results.txt')  , emit: hits
+    tuple val(meta), path('*.txt')  , emit: hits
     path "versions.yml"                   , emit: versions
 
     when:
@@ -19,11 +19,12 @@ process BBMAP_SENDSKETCH {
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def file_used = file.size() > 1 ? file[0] : file
     """
     sendsketch.sh \\
         in=${file_used} \\
-        out='results.txt' \\
+        out=${prefix}.txt \\
         $args \\
         -Xmx${task.memory.toGiga()}g
 
