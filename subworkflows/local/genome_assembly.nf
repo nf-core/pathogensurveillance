@@ -44,14 +44,16 @@ workflow GENOME_ASSEMBLY {
 
     ch_bakta_db = Channel.value("$projectDir/assets/bakta_db/db-light")
     BAKTA_BAKTA (
-        SPADES.out.scaffolds, // Genome assembly
+        FILTER_ASSEMBLY.out.filtered, // Genome assembly
         ch_bakta_db, // Bakta database
         [], // proteins (optional)
         [] // prodigal_tf (optional)
     )
 
     emit:
-    reads    = FASTP.out.reads           // channel: [ val(meta), [ fastq_1, fastq_2 ] ]
+    reads     = FASTP.out.reads           // channel: [ val(meta), [ fastq_1, fastq_2 ] ]
+    gff       = BAKTA_BAKTA.out.gff
+    scaffolds = FILTER_ASSEMBLY.out.filtered
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }

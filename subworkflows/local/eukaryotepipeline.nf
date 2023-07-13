@@ -36,11 +36,11 @@ workflow EUKARYOTEPIPELINE {
     )
     ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
     
-    VARIANT_CALLING_REPORT (
-        CALL_VARIANTS.out.vcf,
-        ch_samplesheet
-    )
-    ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
+    //VARIANT_CALLING_REPORT (
+    //    CALL_VARIANTS.out.vcf,
+    //    ch_samplesheet
+    //)
+    //ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
 
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict

@@ -4,6 +4,7 @@ include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
 include { CALL_VARIANTS          } from './call_variants'
 include { VARIANT_CALLING_REPORT } from './variant_calling_report'
 include { GENOME_ASSEMBLY        } from './genome_assembly'
+include { CORE_GENOME_PHYLOGENY  } from './core_genome_phylogeny'                     
 
 workflow BACTERIAPIPELINE {
 
@@ -38,17 +39,21 @@ workflow BACTERIAPIPELINE {
     )
     ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
     
-    VARIANT_CALLING_REPORT (
-        CALL_VARIANTS.out.vcf,
-        ch_samplesheet
-    )
-    ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
+    //VARIANT_CALLING_REPORT (
+    //    CALL_VARIANTS.out.vcf,
+    //    ch_samplesheet
+    //)
+    //ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
 
     GENOME_ASSEMBLY (
         ch_reads
         .join(ch_reference)
     )
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
+
+    CORE_GENOME_PHYLOGENY (
+        GENOME_ASSEMBLY.out.gff.join(ch_reference)
+    )
       
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict
