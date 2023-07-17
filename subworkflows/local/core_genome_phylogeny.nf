@@ -1,5 +1,6 @@
-include { PIRATE         } from '../../modules/nf-core/pirate/main'
-include { SAMTOOLS_FAIDX } from '../../modules/nf-core/samtools/faidx/main'
+include { PIRATE                } from '../../modules/nf-core/pirate/main'
+include { SAMTOOLS_FAIDX        } from '../../modules/nf-core/samtools/faidx/main'
+include { REFORMATPIRATERESULTS } from '../../modules/local/reformat_pirate_results'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -17,6 +18,10 @@ workflow CORE_GENOME_PHYLOGENY {
 
     PIRATE ( ch_gff_grouped )
     ch_versions = ch_versions.mix(PIRATE.out.versions.first())
+
+    REFORMATPIRATERESULTS ( PIRATE.out.results )                                                   
+    ch_versions = ch_versions.mix(REFORMATPIRATERESULTS.out.versions.first())                  
+
 
     emit:
     pirate_aln      = PIRATE.out.aln        // channel: [ ref_meta, align_fasta ]
