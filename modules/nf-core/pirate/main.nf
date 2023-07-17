@@ -5,7 +5,7 @@ process PIRATE {
     conda "bioconda::pirate=1.0.4 bioconda::perl-bioperl=1.7.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pirate:1.0.4--hdfd78af_2' :
-        'biocontainers/pirate:1.0.4--hdfd78af_2' }"
+        'quay.io/biocontainers/pirate:1.0.5--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(gff)
@@ -22,6 +22,10 @@ process PIRATE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    # Rename .gff3 to .gff if needed
+    find -regex .*\\.gff3\$ | sed 's/3\$//' | xargs -I {} mv {}3 {}
+
+    # Run pirate on all .gff in input directory
     PIRATE \\
         $args \\
         --threads $task.cpus \\
