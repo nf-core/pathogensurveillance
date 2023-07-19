@@ -2,7 +2,7 @@ process BAKTA_BAKTA {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::bakta=1.7.0"
+    conda "bioconda::bakta=1.8.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/bakta:1.7.0--pyhdfd78af_1' :
         'quay.io/biocontainers/bakta:1.8.0--pyhdfd78af_0' }"

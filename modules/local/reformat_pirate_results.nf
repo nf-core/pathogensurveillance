@@ -2,7 +2,7 @@ process REFORMATPIRATERESULTS {
     tag "$ref_meta.id"
     label 'process_single'
                                                                                 
-    conda "bioconda::pirate=1.0.4 bioconda::perl-bioperl=1.7.2"                 
+    conda "bioconda::pirate=1.0.5 bioconda::perl-bioperl=1.7.8"                 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pirate:1.0.4--hdfd78af_2' :
         'quay.io/biocontainers/pirate:1.0.5--hdfd78af_0' }"                     
@@ -24,10 +24,12 @@ process REFORMATPIRATERESULTS {
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
     # Reformat comments so that subsample_outputs.pl understands them
-    sed -i 's/^# /## /' modified_gffs/*.gff
+    mkdir reformatted_gffs
+    cp modified_gffs/*.gff reformatted_gffs/
+    sed -i 's/^# /## /' reformatted_gffs/*.gff
 
     # rename with original locus tag from input files
-    subsample_outputs.pl -i PIRATE.gene_families.ordered.tsv -g modified_gffs/  -o ${prefix}.tsv --field "prev_ID" --feature "CDS"
+    subsample_outputs.pl -i PIRATE.gene_families.ordered.tsv -g reformatted_gffs/ -o ${prefix}.tsv --field "prev_ID" --feature "CDS"
 
     # gene/allele presence-absence
     PIRATE_to_Rtab.pl -i ${prefix}.tsv -o ${prefix}_genePA.tsv 

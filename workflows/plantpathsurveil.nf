@@ -113,11 +113,11 @@ workflow PLANTPATHSURVEIL {
         ch_input
     )
     ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
-    EUKARYOTEPIPELINE (
-        subpipeline_input.eukaryote,
-        ch_input
-    )
-    ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions)
+    //EUKARYOTEPIPELINE (
+    //    subpipeline_input.eukaryote,
+    //    ch_input
+    //)
+    //ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions)
 
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               

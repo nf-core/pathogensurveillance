@@ -1,6 +1,7 @@
 include { PIRATE                } from '../../modules/nf-core/pirate/main'
 include { SAMTOOLS_FAIDX        } from '../../modules/nf-core/samtools/faidx/main'
 include { REFORMATPIRATERESULTS } from '../../modules/local/reformat_pirate_results'
+include { ALIGNFEATURESEQUENCES } from '../../modules/local/align_feature_sequences'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -22,6 +23,9 @@ workflow CORE_GENOME_PHYLOGENY {
     REFORMATPIRATERESULTS ( PIRATE.out.results )                                                   
     ch_versions = ch_versions.mix(REFORMATPIRATERESULTS.out.versions.first())                  
 
+    ALIGNFEATURESEQUENCES ( PIRATE.out.results )                            
+    ch_versions = ch_versions.mix(ALIGNFEATURESEQUENCES.out.versions.first())   
+                                                                                
 
     emit:
     pirate_aln      = PIRATE.out.aln        // channel: [ ref_meta, align_fasta ]
