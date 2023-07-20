@@ -1,5 +1,5 @@
 process IQTREE2 {
-    tag "$alignment"
+    tag "$meta.id"
     label 'process_medium'
 
     conda "bioconda::iqtree=2.1.4_beta"
@@ -8,7 +8,7 @@ process IQTREE2 {
         'biocontainers/iqtree:2.1.4_beta--hdcc8f71_0' }"
 
     input:
-    tuple val(meta), path(alignment)
+    tuple val(meta), path(alignment, stageAs: 'input_alignments/*')
     val constant_sites
 
     output:
@@ -21,16 +21,28 @@ process IQTREE2 {
     script:
     def args = task.ext.args ?: ''
     def fconst_args = constant_sites ? "-fconst $constant_sites" : ''
-    def memory      = task.memory.toString().replaceAll(' ', '')
+    def memory      = task.memory.toString().replaceAll(' ', '').replaceAll('B', '')
+    def first_align = alignment[0]
     """
+    # Get number of samples to decide whether or not to bootstrap
+    NSAMPLE=\$(grep '>' $first_align | wc -l)
+    if [[\$NSAMPLE -gt 3]]; then
+        BOOT="-B 1000"
+    else
+        BOOT=""
+    fi
+
+    # Create phylogenetic tree
     iqtree2 \\
         $fconst_args \\
+        \$BOOT \\
         $args \\
-        -s $alignment \\
+        -s input_alignments \\
         -nt AUTO \\
         -ntmax $task.cpus \\
         -mem $memory \\
 
+    # Save version information
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         iqtree: \$(echo \$(iqtree -version 2>&1) | sed 's/^IQ-TREE multicore version //;s/ .*//')
