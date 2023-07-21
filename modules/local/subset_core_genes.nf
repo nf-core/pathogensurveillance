@@ -24,7 +24,7 @@ process SUBSETCOREGENES {
     NCOL=\$(awk -F '\\t' '{print NF - 22; exit}' $gene_fam)
     
     # Remove rows representing gene families not present in all samples or that have paralogs
-    awk -F '\\t' "\\\$7 == \$NCOL  && \\\$10 == 1" $gene_fam > ${prefix}_core_genes.tsv
+    awk -F '\\t' "\\\$7 == \$NCOL && \\\$10 == 1 && \\\$11 == 0 && \\\$12 == 0" $gene_fam > ${prefix}_core_genes.tsv
 
     # Make a directory with links to the sequences for genes that are single-copy and core
     mkdir ${prefix}_feat_seqs

@@ -26,7 +26,7 @@ process IQTREE2 {
     """
     # Get number of samples to decide whether or not to bootstrap
     NSAMPLE=\$(grep '>' $first_align | wc -l)
-    if [[\$NSAMPLE -gt 3]]; then
+    if [ \$NSAMPLE -gt 3 ]; then
         BOOT="-B 1000"
     else
         BOOT=""
