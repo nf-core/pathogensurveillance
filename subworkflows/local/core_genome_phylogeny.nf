@@ -1,16 +1,18 @@
-include { PIRATE                } from '../../modules/nf-core/pirate/main'
-include { SAMTOOLS_FAIDX        } from '../../modules/nf-core/samtools/faidx/main'
-include { MAFFT                 } from '../../modules/nf-core/mafft/main'
-include { IQTREE2               } from '../../modules/local/iqtree2'
-include { REFORMATPIRATERESULTS } from '../../modules/local/reformat_pirate_results'
-include { ALIGNFEATURESEQUENCES } from '../../modules/local/align_feature_sequences'
-include { SUBSETCOREGENES       } from '../../modules/local/subset_core_genes'
-include { RENAMECOREGENEHEADERS } from '../../modules/local/rename_core_gene_headers'
+include { PIRATE                    } from '../../modules/nf-core/pirate/main'
+include { SAMTOOLS_FAIDX            } from '../../modules/nf-core/samtools/faidx/main'
+include { MAFFT                     } from '../../modules/nf-core/mafft/main'
+include { IQTREE2                   } from '../../modules/local/iqtree2'
+include { REFORMATPIRATERESULTS     } from '../../modules/local/reformat_pirate_results'
+include { ALIGNFEATURESEQUENCES     } from '../../modules/local/align_feature_sequences'
+include { SUBSETCOREGENES           } from '../../modules/local/subset_core_genes'
+include { RENAMECOREGENEHEADERS     } from '../../modules/local/rename_core_gene_headers'
+include { COREGENOMEPHYLOGENYREPORT } from '../../modules/local/core_gene_phylogeny_report'
 
 workflow CORE_GENOME_PHYLOGENY {
 
     take:
     ch_input // [ val(meta), file(gff), val(ref_meta), file(reference) ]
+    ch_samplesheet // channel: path
 
     main:
 
@@ -43,7 +45,10 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2 ( MAFFT.out.fas.groupTuple(), [] )
-    ch_versions = ch_versions.mix(IQTREE2.out.versions.first())                           
+    ch_versions = ch_versions.mix(IQTREE2.out.versions.first())
+
+    // Make report
+    COREGENOMEPHYLOGENYREPORT ( IQTREE2.out.phylogeny, ch_samplesheet )                           
 
     emit:
     pirate_aln      = PIRATE.out.aln        // channel: [ ref_meta, align_fasta ]

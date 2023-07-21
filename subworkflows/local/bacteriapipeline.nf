@@ -52,7 +52,8 @@ workflow BACTERIAPIPELINE {
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
 
     CORE_GENOME_PHYLOGENY (
-        GENOME_ASSEMBLY.out.gff.join(ch_reference)
+        GENOME_ASSEMBLY.out.gff.join(ch_reference),
+        ch_samplesheet
     )
       
     emit:

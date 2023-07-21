@@ -3,9 +3,17 @@ title: "Test report for core genome phylogeny"
 output: html_document
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
-  treefile: "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_medium/iqtree2/input_alignments.treefile"
+  treefile: "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile"
   metadata: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
 ---
+
+```{r include=FALSE, eval=FALSE}
+params = list(
+  treefile = "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile",
+  metadata = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
+)
+```
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -17,98 +25,30 @@ Load required libraries.
 
 ```{r}
 library(ggtree)
+library(treeio)
 ```
 
 
 Load metadata.
 
 ```{r}
-metadata <- read_csv(params$metadata)
+metadata <- read.csv(params$metadata)
 metadata$sample <- paste0(metadata$sample, "_T1")
-print(metadata)
 ```
 
-Load variants data encoded as a FASTA multiple sequence alignment.
+Load treefile.
 
 ```{r}
-pangenome <- read.dna(params$fasta_align, format = "fasta") #Graphtyper
-pangenome <- pangenome[which(rownames(pangenome) != "REF"),] #remove REF seq
-pangenome.gi <- DNAbin2genind(pangenome)
+tree <- read.newick(params$treefile)
 ```
 
-```{r}
-if (is.null(pangenome.gi)) {
-  print("No variants to analyze. Aborting the rest of the analysis.")
-  knitr::opts_chunk$set(eval = FALSE)
-}
-```
-
-
-## Set up data for plotting
-
-Match order of `genind` object with metadata table, edit `NA` to `"Unknown"`
+plot tree
 
 ```{r}
-metadata <- metadata[match(indNames(pangenome.gi), metadata$sample),]
-```
-
-Prepare data for plotting. 
-
-```{r}
-#change for year, host, Cultivar, Gr-Key, Br-Key
-metadata$year[is.na(metadata$year)] <- "Unknown"
-
-# Set Strata and Pop
-strata(pangenome.gi) <- metadata[,c("sample", "year", "host", "cv_key", "date_received")]
-setPop(pangenome.gi) <- ~year
-
-#Set colors
-#myColors <- rainbow(length(unique(metadata$Year)))
-mycolyear <- gray.colors(n = 7, start = 0.2, end = 0.8)
-names(mycolyear) <- sort(levels(as.factor(metadata$year)))
-mycolyear["Unknown"] <- "#808080"
-mycolyear
-
-# Convert to genclone
-pgpist <- as.genclone(pangenome.gi)
-```
-
-Filter genotypes at 5 nucleotides (with the default farthest_neighbor algorithm).
-
-```{r}
-mlg.filter(pgpist, distance = bitwise.dist, algorithm = "average_neighbor",  percent = FALSE) <- 6
-```
-
-
-## Plot 
-
-Simple plot.
-
-```{r}
-ms.loc <- poppr.msn(pgpist,
-                    distmat = bitwise.dist(pgpist, percent = FALSE),
-                    include.ties = TRUE,
-                    mlg=FALSE)
-```
-
-Annotated plot.
-
-```{r}
-edges <- E(ms.loc$graph)$weight
-if (! is.null(edges)) {
-plot_poppr_msn(
-  pgpist,
-  poppr_msn = ms.loc,
-  palette = mycolyear,
-  mlg = FALSE,
-  quantiles = FALSE,
-  wscale = FALSE,
-  layfun = layout_with_lgl,
-  edge.label = edges,
-  edge.label.font = 2,
-  edge.label.cex = 1,
-  edge.lable.family = "Helvetica",
-  edge.label.color = "blue")
-}
+ggplot(tree, aes(x, y)) +
+  geom_tree() + 
+  theme_tree() +
+  geom_tiplab(as_ylab = FALSE, color = '#555555') +
+  xlim(0, 0.0002)
 ```
 
