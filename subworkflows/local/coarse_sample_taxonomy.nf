@@ -17,8 +17,9 @@ workflow COARSE_SAMPLE_TAXONOMY {
     ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.toSortedList().map{it[0]})
 
     emit:
-    taxon           = INITIALCLASSIFICATION.out.taxon           // channel: [ val(meta), val(taxon) ]
+    taxa            = INITIALCLASSIFICATION.out.taxa            // channel: [ val(meta), file(taxon) ]
     classification  = INITIALCLASSIFICATION.out.classification  // channel: [ val(meta), val(classification) ]
+    kingdom         = INITIALCLASSIFICATION.out.kingdom         // channel: [ val(meta), val(kingdom) ]
     hits            = BBMAP_SENDSKETCH.out.hits                 // channel: [ val(meta), file(hits) ]
     versions        = ch_versions                               // channel: [ versions.yml ]
 }

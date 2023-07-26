@@ -98,7 +98,7 @@ workflow PLANTPATHSURVEIL {
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
     
     
-    COARSE_SAMPLE_TAXONOMY.out.taxon
+    COARSE_SAMPLE_TAXONOMY.out.kingdom
     .join(COARSE_SAMPLE_TAXONOMY.out.hits)
     .join(INPUT_CHECK.out.reads_and_ref)
     .branch {
