@@ -1,5 +1,5 @@
-process INITIALCLASSIFICATION {
-    tag "$meta.id"
+process PICK_ASSEMBLIES {
+    tag "$family"
     label 'process_single'
 
     conda "conda-forge::r-base=4.2.1"                                           
@@ -8,14 +8,10 @@ process INITIALCLASSIFICATION {
         'quay.io/biocontainers/r-base:4.2.1' }"                                 
 
     input:
-    tuple val(meta), path(hits)
+    tuple val(family), path(genera), path(species), path(stats)
 
     output:
-    tuple val(meta), path("species.txt")   , emit: species
-    tuple val(meta), path("genera.txt")    , emit: genera
-    tuple val(meta), path("families.txt")  , emit: families
-    tuple val(meta), env(KINGDOM)          , emit: kingdom
-    tuple val(meta), env(CLASS)            , emit: classification
+    tuple val(family), path("assemblies_ids.txt") , emit: id_list
     path "versions.yml", emit: versions
 
     when:
@@ -23,11 +19,9 @@ process INITIALCLASSIFICATION {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${family}"
     """
-    sendsketch_filter.R $hits
-    KINGDOM="\$(cat kingdom.txt)"
-    CLASS="\$(cat classification.txt)"
+    pick_assemblies.R $genera $species $stats
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

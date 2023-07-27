@@ -41,8 +41,9 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK            } from '../subworkflows/local/input_check'
 include { COARSE_SAMPLE_TAXONOMY } from '../subworkflows/local/coarse_sample_taxonomy'
-include { BACTERIAPIPELINE      } from '../subworkflows/local/bacteriapipeline'
+include { BACTERIAPIPELINE       } from '../subworkflows/local/bacteriapipeline'
 include { EUKARYOTEPIPELINE      } from '../subworkflows/local/eukaryotepipeline'
+include { DOWNLOAD_REFERENCES    } from '../subworkflows/local/download_references'
 
 
 /*
@@ -98,6 +99,12 @@ workflow PLANTPATHSURVEIL {
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
     
     
+    DOWNLOAD_REFERENCES (
+        COARSE_SAMPLE_TAXONOMY.out.species,
+        COARSE_SAMPLE_TAXONOMY.out.genera,
+        COARSE_SAMPLE_TAXONOMY.out.families
+    )
+    
     COARSE_SAMPLE_TAXONOMY.out.kingdom
     .join(COARSE_SAMPLE_TAXONOMY.out.hits)
     .join(INPUT_CHECK.out.reads_and_ref)
@@ -108,11 +115,11 @@ workflow PLANTPATHSURVEIL {
     }
     .set { subpipeline_input }
 
-    BACTERIAPIPELINE (
-        subpipeline_input.bacteria,
-        ch_input
-    )
-    ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
+    //BACTERIAPIPELINE (
+    //    subpipeline_input.bacteria,
+    //    ch_input
+    //)
+    //ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
     //EUKARYOTEPIPELINE (
     //    subpipeline_input.eukaryote,
     //    ch_input

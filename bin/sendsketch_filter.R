@@ -19,10 +19,11 @@ data <- data[data$ANI > ani_threshold, ]
 data$genus <- gsub(".*g:(.+);s:.*", "\\1", data$taxonomy)
 data$family <- gsub(".*f:(.+);g:.*", "\\1", data$taxonomy)
 data$species <- gsub(".*;s:([a-zA-Z0-9 .]+);?.*", "\\1", data$taxonomy)
-out_taxa <- unique(c(data$family, data$genus, data$species))
 
 # Write output
-writeLines(out_taxa, "taxon_list.txt")
+writeLines(unique(data$species), "species.txt")
+writeLines(unique(data$genus), "genera.txt")
+writeLines(unique(data$family), "families.txt")
 
 # Save kingdom 
 kingdom <- gsub("sk:(.+);p:.*", "\\1", data$taxonomy[1])
