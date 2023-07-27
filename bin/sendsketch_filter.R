@@ -1,7 +1,5 @@
 #!/usr/bin/env -S Rscript --vanilla
 
-#args=c("C:\Users\smile\Downloads\work\22-299_T1.txt")
-
 # Options
 ani_threshold <- 90
 

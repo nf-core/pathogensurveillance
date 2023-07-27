@@ -1,5 +1,5 @@
 process PICK_ASSEMBLIES {
-    tag "$family"
+    tag "$meta.id"
     label 'process_single'
 
     conda "conda-forge::r-base=4.2.1"                                           
@@ -8,10 +8,12 @@ process PICK_ASSEMBLIES {
         'quay.io/biocontainers/r-base:4.2.1' }"                                 
 
     input:
-    tuple val(family), path(genera), path(species), path(stats)
+    tuple val(meta), path(families), path(genera), path(species)
+    path stats
 
     output:
-    tuple val(family), path("assemblies_ids.txt") , emit: id_list
+    tuple val(meta), path("${prefix}.tsv")     , emit: stats
+    tuple val(meta), path("${prefix}_ids.txt"), emit: id_list
     path "versions.yml", emit: versions
 
     when:
@@ -19,9 +21,11 @@ process PICK_ASSEMBLIES {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${family}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
-    pick_assemblies.R $genera $species $stats
+    pick_assemblies.R ${families} ${genera} ${species} ${stats} 5 ${prefix}.tsv
+
+    tail -n +2 ${prefix}.tsv | cut -f2 > ${prefix}_ids.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
