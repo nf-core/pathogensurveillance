@@ -3,6 +3,8 @@ include { MERGE_ASSEMBLIES      } from '../../modules/local/mergeassemblies'
 include { PICK_ASSEMBLIES       } from '../../modules/local/pickassemblies'
 include { DOWNLOAD_ASSEMBLIES   } from '../../modules/local/downloadassemblies'
 include { MAKEGFFWITHFASTA      } from '../../modules/local/makegffwithfasta'
+include { SOURMASH_SKETCH       } from '../../modules/nf-core/sourmash/sketch/main'
+include { KHMER_TRIMLOWABUND    } from '../../modules/local/khmer_trimlowabund'
 
 workflow DOWNLOAD_REFERENCES {
 
@@ -49,6 +51,11 @@ workflow DOWNLOAD_REFERENCES {
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
     
     MAKEGFFWITHFASTA ( DOWNLOAD_ASSEMBLIES.out.sequence.join(DOWNLOAD_ASSEMBLIES.out.gff) )
+   
+    SOURMASH_SKETCH (
+        DOWNLOAD_ASSEMBLIES.out.sequence
+        .map { [[id: it[0]], it[1]] }
+    )
 
     ch_samp_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
@@ -62,7 +69,7 @@ workflow DOWNLOAD_REFERENCES {
     ch_samp_gff = DOWNLOAD_ASSEMBLIES.out.gff                            
         .cross(ch_samp_ids)           // The cross/map combo does a full join   
         .map { [it[1][1], it[0][1]] } //   (join operator is an inner join).    
-        .groupTuple().view()                                                         
+        .groupTuple()                                                        
 
     emit:
     stats           = FIND_ASSEMBLIES.out.stats        // channel: [ val(taxon), file(stats) ]
