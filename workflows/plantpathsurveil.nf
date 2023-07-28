@@ -94,7 +94,7 @@ workflow PLANTPATHSURVEIL {
     // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
     //
     COARSE_SAMPLE_TAXONOMY (
-        INPUT_CHECK.out.reads_and_ref
+        INPUT_CHECK.out.reads_and_ref.map { it[0..3] }
     )
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
     
@@ -104,6 +104,8 @@ workflow PLANTPATHSURVEIL {
         COARSE_SAMPLE_TAXONOMY.out.genera,
         COARSE_SAMPLE_TAXONOMY.out.families
     )
+
+    
     
     COARSE_SAMPLE_TAXONOMY.out.kingdom
     .join(COARSE_SAMPLE_TAXONOMY.out.hits)
@@ -115,11 +117,11 @@ workflow PLANTPATHSURVEIL {
     }
     .set { subpipeline_input }
 
-    //BACTERIAPIPELINE (
-    //    subpipeline_input.bacteria,
-    //    ch_input
-    //)
-    //ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
+    BACTERIAPIPELINE (
+        subpipeline_input.bacteria,
+        ch_input
+    )
+    ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
     //EUKARYOTEPIPELINE (
     //    subpipeline_input.eukaryote,
     //    ch_input

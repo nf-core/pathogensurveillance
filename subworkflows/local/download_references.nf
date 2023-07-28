@@ -2,6 +2,7 @@ include { FIND_ASSEMBLIES       } from '../../modules/local/findassemblies'
 include { MERGE_ASSEMBLIES      } from '../../modules/local/mergeassemblies'
 include { PICK_ASSEMBLIES       } from '../../modules/local/pickassemblies'
 include { DOWNLOAD_ASSEMBLIES   } from '../../modules/local/downloadassemblies'
+include { MAKEGFFWITHFASTA      } from '../../modules/local/makegffwithfasta'
 
 workflow DOWNLOAD_REFERENCES {
 
@@ -46,6 +47,22 @@ workflow DOWNLOAD_REFERENCES {
         .flatten()                                                              
         .unique()
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
+    
+    MAKEGFFWITHFASTA ( DOWNLOAD_ASSEMBLIES.out.sequence.join(DOWNLOAD_ASSEMBLIES.out.gff) )
+
+    ch_samp_ids = PICK_ASSEMBLIES.out.id_list
+        .splitText(elem: 1)
+        .map { [it[1].replace('\n', ''), it[0]] }
+
+    ch_samp_seq = DOWNLOAD_ASSEMBLIES.out.sequence
+        .cross(ch_samp_ids)           // The cross/map combo does a full join
+        .map { [it[1][1], it[0][1]] } //   (join operator is an inner join).
+        .groupTuple()
+
+    ch_samp_gff = DOWNLOAD_ASSEMBLIES.out.gff                            
+        .cross(ch_samp_ids)           // The cross/map combo does a full join   
+        .map { [it[1][1], it[0][1]] } //   (join operator is an inner join).    
+        .groupTuple().view()                                                         
 
     emit:
     stats           = FIND_ASSEMBLIES.out.stats        // channel: [ val(taxon), file(stats) ]

@@ -12,8 +12,13 @@ process DOWNLOAD_ASSEMBLIES {
     val id // There is no meta because we want to cache based only the ID                                                                
                                                                                 
     output:                                                                     
-    tuple val(id), path("${prefix}.zip"), emit: assembly                             
-    path "versions.yml"                 , emit: versions                             
+    tuple val(id), path("${prefix}.zip"), emit: assembly
+    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}_*_genomic.fna"), emit: sequence
+    tuple val(id), path("ncbi_dataset/data/${prefix}/genomic.gff"), emit: gff, optional: true
+    tuple val(id), path("ncbi_dataset/data/${prefix}/cds_from_genomic.fna"), emit: cds, optional: true
+    tuple val(id), path("ncbi_dataset/data/${prefix}/protein.faa"), emit: protein, optional: true
+                             
+    path "versions.yml"                 , emit: versions                       
                                                                                 
     when:                                                                       
     task.ext.when == null || task.ext.when                                      
@@ -22,7 +27,11 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${id}".replaceAll(' ', '_')                               
     def args = task.ext.args ?: ''                                              
     """
+    # Download assemblies as zip archives
     datasets download genome accession $id --include gff3,rna,cds,protein,genome,seq-report --filename ${prefix}.zip
+    
+    # Unzip
+    unzip ${prefix}.zip
  
     cat <<-END_VERSIONS > versions.yml                                          
     "${task.process}":                                                          

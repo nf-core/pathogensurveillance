@@ -9,7 +9,7 @@ include { CORE_GENOME_PHYLOGENY  } from './core_genome_phylogeny'
 workflow BACTERIAPIPELINE {
 
     take:
-    input // channel: [ val(meta), val(taxon), path(hits), path(reads), val(ref_meta), path(reference) ]
+    input // channel: [ val(meta), val(taxon), path(hits), path(reads), val(ref_meta), path(reference), val(groups) ]
     ch_samplesheet // channel: path
 
     main:
@@ -22,13 +22,13 @@ workflow BACTERIAPIPELINE {
     MAKE_REFERENCE_INDEX ( ch_reference )
     ch_versions = ch_versions.mix(MAKE_REFERENCE_INDEX.out.versions)      
     
-    //ALIGN_READS_TO_REF (
-    //    ch_reads
-    //    .join(ch_reference)
-    //    .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
-    //    .join(MAKE_REFERENCE_INDEX.out.bwa_index)
-    //)
-    //ch_versions = ch_versions.mix(ALIGN_READS_TO_REF.out.versions)       
+    ALIGN_READS_TO_REF (
+        ch_reads
+        .join(ch_reference)
+        .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
+        .join(MAKE_REFERENCE_INDEX.out.bwa_index)
+    )
+    ch_versions = ch_versions.mix(ALIGN_READS_TO_REF.out.versions)       
 
     //CALL_VARIANTS (
     //    ALIGN_READS_TO_REF.out.bam

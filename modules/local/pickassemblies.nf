@@ -12,7 +12,7 @@ process PICK_ASSEMBLIES {
     path stats
 
     output:
-    tuple val(meta), path("${prefix}.tsv")     , emit: stats
+    tuple val(meta), path("${prefix}.tsv")    , emit: stats
     tuple val(meta), path("${prefix}_ids.txt"), emit: id_list
     path "versions.yml", emit: versions
 
