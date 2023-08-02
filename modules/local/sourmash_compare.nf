@@ -15,7 +15,7 @@ process SOURMASH_COMPARE {
 
     output:
     tuple val(meta), path("*comp.npy.labels.txt"), path("*comp.npy"), optional:true, emit: matrix
-    path "*comp.csv"       , optional:true, emit: csv
+    tuple val(meta), path("*comp.csv")       , optional:true, emit: csv
     path "versions.yml"    , emit: versions
 
     when:

@@ -1,10 +1,10 @@
-include { FIND_ASSEMBLIES       } from '../../modules/local/findassemblies'
-include { MERGE_ASSEMBLIES      } from '../../modules/local/mergeassemblies'
-include { PICK_ASSEMBLIES       } from '../../modules/local/pickassemblies'
-include { DOWNLOAD_ASSEMBLIES   } from '../../modules/local/downloadassemblies'
-include { MAKEGFFWITHFASTA      } from '../../modules/local/makegffwithfasta'
-include { SOURMASH_SKETCH       } from '../../modules/nf-core/sourmash/sketch/main'
-include { KHMER_TRIMLOWABUND    } from '../../modules/local/khmer_trimlowabund'
+include { FIND_ASSEMBLIES                           } from '../../modules/local/findassemblies'
+include { MERGE_ASSEMBLIES                          } from '../../modules/local/mergeassemblies'
+include { PICK_ASSEMBLIES                           } from '../../modules/local/pickassemblies'
+include { DOWNLOAD_ASSEMBLIES                       } from '../../modules/local/downloadassemblies'
+include { MAKEGFFWITHFASTA                          } from '../../modules/local/makegffwithfasta'
+include { SOURMASH_SKETCH as SOURMASH_SKETCH_GENOME } from '../../modules/nf-core/sourmash/sketch/main'
+include { KHMER_TRIMLOWABUND                        } from '../../modules/local/khmer_trimlowabund'
 
 workflow DOWNLOAD_REFERENCES {
 
@@ -54,7 +54,7 @@ workflow DOWNLOAD_REFERENCES {
     
     MAKEGFFWITHFASTA ( DOWNLOAD_ASSEMBLIES.out.sequence.join(DOWNLOAD_ASSEMBLIES.out.gff) )
    
-    SOURMASH_SKETCH (
+    SOURMASH_SKETCH_GENOME (
         DOWNLOAD_ASSEMBLIES.out.sequence
         .map { [[id: it[0]], it[1]] }
     )
@@ -65,9 +65,9 @@ workflow DOWNLOAD_REFERENCES {
 
 
     emit:
-    assem_samp_combos = genome_ids                                         // [ val(genome_id), val(meta) ] for each assembly/sample combination
-    sequence          = DOWNLOAD_ASSEMBLIES.out.sequence // [ val(genome_id), file(fna) ] for each assembly
-    gff               = DOWNLOAD_ASSEMBLIES.out.gff      // [ val(genome_id), file(gff) ] for each assembly
-    signatures        = SOURMASH_SKETCH.out.signatures   // [ val(genome_id), file(signature) ] for each assembly
-    versions          = ch_versions                      // [ versions.yml ]
+    assem_samp_combos = genome_ids                            // [ val(genome_id), val(meta) ] for each assembly/sample combination
+    sequence          = DOWNLOAD_ASSEMBLIES.out.sequence      // [ val(genome_id), file(fna) ] for each assembly
+    gff               = DOWNLOAD_ASSEMBLIES.out.gff           // [ val(genome_id), file(gff) ] for each assembly
+    signatures        = SOURMASH_SKETCH_GENOME.out.signatures // [ val(genome_id), file(signature) ] for each assembly
+    versions          = ch_versions                           // [ versions.yml ]
 }
