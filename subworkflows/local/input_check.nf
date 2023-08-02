@@ -14,10 +14,11 @@ workflow INPUT_CHECK {
         .csv
         .splitCsv ( header:true, sep:',' )
         .map { create_reads_ref_channel(it) }
-        .set { reads_and_ref }
-    
+        .transpose ( by: 4 ) // Duplicate rows for each group when there are multiple groups per sample
+        .set { sample_data }
+
     emit:
-    reads_and_ref                             // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(ref), [ val(groups) ] ]
+    sample_data                             // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups) ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
@@ -40,13 +41,14 @@ def create_reads_ref_channel(LinkedHashMap row) {
     def ref_meta = [:]
     ref_meta.id = row.reference_id ?: row.reference.replaceAll('/', '_')
     def output = []
+    def groups = row.report_group.split(";") as ArrayList
     if (meta.single_end) {
         output = [ meta, [ file(row.fastq_1) ], ref_meta, file(row.reference), row.report_group.split(";") ]
     } else {
         if (!file(row.fastq_2).exists()) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
         }
-        output = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], ref_meta, file(row.reference), row.report_group.split(";") ]
+        output = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], ref_meta, file(row.reference), groups ]
     }
     return output
 }

@@ -3,17 +3,16 @@ include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
 include { CALL_VARIANTS          } from './call_variants'
 include { VARIANT_CALLING_REPORT } from './variant_calling_report'
 
-workflow EUKARYOTEPIPELINE {
+workflow VARIANT_CALLING_ANALYSIS {
 
     take:
-    input // channel: [ val(meta), val(taxon), path(hits), path(reads), val(ref_meta), path(reference) ]
+    input // channel: [ val(meta), val(taxon), path(reads), val(ref_meta), path(reference) ]
     ch_samplesheet // channel: path
 
     main:
     ch_taxon     = input.map { [it[0], it[1]] } 
-    ch_bbsketch  = input.map { [it[0], it[2]] }
-    ch_reads     = input.map { [it[0], it[3]] }
-    ch_reference = input.map { [it[0], it[4], it[5]] }
+    ch_reads     = input.map { [it[0], it[2]] }
+    ch_reference = input.map { [it[0], it[3], it[4]] }
     ch_versions = Channel.empty()
 
     MAKE_REFERENCE_INDEX ( ch_reference )
@@ -36,11 +35,11 @@ workflow EUKARYOTEPIPELINE {
     )
     ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
     
-    //VARIANT_CALLING_REPORT (
-    //    CALL_VARIANTS.out.vcf,
-    //    ch_samplesheet
-    //)
-    //ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
+    VARIANT_CALLING_REPORT (
+        CALL_VARIANTS.out.vcf,
+        ch_samplesheet
+    )
+    ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
 
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict

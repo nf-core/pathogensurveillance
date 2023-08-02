@@ -39,11 +39,12 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK            } from '../subworkflows/local/input_check'
-include { COARSE_SAMPLE_TAXONOMY } from '../subworkflows/local/coarse_sample_taxonomy'
-include { BACTERIAPIPELINE       } from '../subworkflows/local/bacteriapipeline'
-include { EUKARYOTEPIPELINE      } from '../subworkflows/local/eukaryotepipeline'
-include { DOWNLOAD_REFERENCES    } from '../subworkflows/local/download_references'
+include { INPUT_CHECK              } from '../subworkflows/local/input_check'
+include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
+include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
+include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
+include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
+include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
 
 
 /*
@@ -73,55 +74,80 @@ workflow PLANTPATHSURVEIL {
 
     ch_versions = Channel.empty()
 
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
+    // Read in samplesheet, validate and stage input files
     INPUT_CHECK (
         ch_input
     )
-    ch_reads = INPUT_CHECK.out.reads_and_ref.map { it[0..1] }
+    ch_reads = INPUT_CHECK.out.sample_data
+        .map { it[0..1] }
+        .distinct()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
-    //
-    // MODULE: Run FastQC
-    //
+    // Run FastQC
     FASTQC (
         ch_reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
 
-    //
-    // SUBWORKFLOW: Make initial taxonomic classification to decide how to treat sample
-    //
+    // Make initial taxonomic classification to decide how to treat sample
     COARSE_SAMPLE_TAXONOMY (
-        INPUT_CHECK.out.reads_and_ref.map { it[0..3] }
+        ch_reads
     )
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
     
-    
+    // Search for and download reference assemblies for all samples
     DOWNLOAD_REFERENCES (
         COARSE_SAMPLE_TAXONOMY.out.species,
         COARSE_SAMPLE_TAXONOMY.out.genera,
         COARSE_SAMPLE_TAXONOMY.out.families
     )
 
-    
-    
-    COARSE_SAMPLE_TAXONOMY.out.kingdom
-    .join(COARSE_SAMPLE_TAXONOMY.out.hits)
-    .join(INPUT_CHECK.out.reads_and_ref)
-    .branch {
-        bacteria: it[1] == "Bacteria"
-        eukaryote: it[1] == "Eukaryota"
-        unknown: true 
-    }
-    .set { subpipeline_input }
-
-    BACTERIAPIPELINE (
-        subpipeline_input.bacteria,
-        ch_input
+    // Assign closest reference for samples without a user-assigned reference
+    ASSIGN_REFERENCES (
+        INPUT_CHECK.out.sample_data,
+        DOWNLOAD_REFERENCES.out.assem_samp_combos,
+        DOWNLOAD_REFERENCES.out.sequence,
+        DOWNLOAD_REFERENCES.out.signatures
     )
-    ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
+
+    // Call variants and create SNP-tree and minimum spanning nextwork
+    //VARIANT_CALLING_ANALYSIS (
+    //)
+
+    // Assemble and annotate bacterial genomes
+    //GENOME_ASSEMBLY (                                                           
+    //    ch_reads                                                                
+    //    .join(ch_reference)                                                     
+    //)                                                                           
+    //ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
+
+    // Create core gene phylogeny for bacterial samples
+    //CORE_GENOME_PHYLOGENY (                                                     
+    //    GENOME_ASSEMBLY.out.gff.join(ch_reference),                             
+    //    ch_samplesheet                                                          
+    //)                                                                           
+
+    // Read2tree phylogeny for eukaryotes
+    //READ2TREE_ANALYSIS (
+    //)
+
+    
+    
+    //COARSE_SAMPLE_TAXONOMY.out.kingdom
+    //.join(COARSE_SAMPLE_TAXONOMY.out.hits)
+    //.join(INPUT_CHECK.out.reads_and_ref)
+    //.branch {
+    //    bacteria: it[1] == "Bacteria"
+    //    eukaryote: it[1] == "Eukaryota"
+    //    unknown: true 
+    //}
+    //.set { subpipeline_input }
+    //
+    //BACTERIAPIPELINE (
+    //    subpipeline_input.bacteria,
+    //    ch_input
+    //)
+    //ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
     //EUKARYOTEPIPELINE (
     //    subpipeline_input.eukaryote,
     //    ch_input
@@ -133,29 +159,27 @@ workflow PLANTPATHSURVEIL {
         ch_versions.unique().collect(sort:true)
     )
                                                                           
-    //
-    // MODULE: MultiQC
-    //
-    workflow_summary    = WorkflowPlantpathsurveil.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
+    // MultiQC
+    //workflow_summary    = WorkflowPlantpathsurveil.paramsSummaryMultiqc(workflow, summary_params)
+    //ch_workflow_summary = Channel.value(workflow_summary)
 
-    methods_description    = WorkflowPlantpathsurveil.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    ch_methods_description = Channel.value(methods_description)
+    //methods_description    = WorkflowPlantpathsurveil.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    //ch_methods_description = Channel.value(methods_description)
 
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = Channel.empty()
+    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+    //ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.collect().ifEmpty([]),
-        ch_multiqc_custom_config.collect().ifEmpty([]),
-        ch_multiqc_logo.collect().ifEmpty([])
-    )
-    multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    //MULTIQC (
+    //    ch_multiqc_files.collect(),
+    //    ch_multiqc_config.collect().ifEmpty([]),
+    //    ch_multiqc_custom_config.collect().ifEmpty([]),
+    //    ch_multiqc_logo.collect().ifEmpty([])
+    //)
+    //multiqc_report = MULTIQC.out.report.toList()
+    //ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 
 
 }

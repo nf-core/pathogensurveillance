@@ -4,13 +4,12 @@ include { INITIALCLASSIFICATION  } from '../../modules/local/initialclassificati
 workflow COARSE_SAMPLE_TAXONOMY {
 
     take:
-    ch_reads_ref  // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(reference) ]
+    ch_reads  // channel: [ val(meta), [ file(reads) ] ]
 
     main:
     ch_versions = Channel.empty()
 
-    ch_fastq = ch_reads_ref.map { it[0..1] }
-    BBMAP_SENDSKETCH ( ch_fastq )
+    BBMAP_SENDSKETCH ( ch_reads )
     ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
 
     INITIALCLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )

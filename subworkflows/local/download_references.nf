@@ -35,7 +35,9 @@ workflow DOWNLOAD_REFERENCES {
     )
     
     PICK_ASSEMBLIES (
-        ch_families.join(ch_genera).join(ch_species),
+        ch_families
+            .join(ch_genera)
+            .join(ch_species),
         MERGE_ASSEMBLIES.out.merged_stats
     )
 
@@ -57,21 +59,15 @@ workflow DOWNLOAD_REFERENCES {
         .map { [[id: it[0]], it[1]] }
     )
 
-    ch_samp_ids = PICK_ASSEMBLIES.out.id_list
+    genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
-        .map { [it[1].replace('\n', ''), it[0]] }
+        .map { [it[1].replace('\n', ''), it[0]] } // [ val(genome_id), val(meta) ]
 
-    ch_samp_seq = DOWNLOAD_ASSEMBLIES.out.sequence
-        .cross(ch_samp_ids)           // The cross/map combo does a full join
-        .map { [it[1][1], it[0][1]] } //   (join operator is an inner join).
-        .groupTuple()
-
-    ch_samp_gff = DOWNLOAD_ASSEMBLIES.out.gff                            
-        .cross(ch_samp_ids)           // The cross/map combo does a full join   
-        .map { [it[1][1], it[0][1]] } //   (join operator is an inner join).    
-        .groupTuple()                                                        
 
     emit:
-    stats           = FIND_ASSEMBLIES.out.stats        // channel: [ val(taxon), file(stats) ]
-    versions        = ch_versions                      // channel: [ versions.yml ]
+    assem_samp_combos = genome_ids                                         // [ val(genome_id), val(meta) ] for each assembly/sample combination
+    sequence          = DOWNLOAD_ASSEMBLIES.out.sequence // [ val(genome_id), file(fna) ] for each assembly
+    gff               = DOWNLOAD_ASSEMBLIES.out.gff      // [ val(genome_id), file(gff) ] for each assembly
+    signatures        = SOURMASH_SKETCH.out.signatures   // [ val(genome_id), file(signature) ] for each assembly
+    versions          = ch_versions                      // [ versions.yml ]
 }
