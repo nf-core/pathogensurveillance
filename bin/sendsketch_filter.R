@@ -2,6 +2,7 @@
 
 # Options
 ani_threshold <- 90
+complt_threshold <- 70
 
 # Parse inputs
 args = commandArgs(trailingOnly = TRUE)
@@ -9,9 +10,11 @@ data <- read.csv(args[1], skip = 2, header = TRUE, sep = '\t')
 
 # Format table
 data$ANI <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, data$ANI))
+data$Complt <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, data$Complt))
 
 # Filter table by match quality
 data <- data[data$ANI > ani_threshold, ]
+data <- data[data$Complt > complt_threshold, ]
 
 # Extract taxon info
 data$genus <- gsub(".*g:(.+);s:.*", "\\1", data$taxonomy)
