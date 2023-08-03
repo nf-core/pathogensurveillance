@@ -6,13 +6,12 @@ include { VARIANT_CALLING_REPORT } from './variant_calling_report'
 workflow VARIANT_CALLING_ANALYSIS {
 
     take:
-    input // channel: [ val(meta), val(taxon), path(reads), val(ref_meta), path(reference) ]
+    input // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
     ch_samplesheet // channel: path
 
     main:
-    ch_taxon     = input.map { [it[0], it[1]] } 
-    ch_reads     = input.map { [it[0], it[2]] }
-    ch_reference = input.map { [it[0], it[3], it[4]] }
+    ch_reads     = input.map { [it[0], it[1]] }
+    ch_reference = input.map { [it[0], it[2], it[3]] }
     ch_versions = Channel.empty()
 
     MAKE_REFERENCE_INDEX ( ch_reference )
@@ -29,7 +28,7 @@ workflow VARIANT_CALLING_ANALYSIS {
     CALL_VARIANTS (
         ALIGN_READS_TO_REF.out.bam
         .join(ALIGN_READS_TO_REF.out.bai)
-        .join(ch_reference)
+        .join(input.map { [it[0], it[2], it[3], it[4]] })
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.picard_dict)
     )

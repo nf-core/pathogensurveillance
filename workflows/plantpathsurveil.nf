@@ -111,8 +111,10 @@ workflow PLANTPATHSURVEIL {
     )
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    //VARIANT_CALLING_ANALYSIS (
-    //)
+    VARIANT_CALLING_ANALYSIS (
+        ASSIGN_REFERENCES.out.sample_data,
+        ch_input
+    )
 
     // Assemble and annotate bacterial genomes
     //GENOME_ASSEMBLY (                                                           

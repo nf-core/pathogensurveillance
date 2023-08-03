@@ -118,7 +118,7 @@ workflow ASSIGN_REFERENCES {
     new_sample_data = sample_data
         .map { [it[0], it[4], it[1]] } // [val(meta), val(group_meta), [file(fastq)] ]
         .combine ( assigned_refs_with_seq, by: 0..1 ) // [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
-        .map { [it[0], it[2], it[3], it[4], it[1]] }.view() // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+        .map { [it[0], it[2], it[3], it[4], it[1]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
 
     emit:
     sample_data     = new_sample_data   // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]

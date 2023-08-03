@@ -9,17 +9,18 @@ include { VCFLIB_VCFFILTER          } from '../../modules/nf-core/vcflib/vcffilt
 workflow CALL_VARIANTS {
 
     take:
-    ch_input     // channel: [ val(meta), file(bam), file(bam_bai), val(ref_meta), file(reference), file(samtool_fai), file(picard_dict) ]
+    ch_input     // channel: [ val(meta), file(bam), file(bam_bai), val(ref_meta), file(reference), val(group_meta), file(samtool_fai), file(picard_dict) ]
 
     main:
 
     ch_versions = Channel.empty()
     
-    // group samples by reference genome
-    //    ch_ref_grouped: [val(ref_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
+    // group samples by reference genome and group
+    //    ch_ref_grouped: [val(ref+group_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
     ch_ref_grouped = ch_input
-        .groupTuple(by: 3)
-        .map { [it[3], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[0], it[1], it[2]] } // remove redundant reference genome paths
+        .map { [[id: "${it[5].id}_${it[3].id}", group: it[5], ref: it[3]], it[0], it[1], it[2], it[4], it[6], it[7]] }
+        .groupTuple()
+        .map { [it[0], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[1], it[2], it[3]] }.view() // remove redundant reference genome paths
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
     ch_ref = ch_ref_grouped.map { it[0..1] }
