@@ -21,12 +21,14 @@ workflow ASSIGN_REFERENCES {
             .map { it[0..1] } // [val(meta), [file(fastq)]], possibly duplicated
             .unique() // [val(meta), [file(fastq)]], one per sample
     )
+    ch_versions = ch_versions.mix(KHMER_TRIMLOWABUND.out.versions)
 
     // Create signature for each sample
     SOURMASH_SKETCH_READS (
         KHMER_TRIMLOWABUND.out.sequence
     )
-
+    ch_versions = ch_versions.mix(SOURMASH_SKETCH_READS.out.versions)              
+    
     // Create signature for each user-defined reference genome
     user_refs = sample_data
         .filter { it[3] != null }
@@ -35,7 +37,8 @@ workflow ASSIGN_REFERENCES {
     SOURMASH_SKETCH_GENOME (                                                           
         user_refs                                         
     )                                                                           
-    
+    ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions)           
+
     // Make list of user-defined reference signatures for each group                            
     user_sigs = sample_data
         .map { [it[2], it[4]] } // ref_meta, group_meta                                                  
@@ -62,8 +65,8 @@ workflow ASSIGN_REFERENCES {
     // Combine all signatures for each group
     group_sigs = sample_sigs
         .join(assem_sigs)
-        .join(user_sigs)
-        .map { [it[0], it[1] + it[2] + it[3]] }
+        .join(user_sigs, remainder: true)
+        .map { [it[0], it[1] + it[2] + (it[3] != null ? it[3] : [])] }
 
     // Compare all genomes/samples to eachother to create an ANI matrix
     SOURMASH_COMPARE (
@@ -72,17 +75,50 @@ workflow ASSIGN_REFERENCES {
         true, // save numpy matrix
         true  // save CSV
     )
+    ch_versions = ch_versions.mix(SOURMASH_COMPARE.out.versions)          
 
     // Make file with smaple IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
         .collectFile() { item -> [ "${item[4].id}.csv", "${item[0].id},${item[2].id ?: 'NA'}\n" ] }
-        .map {[[id: it.getSimpleName()], it]}
+        .map {[[id: it.getSimpleName()], it]} // TODO this recreates the group_meta, but if other feilds besids "id" are added this will not preserve those
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_GROUP_REFERENCES (
-        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs).view()
+        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs)
     )
 
+    // Convert CSV output back to nextflow channels
+    assigned_refs_ids = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs
+        .splitText( elem: 1 )
+        .splitCsv( elem: 1 )
+        // [val(sample_id), val(group_id), val(reference_id)]
+
+    // Convert IDs back into full meta
+    id_meta_key = sample_data                                                                 
+        .map { [it[0].id, it[4].id, it[2].id, it[0], it[4], it[2]] }
+    assigned_refs = assigned_refs_ids
+        .combine(id_meta_key)
+        .map { it[3..5] }
+        // [val(meta), val(group_meta), val(ref_meta)]
+
+    // Add reference file based on ref_meta
+    user_refs = sample_data
+        .filter { it[3] != null }
+        .map { it[2..3] } // [val(ref_meta), file(reference)]
+    all_refs = sequence
+        .concat(user_refs) // [val(ref_meta), file(reference)]
+    assigned_refs_with_seq = assigned_refs
+        .map { [it[2], it[0..1]] } // [val(ref_meta), val(meta), val(group_meta)]
+        .combine(all_refs) // [val(ref_meta), val(meta), val(group_meta), file(reference)]
+        .map { [it[1], it[2], it[0], it[3]] } // [val(meta), val(group_meta), val(ref_meta), file(reference)]
+
+    // Recreate sample data with new references picked
+    new_sample_data = sample_data
+        .map { [it[0], it[4], it[1]] } // [val(meta), val(group_meta), [file(fastq)] ]
+        .combine ( assigned_refs_with_seq, by: 0..1 ) // [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
+        .map { [it[0], it[2], it[3], it[4], it[1]] }  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
     emit:
-    versions        = ch_versions                      // channel: [ versions.yml ]
+    sample_data     = new_sample_data   // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    versions        = ch_versions       // channel: [ versions.yml ]
 }

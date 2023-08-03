@@ -19,7 +19,7 @@ workflow INPUT_CHECK {
         .set { sample_data }
 
     emit:
-    sample_data                             // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups) ]
+    sample_data                               // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups) ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
