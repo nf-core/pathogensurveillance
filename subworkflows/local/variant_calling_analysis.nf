@@ -1,7 +1,10 @@
 include { MAKE_REFERENCE_INDEX   } from './make_ref_index'  // this is being called from subworkflows
 include { ALIGN_READS_TO_REF     } from './align_reads_to_ref'
 include { CALL_VARIANTS          } from './call_variants'
-include { VARIANT_CALLING_REPORT } from './variant_calling_report'
+include { IQTREE2 as IQTREE2_SNP } from '../../modules/local/iqtree2'        
+include { VCFTOTAB      } from '../../modules/local/vcftotab'                   
+include { VCFTOSNPALN   } from '../../modules/local/vcftosnpaln'                
+include { VARIANTREPORT } from '../../modules/local/variantreport'              
 
 workflow VARIANT_CALLING_ANALYSIS {
 
@@ -37,12 +40,17 @@ workflow VARIANT_CALLING_ANALYSIS {
             .map { [it[0], it[7], it[8], it[1]] + it[3..6] }
     )
     ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
+   
+    VCFTOTAB ( CALL_VARIANTS.out.vcf )                                                       
+    ch_versions = ch_versions.mix(VCFTOTAB.out.versions.toSortedList().map{it[0]})
+                                                                                
+    VCFTOSNPALN ( VCFTOTAB.out.tab )                                            
+    ch_versions = ch_versions.mix(VCFTOSNPALN.out.versions.toSortedList().map{it[0]})
+                                                                                
+    VARIANTREPORT ( VCFTOSNPALN.out.fasta, ch_samplesheet )                     
+    ch_versions = ch_versions.mix(VARIANTREPORT.out.versions.toSortedList().map{it[0]})
     
-    VARIANT_CALLING_REPORT (
-        CALL_VARIANTS.out.vcf,
-        ch_samplesheet
-    )
-    ch_versions = ch_versions.mix(VARIANT_CALLING_REPORT.out.versions)       
+    IQTREE2_SNP ( VCFTOSNPALN.out.fasta, [] ) 
 
     emit:
     picard_dict  = MAKE_REFERENCE_INDEX.out.picard_dict

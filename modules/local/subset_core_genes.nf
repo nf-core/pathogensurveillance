@@ -12,7 +12,7 @@ process SUBSETCOREGENES {
 
     output:
     tuple val(ref_meta), path("${prefix}_core_genes.tsv"), emit: gene_fam
-    tuple val(ref_meta), path("${prefix}_feat_seqs/*.fasta"), emit: feat_seq
+    tuple val(ref_meta), path("${prefix}_feat_seqs/*.fasta"), emit: feat_seq, optional: true
 
     when:
     task.ext.when == null || task.ext.when

@@ -25,7 +25,8 @@ process IQTREE2 {
     def first_align = alignment[0]
     """
     # Get number of samples to decide whether or not to bootstrap
-    NSAMPLE=\$(grep '>' $first_align | wc -l)
+    FIRSTSAMPLE=\$(ls -d1 input_alignments/* | head -n 1)
+    NSAMPLE=\$(grep '>' \$FIRSTSAMPLE | wc -l)
     if [ \$NSAMPLE -gt 3 ]; then
         BOOT="-B 1000"
     else

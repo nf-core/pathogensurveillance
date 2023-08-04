@@ -67,7 +67,7 @@ workflow DOWNLOAD_REFERENCES {
     emit:
     assem_samp_combos = genome_ids                            // [ val(genome_id), val(meta) ] for each assembly/sample combination
     sequence          = DOWNLOAD_ASSEMBLIES.out.sequence      // [ val(genome_id), file(fna) ] for each assembly
-    gff               = DOWNLOAD_ASSEMBLIES.out.gff           // [ val(genome_id), file(gff) ] for each assembly
+    gff               = MAKEGFFWITHFASTA.out.gff              // [ val(genome_id), file(gff) ] for each assembly
     signatures        = SOURMASH_SKETCH_GENOME.out.signatures // [ val(genome_id), file(signature) ] for each assembly
     versions          = ch_versions                           // [ versions.yml ]
 }
