@@ -2,7 +2,7 @@ process VCFLIB_VCFFILTER {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::vcflib=1.0.3"
+    conda "bioconda::vcflib=1.0.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/vcflib:1.0.3--ha025227_0':
         'quay.io/biocontainers/vcflib:1.0.3--ha025227_0' }"

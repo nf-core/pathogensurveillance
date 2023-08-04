@@ -14,9 +14,9 @@ process DOWNLOAD_ASSEMBLIES {
     output:                                                                     
     tuple val(id), path("${prefix}.zip"), emit: assembly
     tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}_*_genomic.fna"), emit: sequence
-    tuple val(id), path("ncbi_dataset/data/${prefix}/genomic.gff"), emit: gff, optional: true
-    tuple val(id), path("ncbi_dataset/data/${prefix}/cds_from_genomic.fna"), emit: cds, optional: true
-    tuple val(id), path("ncbi_dataset/data/${prefix}/protein.faa"), emit: protein, optional: true
+    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}.gff"), emit: gff, optional: true
+    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}_cds.fna"), emit: cds, optional: true
+    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}.faa"), emit: protein, optional: true
                              
     path "versions.yml"                 , emit: versions                       
                                                                                 
@@ -32,6 +32,17 @@ process DOWNLOAD_ASSEMBLIES {
     
     # Unzip
     unzip ${prefix}.zip
+
+    # Rename files with assembly name
+    if [ -f ncbi_dataset/data/${prefix}/genomic.gff ]; then
+        mv ncbi_dataset/data/${prefix}/genomic.gff ncbi_dataset/data/${prefix}/${prefix}.gff
+    fi
+    if [ -f ncbi_dataset/data/${prefix}/cds_from_genomic.fna ]; then
+        mv ncbi_dataset/data/${prefix}/cds_from_genomic.fna ncbi_dataset/data/${prefix}/${prefix}_cds.fna
+    fi
+    if [ -f ncbi_dataset/data/${prefix}/protein.faa ]; then
+        mv ncbi_dataset/data/${prefix}/protein.faa ncbi_dataset/data/${prefix}/${prefix}.faa
+    fi
  
     cat <<-END_VERSIONS > versions.yml                                          
     "${task.process}":                                                          

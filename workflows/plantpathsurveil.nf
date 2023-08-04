@@ -125,9 +125,14 @@ workflow PLANTPATHSURVEIL {
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
 
     // Create core gene phylogeny for bacterial samples
+    ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
+        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(genome_id), val(meta), file(gff) ]
+        .map { it[1..2] } // [ val(meta), file(gff) ]
+        .groupTuple() // [ val(meta), [file(gff)] ]
     gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
-        .map { [it[0], it[5], it[4]] } // [ val(meta), file(gff), val(group_meta) ]            
+        .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
+        .map { [it[0], it[5], it[4], it[6]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)] ]            
     CORE_GENOME_PHYLOGENY (                                                     
         gff_and_group,                             
         ch_input                                                          

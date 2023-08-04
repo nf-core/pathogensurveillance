@@ -26,45 +26,25 @@ include { BWA_INDEX                       } from '../../modules/nf-core/bwa/inde
 
 workflow MAKE_REFERENCE_INDEX{
     take:
-    ch_reference     // [ val(meta), val(ref_meta), file(reference) ]
+    reference     // [ val(ref_meta), file(reference) ]
 
     main:
     ch_versions = Channel.empty()
 
-    // make channel for each unique reference
-    ch_unique_ref = ch_reference
-        .map { it[1..2] }
-        .groupTuple() // make unique based on reference metadata
-        .map { [it[0],it[1].sort()[0]] } // picks first sorted ref link so the cache works
-    PICARD_CREATESEQUENCEDICTIONARY ( ch_unique_ref )
+    PICARD_CREATESEQUENCEDICTIONARY ( reference )
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions.toSortedList().map{it[0]})
 
-    SAMTOOLS_FAIDX ( ch_unique_ref )
+    SAMTOOLS_FAIDX ( reference )
     ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions.toSortedList().map{it[0]})
 
-    BWA_INDEX ( ch_unique_ref ) 
+    BWA_INDEX ( reference ) 
     ch_versions = ch_versions.mix (BWA_INDEX.out.versions.toSortedList().map{it[0]})
 
-    // duplicate and recombine unique reference results with sample data
-    //    odd cross + map needed since join does not duplicate things
-    picard_dict = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
-        .cross(ch_reference.map { [it[1], it[0]] } )
-        .map { [it[1][1], it[0][1]] }
-    samtools_fai = SAMTOOLS_FAIDX.out.fai
-        .cross(ch_reference.map { [it[1], it[0]] } )
-        .map { [it[1][1], it[0][1]] } 
-    samtools_gzi = SAMTOOLS_FAIDX.out.gzi
-        .cross(ch_reference.map { [it[1], it[0]] } )
-        .map { [it[1][1], it[0][1]] } 
-    bwa_index = BWA_INDEX.out.index
-        .cross(ch_reference.map { [it[1], it[0]] } )
-        .map { [it[1][1], it[0][1]] } 
-
     emit:
-    picard_dict
-    samtools_fai
-    samtools_gzi
-    bwa_index
-    versions = ch_versions                        // channel: [ versions.yml ]
+    picard_dict   = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
+    samtools_fai  = SAMTOOLS_FAIDX.out.fai
+    samtools_gzi  = SAMTOOLS_FAIDX.out.gzi
+    bwa_index     = BWA_INDEX.out.index
+    versions      = ch_versions                        // channel: [ versions.yml ]
 
 }

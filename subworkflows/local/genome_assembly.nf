@@ -34,9 +34,9 @@ workflow GENOME_ASSEMBLY {
     ch_versions = ch_versions.mix(FILTER_ASSEMBLY.out.versions.first())
 
     ch_ref_grouped = ch_input_filtered
-        .combine(FILTER_ASSEMBLY.out.filtered)
+        .combine(FILTER_ASSEMBLY.out.filtered, by: 0)
         .groupTuple(by: 2)
-        .map { [it[2], it[3].sort()[0], it[1]] }
+        .map { [it[2], it[3].sort()[0], it[6]] } // [val(ref_meta), val(ref), [file(assembly] ]
     QUAST (
         ch_ref_grouped.map { it[2] }, // consensus (one or more assemblies)
         ch_ref_grouped.map { it[1] }, // fasta (reference, optional)

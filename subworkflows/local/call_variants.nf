@@ -20,7 +20,7 @@ workflow CALL_VARIANTS {
     ch_ref_grouped = ch_input
         .map { [[id: "${it[5].id}_${it[3].id}", group: it[5], ref: it[3]], it[0], it[1], it[2], it[4], it[6], it[7]] }
         .groupTuple()
-        .map { [it[0], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[1], it[2], it[3]] }.view() // remove redundant reference genome paths
+        .map { [it[0], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[1], it[2], it[3]] } // remove redundant reference genome paths
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
     ch_ref = ch_ref_grouped.map { it[0..1] }
@@ -49,11 +49,10 @@ workflow CALL_VARIANTS {
     ch_versions = ch_versions.mix(BGZIP_MAKE_GZIP.out.versions.toSortedList().map{it[0]})
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
-    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // ensure inputs in same order
-        .join(TABIX_TABIX.out.tbi)
+    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // 
+        .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
         .join(ch_ref_grouped.map { it[0..3] })
-        .join(BGZIP_MAKE_GZIP.out.gzi)
-    // vf_input: [val(ref_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
+        .join(BGZIP_MAKE_GZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
         vf_input.map { it[3] },

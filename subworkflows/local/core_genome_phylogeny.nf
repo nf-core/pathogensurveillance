@@ -11,7 +11,7 @@ include { COREGENOMEPHYLOGENYREPORT } from '../../modules/local/core_gene_phylog
 workflow CORE_GENOME_PHYLOGENY {
 
     take:
-    ch_input // [ val(meta), file(gff), val(group_meta) ]
+    sample_gff // [ val(meta), file(sample_gffs), val(group_meta), [file(ref_gffs)] ]
     ch_samplesheet // channel: path
 
     main:
@@ -19,9 +19,9 @@ workflow CORE_GENOME_PHYLOGENY {
     ch_versions = Channel.empty()
 
     // group samples by reference genome                                        
-    ch_gff_grouped = ch_input                                                   
+    ch_gff_grouped = sample_gff                                                  
         .groupTuple(by: 2)                                                      
-        .map { [it[2], it[1]] } // remove redundant reference genome paths
+        .map { [it[2], it[1] + it[3].flatten().unique()] } // [ val(group_meta), [ gff ] ]
 
     PIRATE ( ch_gff_grouped )
     ch_versions = ch_versions.mix(PIRATE.out.versions.first())
