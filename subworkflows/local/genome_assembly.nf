@@ -7,13 +7,16 @@ include { BAKTA_BAKTA     } from '../../modules/nf-core/bakta/bakta/main'
 workflow GENOME_ASSEMBLY {
 
     take:
-    ch_input // channel: [ val(meta), [fastq_1, fastq_2 ], val(ref_meta), file(reference) ]
+    ch_input // channel: [ val(meta), [fastq_1, fastq_2], val(ref_meta), file(reference), val(group_meta), val(kingdom) ]
 
     main:
 
     ch_versions = Channel.empty()
-    ch_reads = ch_input.map { it[0..1] }
-    ch_ref = ch_input.map { [it[0], it[2], it[3]] }
+    ch_input_filtered = ch_input
+        .filter { it[5] == "Bacteria" }
+    ch_reads = ch_input_filtered
+        .map { it[0..1] }
+        .unique()
     
     FASTP ( ch_reads, [], false, false )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
@@ -30,8 +33,8 @@ workflow GENOME_ASSEMBLY {
     )
     ch_versions = ch_versions.mix(FILTER_ASSEMBLY.out.versions.first())
 
-    ch_ref_grouped = FILTER_ASSEMBLY.out.filtered
-        .join(ch_ref) 
+    ch_ref_grouped = ch_input_filtered
+        .combine(FILTER_ASSEMBLY.out.filtered)
         .groupTuple(by: 2)
         .map { [it[2], it[3].sort()[0], it[1]] }
     QUAST (

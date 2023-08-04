@@ -45,6 +45,7 @@ include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phy
 include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
 include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
+include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 
 
 /*
@@ -78,7 +79,7 @@ workflow PLANTPATHSURVEIL {
     INPUT_CHECK (
         ch_input
     )
-    ch_reads = INPUT_CHECK.out.sample_data
+    ch_reads = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
         .distinct()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
@@ -117,17 +118,20 @@ workflow PLANTPATHSURVEIL {
     )
 
     // Assemble and annotate bacterial genomes
-    //GENOME_ASSEMBLY (                                                           
-    //    ch_reads                                                                
-    //    .join(ch_reference)                                                     
-    //)                                                                           
-    //ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
+    GENOME_ASSEMBLY (                                                           
+        ASSIGN_REFERENCES.out.sample_data                           
+            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)                                                   
+    )                                                                           
+    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
 
     // Create core gene phylogeny for bacterial samples
-    //CORE_GENOME_PHYLOGENY (                                                     
-    //    GENOME_ASSEMBLY.out.gff.join(ch_reference),                             
-    //    ch_samplesheet                                                          
-    //)                                                                           
+    gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
+        .map { [it[0], it[5], it[4]] } // [ val(meta), file(gff), val(group_meta) ]            
+    CORE_GENOME_PHYLOGENY (                                                     
+        gff_and_group,                             
+        ch_input                                                          
+    )                                                                           
 
     // Read2tree phylogeny for eukaryotes
     //READ2TREE_ANALYSIS (

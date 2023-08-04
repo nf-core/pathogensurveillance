@@ -14,7 +14,7 @@ workflow VARIANT_CALLING_ANALYSIS {
     ch_reference = input.map { [it[0], it[2], it[3]] }
     ch_versions = Channel.empty()
 
-    MAKE_REFERENCE_INDEX ( ch_reference )
+    MAKE_REFERENCE_INDEX ( ch_reference.unique() )
     ch_versions = ch_versions.mix(MAKE_REFERENCE_INDEX.out.versions)      
     
     ALIGN_READS_TO_REF (
@@ -22,15 +22,16 @@ workflow VARIANT_CALLING_ANALYSIS {
         .join(ch_reference)
         .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
         .join(MAKE_REFERENCE_INDEX.out.bwa_index)
+        .unique()
     )
     ch_versions = ch_versions.mix(ALIGN_READS_TO_REF.out.versions)       
 
     CALL_VARIANTS (
         ALIGN_READS_TO_REF.out.bam
-        .join(ALIGN_READS_TO_REF.out.bai)
-        .join(input.map { [it[0], it[2], it[3], it[4]] })
-        .join(MAKE_REFERENCE_INDEX.out.samtools_fai)
-        .join(MAKE_REFERENCE_INDEX.out.picard_dict)
+        .join(ALIGN_READS_TO_REF.out.bai, by: 0..1) // [meta, ref_meta, bam, bai]
+        .combine(input.map { [it[0], it[2], it[3], it[4]] }, by: 0..1)  // [meta, ref_meta, bam, bai, ref, group_meta]
+        .combine(MAKE_REFERENCE_INDEX.out.samtools_fai, by: 1)
+        .combine(MAKE_REFERENCE_INDEX.out.picard_dict, by: 1)
     )
     ch_versions = ch_versions.mix(CALL_VARIANTS.out.versions)       
     

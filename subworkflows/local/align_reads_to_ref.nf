@@ -14,8 +14,11 @@ workflow ALIGN_READS_TO_REF {
 
     ch_versions = Channel.empty()
 
-    ch_reads     = ch_input.map { [it[0], it[1]] }
-    ch_bwa_index = ch_input.map { [it[0], it[5]] }
+    samp_ref_combo = ch_input
+        .map { [[id: "${it[2].id}_${it[0].id}", ref: it[2], sample: it[0]]] + it } // make composite ID for read/ref combos
+
+    ch_reads     = samp_ref_combo.map { [it[0], it[2]] }
+    ch_bwa_index = samp_ref_combo.map { [it[0], it[6]] }
     BWA_MEM ( ch_reads, ch_bwa_index, false )
     ch_versions = ch_versions.mix(BWA_MEM.out.versions.toSortedList().map{it[0]})
 
@@ -25,8 +28,8 @@ workflow ALIGN_READS_TO_REF {
     PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
     ch_versions = ch_versions.mix(PICARD_SORTSAM_1.out.versions.toSortedList().map{it[0]})
     
-    ch_reference = ch_input.map { [it[0], it[3]] } // channel: [ val(meta), file(reference) ]
-    ch_ref_index = ch_input.map { [it[0], it[4]] } // channel: [ val(meta), file(ref_index) ]
+    ch_reference = samp_ref_combo.map { [it[0], it[4]] } // channel: [ val(ref_samp_meta), file(reference) ]
+    ch_ref_index = samp_ref_combo.map { [it[0], it[5]] } // channel: [ val(ref_samp_meta), file(ref_index) ]
     picard_input = PICARD_SORTSAM_1.out.bam // joined to associated right reference with each sample
         .join(ch_reference)
         .join(ch_ref_index)
@@ -43,9 +46,16 @@ workflow ALIGN_READS_TO_REF {
     SAMTOOLS_INDEX ( PICARD_SORTSAM_2.out.bam )
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.toSortedList().map{it[0]})
 
+    // Revet combined metas back to seperate ones for sample and reference
+    out_bam = PICARD_SORTSAM_2.out.bam        // channel: [ val(ref_samp_meta), [ bam ] ]
+        .map { [it[0].sample, it[0].ref, it[1]] }
+    out_bai = SAMTOOLS_INDEX.out.bai        // channel: [ val(ref_samp_meta), [ bai ] ]
+        .map { [it[0].sample, it[0].ref, it[1]] }                               
+        
+
     emit:
-    bam      = PICARD_SORTSAM_2.out.bam        // channel: [ val(meta), [ bam ] ]
-    bai      = SAMTOOLS_INDEX.out.bai   // channel: [ val(meta), [ bai ] ]
-    versions = ch_versions                     // channel: [ versions.yml ]
+    bam      = out_bam        // channel: [ val(meta), val(ref_meta), [ bam ] ]
+    bai      = out_bai        // channel: [ val(meta), val(ref_meta), [ bai ] ]
+    versions = ch_versions    // channel: [ versions.yml ]
 }
 

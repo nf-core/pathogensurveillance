@@ -11,7 +11,7 @@ include { COREGENOMEPHYLOGENYREPORT } from '../../modules/local/core_gene_phylog
 workflow CORE_GENOME_PHYLOGENY {
 
     take:
-    ch_input // [ val(meta), file(gff), val(ref_meta), file(reference) ]
+    ch_input // [ val(meta), file(gff), val(group_meta) ]
     ch_samplesheet // channel: path
 
     main:
