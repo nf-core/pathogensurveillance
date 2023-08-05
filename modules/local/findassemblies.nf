@@ -1,7 +1,7 @@
 process FIND_ASSEMBLIES {                                                  
     tag "$taxon"                                                              
     label 'process_single'
-    maxForks 1                                                      
+    maxForks 3                                                      
                                                                                 
     conda "bioconda::entrez-direct=16.2"                                        
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -30,7 +30,7 @@ process FIND_ASSEMBLIES {
     echo \$COLS | sed 's/ /\\t/g' > ${prefix}.tsv                                                                     
     esearch -db taxonomy -query "${taxon} OR ${taxon}[subtree]" | \\
         elink -target assembly | \\
-        efilter -query "latest [PROP] NOT partial-genome-representation [PROP]" | \\
+        efilter -query "latest[PROP] AND full-genome-representation[PROP] AND has-annotation[PROP] NOT excluded-from-refseq[PROP]" | \\
         efetch -format docsum | \\
         xtract -pattern DocumentSummary -def 'NA' -element \$COLS >> \\
         ${prefix}.tsv

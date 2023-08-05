@@ -1,7 +1,7 @@
 process DOWNLOAD_ASSEMBLIES {                                                  
     tag "$id"                                                              
     label 'process_single'
-    maxForks 1                                                      
+    maxForks 3                                                      
                                                                                 
     conda "conda-forge::ncbi-datasets-cli=15.11.0"                                
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

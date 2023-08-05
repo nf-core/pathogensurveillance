@@ -1,6 +1,6 @@
 process MAFFT {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_low'
 
     conda "bioconda::mafft=7.508"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

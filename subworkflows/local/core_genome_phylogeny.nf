@@ -1,6 +1,6 @@
 include { PIRATE                    } from '../../modules/nf-core/pirate/main'
 include { SAMTOOLS_FAIDX            } from '../../modules/nf-core/samtools/faidx/main'
-include { MAFFT                     } from '../../modules/nf-core/mafft/main'
+include { MAFFT as MAFFT_SMALL      } from '../../modules/nf-core/mafft/main'
 include { IQTREE2                   } from '../../modules/local/iqtree2'
 include { REFORMATPIRATERESULTS     } from '../../modules/local/reformat_pirate_results'
 include { ALIGNFEATURESEQUENCES     } from '../../modules/local/align_feature_sequences'
@@ -40,11 +40,11 @@ workflow CORE_GENOME_PHYLOGENY {
     SUBSETCOREGENES ( REFORMATPIRATERESULTS.out.gene_fam.join(RENAMECOREGENEHEADERS.out.feat_seqs) )
 
     // Align each gene family with mafft
-    MAFFT ( SUBSETCOREGENES.out.feat_seq.transpose(), [] )
-    ch_versions = ch_versions.mix(MAFFT.out.versions.first())
+    MAFFT_SMALL ( SUBSETCOREGENES.out.feat_seq.transpose(), [] )
+    ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2 ( MAFFT.out.fas.groupTuple(), [] )
+    IQTREE2 ( MAFFT_SMALL.out.fas.groupTuple(), [] )
     ch_versions = ch_versions.mix(IQTREE2.out.versions.first())
 
     // Make report
