@@ -122,5 +122,6 @@ workflow ASSIGN_REFERENCES {
 
     emit:
     sample_data     = new_sample_data   // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    ani_matrix      = SOURMASH_COMPARE.out.csv // [val(group_meta), val(csv)]
     versions        = ch_versions       // channel: [ versions.yml ]
 }

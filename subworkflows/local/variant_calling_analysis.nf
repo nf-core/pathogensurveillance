@@ -57,6 +57,9 @@ workflow VARIANT_CALLING_ANALYSIS {
     samtools_fai = MAKE_REFERENCE_INDEX.out.samtools_fai
     samtools_gzi = MAKE_REFERENCE_INDEX.out.samtools_gzi
     bwa_index    = MAKE_REFERENCE_INDEX.out.bwa_index 
+    phylogeny    = IQTREE2_SNP.out.phylogeny                                        
+                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, tree ]
+
     versions = ch_versions                           // channel: [ versions.yml ]
 
 }

@@ -52,6 +52,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     emit:
     pirate_aln      = PIRATE.out.aln        // channel: [ ref_meta, align_fasta ]
+    phylogeny       = IQTREE2.out.phylogeny // channel: [ group_meta, tree ]
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }

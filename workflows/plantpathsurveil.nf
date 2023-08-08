@@ -47,6 +47,7 @@ include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_refere
 include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
 include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 
+include { MAIN_REPORT              } from '../modules/local/mainreport'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,29 +143,19 @@ workflow PLANTPATHSURVEIL {
     //READ2TREE_ANALYSIS (
     //)
 
-    
-    
-    //COARSE_SAMPLE_TAXONOMY.out.kingdom
-    //.join(COARSE_SAMPLE_TAXONOMY.out.hits)
-    //.join(INPUT_CHECK.out.reads_and_ref)
-    //.branch {
-    //    bacteria: it[1] == "Bacteria"
-    //    eukaryote: it[1] == "Eukaryota"
-    //    unknown: true 
-    //}
-    //.set { subpipeline_input }
-    //
-    //BACTERIAPIPELINE (
-    //    subpipeline_input.bacteria,
-    //    ch_input
-    //)
-    //ch_versions = ch_versions.mix(BACTERIAPIPELINE.out.versions)
-    //EUKARYOTEPIPELINE (
-    //    subpipeline_input.eukaryote,
-    //    ch_input
-    //)
-    //ch_versions = ch_versions.mix(EUKARYOTEPIPELINE.out.versions)
+    // Create main summary report
+    report_in = VARIANT_CALLING_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
+        .groupTuple() // [ group_meta, [ref_meta], [tree] ]
+        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
+        .map { it + [ch_input, ASSIGN_REFERENCES.out.stats] }.view()
 
+    MAIN_REPORT ( 
+        report_in,
+        ch_input,
+        DOWNLOAD_REFERENCES.out.stats.first()
+    )  
+    
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
         ch_versions.unique().collect(sort:true)
