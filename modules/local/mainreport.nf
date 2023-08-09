@@ -11,7 +11,7 @@ process MAIN_REPORT {
     path ref_data
 
     output:
-    tuple val(group_meta), path("*.html"), emit: html
+    tuple val(group_meta), path("main_report/${prefix}_report"), emit: html
     path "versions.yml"                , emit: versions
 
     when:
@@ -19,11 +19,13 @@ process MAIN_REPORT {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${group_meta.id}"
+    prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    which Rscript
+    # Copy source of report here cause bookdown seems to want to make its output in the source
+    cp -r ${projectDir}/assets/main_report ./
+
     Rscript -e "workdir<-getwd()
-        rmarkdown::render('${projectDir}/assets/main_report.Rmd',
+        bookdown::render_book('main_report',
         params = list(
         samp_data = \\\"$samp_data\\\",
         ref_data = \\\"$ref_data\\\",
@@ -31,9 +33,8 @@ process MAIN_REPORT {
         ani_matrix = \\\"$ani_matrix\\\",
         core_phylo = \\\"$core_phylo\\\"
         ),
-        output_file = \\\"${prefix}_report.html\\\",
-        knit_root_dir=workdir,
-        output_dir=workdir)"
+        output_dir = \\\"${prefix}_report\\\",
+        knit_root_dir = workdir)"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
