@@ -37,9 +37,6 @@ samp_meta <- read.csv(params$samp_data, sep = ',')
 samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
 ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
 tree <- ape::read.tree(params$core_phylo)
-if (! is.null(tree)) {
-  tree$tip.label = gsub(tree$tip.label, pattern = "_with_fasta", replacement = "")
-}
 ```
 
 
