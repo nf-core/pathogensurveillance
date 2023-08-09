@@ -8,24 +8,25 @@ process IQTREE2 {
         'biocontainers/iqtree:2.1.4_beta--hdcc8f71_0' }"
 
     input:
-    tuple val(meta), path(alignment, stageAs: 'input_alignments/*')
+    tuple val(meta), path(alignment, stageAs: "input_data/*")
     val constant_sites
 
     output:
-    tuple val(meta), path("*.treefile"), emit: phylogeny
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("${prefix}.treefile"), emit: phylogeny
+    path "versions.yml"                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def args = task.ext.args ?: ''
+    prefix = task.ext.prefix ?: "${meta.id}"
     def fconst_args = constant_sites ? "-fconst $constant_sites" : ''
     def memory      = task.memory.toString().replaceAll(' ', '').replaceAll('B', '')
     def first_align = alignment[0]
     """
     # Get number of samples to decide whether or not to bootstrap
-    FIRSTSAMPLE=\$(ls -d1 input_alignments/* | head -n 1 || if [[ \$? -eq 141 ]]; then true; else exit \$?; fi)
+    FIRSTSAMPLE=\$(ls -d1 input_data/* | head -n 1 || if [[ \$? -eq 141 ]]; then true; else exit \$?; fi)
     NSAMPLE=\$(grep '>' \$FIRSTSAMPLE | wc -l)
     if [ \$NSAMPLE -gt 3 ]; then
         BOOT="-B 1000"
@@ -38,10 +39,13 @@ process IQTREE2 {
         $fconst_args \\
         \$BOOT \\
         $args \\
-        -s input_alignments \\
+        -s input_data \\
         -nt $task.cpus \\
         -ntmax $task.cpus \\
         -mem $memory \\
+
+    # Rename output by prefix
+    mv input_data.treefile ${prefix}.treefile
 
     # Save version information
     cat <<-END_VERSIONS > versions.yml

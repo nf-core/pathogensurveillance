@@ -1,53 +1,80 @@
 ---
-title: "Test report for core genome phylogeny"
+title: "Summary Report"
 output: html_document
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
-  ref_meta: "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile"
-  core_phylo: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
+    samp_data: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/metadata_medium.csv"
+    ref_data: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/merged_assembly_stats.tsv"
+    snp_phylos: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/subgroup_GCF_026651895.1.treefile"
+    ani_matrix: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/comp.csv"
+    core_phylo: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/subgroup.treefile"
 ---
 
 ```{r include=FALSE, eval=FALSE}
 params = list(
-  ref_meta = "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile",
-  ref_meta = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
+samp_data = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/metadata_medium.csv",
+ref_data = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/merged_assembly_stats.tsv",
+snp_plylos = list("/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/subgroup_GCF_026651895.1.treefile"),
+ani_matrix = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/comp.csv",
+core_phylo = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/ae/20a9873fdc22ae2694e8023b264cbb/subgroup.treefile"
 )
 ```
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```
 
-## Prepare
+```{r libraries}
+library(phylocanvas)
+library(ape)
+```
 
-Load required libraries.
-
-```{r}
-library(ggtree)
-library(treeio)
+```{r parse_inputs}
+ref_meta <- read.csv(params$ref_data, sep = '\t')
+ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
+samp_meta <- read.csv(params$samp_data, sep = ',')
+samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
+ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
+tree <- ape::read.tree(params$core_phylo)
+if (! is.null(tree)) {
+  tree$tip.label = gsub(tree$tip.label, pattern = "_with_fasta", replacement = "")
+}
 ```
 
 
-Load metadata.
+## Identification
 
-```{r}
-metadata <- read.csv(params$metadata)
-metadata$sample <- paste0(metadata$sample, "_T1")
+
+```{r core_phylo, fig.height = 7, eval = ! is.null(tree)}
+# Identify which tips are samples and references
+sample_ids <- tree$tip.label[tree$tip.label %in% samp_meta$modified_id]
+
+# Root tree 
+colnames(ani_matrix) <- gsub(colnames(ani_matrix), pattern = "[.-]", replacement = "_")
+rownames(ani_matrix) <- colnames(ani_matrix)
+group_ani <- ani_matrix[rownames(ani_matrix) %in% tree$tip.label, colnames(ani_matrix) %in% tree$tip.label]
+tree <- root(tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+
+# Set tip labels to taxon names for reference sequences
+# TODO: need a more reliable way to get IDs
+name_key <- c(
+  ref_meta$Organism, 
+  samp_meta$sample
+)
+names(name_key) <- c(
+  ref_meta$modified_id,
+  samp_meta$modified_id
+)
+tree$tip.label <- name_key[tree$tip.label]
+
+# Plot tree
+phycanv <- phylocanvas(tree, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+phycanv
 ```
 
-Load treefile.
-
-```{r}
-tree <- read.newick(params$treefile)
-```
-
-plot tree
-
-```{r}
-ggplot(tree, aes(x, y)) +
-  geom_tree() + 
-  theme_tree() +
-  geom_tiplab(as_ylab = FALSE, color = '#555555')
+```{asis no_core_phylo, echo = is.null(tree)}
+There is no tree to draw, probably because there were too few samples.
+More info will be added later.
 ```
 

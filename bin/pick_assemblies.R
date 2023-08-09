@@ -1,4 +1,4 @@
-#!/usr/bin/env -S Rscript --vanilla
+#!/usr/bin/env Rscript
 
 # Options
 min_coverage <- 30

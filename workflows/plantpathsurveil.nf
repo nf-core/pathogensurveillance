@@ -148,12 +148,11 @@ workflow PLANTPATHSURVEIL {
         .groupTuple() // [ group_meta, [ref_meta], [tree] ]
         .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
-        .map { it + [ch_input, ASSIGN_REFERENCES.out.stats] }.view()
 
     MAIN_REPORT ( 
         report_in,
         ch_input,
-        DOWNLOAD_REFERENCES.out.stats.first()
+        DOWNLOAD_REFERENCES.out.stats
     )  
     
     // Save version info

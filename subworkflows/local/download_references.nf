@@ -69,6 +69,6 @@ workflow DOWNLOAD_REFERENCES {
     sequence   = DOWNLOAD_ASSEMBLIES.out.sequence      // [ val(genome_id), file(fna) ] for each assembly
     gff        = MAKEGFFWITHFASTA.out.gff              // [ val(genome_id), file(gff) ] for each assembly
     signatures = SOURMASH_SKETCH_GENOME.out.signatures // [ val(genome_id), file(signature) ] for each assembly
-    stats      = MERGE_ASSEMBLIES.out.merged_stats.map { it[1] }     // [ file(stats) ]
+    stats      = MERGE_ASSEMBLIES.out.merged_stats     // [ file(stats) ]
     versions   = ch_versions                           // [ versions.yml ]
 }
