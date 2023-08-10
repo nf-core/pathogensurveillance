@@ -5,10 +5,10 @@ min_coverage <- 30
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c("/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/a5/f4d1a4a852122ea9970733dd75170b/families.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/a5/f4d1a4a852122ea9970733dd75170b/genera.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/a5/f4d1a4a852122ea9970733dd75170b/species.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/c8/3c3003a3c9420f2d5142f83b392c27/merged_assembly_stats.tsv",
+# args <- c("/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/families.txt",
+#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/genera.txt",
+#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/species.txt",
+#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/0d/03837419adaf53ebcb2464a02453a2/merged_assembly_stats.tsv",
 #           "5",
 #           "result.tsv")
 names(args) <- c("family", "genus", "species", "stats", "count", "out_path")
@@ -45,8 +45,10 @@ sp_stats <- lapply(split(sp_stats, sp_stats$SpeciesName), function(per_sp_data) 
     per_org_data[which.max(per_org_data$ScaffoldN50), ]
   })
 })
-sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
-sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats)], ]
+if (length(sp_stats) != 0 ) {
+  sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
+  sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats)], ]
+}
 
 # Pick representatives for each genus
 gn_stats <- stats[stats$genus %in% genera, , drop = FALSE]
@@ -55,9 +57,11 @@ gn_stats <- lapply(split(gn_stats, gn_stats$genus), function(per_sp_data) {
     per_org_data[which.max(per_org_data$ScaffoldN50), ]
   })
 })
-gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
-gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
-gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats)], ]
+if (length(gn_stats) != 0 ) {
+  gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
+  gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
+  gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats)], ]
+}
 
 # Pick representatives for each family
 fa_stats <- stats[stats$Family %in% families, , drop = FALSE]
@@ -66,9 +70,11 @@ fa_stats <- lapply(split(fa_stats, fa_stats$Family), function(per_fm_data) {
     per_gn_data[which.max(per_gn_data$ScaffoldN50), ]
   })
 })
-fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
-fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
-fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats)], ]
+if (length(fa_stats) != 0 ) {
+  fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
+  fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
+  fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats)], ]
+}
 
 # Combine results
 result <- rbind(sp_stats, gn_stats, fa_stats)

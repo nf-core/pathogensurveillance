@@ -26,6 +26,7 @@ process INITIALCLASSIFICATION {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     Rscript --vanilla ${projectDir}/bin/sendsketch_filter.R $hits
+
     KINGDOM="\$(cat kingdom.txt)"
     CLASS="\$(cat classification.txt)"
 
