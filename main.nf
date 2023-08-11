@@ -1,12 +1,12 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/plantpathsurveil
+    nf-core/PATHOGENDX
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/plantpathsurveil
+    Github : https://github.com/nf-core/PATHOGENDX
 
-    Website: https://nf-co.re/plantpathsurveil
-    Slack  : https://nfcore.slack.com/channels/plantpathsurveil
+    Website: https://nf-co.re/PATHOGENDX
+    Slack  : https://nfcore.slack.com/channels/PATHOGENDX
 ----------------------------------------------------------------------------------------
 */
 
@@ -35,13 +35,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PLANTPATHSURVEIL } from './workflows/plantpathsurveil'
+include { PATHOGENDX } from './workflows/pathogendx'
 
 //
-// WORKFLOW: Run main nf-core/plantpathsurveil analysis pipeline
+// WORKFLOW: Run main nf-core/PATHOGENDX analysis pipeline
 //
-workflow NFCORE_PLANTPATHSURVEIL {
-    PLANTPATHSURVEIL ()
+workflow NFCORE_PATHOGENDX {
+    PATHOGENDX ()
 }
 
 /*
@@ -55,7 +55,7 @@ workflow NFCORE_PLANTPATHSURVEIL {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_PLANTPATHSURVEIL ()
+    NFCORE_PATHOGENDX ()
 }
 
 /*
