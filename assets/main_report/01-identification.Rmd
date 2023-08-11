@@ -13,16 +13,17 @@ params = lapply(params, function(x) file.path(work_dir, x))
 ```
 
 
-```{r setup, include=FALSE}
+```{r id_setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```
 
-```{r libraries}
+```{r id_libraries}
 library(phylocanvas)
 library(ape)
+library(magrittr)
 ```
 
-```{r parse_inputs}
+```{r id_parse_inputs}
 ref_meta <- read.csv(params$ref_data, sep = '\t')
 ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
 samp_meta <- read.csv(params$samp_data, sep = ',')
@@ -33,10 +34,13 @@ snp_trees <- ape::read.tree(params$snp_phylos)
 ```
 
 
+## Initial ANI tree
+
+
 ## Core genome phylogeny
 
 
-```{r core_phylo, fig.height = 7, eval = ! is.null(core_tree)}
+```{r id_core_phylo, fig.height = 7, eval = ! is.null(core_tree)}
 # Identify which tips are samples and references
 sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_meta$modified_id]
 
@@ -60,29 +64,19 @@ core_tree$tip.label <- name_key[core_tree$tip.label]
 
 # Plot tree
 phycanv <- phylocanvas(core_tree, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+for (x in name_key[sample_ids]) {
+  phycanv <- style_node(phycanv, x, labelcolor = "green", labeltextsize = 30)
+}
+    
 phycanv
 ```
 
-```{asis no_core_phylo, echo = is.null(core_tree)}
+```{asis id_no_core_phylo, echo = is.null(core_tree)}
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
 
 
-## SNP phylogeny
 
 
-```{r snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
-# Root tree 
-snp_trees <- root(snp_trees, "REF")
-
-# Plot tree
-phycanv <- phylocanvas(snp_trees, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-phycanv
-```
-
-```{asis no_snp_phylo, echo = is.null(snp_trees)}
-There is no tree to draw, probably because there were too few samples.
-More info will be added later.
-```

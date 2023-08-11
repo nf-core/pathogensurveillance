@@ -26,6 +26,7 @@ process MAIN_REPORT {
 
     Rscript -e "workdir<-getwd()
         bookdown::render_book('main_report',
+        output_format = 'all',
         params = list(
         samp_data = \\\"$samp_data\\\",
         ref_data = \\\"$ref_data\\\",

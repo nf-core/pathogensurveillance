@@ -3,11 +3,21 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><a href="./">PathogenDx Report</a></li>
+        <li><b><a href="./">PathogenDx Report</a></b></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Created with bookdown</a></li>
-    edit: https://github.com/USERNAME/REPO/edit/BRANCH/%s
+    # edit: null
     download: ["pdf", "epub"]
+    sharing:
+      facebook: false
+      github: true
+      twitter: false
+      linkedin: false
+      weibo: false
+      instapaper: false
+      vk: false
+      whatsapp: false
+      all: false
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex

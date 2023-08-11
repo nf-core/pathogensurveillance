@@ -23,6 +23,10 @@ params:
 This is the first page a user sees.
 What should go here?
 
+## Input settings
+
+## Software used
+
 
 ```{r include=FALSE}
 # automatically create a bib database for R packages
