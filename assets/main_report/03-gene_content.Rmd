@@ -1,0 +1,9 @@
+# Gene content
+
+## Antibotic resistance genes
+
+## Effectors
+
+## Plasmids
+
+## User-defined genes
