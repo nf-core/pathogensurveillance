@@ -7,7 +7,7 @@
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowPathogendx.initialise(params, log)
+WorkflowPathogensurveillance.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
@@ -72,7 +72,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Info required for completion email and summary
 def multiqc_report = []
 
-workflow PATHOGENDX {
+workflow PATHOGENSURVEILLANCE {
 
     ch_versions = Channel.empty()
 
@@ -161,10 +161,10 @@ workflow PATHOGENDX {
     )
                                                                           
     // MultiQC
-    //workflow_summary    = WorkflowPathogendx.paramsSummaryMultiqc(workflow, summary_params)
+    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
     //ch_workflow_summary = Channel.value(workflow_summary)
 
-    //methods_description    = WorkflowPathogendx.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
     //ch_methods_description = Channel.value(methods_description)
 
     //ch_multiqc_files = Channel.empty()

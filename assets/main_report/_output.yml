@@ -3,7 +3,7 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><b><a href="./">PathogenDx Report</a></b></li>
+        <li><b><a href="./">Pathogensurveillance Report</a></b></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Created with bookdown</a></li>
     # edit: null

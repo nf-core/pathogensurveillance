@@ -1,10 +1,10 @@
 //
-// This file holds several functions specific to the workflow/pathogendx.nf in the nf-core/pathogendx pipeline
+// This file holds several functions specific to the workflow/pathogensurvaillance.nf in the nf-core/pathogensurveillance pipeline
 //
 
 import groovy.text.SimpleTemplateEngine
 
-class WorkflowPathogendx {
+class WorkflowPathogensurveillance {
 
     //
     // Check and validate parameters

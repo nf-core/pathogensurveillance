@@ -35,13 +35,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PATHOGENDX } from './workflows/pathogendx'
+include { PATHOGENSURVEILLANCE } from './workflows/pathogensurveillance'
 
 //
 // WORKFLOW: Run main nf-core/PATHOGENDX analysis pipeline
 //
-workflow NFCORE_PATHOGENDX {
-    PATHOGENDX ()
+workflow NFCORE_PATHOGENSURVEILLANCE {
+    PATHOGENSURVEILLANCE ()
 }
 
 /*
@@ -55,7 +55,7 @@ workflow NFCORE_PATHOGENDX {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_PATHOGENDX ()
+    NFCORE_PATHOGENSURVEILLANCE ()
 }
 
 /*
