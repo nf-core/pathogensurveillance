@@ -85,6 +85,8 @@ workflow PATHOGENSURVEILLANCE {
         .distinct()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
+    ch_reads.map { [it[0], null, it[1]]}.view()
+
     // Run FastQC
     FASTQC (
         ch_reads
@@ -96,13 +98,20 @@ workflow PATHOGENSURVEILLANCE {
         ch_reads
     )
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
-    
+
     // Search for and download reference assemblies for all samples
     DOWNLOAD_REFERENCES (
         COARSE_SAMPLE_TAXONOMY.out.species,
         COARSE_SAMPLE_TAXONOMY.out.genera,
         COARSE_SAMPLE_TAXONOMY.out.families
     )
+
+    // Create main summary report                                               
+    MAIN_REPORT (                                                               
+        INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
+        ch_input,                                                               
+        DOWNLOAD_REFERENCES.out.stats                                           
+    )                                                                           
 
     // Assign closest reference for samples without a user-assigned reference
     ASSIGN_REFERENCES (

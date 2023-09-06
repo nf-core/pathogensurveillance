@@ -11,11 +11,11 @@ description: |
 link-citations: yes
 github-repo: rstudio/bookdown-demo
 params:
-    samp_data: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
-    ref_data: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581/merged_assembly_stats.tsv"
-    snp_phylos: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581/xan_test_22_331_assembly.treefile"
-    ani_matrix: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581/comp.csv"
-    core_phylo: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581/xan_test.treefile"
+    samp_data: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/test/data/metadata_medium.csv"
+    ref_data: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/60/71f547293aa5d22f469ea3ee215581/merged_assembly_stats.tsv"
+    snp_phylos: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/60/71f547293aa5d22f469ea3ee215581/xan_test_22_331_assembly.treefile"
+    ani_matrix: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/60/71f547293aa5d22f469ea3ee215581/comp.csv"
+    core_phylo: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/60/71f547293aa5d22f469ea3ee215581/xan_test.treefile"
 ---
 
 # Run info
@@ -23,14 +23,8 @@ params:
 This is the first page a user sees.
 What should go here?
 
+* status of pipeline execution
+
 ## Input settings
 
-## Software used
-
-
-```{r include=FALSE}
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
-```
+## Things that require user attention

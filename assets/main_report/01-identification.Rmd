@@ -12,7 +12,6 @@ params = list(
 params = lapply(params, function(x) file.path(work_dir, x))
 ```
 
-
 ```{r id_setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```
@@ -33,6 +32,9 @@ core_tree <- ape::read.tree(params$core_phylo)
 snp_trees <- ape::read.tree(params$snp_phylos)
 ```
 
+## Sendsketch
+
+A table with sendsketch results
 
 ## Initial ANI tree
 

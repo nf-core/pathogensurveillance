@@ -1,5 +1,8 @@
 # Diversity
 
+How do the samples compare to eachother?
+
+
 ```{r include=FALSE, eval=FALSE}
 work_dir = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581"
 params = list(
