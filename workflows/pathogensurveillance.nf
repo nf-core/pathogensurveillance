@@ -44,10 +44,11 @@ include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_t
 include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
 include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
-include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
-include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
+include { ASSIGN_REFERENCES            } from '../subworkflows/local/assign_references'
+include { GENOME_ASSEMBLY              } from '../subworkflows/local/genome_assembly'
 
-include { MAIN_REPORT              } from '../modules/local/mainreport'
+include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/mainreport'
+include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/mainreport'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,8 +86,6 @@ workflow PATHOGENSURVEILLANCE {
         .distinct()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
-    ch_reads.map { [it[0], null, it[1]]}.view()
-
     // Run FastQC
     FASTQC (
         ch_reads
@@ -107,18 +106,19 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Create main summary report                                               
-    MAIN_REPORT (                                                               
-        INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
-        ch_input,                                                               
-        DOWNLOAD_REFERENCES.out.stats                                           
-    )                                                                           
+    //MAIN_REPORT_1 (                                                               
+    //    INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
+    //    ch_input,                                                               
+    //    DOWNLOAD_REFERENCES.out.stats                                           
+    //)                                                                           
 
     // Assign closest reference for samples without a user-assigned reference
     ASSIGN_REFERENCES (
         INPUT_CHECK.out.sample_data,
         DOWNLOAD_REFERENCES.out.assem_samp_combos,
         DOWNLOAD_REFERENCES.out.sequence,
-        DOWNLOAD_REFERENCES.out.signatures
+        DOWNLOAD_REFERENCES.out.signatures,
+        COARSE_SAMPLE_TAXONOMY.out.depth
     )
 
     // Call variants and create SNP-tree and minimum spanning nextwork
@@ -158,7 +158,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
 
-    MAIN_REPORT ( 
+    MAIN_REPORT_2 ( 
         report_in,
         ch_input,
         DOWNLOAD_REFERENCES.out.stats

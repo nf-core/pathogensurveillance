@@ -2,8 +2,8 @@ process DOWNLOAD_ASSEMBLIES {
     tag "$id"                                                              
     label 'process_single'
     maxForks 1
-    errorStrategy 'retry'
-    maxRetries 3                                                      
+    errorStrategy { return task.attempt > 3 ? 'ignore' : 'retry' }
+    maxRetries 5                                                      
                                                                                 
     conda "conda-forge::ncbi-datasets-cli=15.11.0"                                
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

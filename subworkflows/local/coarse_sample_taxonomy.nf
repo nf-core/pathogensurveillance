@@ -11,8 +11,12 @@ workflow COARSE_SAMPLE_TAXONOMY {
 
     BBMAP_SENDSKETCH ( ch_reads )
     ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
+    ch_depth = BBMAP_SENDSKETCH.out.hits
+        .map { [it[0], it[2]] }
+    ch_hits = BBMAP_SENDSKETCH.out.hits                                        
+        .map { [it[0], it[1]] }                                                 
 
-    INITIALCLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
+    INITIALCLASSIFICATION ( ch_hits )
     ch_versions = ch_versions.mix(INITIALCLASSIFICATION.out.versions.toSortedList().map{it[0]})
 
     emit:
@@ -21,6 +25,7 @@ workflow COARSE_SAMPLE_TAXONOMY {
     families        = INITIALCLASSIFICATION.out.families        // channel: [ val(meta), file(taxon) ]
     classification  = INITIALCLASSIFICATION.out.classification  // channel: [ val(meta), val(classification) ]
     kingdom         = INITIALCLASSIFICATION.out.kingdom         // channel: [ val(meta), val(kingdom) ]
-    hits            = BBMAP_SENDSKETCH.out.hits                 // channel: [ val(meta), file(hits) ]
+    hits            = ch_hits                                   // channel: [ val(meta), file(hits) ]
+    depth           = ch_depth                                  // channel: [ val(meta), file(depth) ]
     versions        = ch_versions                               // channel: [ versions.yml ]
 }
