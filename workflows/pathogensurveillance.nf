@@ -168,6 +168,8 @@ workflow PATHOGENSURVEILLANCE {
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
         ch_versions.unique().collect(sort:true)
     )
+
+    println "$workflow.manifest"
                                                                           
     // MultiQC
     //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)

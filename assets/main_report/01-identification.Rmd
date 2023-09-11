@@ -50,7 +50,7 @@ sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_meta$modified_id
 colnames(ani_matrix) <- gsub(colnames(ani_matrix), pattern = "[.-]", replacement = "_")
 rownames(ani_matrix) <- colnames(ani_matrix)
 group_ani <- ani_matrix[rownames(ani_matrix) %in% core_tree$tip.label, colnames(ani_matrix) %in% core_tree$tip.label]
-core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+#core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
 
 # Set tip labels to taxon names for reference sequences
 # TODO: need a more reliable way to get IDs
