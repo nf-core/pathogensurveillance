@@ -1,5 +1,5 @@
 include { GRAPHTYPER_GENOTYPE       } from '../../modules/nf-core/graphtyper/genotype/main'
-include { MAKEREGIONFILE            } from '../../modules/local/makeregionfile'
+include { MAKE_REGION_FILE          } from '../../modules/local/make_region_file'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../modules/nf-core/graphtyper/vcfconcatenate/main'
 include { TABIX_TABIX               } from '../../modules/nf-core/tabix/tabix/main'
 include { BGZIP_MAKE_GZIP           } from '../../modules/local/bgzip_make_gzip'
@@ -24,10 +24,10 @@ workflow CALL_VARIANTS {
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
     ch_ref = ch_ref_grouped.map { it[0..1] }
-    MAKEREGIONFILE ( ch_ref ) 
+    MAKE_REGION_FILE ( ch_ref ) 
 
     // Run graphtyper on each group of samples for all chromosomes
-    ch_ref_grouped = ch_ref_grouped.join(MAKEREGIONFILE.out.regions) // make inputs in same order
+    ch_ref_grouped = ch_ref_grouped.join(MAKE_REGION_FILE.out.regions) // make inputs in same order
     GRAPHTYPER_GENOTYPE (
         ch_ref_grouped.map { [it[0], it[5], it[6]] },
         ch_ref_grouped.map { [it[0], it[1]] },

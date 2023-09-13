@@ -1,4 +1,4 @@
-process RENAMECOREGENEHEADERS {
+process RENAME_CORE_GENE_HEADERS {
     tag "$ref_meta.id"
     label 'process_single'
                                                                                 

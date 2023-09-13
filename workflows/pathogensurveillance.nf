@@ -42,13 +42,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK              } from '../subworkflows/local/input_check'
 include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
 include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
-include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
+include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysis'
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
-include { ASSIGN_REFERENCES            } from '../subworkflows/local/assign_references'
-include { GENOME_ASSEMBLY              } from '../subworkflows/local/genome_assembly'
+include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
+include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 
-include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/mainreport'
-include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/mainreport'
+include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/main_report'
+include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/main_report'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,7 +122,7 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_CALLING_ANALYSIS (
+    VARIANT_ANALYSIS (
         ASSIGN_REFERENCES.out.sample_data,
         ch_input
     )
@@ -153,7 +153,7 @@ workflow PATHOGENSURVEILLANCE {
     //)
 
     // Create main summary report
-    report_in = VARIANT_CALLING_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
+    report_in = VARIANT_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
         .groupTuple() // [ group_meta, [ref_meta], [tree] ]
         .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
@@ -169,29 +169,28 @@ workflow PATHOGENSURVEILLANCE {
         ch_versions.unique().collect(sort:true)
     )
 
-    println "$workflow.manifest"
                                                                           
     // MultiQC
-    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
-    //ch_workflow_summary = Channel.value(workflow_summary)
+    workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
+    ch_workflow_summary = Channel.value(workflow_summary)
 
-    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    //ch_methods_description = Channel.value(methods_description)
+    methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    ch_methods_description = Channel.value(methods_description)
 
-    //ch_multiqc_files = Channel.empty()
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
-    //MULTIQC (
-    //    ch_multiqc_files.collect(),
-    //    ch_multiqc_config.collect().ifEmpty([]),
-    //    ch_multiqc_custom_config.collect().ifEmpty([]),
-    //    ch_multiqc_logo.collect().ifEmpty([])
-    //)
-    //multiqc_report = MULTIQC.out.report.toList()
-    //ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        ch_multiqc_config.collect().ifEmpty([]),
+        ch_multiqc_custom_config.collect().ifEmpty([]),
+        ch_multiqc_logo.collect().ifEmpty([])
+    )
+    multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 
 
 }

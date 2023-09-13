@@ -1,4 +1,4 @@
-process ALIGNFEATURESEQUENCES {                                                 
+process ALIGN_FEATURE_SEQUENCES {                                                 
     tag "$ref_meta.id"                                                          
     label 'process_single'                                                      
                                                                                 

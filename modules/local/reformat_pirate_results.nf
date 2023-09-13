@@ -1,4 +1,4 @@
-process REFORMATPIRATERESULTS {
+process REFORMAT_PIRATE_RESULTS {
     tag "$ref_meta.id"
     label 'process_single'
                                                                                 

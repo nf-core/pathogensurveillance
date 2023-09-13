@@ -16,6 +16,7 @@ params:
     snp_phylos: "_test_data/xan_test_22_331_assembly.treefile"
     ani_matrix: "_test_data/comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
+    output_dir: "_test_data/output"
 ---
 
 # Run info
