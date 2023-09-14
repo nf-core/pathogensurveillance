@@ -1,3 +1,14 @@
+--- 
+params:
+    samp_data: "_test_data/metadata_medium.csv"
+    ref_data: "_test_data/merged_assembly_stats.tsv"
+    snp_phylos: "_test_data/xan_test_22_331_assembly.treefile"
+    snp_align: "_test_data/xan_test_22_331_assembly.fasta"
+    ani_matrix: "_test_data/comp.csv"
+    core_phylo: "_test_data/xan_test.treefile"
+    output_dir: "_test_data/output"
+---
+
 # Diversity
 
 How do the samples compare to eachother?

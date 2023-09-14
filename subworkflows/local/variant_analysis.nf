@@ -59,7 +59,8 @@ workflow VARIANT_ANALYSIS {
     bwa_index    = REFERENCE_INDEX.out.bwa_index 
     phylogeny    = IQTREE2_SNP.out.phylogeny                                        
                        .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, tree ]
-
+    snp_align    = VCF_TO_SNPALN.out.fasta
+                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
     versions = ch_versions                           // channel: [ versions.yml ]
 
 }

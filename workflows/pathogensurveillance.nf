@@ -154,9 +154,10 @@ workflow PATHOGENSURVEILLANCE {
 
     // Create main summary report
     report_in = VARIANT_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
-        .groupTuple() // [ group_meta, [ref_meta], [tree] ]
-        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
+        .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // [ group_meta, ref_meta, tree, snp_align ]
+        .groupTuple() // [ group_meta, [ref_meta], [tree], [snp_align] ]
+        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], [snp_align], ani_matrix ]
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], [snp_align], ani_matrix, core_tree ]
 
     MAIN_REPORT_2 ( 
         report_in,
