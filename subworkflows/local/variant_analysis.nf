@@ -14,6 +14,10 @@ workflow VARIANT_ANALYSIS {
     main:
     ch_versions = Channel.empty()
 
+    ch_ref = input
+        .map { it[2..3] }
+        .groupTuple()
+        .map { [it[0], it[1].sort()[0]] }
     REFERENCE_INDEX ( input.map { it[2..3] }.unique() )
     ch_versions = ch_versions.mix(REFERENCE_INDEX.out.versions) 
 

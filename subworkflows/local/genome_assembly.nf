@@ -36,7 +36,7 @@ workflow GENOME_ASSEMBLY {
     ch_ref_grouped = ch_input_filtered
         .combine(FILTER_ASSEMBLY.out.filtered, by: 0)
         .groupTuple(by: 2) // [val(meta)], [[fastq_1, fastq_2]], val(ref_meta), [file(reference)], [val(group_meta)], [val(kingdom)], [file(assembly)]
-        .map { [it[2], it[6], it[3].sort()[0], []] } // ref_meta, assembly, reference
+        .map { [it[2], it[6].sort(), it[3].sort()[0], []] } // ref_meta, assembly, reference
     QUAST (
         ch_ref_grouped,
         true, // use_fasta
