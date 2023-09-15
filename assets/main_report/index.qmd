@@ -16,7 +16,7 @@ This report is produced using the nf-core Pathogen Surveillance **version {{< va
 |-----|-----|
 | **Date**            | `r format(Sys.time(), '%B %d , %Y')` |
 | **Submitter(s):**   | xxx |
-| **# samples:**      | xxx |
+| **Samples:**      | xxx |
 
 ## Run info
 
