@@ -6,11 +6,23 @@ params:
     snp_align: "_test_data/xan_test_22_331_assembly.fasta"
     ani_matrix: "_test_data/comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
+execute:
+  echo: false
 ---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| context: server
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
 
 # Summary {.unnumbered}
 
-This report is produced using the nf-core Pathogen Surveillance **version {{< var version >}}** pipeline.
+Here is your report produced by the `nf-core` `Pathogen Surveillance` pipeline **version {{< var version >}}**.
 
 | <!-- --> | <!-- --> | 
 |-----|-----|
@@ -30,7 +42,6 @@ What should go here?
 Could copy the info that nextflow tower shows.
 
 ```{r}
-library(readr)
 data <- read_csv('_test_data/metadata_medium.csv')
 DT::datatable(data)
 ```
