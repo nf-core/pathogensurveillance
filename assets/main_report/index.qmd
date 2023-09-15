@@ -10,11 +10,11 @@ params:
 
 # Summary {.unnumbered}
 
-This report is produced by Pathogen Surveillance **version {{< var version >}}**.
+This report is produced using the nf-core Pathogen Surveillance **version {{< var version >}}** pipeline.
 
-|  | |
+| | | 
 |-----|-----|
-| **Date**            | `{r} I('**bold**')` |
+| **Date**            | `r Sys.Date()` |
 | **Submitter(s):**   | xxx |
 | **# samples:**      | xxx |
 
