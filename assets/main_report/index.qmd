@@ -12,8 +12,6 @@ params:
 
 This report is produced using the nf-core Pathogen Surveillance **version {{< var version >}}** pipeline.
 
-{{<date>}}
-
 | | | 
 |-----|-----|
 | **Date**            | `r format(Sys.time(), '%B %d , %Y')` |
