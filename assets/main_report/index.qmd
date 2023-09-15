@@ -8,9 +8,9 @@ params:
     core_phylo: "_test_data/xan_test.treefile"
 ---
 
-# Preface {.unnumbered}
+# Report summary {.unnumbered}
 
-This is a Quarto book.
+This is a new report.
 
 To learn more about Quarto books visit <https://quarto.org/docs/books>.
 
