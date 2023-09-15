@@ -6,7 +6,6 @@ params:
     snp_align: "_test_data/xan_test_22_331_assembly.fasta"
     ani_matrix: "_test_data/comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
-    output_dir: "_test_data/output"
 ---
 
 # Preface {.unnumbered}
@@ -21,6 +20,16 @@ This is the first page a user sees.
 What should go here?
 
 * status of pipeline execution
+* table of run metadata (run_id, submitter, time)
+* sample metadata ( sample ids, type of sequencing, input metadata)
+
+Could copy the info that nextflow tower shows.
+
+```{r}
+library(readr)
+data <- read_csv('_test_data/metadata_medium.csv')
+DT::datatable(data)
+```
 
 ## Input settings
 

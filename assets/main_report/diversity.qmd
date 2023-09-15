@@ -13,20 +13,6 @@ params:
 
 How do the samples compare to eachother?
 
-
-```{r include=FALSE, eval=FALSE}
-work_dir = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/60/71f547293aa5d22f469ea3ee215581"
-params = list(
-  samp_data = "metadata_medium.csv",
-  ref_data = "merged_assembly_stats.tsv",
-  snp_phylos = list("xan_test_22_331_assembly.treefile"),
-  ani_matrix = "comp.csv",
-  core_phylo = "xan_test.treefile"
-)
-params = lapply(params, function(x) file.path(work_dir, x))
-```
-
-
 ```{r div_setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```

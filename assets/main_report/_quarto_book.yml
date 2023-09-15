@@ -1,0 +1,21 @@
+project:
+  type: book
+
+book:
+  title: "Pathogensurveillance Report"
+  chapters:
+    - index.qmd
+    - identification.qmd
+    - diversity.qmd
+    - gene_content.qmd
+    - map.qmd
+    - quality_control.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
