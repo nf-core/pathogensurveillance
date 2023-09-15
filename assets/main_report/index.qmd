@@ -8,11 +8,15 @@ params:
     core_phylo: "_test_data/xan_test.treefile"
 ---
 
-# Report summary {.unnumbered}
+# Summary {.unnumbered}
 
-This is a new report.
+This report is produced by Pathogen Surveillance **version {{< var version >}}**.
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+|  | |
+|-----|-----|
+| **Date**            | `{r} I('**bold**')` |
+| **Submitter(s):**   | xxx |
+| **# samples:**      | xxx |
 
 # Run info
 
