@@ -12,13 +12,15 @@ params:
 
 This report is produced using the nf-core Pathogen Surveillance **version {{< var version >}}** pipeline.
 
+{{<date>}}
+
 | | | 
 |-----|-----|
-| **Date**            | `r Sys.Date()` |
+| **Date**            | `r format(Sys.time(), '%B %d , %Y')` |
 | **Submitter(s):**   | xxx |
 | **# samples:**      | xxx |
 
-# Run info
+## Run info
 
 This is the first page a user sees.
 What should go here?
