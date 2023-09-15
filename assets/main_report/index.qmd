@@ -11,7 +11,7 @@ params:
 
 # Preface {.unnumbered}
 
-This is a Quarto book.
+This is a new report.
 
 To learn more about Quarto books visit <https://quarto.org/docs/books>.
 
