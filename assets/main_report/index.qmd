@@ -9,7 +9,7 @@ params:
     output_dir: "_test_data/output"
 ---
 
-# Preface {.unnumbered}
+# Report summary {.unnumbered}
 
 This is a new report.
 
