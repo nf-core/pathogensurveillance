@@ -10,6 +10,7 @@ execute:
   echo: false
 ---
 
+<!--# preloading libraries in one place at the top avoids mutliple reloads.-->
 ```{r}
 #| echo: false
 #| warning: false
@@ -22,7 +23,7 @@ library(readr)
 
 # Summary {.unnumbered}
 
-Here is your report produced by the `nf-core` `Pathogen Surveillance` pipeline **version {{< var version >}}**.
+This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** version **{{< var version >}}**.
 
 | <!-- --> | <!-- --> | 
 |-----|-----|
@@ -49,3 +50,10 @@ DT::datatable(data)
 ## Input settings
 
 ## Things that require user attention
+
+## About
+
+The **`nf-core` `Pathogen Surveillance` pipeline** was developped by ..
+
+> Please cite this pipeline in publications as follows: ...
+
