@@ -29,7 +29,9 @@ This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** ve
 |-----|-----|
 | **Date**            | `r format(Sys.time(), '%B %d , %Y')` |
 | **Submitter(s):**   | xxx |
-| **Samples:**      | xxx |
+| **Samples:**      | `r nrow(read_csv('_test_data/metadata_medium.csv'))` |
+
+
 
 ## Run info
 
