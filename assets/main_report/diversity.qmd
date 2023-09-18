@@ -11,7 +11,7 @@ params:
 
 # Diversity
 
-How do the samples compare to eachother?
+How do the samples compare to each other?
 
 ```{r div_setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
