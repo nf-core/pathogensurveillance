@@ -10,7 +10,7 @@ execute:
   echo: false
 ---
 
-<!--# preloading libraries in one place at the top avoids mutliple reloads.-->
+<!--# preloading libraries in one place at the top avoids mutliple reloads and metadata.-->
 ```{r}
 #| echo: false
 #| warning: false
@@ -19,6 +19,7 @@ execute:
 library(dplyr)
 library(ggplot2)
 library(readr)
+metadata <-read_csv('_test_data/metadata_medium.csv')
 ```
 
 # Summary {.unnumbered}
@@ -28,10 +29,8 @@ This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** ve
 | <!-- --> | <!-- --> | 
 |-----|-----|
 | **Date**            | `r format(Sys.time(), '%B %d , %Y')` |
-| **Submitter(s):**   | xxx |
-| **Samples:**      | `r nrow(read_csv('_test_data/metadata_medium.csv'))` |
-
-
+| **Submitter(s):**   | `r unique(metadata$report_group)` |
+| **Samples:**      | `r nrow(metadata)` |
 
 ## Run info
 
@@ -45,8 +44,7 @@ What should go here?
 Could copy the info that nextflow tower shows.
 
 ```{r}
-data <- read_csv('_test_data/metadata_medium.csv')
-DT::datatable(data)
+DT::datatable(metadata)
 ```
 
 ## Input settings
