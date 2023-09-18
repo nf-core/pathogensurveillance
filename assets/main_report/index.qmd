@@ -19,6 +19,7 @@ execute:
 library(dplyr)
 library(ggplot2)
 library(readr)
+library(knitr)
 metadata <-read_csv(params$meta_data)
 ```
 
@@ -30,7 +31,7 @@ This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** ve
 |-----|-----|
 | **Date**            | TBD |
 | **Last updated**    | `r format(Sys.time(), '%B %d , %Y')` |
-| **Submitter(s):**   | `r unique(metadata$report_group)` |
+| **Submitter(s):**   | `r knitr::combine_words(unique(metadata$report_group))` |
 | **Samples:**        | `r nrow(metadata)` |
 
 ## Run info
