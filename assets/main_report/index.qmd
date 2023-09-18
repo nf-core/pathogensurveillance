@@ -10,7 +10,7 @@ execute:
   echo: false
 ---
 
-<!--# preloading libraries in one place at the top avoids mutliple reloads and metadata.-->
+<!--# pre-loading libraries in one place at the top avoids multiple reloads and metadata. Not sure if this can be done better elsewhere. -->
 ```{r}
 #| echo: false
 #| warning: false
@@ -31,7 +31,7 @@ This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** ve
 |-----|-----|
 | **Date**            | TBD |
 | **Last updated**    | `r format(Sys.time(), '%B %d , %Y')` |
-| **Submitter(s):**   | `r knitr::combine_words(unique(metadata$report_group))` |
+| **Submitter(s):**   | `r combine_words(unique(metadata$report_group))` |
 | **Samples:**        | `r nrow(metadata)` |
 
 ## Run info
