@@ -6,7 +6,7 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Summary
+        text: Report
       - href: identification.qmd
         text: Identity
       - href: diversity.qmd

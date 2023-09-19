@@ -8,6 +8,7 @@ params:
     core_phylo: "_test_data/xan_test.treefile"
 execute:
   echo: false
+bibliography: references.bib
 ---
 
 <!--# pre-loading libraries in one place at the top avoids multiple reloads and metadata. Not sure if this can be done better elsewhere. -->
@@ -23,7 +24,7 @@ library(knitr)
 metadata <-read_csv(params$meta_data)
 ```
 
-# Summary {.unnumbered}
+# Report {.unnumbered}
 
 This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** version **{{< var version >}}**.
 
@@ -53,9 +54,16 @@ DT::datatable(metadata)
 
 ## Things that require user attention
 
+## Methods used
+
+The `pathogen surveillance` pipeline is implementned as follows using the following tools you should reference as appropriate:
+
+  - A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
+  - The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
+
 ## About
 
-The **`nf-core` `Pathogen Surveillance` pipeline** was developed by:
+The **`pathogen surveillance` pipeline** was developed by:
 
   - Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
   - Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
@@ -63,5 +71,5 @@ The **`nf-core` `Pathogen Surveillance` pipeline** was developed by:
 > To contribute or report bug please see our [github repository]( https://github.com/nf-core/pathogensurveillance). 
   
 
-> Please cite this pipeline in publications as follows: ...
+Please cite this pipeline in publications as follows: ...
 
