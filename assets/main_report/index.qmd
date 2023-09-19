@@ -1,20 +1,40 @@
 --- 
 params:
-    samp_data: "_test_data/metadata_medium.csv"
+    meta_data: "_test_data/metadata_medium.csv"
     ref_data: "_test_data/merged_assembly_stats.tsv"
     snp_phylos: "_test_data/xan_test_22_331_assembly.treefile"
     snp_align: "_test_data/xan_test_22_331_assembly.fasta"
     ani_matrix: "_test_data/comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
+execute:
+  echo: false
 ---
 
-# Report summary {.unnumbered}
+<!--# pre-loading libraries in one place at the top avoids multiple reloads and metadata. Not sure if this can be done better elsewhere. -->
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| context: server
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(knitr)
+metadata <-read_csv(params$meta_data)
+```
 
-This is a new report.
+# Summary {.unnumbered}
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** version **{{< var version >}}**.
 
-# Run info
+| <!-- --> | <!-- --> | 
+|-----|-----|
+| **Date**            | TBD |
+| **Last updated**    | `r format(Sys.time(), '%B %d , %Y')` |
+| **Submitter(s):**   | `r combine_words(unique(metadata$report_group))` |
+| **Samples:**        | `r nrow(metadata)` |
+
+## Run info
 
 This is the first page a user sees.
 What should go here?
@@ -26,11 +46,22 @@ What should go here?
 Could copy the info that nextflow tower shows.
 
 ```{r}
-library(readr)
-data <- read_csv('_test_data/metadata_medium.csv')
-DT::datatable(data)
+DT::datatable(metadata)
 ```
 
 ## Input settings
 
 ## Things that require user attention
+
+## About
+
+The **`nf-core` `Pathogen Surveillance` pipeline** was developed by:
+
+  - Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+  - Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
+  
+> To contribute or report bug please see our [github repository]( https://github.com/nf-core/pathogensurveillance). 
+  
+
+> Please cite this pipeline in publications as follows: ...
+

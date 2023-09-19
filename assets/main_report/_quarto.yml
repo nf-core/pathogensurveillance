@@ -6,7 +6,7 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Home
+        text: Summary
       - href: identification.qmd
         text: Identity
       - href: diversity.qmd
@@ -18,9 +18,18 @@ website:
       - href: quality_control.qmd
         text: Quality Control
       - references.qmd
+    tools:
+      - icon: twitter
+        href: https://twitter.com/phytophthoralab
+        text: PhytophthoraLab
+      - icon: github
+        href: https://github.com/nf-core/pathogensurveillance
+        text: Nf-core PathogenSurveillance GitHub
 
 format:
   html:
     theme: sandstone
     css: styles.css
     toc: true
+    
+bibliography: references.bib
