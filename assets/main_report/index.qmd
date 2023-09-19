@@ -57,7 +57,7 @@ DT::datatable(metadata)
 
 The **`nf-core` `Pathogen Surveillance` pipeline** was developed by:
 
-  - Zach Foster, Martha Sudermann, Camilo Parada-Rojas, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/)
+  - Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
   - Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
   
 > To contribute or report bug please see our [github repository]( https://github.com/nf-core/pathogensurveillance). 
