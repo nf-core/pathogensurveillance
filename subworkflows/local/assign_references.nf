@@ -3,7 +3,7 @@ include { ASSIGN_GROUP_REFERENCES                     } from '../../modules/loca
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_READS    } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_GENOME   } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_COMPARE                            } from '../../modules/local/sourmash_compare'
-include { SEQTK_SAMPLE                                } from '../../modules/nf-core/seqtk/sample/main'
+include { SUBSET_READS                                } from '../../modules/local/subset_reads'
 
 workflow ASSIGN_REFERENCES {
 
@@ -18,17 +18,17 @@ workflow ASSIGN_REFERENCES {
     ch_versions = Channel.empty()
 
     // Subset sample reads to increase speed of following steps
-    SEQTK_SAMPLE (
+    SUBSET_READS (
         sample_data                                                             
             .map { it[0..1] } // [val(meta), [file(fastq)]], possibly duplicated
             .combine(depth, by:0) // [val(meta), [file(fastq)], depth], possibly duplicated
-            .map { it[0..1] + [ Float.parseFloat(it[2]) > 2 ? 2 / Float.parseFloat(it[2]) : 1 ] }
-            .unique() // [val(meta), [file(fastq)]], one per sample
-    )
+            .unique(), // [val(meta), [file(fastq)], depth], one per sample                                                           
+        params.sketch_max_depth                                                
+    )                                                                           
 
     // Trim rare k-mers from raw reads
     KHMER_TRIMLOWABUND (
-        SEQTK_SAMPLE.out.reads
+        SUBSET_READS.out.reads
     )
     ch_versions = ch_versions.mix(KHMER_TRIMLOWABUND.out.versions)
 

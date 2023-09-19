@@ -8,8 +8,8 @@ process SUBSET_READS {
         'biocontainers/seqkit:2.2.0--h9ee0642_0' }"
 
     input:
-    tuple val(meta), val(fastqs), path(ref)
-    val depth
+    tuple val(meta), val(fastqs), val(depth)
+    val max_depth
 
     output:
     tuple val(meta), path("*_subset.fastq.gz"), emit: reads
@@ -22,18 +22,9 @@ process SUBSET_READS {
     prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     """
-    REF_WC=\$(zgrep -v '^>' ${ref} | wc -m)
     READ_COUNT=\$(zgrep -c '@' ${fastqs[0]})
-    READ_LEN=\$(zgrep -m 1 '^[^@+#]' ${fastqs[0]} | wc -m)
-    DEPTH=\$((\$READ_COUNT * \$READ_LEN / \$REF_WC))
-    SUBSET_COUNT=\$((\$READ_COUNT * ${depth} / \$DEPTH))
+    SUBSET_COUNT=\$(echo "\$READ_COUNT * ${max_depth} / ${depth}" | bc)
     
-    echo "REF_WC: \${REF_WC}"
-    echo "READ_COUNT: \${READ_COUNT}"
-    echo "READ_LEN: \${READ_LEN}"
-    echo "DEPTH: \${DEPTH}"
-    echo "SUBSET_COUNT: \${SUBSET_COUNT}"
-
     if [ \$SUBSET_COUNT -gt \$READ_COUNT ]; then
         for f in ${fastqs.join(' ')}                                      
         do                                                                      

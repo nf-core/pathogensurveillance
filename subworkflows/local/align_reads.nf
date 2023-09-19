@@ -4,6 +4,7 @@ include { PICARD_SORTSAM as PICARD_SORTSAM_1 } from '../../modules/nf-core/picar
 include { PICARD_SORTSAM as PICARD_SORTSAM_2 } from '../../modules/nf-core/picard/sortsam/main'
 include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_INDEX                     } from '../../modules/nf-core/samtools/index/main'
+include { CALCULATE_DEPTH                    } from '../../modules/local/calculate_depth'
 include { SUBSET_READS                       } from '../../modules/local/subset_reads'
 
 workflow ALIGN_READS {
@@ -19,7 +20,11 @@ workflow ALIGN_READS {
         .map { [[id: "${it[2].id}_${it[0].id}", ref: it[2], sample: it[0]]] + it } // make composite ID for read/ref combos
 
     ch_reads_and_ref = samp_ref_combo1.map { [it[0], it[2], it[4]] }
-    SUBSET_READS ( ch_reads_and_ref, 15 )
+    CALCULATE_DEPTH ( ch_reads_and_ref )
+    SUBSET_READS ( 
+        ch_reads_and_ref.join(CALCULATE_DEPTH.out.depth), 
+        params.variant_max_depth
+    )
 
     samp_ref_combo2 = samp_ref_combo1
         .combine(SUBSET_READS.out.reads, by:0) // ref_samp_meta, meta, [reads], ref_meta, reference, reference_index, bam_index, [reads_subset]
