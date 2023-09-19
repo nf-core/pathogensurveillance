@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Pathogensurveillance Report"
+  title: "Pathogen Surveillance Report"
   navbar:
     left:
       - href: index.qmd
