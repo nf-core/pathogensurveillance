@@ -2,11 +2,11 @@ project:
   type: website
 
 website:
-  title: "Pathogensurveillance Report"
+  title: "Pathogen Surveillance Report"
   navbar:
     left:
       - href: index.qmd
-        text: Summary
+        text: Report
       - href: identification.qmd
         text: Identity
       - href: diversity.qmd
