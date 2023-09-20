@@ -1,4 +1,4 @@
---- 
+---
 params:
     samp_data: "_test_data/metadata_medium.csv"
     ref_data: "_test_data/merged_assembly_stats.tsv"
@@ -11,9 +11,6 @@ params:
 
 # Diversity
 
-How do the samples compare to each other?
-Martha-just testing that I am pushing to write branch
-
 ```{r div_setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```
@@ -21,7 +18,23 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```{r div_libraries}
 library(phylocanvas)
 library(ape)
+library(tidyverse)
+library(palmerpenguins)
+library(ade4)
+library(adegenet)
+library(poppr)
+library(ggtree)
+library(igraph)
+library(visNetwork)
+library(phangorn)
+library(ggplot2)
+library(ggnewscale)
 ```
+
+### *Things to address:*
+
+1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
+2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
 
 ```{r div_parse_inputs}
 ref_meta <- read.csv(params$ref_data, sep = '\t')
@@ -31,16 +44,40 @@ samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacemen
 ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
 core_tree <- ape::read.tree(params$core_phylo)
 snp_trees <- ape::read.tree(params$snp_phylos)
+#Rename sample names so they don't have prefixes-may be better way
 ```
 
 ## SNP phylogeny
 
-```{r div_snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
-# Root tree 
-snp_trees <- root(snp_trees, "REF")
+```{r div_snp_tree_config}
+#Rename tree tip labels
+
+oldtips<-snp_trees$tip.label
+newtips <- gsub(".*_assembly_", "", oldtips)
+snp_trees$tip.label<-newtips
+
+#Load metadata-relevant if we want to color tips
+
+# Root tree
+#option1
+snp_trees_rootref <- root(snp_trees, "REF")
+#option2
+snp_trees_midpoint<-midpoint(snp_trees)
+```
+
+### ggtree option (starting point)
+
+```{r ggtree starting point, fig.height = 7, eval = ! is.null(snp_trees)}
+
+```
+
+### Phylocanvas version
 
 # Plot tree
-phycanv <- phylocanvas(snp_trees, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+
+```{r div_snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
+phycanv <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+
 phycanv
 ```
 
@@ -49,6 +86,10 @@ There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
-
 ## Minimum spanning network
 
+### *Questions to address*
+
+1.  Important dicsussion point-for running poppr, will user decide on SNP threshold? This differs depending on dataset. Can we use something like poppr *cutoff_predictor* function?
+
+*Martha is actively working on this*
