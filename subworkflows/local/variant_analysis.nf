@@ -61,6 +61,8 @@ workflow VARIANT_ANALYSIS {
                        .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, tree ]
     snp_align    = VCF_TO_SNPALN.out.fasta
                        .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
+    vcf          = CALL_VARIANTS.out.vcf                                      
+                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
     versions = ch_versions                           // channel: [ versions.yml ]
 
 }

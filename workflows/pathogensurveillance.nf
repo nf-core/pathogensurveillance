@@ -154,19 +154,6 @@ workflow PATHOGENSURVEILLANCE {
     //READ2TREE_ANALYSIS (
     //)
 
-    // Create main summary report
-    report_in = VARIANT_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
-        .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // [ group_meta, ref_meta, tree, snp_align ]
-        .groupTuple() // [ group_meta, [ref_meta], [tree], [snp_align] ]
-        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], [snp_align], ani_matrix ]
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], [snp_align], ani_matrix, core_tree ]
-
-    MAIN_REPORT_2 ( 
-        report_in,
-        ch_input,
-        DOWNLOAD_REFERENCES.out.stats
-    )  
-    
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
         ch_versions.unique().collect(sort:true)
@@ -195,6 +182,30 @@ workflow PATHOGENSURVEILLANCE {
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 
+    // Create main summary report                                               
+    grouped_sendsketch = INPUT_CHECK.out.sample_data // meta, fastq, ref_meta, reference, group_meta
+        .join(COARSE_SAMPLE_TAXONOMY.out.hits) // meta, fastq, ref_meta, reference, group_meta, sendsketch
+        .map { it[4..5] } // group_meta, sendsketch                             
+        .groupTuple() // group_meta, [sendsketch]
+    report_in = VARIANT_ANALYSIS.out.phylogeny // group_meta, ref_meta, tree    
+        .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // group_meta, ref_meta, tree, snp_align
+        .combine(VARIANT_ANALYSIS.out.vcf, by:0..1) // group_meta, ref_meta, tree, snp_align, vcf
+        .combine(GENOME_ASSEMBLY.out.quast.map { [it[1], it[0]] }, by: 1) // ref_meta, group_meta, tree, snp_align, vcf, quast
+        .map { [it[1], it[0]] + it[2..5]}
+        .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
+        .join(ASSIGN_REFERENCES.out.ani_matrix) // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast] ani_matrix
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
+        .join(grouped_sendsketch) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree, [sendsketch]
+                                                                     
+    MAIN_REPORT_2 (                                                             
+        report_in,                                                              
+        ch_input,                                                               
+        DOWNLOAD_REFERENCES.out.stats,                                          
+        MULTIQC.out.data,                                                       
+        MULTIQC.out.plots,                                                      
+        MULTIQC.out.report,
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
+    )                                                                           
 
 }
 
