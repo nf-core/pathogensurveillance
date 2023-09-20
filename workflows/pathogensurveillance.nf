@@ -130,7 +130,8 @@ workflow PATHOGENSURVEILLANCE {
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (                                                           
         ASSIGN_REFERENCES.out.sample_data                           
-            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)                                                   
+            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
+            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)                                                   
     )                                                                           
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
 
@@ -142,7 +143,8 @@ workflow PATHOGENSURVEILLANCE {
     gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
         .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-        .map { [it[0], it[5], it[4], it[6]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)] ]            
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
+        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]            
     CORE_GENOME_PHYLOGENY (                                                     
         gff_and_group,                             
         ch_input                                                          

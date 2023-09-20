@@ -22,7 +22,9 @@ workflow ALIGN_READS {
     ch_reads_and_ref = samp_ref_combo1.map { [it[0], it[2], it[4]] }
     CALCULATE_DEPTH ( ch_reads_and_ref )
     SUBSET_READS ( 
-        ch_reads_and_ref.join(CALCULATE_DEPTH.out.depth), 
+        ch_reads_and_ref
+            .map { it[0..1] }
+            .combine(CALCULATE_DEPTH.out.depth, by:0), 
         params.variant_max_depth
     )
 

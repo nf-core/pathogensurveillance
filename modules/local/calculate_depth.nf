@@ -11,7 +11,7 @@ process CALCULATE_DEPTH {
     tuple val(meta), val(fastqs), path(ref)                                     
                                                                                 
     output:                                                                     
-    tuple val(meta), val(DEPTH), emit: depth                     
+    tuple val(meta), env(DEPTH), emit: depth                     
                                                                                 
     when:                                                                       
     task.ext.when == null || task.ext.when                                      
