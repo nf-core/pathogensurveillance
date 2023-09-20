@@ -8,7 +8,6 @@ params:
     core_phylo: "_test_data/xan_test.treefile"
 execute:
   echo: false
-bibliography: references.bib
 ---
 
 <!--# pre-loading libraries in one place at the top avoids multiple reloads and metadata. Not sure if this can be done better elsewhere. -->
