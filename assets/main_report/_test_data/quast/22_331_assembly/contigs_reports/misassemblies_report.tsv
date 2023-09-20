@@ -1,0 +1,21 @@
+Assembly	22-330_filtered	22-300_filtered	22-324_filtered	22-329A_filtered	22-301_filtered	22-329B_filtered	22-299_filtered	SRR17286018_filtered
+# misassemblies	6	6	23	10	9	8	4	28
+  # contig misassemblies	6	6	23	10	9	8	4	28
+    # c. relocations	0	0	2	0	0	0	0	2
+    # c. translocations	6	6	21	10	9	8	4	26
+    # c. inversions	0	0	0	0	0	0	0	0
+  # scaffold misassemblies	0	0	0	0	0	0	0	0
+    # s. relocations	0	0	0	0	0	0	0	0
+    # s. translocations	0	0	0	0	0	0	0	0
+    # s. inversions	0	0	0	0	0	0	0	0
+# misassembled contigs	5	5	17	8	9	7	3	19
+Misassembled contigs length	162792	310243	883342	248993	636397	130611	412173	1060228
+# local misassemblies	1	1	2	0	1	2	0	3
+# scaffold gap ext. mis.	0	0	0	0	0	0	0	0
+# scaffold gap loc. mis.	0	0	0	0	0	0	0	2
+# unaligned mis. contigs	0	0	2	0	0	0	1	0
+# mismatches	121	122	595	349	176	71	114	872
+# indels	24	22	77	23	49	13	51	147
+    # indels (<= 5 bp)	12	6	26	11	23	1	28	72
+    # indels (> 5 bp)	12	16	51	12	26	12	23	75
+Indels length	896	1190	1586	935	1482	770	1353	2933

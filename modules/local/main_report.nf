@@ -6,9 +6,13 @@ process MAIN_REPORT {
     container null
 
     input:
-    tuple val(group_meta), val(ref_metas), file(snp_phylos), file(snp_align), file(ani_matrix), file(core_phylo)
+    tuple val(group_meta), val(ref_metas), file(snp_phylos), file(snp_aligns), file(vcfs), file(quast_dirs), file(ani_matrix), file(core_phylo), file(sendsketchs)
     path samp_data
     path ref_data
+    path multiqc_data
+    path multiqc_plots
+    path multiqc_report
+    path versions
 
     output:
     tuple val(group_meta), path("main_report/${prefix}_report"), emit: html
@@ -20,19 +24,47 @@ process MAIN_REPORT {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
+    def ref_ids = ref_metas.collect{ it.id }.join(';')
     """
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r ${projectDir}/assets/main_report ./
     
+    # Put multiqc's output into a single folder for organization
+    mkdir multiqc
+    cp -r ${multiqc_data} multiqc/
+    cp -r ${multiqc_plots} multiqc/                                              
+    cp -r ${multiqc_report} multiqc/
+    
+    # Put quast's output into a single folder for organization
+    mkdir quast
+    cp -r ${quast_dirs} quast/
+    
+    # Put sendsketch's output into a single folder for organization
+    mkdir sendsketch
+    cp -r ${sendsketchs} sendsketch/
+
+    # Put variant data into a single folder for organization
+    mkdir variant_data
+    cp -r ${snp_phylos} variant_data/
+    cp -r ${vcfs} variant_data/
+    cp -r ${snp_aligns} variant_data/
+    
+    # Render the report
     quarto render main_report \\
         --output-dir ${prefix}_report \\
+        -P group:${group_meta.id} \\
+        -P refs:${ref_ids} \\
         -P samp_data:../${samp_data} \\
         -P ref_data:../${ref_data} \\
-        -P snp_phylos:../${snp_phylos} \\
+        -P sendsketch:../sendsketch
+        -P variant_data:../variant_data \\
         -P ani_matrix:../${ani_matrix} \\
         -P core_phylo:../${core_phylo} \\
-        -P snp_align:../${snp_align}
+        -P multiqc:../multiqc \\
+        -P quast:../quast \\
+        -P versions:../versions
 
+    # Save version of quarto used
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         quarto: \$(quarto --version)

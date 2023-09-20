@@ -63,6 +63,7 @@ workflow GENOME_ASSEMBLY {
     reads     = FASTP.out.reads           // channel: [ val(meta), [ fastq_1, fastq_2 ] ]
     gff       = BAKTA_BAKTA.out.gff
     scaffolds = FILTER_ASSEMBLY.out.filtered
+    quast     = QUAST.out.results
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }

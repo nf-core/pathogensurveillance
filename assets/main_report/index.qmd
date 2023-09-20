@@ -1,11 +1,16 @@
 --- 
 params:
-    meta_data: "_test_data/metadata_medium.csv"
+    group: "xan_test"
+    refs: "22_331_assembly"
+    samp_data: "_test_data/metadata_medium.csv"
     ref_data: "_test_data/merged_assembly_stats.tsv"
-    snp_phylos: "_test_data/xan_test_22_331_assembly.treefile"
-    snp_align: "_test_data/xan_test_22_331_assembly.fasta"
+    sendsketch: "_test_data/sendsketch"
+    variant_data: "_test_data/variant_data"
     ani_matrix: "_test_data/comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
+    multiqc: "_test_data/multiqc"
+    quast: "_test_data/quast"
+    versions: "_test_data/software_versions.yml"
 execute:
   echo: false
 bibliography: references.bib
