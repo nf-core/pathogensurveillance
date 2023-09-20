@@ -56,8 +56,6 @@ oldtips<-snp_trees$tip.label
 newtips <- gsub(".*_assembly_", "", oldtips)
 snp_trees$tip.label<-newtips
 
-#Load metadata-relevant if we want to color tips
-
 # Root tree
 #option1
 snp_trees_rootref <- root(snp_trees, "REF")
@@ -68,6 +66,14 @@ snp_trees_midpoint<-midpoint(snp_trees)
 ### ggtree option (starting point)
 
 ```{r ggtree starting point, fig.height = 7, eval = ! is.null(snp_trees)}
+gg <- ggtree(snp_trees_midpoint) %<+% samp_meta +
+  geom_tiplab(size=2.5) +
+  geom_tippoint(aes(color = factor(`year`)),size=1.5) +
+  theme(legend.position="right") +
+  guides(color = guide_legend(override.aes = list(size=1),order=3)) +
+  geom_treescale(fontsize =2.5) 
+
+gg
 
 ```
 
