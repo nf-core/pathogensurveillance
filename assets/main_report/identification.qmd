@@ -1,4 +1,4 @@
---- 
+---
 params:
     group: "xan_test"
     refs: "22_331_assembly"
@@ -60,8 +60,6 @@ p1
 ```
 
 ## Core genome phylogeny
-
-*Martha-I am not getting any tree*
 
 ```{r id_core_phylo, fig.height = 7, eval = ! is.null(core_tree)}
 # Identify which tips are samples and references

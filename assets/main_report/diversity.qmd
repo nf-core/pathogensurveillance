@@ -51,14 +51,14 @@ library(ggnewscale)
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
 
 ```{r div_parse_inputs}
-ref_meta <- read.csv(params$ref_data, sep = '\t')
-ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
+#ref_meta <- read.csv(params$ref_data, sep = '\t')
+#ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
 samp_meta <- read.csv(params$samp_data, sep = ',')
 samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
 ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
 #core_tree <- ape::read.tree(params$core_phylo)
-snp_trees <- ape::read.tree(params$snp_phylos)
-snp_alignment<-ape::read.dna(params$snp_align, format =  "fasta")
+snp_trees <- ape::read.tree(file.path(params$variant_data, "xan_test_22_331_assembly.treefile"))
+snp_alignment<-ape::read.dna(file.path(params$variant_data, "xan_test_22_331_assembly.fasta"), format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
