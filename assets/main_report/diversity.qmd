@@ -39,12 +39,15 @@ execute:
 samp_meta <- read.csv(params$samp_data, sep = ',')
 samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
 #core_tree <- ape::read.tree(core_phylo_path)
+#not sure this is the intended way to create snp_tree path, but just added this temporarily so everything could render
+snp_tree_paths <-file.path(params$variant_data, "xan_test_22_331_assembly.treefile")
+snp_align_paths <-file.path(params$variant_data, "xan_test_22_331_assembly.fasta")
 snp_trees <- ape::read.tree(snp_tree_paths)
 snp_alignment<-ape::read.dna(snp_align_paths, format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
-## SNP phylogeny
+# SNP phylogeny
 
 ```{r div_snp_tree_config, include=FALSE}
 #Rename tree tip labels
@@ -63,7 +66,7 @@ snp_trees_midpoint<-midpoint(snp_trees)
 
 *May not be most generalizable as one has to specify how color tips-but just another tree option. Very powerful package-but trees are not interactive*
 
-```{r ggtree starting point, fig.height = 7, eval = ! is.null(snp_trees)}
+```{r ggtree starting point, eval = ! is.null(snp_trees)}
 gg <- ggtree(snp_trees_midpoint) %<+% samp_meta +
   geom_tiplab(size=2.5) +
   geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) +
@@ -75,8 +78,6 @@ gg
 
 ### Phylocanvas version
 
-# Plot tree
-
 ```{r div_snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
 phycanv <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
 phycanv
@@ -87,7 +88,7 @@ There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
-## Minimum spanning network
+# Minimum spanning network
 
 ### *Questions to address*
 
@@ -95,7 +96,7 @@ More info will be added later.
 
 *Martha is actively experimenting. So far looking into Visnetwork, but another option is networkD3?*
 
-```{r poppr_config, include=FALSE, eval=FALSE}
+```{r poppr_config}
 #Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
 snp_aln.gi <- DNAbin2genind(snp_alignment)
 snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
@@ -106,7 +107,6 @@ snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
 genind_names<-indNames(snp_aln.gi)
 cleaned_names <- gsub("22_331_assembly_", "", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
-
 
 ```
 
@@ -124,7 +124,6 @@ snp_genclone <- as.genclone(snp_aln.gi)
 mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- 6
 
 idlist<-mlg.id(snp_genclone)
-idlist
 
 mlglist<-data.frame("MLG","strain")
 colnames(mlglist) <- c("V1","V2")
@@ -141,7 +140,7 @@ mlglist
 
 ### Experimenting with less subjective ways to provide SNP cutoff
 
-Please revise as needed. I think we need a better apporach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful
+Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
 
 ```{r mlg_config_test}
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
@@ -150,7 +149,6 @@ snpdist_stats<-filter_stats(snp_genclone)
 print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
 mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
 idlist2<-mlg.id(snp_genclone)
-idlist2
 
 mlglist2<-data.frame("MLG","strain")
 colnames(mlglist2) <- c("V1","V2")
@@ -167,7 +165,7 @@ mlglist2
 
 ### Poppr MSN
 
-```{r poppr msn}
+```{r poppr msn, fig.height = 10}
 # Create a minimum spanning network with filtered data
 #Still have issues with metadata-reference seq has none-need way to include? 
 
@@ -198,7 +196,6 @@ ms.loc <- poppr.msn(snp_genclone,
 #str(ms.loc)
 the_edges <-E(ms.loc$graph)$weight
 edges<-as.list(the_edges)
-edges
 
 # Plot a pretty plot
 set.seed(8)
@@ -222,7 +219,7 @@ plot_poppr_msn(
 
 ### Visnetwork minimum spanning network
 
-*Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color with multiple colors, and colors are not correct. Need to remove sample names from nodes*
+*Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes*
 
 ```{r visnetwork}
 #node_data <- data.frame(
