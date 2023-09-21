@@ -1,10 +1,8 @@
-library(dplyr)
-library(ggplot2)
-library(readr)
-library(knitr)
-library(readr)
-library(purrr)
-library(yaml)
+# If being run manually (no params), then get default params from yaml header
+if (! exists("params")) {
+    header <- rmarkdown::yaml_front_matter('index.qmd')
+    params <- as.list(header$params)
+}
 
 # Parse metadata
 group <- params$group
@@ -21,9 +19,9 @@ sketch_data <- map_dfr(list.files(params$sendsketch), function(path) {
 })
 
 # Parse variant data
-snp_tree_paths <- list.files(params$variant_data, pattern = "\\.treefile$")
-vcf_paths <- list.files(params$variant_data, pattern = "\\.vcf\\.gz$")
-snp_align_paths <- list.files(params$variant_data, pattern = "\\.fasta$")
+snp_tree_paths <- list.files(params$variant_data, pattern = "\\.treefile$", full.names = TRUE)
+vcf_paths <- list.files(params$variant_data, pattern = "\\.vcf\\.gz$", full.names = TRUE)
+snp_align_paths <- list.files(params$variant_data, pattern = "\\.fasta$", full.names = TRUE)
 
 # Parse ANI matrix
 ani_matrix <- read.csv(params$ani_matrix, check.names = FALSE)

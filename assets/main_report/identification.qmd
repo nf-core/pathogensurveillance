@@ -15,6 +15,11 @@ execute:
   echo: false
 ---
 
+# Identification
+
+```{r knitr_settings, file='knitr_settings.R'}
+```
+
 ```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
 # When running manually for development: source('load_libraries.R')
 ```
@@ -23,30 +28,15 @@ execute:
 # When running manually for development: source('parse_inputs.R')
 ```
 
-# Identification
-
-```{r id_setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
-```
-
-```{r id_libraries}
-library(phylocanvas)
-library(ape)
-library(magrittr)
-library(pheatmap)
-```
-
-```{r id_parse_inputs}
-ref_data$modified_id <- gsub(ref_data$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
-samp_data$modified_id <- paste0(gsub(samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
-ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
-core_tree <- ape::read.tree(params$core_phylo)
-snp_trees <- ape::read.tree(params$snp_phylos)
-```
 
 ## Sendsketch
 
 A table with sendsketch results
+
+```{r}
+sketch_data
+```
+
 
 ### Initial ANI heatmap and dendrogram
 
@@ -54,7 +44,6 @@ A table with sendsketch results
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 library(pheatmap)
-row.names(ani_matrix) <- colnames(ani_matrix)
 p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
@@ -63,15 +52,21 @@ p1
 
 *Martha-I am not getting any tree*
 
-```{r id_core_phylo, fig.height = 7, eval = ! is.null(core_tree)}
+```{r id_core_phylo, fig.height = 7}
+convert_id <- function(ids) {
+    gsub(ids, pattern = "[.-]", replacement = "_")
+}
+
+core_tree <- ape::read.tree(core_phylo_path)
+
 # Identify which tips are samples and references
-sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
+sample_ids <- core_tree$tip.label[core_tree$tip.label %in% convert_id(samp_data$sample)]
 
 # Root tree 
-colnames(ani_matrix) <- gsub(colnames(ani_matrix), pattern = "[.-]", replacement = "_")
+colnames(ani_matrix) <- convert_id(colnames(ani_matrix))
 rownames(ani_matrix) <- colnames(ani_matrix)
 group_ani <- ani_matrix[rownames(ani_matrix) %in% core_tree$tip.label, colnames(ani_matrix) %in% core_tree$tip.label]
-#core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
 
 # Set tip labels to taxon names for reference sequences
 # TODO: need a more reliable way to get IDs
@@ -80,8 +75,8 @@ name_key <- c(
   samp_data$sample
 )
 names(name_key) <- c(
-  ref_data$modified_id,
-  samp_data$modified_id
+  convert_id(ref_data$LastMajorReleaseAccession),
+  convert_id(samp_data$sample)
 )
 core_tree$tip.label <- name_key[core_tree$tip.label]
 
@@ -94,7 +89,3 @@ for (x in name_key[sample_ids]) {
 phycanv
 ```
 
-```{asis id_no_core_phylo, echo = is.null(core_tree)}
-There is no tree to draw, probably because there were too few samples.
-More info will be added later.
-```

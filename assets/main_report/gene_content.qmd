@@ -15,6 +15,11 @@ execute:
   echo: false
 ---
 
+# Gene content
+
+```{r knitr_settings, file='knitr_settings.R'}
+```
+
 ```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
 # When running manually for development: source('load_libraries.R')
 ```
@@ -22,8 +27,6 @@ execute:
 ```{r parse_inputs, file='parse_inputs.R'}
 # When running manually for development: source('parse_inputs.R')
 ```
-
-# Gene content
 
 
 ## Antibotic resistance genes

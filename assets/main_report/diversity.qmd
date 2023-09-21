@@ -15,6 +15,11 @@ execute:
   echo: false
 ---
 
+# Diversity
+
+```{r knitr_settings, file='knitr_settings.R'}
+```
+
 ```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
 # When running manually for development: source('load_libraries.R')
 ```
@@ -23,27 +28,6 @@ execute:
 # When running manually for development: source('parse_inputs.R')
 ```
 
-# Diversity
-
-```{r div_setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
-```
-
-```{r div_libraries, include=FALSE}
-library(phylocanvas)
-library(ape)
-library(tidyverse)
-library(palmerpenguins)
-library(ade4)
-library(adegenet)
-library(poppr)
-library(ggtree)
-library(igraph)
-library(visNetwork)
-library(phangorn)
-library(ggplot2)
-library(ggnewscale)
-```
 
 ### *Things to address:*
 
@@ -51,13 +35,11 @@ library(ggnewscale)
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
 
 ```{r div_parse_inputs}
-ref_meta <- read.csv(params$ref_data, sep = '\t')
-ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
-samp_meta <- read.csv(params$samp_data, sep = ',')
-samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
+ref_data$modified_id <- gsub(ref_data$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
+samp_data$modified_id <- paste0(gsub(samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
 #ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
-#core_tree <- ape::read.tree(params$core_phylo)
-snp_trees <- ape::read.tree(params$snp_phylos)
+#core_tree <- ape::read.tree(core_phylo_path)
+snp_trees <- ape::read.tree(snp_tree_paths)
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
@@ -82,7 +64,7 @@ snp_trees_midpoint<-midpoint(snp_trees)
 *May not be most generalizable as one has to specify how color tips-but just another tree option. Very powerful package-but trees are not interactive*
 
 ```{r ggtree starting point, fig.height = 7, eval = ! is.null(snp_trees)}
-gg <- ggtree(snp_trees_midpoint) %<+% samp_meta +
+gg <- ggtree(snp_trees_midpoint) %<+% samp_data +
   geom_tiplab(size=2.5) +
   geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) +
   theme(legend.position="left") +
@@ -113,7 +95,7 @@ More info will be added later.
 
 *Martha is actively working on this. So far looking into Visnetwork, but another option is networkD3?*
 
-```{r poppr_config, include=FALSE}
+```{r poppr_config, include=FALSE, eval=FALSE}
 #Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
 snp_aln.gi <- DNAbin2genind(snp_aln)
 snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]

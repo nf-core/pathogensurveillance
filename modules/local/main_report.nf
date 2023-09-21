@@ -56,13 +56,13 @@ process MAIN_REPORT {
         -P refs:${ref_ids} \\
         -P samp_data:../${samp_data} \\
         -P ref_data:../${ref_data} \\
-        -P sendsketch:../sendsketch
+        -P sendsketch:../sendsketch \\
         -P variant_data:../variant_data \\
         -P ani_matrix:../${ani_matrix} \\
         -P core_phylo:../${core_phylo} \\
         -P multiqc:../multiqc \\
         -P quast:../quast \\
-        -P versions:../versions
+        -P versions:../${versions}
 
     # Save version of quarto used
     cat <<-END_VERSIONS > versions.yml

@@ -190,12 +190,13 @@ workflow PATHOGENSURVEILLANCE {
     report_in = VARIANT_ANALYSIS.out.phylogeny // group_meta, ref_meta, tree    
         .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // group_meta, ref_meta, tree, snp_align
         .combine(VARIANT_ANALYSIS.out.vcf, by:0..1) // group_meta, ref_meta, tree, snp_align, vcf
-        .combine(GENOME_ASSEMBLY.out.quast.map { [it[1], it[0]] }, by: 1) // ref_meta, group_meta, tree, snp_align, vcf, quast
+        .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true) // ref_meta, group_meta, tree, snp_align, vcf, quast
         .map { [it[1], it[0]] + it[2..5]}
         .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
-        .join(ASSIGN_REFERENCES.out.ani_matrix) // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast] ani_matrix
+        .join(ASSIGN_REFERENCES.out.ani_matrix, remainder: true) // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast] ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
-        .join(grouped_sendsketch) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree, [sendsketch]
+        .join(grouped_sendsketch, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree, [sendsketch]
                                                                      
     MAIN_REPORT_2 (                                                             
         report_in,                                                              
