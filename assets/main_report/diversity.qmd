@@ -1,4 +1,4 @@
---- 
+---
 params:
     group: "xan_test"
     refs: "22_331_assembly"
@@ -27,7 +27,6 @@ execute:
 ```{r parse_inputs, file='parse_inputs.R'}
 # When running manually for development: source('parse_inputs.R')
 ```
-
 
 ### *Things to address:*
 
@@ -65,7 +64,7 @@ snp_trees_midpoint<-midpoint(snp_trees)
 *May not be most generalizable as one has to specify how color tips-but just another tree option. Very powerful package-but trees are not interactive*
 
 ```{r ggtree starting point, fig.height = 7, eval = ! is.null(snp_trees)}
-gg <- ggtree(snp_trees_midpoint) %<+% samp_data +
+gg <- ggtree(snp_trees_midpoint) %<+% samp_meta +
   geom_tiplab(size=2.5) +
   geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) +
   theme(legend.position="left") +
@@ -94,7 +93,7 @@ More info will be added later.
 
 1.  Important discussion point-for running poppr, will user decide on SNP threshold? This differs depending on dataset. Can we use something like poppr *cutoff_predictor* function?
 
-*Martha is actively working on this. So far looking into Visnetwork, but another option is networkD3?*
+*Martha is actively experimenting. So far looking into Visnetwork, but another option is networkD3?*
 
 ```{r poppr_config, include=FALSE, eval=FALSE}
 #Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
@@ -109,4 +108,151 @@ cleaned_names <- gsub("22_331_assembly_", "", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
 
 
+```
+
+### MLG table (maybe helpful to include-not sure)
+
+```{r mlg_config}
+mat <- match(indNames(snp_aln.gi), samp_meta$sample)
+samp_meta <- samp_meta[mat, ]
+
+# Convert to genclone
+snp_genclone <- as.genclone(snp_aln.gi)
+
+
+# Filter genotypes at 5 nucleotides (with the default farthest neighbor algo)
+mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- 6
+
+idlist<-mlg.id(snp_genclone)
+idlist
+
+mlglist<-data.frame("MLG","strain")
+colnames(mlglist) <- c("V1","V2")
+for (name in names(idlist)) {
+  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist[[name]]))
+  mlglist<-rbind(mlglist,newframe)
+}
+
+colnames(mlglist)<-c("MLG","strain")
+mlglist<-mlglist[mlglist$strain != "strain",]
+#make a prettier table
+mlglist
+```
+
+### Experimenting with less subjective ways to provide SNP cutoff
+
+Please revise as needed. I think we need a better apporach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful
+
+```{r mlg_config_test}
+#Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
+
+snpdist_stats<-filter_stats(snp_genclone)
+print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
+mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+idlist2<-mlg.id(snp_genclone)
+idlist2
+
+mlglist2<-data.frame("MLG","strain")
+colnames(mlglist2) <- c("V1","V2")
+for (name in names(idlist2)) {
+  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
+  mlglist2<-rbind(mlglist2,newframe)
+}
+
+colnames(mlglist2)<-c("MLG","strain")
+mlglist2<-mlglist2[mlglist2$strain != "strain",]
+#make a prettier table
+mlglist2
+```
+
+### Poppr MSN
+
+```{r poppr msn}
+# Create a minimum spanning network with filtered data
+#Still have issues with metadata-reference seq has none-need way to include? 
+
+#NOTE-cannot have NAs in metadata-for temp fix, changed to NA-may need better solution
+samp_meta[is.na(samp_meta)] <- "unknown"
+
+myColors <- rainbow(length(unique(samp_meta$nusery))) 
+names(myColors) <- levels(samp_meta$nusery)
+#myColors["Other"] <- "#808080"
+
+
+setPop(snp_genclone) <- ~nusery
+
+
+# Setting the strata and pop properties
+strata(snp_genclone) <- samp_meta[, c(1:18)]
+setPop(snp_genclone) <- ~nusery
+
+
+
+ms.loc <- poppr.msn(snp_genclone,
+                    distmat = bitwise.dist(snp_genclone, percent = FALSE),
+                    include.ties = TRUE,
+                    showplot = FALSE) # show nothing
+
+#ms.loc$graph[]
+#ms.loc
+#str(ms.loc)
+the_edges <-E(ms.loc$graph)$weight
+edges<-as.list(the_edges)
+edges
+
+# Plot a pretty plot
+set.seed(8)
+plot_poppr_msn(
+  snp_genclone ,
+  poppr_msn = ms.loc,
+  palette = myColors,
+  mlg = FALSE,
+  quantiles = FALSE,
+  wscale = FALSE,
+  inds="None",
+  layfun = layout_with_lgl,
+  edge.label = the_edges,
+  edge.label.font = 2,
+  edge.label.cex = 1,
+  edge.lable.family = "Helvetica",
+  edge.label.color = "darkslateblue"
+  
+)
+```
+
+### Visnetwork minimum spanning network
+
+*Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color with multiple colors, and colors are not correct. Need to remove sample names from nodes*
+
+```{r visnetwork}
+#node_data <- data.frame(
+ # id = V(ms.loc$graph)$name,
+#  size=V(ms.loc$graph)$size,
+ # group = V(ms.loc$graph)$color
+#)
+
+node_data <- data.frame(
+  id = V(ms.loc$graph)$name,
+  label = V(ms.loc$graph)$name,
+  group = V(ms.loc$graph)$color,
+  size = V(ms.loc$graph)$size
+)
+node_data$value <- node_data$size.Freq
+
+node_data$color <- ms.loc$colors[node_data$group]
+node_groups <- lapply(names(ms.loc$colors), function(group_name) {
+  list(color = list(background = ms.loc$colors[group_name], border = 'black'))
+})
+names(node_groups) <- names(ms.loc$colors)
+edges_data <- get.data.frame(ms.loc$graph, what="edges")
+edges_data$title <- paste("Distance:", edges_data$weight)
+edges_data$arrows <- NA
+
+visNetwork(node_data, edges_data) %>%
+  visGroups(groupname = node_groups) %>%
+  visNodes(shape = "dot", color = node_data$color) %>%
+  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>% 
+  #visEdges(arrows = "to") %>%
+  visPhysics(stabilization = FALSE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
