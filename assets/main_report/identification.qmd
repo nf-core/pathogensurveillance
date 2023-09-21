@@ -33,6 +33,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 library(phylocanvas)
 library(ape)
 library(magrittr)
+library(pheatmap)
 ```
 
 ```{r id_parse_inputs}
@@ -47,11 +48,20 @@ snp_trees <- ape::read.tree(params$snp_phylos)
 
 A table with sendsketch results
 
-## Initial ANI tree
+### Initial ANI heatmap and dendrogram
 
+*Martha-Not sure if this is useful, but one idea. The interactive version wasn't that useful-but maybe other options*
+
+```{r ANI dendrogram, fig.height = 8, fig.width=8}
+library(pheatmap)
+row.names(ani_matrix) <- colnames(ani_matrix)
+p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
+p1
+```
 
 ## Core genome phylogeny
 
+*Martha-I am not getting any tree*
 
 ```{r id_core_phylo, fig.height = 7, eval = ! is.null(core_tree)}
 # Identify which tips are samples and references
@@ -88,8 +98,3 @@ phycanv
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
-
-
-
-
-
