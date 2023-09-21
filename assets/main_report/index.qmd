@@ -6,7 +6,7 @@ params:
     ref_data: "_test_data/merged_assembly_stats.tsv"
     sendsketch: "_test_data/sendsketch"
     variant_data: "_test_data/variant_data"
-    ani_matrix: "_test_data/comp.csv"
+    ani_matrix: "_test_data/xan_test_comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
     multiqc: "_test_data/multiqc"
     quast: "_test_data/quast"
@@ -15,29 +15,26 @@ execute:
   echo: false
 ---
 
-<!--# pre-loading libraries in one place at the top avoids multiple reloads and metadata. Not sure if this can be done better elsewhere. -->
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| context: server
-library(dplyr)
-library(ggplot2)
-library(readr)
-library(knitr)
-metadata <-read_csv(params$meta_data)
+```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
+# When running manually for development: source('load_libraries.R')
 ```
 
-# Report {.unnumbered}
+```{r parse_inputs, file='parse_inputs.R'}
+# When running manually for development: source('parse_inputs.R')
+```
 
-This report is produced by the **`nf-core` `Pathogen Surveillance` pipeline** version **{{< var version >}}**.
+# Summary
+
+
+
+This report is produced by the **`nf-core` `pathogensurveillance` pipeline** version **{{< var version >}}**.
 
 | <!-- --> | <!-- --> | 
 |-----|-----|
 | **Date**            | TBD |
 | **Last updated**    | `r format(Sys.time(), '%B %d , %Y')` |
-| **Submitter(s):**   | `r combine_words(unique(metadata$report_group))` |
-| **Samples:**        | `r nrow(metadata)` |
+| **Submitter(s):**   | `r combine_words(unique(samp_data$report_group))` |
+| **Samples:**        | `r nrow(samp_data)` |
 
 ## Run info
 
@@ -51,7 +48,7 @@ What should go here?
 Could copy the info that nextflow tower shows.
 
 ```{r}
-DT::datatable(metadata)
+DT::datatable(samp_data)
 ```
 
 ## Input settings

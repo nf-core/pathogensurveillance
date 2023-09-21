@@ -1,13 +1,27 @@
 --- 
 params:
+    group: "xan_test"
+    refs: "22_331_assembly"
     samp_data: "_test_data/metadata_medium.csv"
     ref_data: "_test_data/merged_assembly_stats.tsv"
-    snp_phylos: "_test_data/xan_test_22_331_assembly.treefile"
-    snp_align: "_test_data/xan_test_22_331_assembly.fasta"
-    ani_matrix: "_test_data/comp.csv"
+    sendsketch: "_test_data/sendsketch"
+    variant_data: "_test_data/variant_data"
+    ani_matrix: "_test_data/xan_test_comp.csv"
     core_phylo: "_test_data/xan_test.treefile"
-    output_dir: "_test_data/output"
+    multiqc: "_test_data/multiqc"
+    quast: "_test_data/quast"
+    versions: "_test_data/software_versions.yml"
+execute:
+  echo: false
 ---
+
+```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
+# When running manually for development: source('load_libraries.R')
+```
+
+```{r parse_inputs, file='parse_inputs.R'}
+# When running manually for development: source('parse_inputs.R')
+```
 
 # Quality control
 
