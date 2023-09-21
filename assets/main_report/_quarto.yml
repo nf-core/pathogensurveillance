@@ -6,18 +6,9 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Report
-      - href: identification.qmd
-        text: Identity
-      - href: diversity.qmd
-        text: Diversity
-      - href: gene_content.qmd
-        text: Genes
-      - href: map.qmd
-        text: Maps
-      - href: quality_control.qmd
-        text: Quality Control
-      - references.qmd
+        text: Results
+      - href: about.qmd
+        text: About
     tools:
       - icon: twitter
         href: https://twitter.com/phytophthoralab
@@ -25,11 +16,26 @@ website:
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         text: Nf-core PathogenSurveillance GitHub
-
+  sidebar:
+    style: "docked"
+    search: false
+    contents:
+      - section: "Results"
+        contents:
+          - index.qmd
+          - identification.qmd
+          - diversity.qmd
+          - gene_content.qmd
+          - map.qmd
+      - section: "Analysis Data"
+        contents:
+          - quality_control.qmd
+          - references.qmd
 format:
   html:
     theme: sandstone
     css: styles.css
     toc: true
+    embed-resources: true
     
 bibliography: references.bib
