@@ -22,12 +22,13 @@ execute:
 
 ```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
 # When running manually for development: source('load_libraries.R')
+source('load_libraries.R')
 ```
 
 ```{r parse_inputs, file='parse_inputs.R'}
 # When running manually for development: source('parse_inputs.R')
+source('parse_inputs.R')
 ```
-
 
 ## Sendsketch
 
@@ -37,20 +38,16 @@ A table with sendsketch results
 sketch_data
 ```
 
-
-### Initial ANI heatmap and dendrogram
+## Initial ANI heatmap and dendrogram
 
 *Martha-Not sure if this is useful, but one idea. The interactive version wasn't that useful-but maybe other options*
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-library(pheatmap)
 p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
 
 ## Core genome phylogeny
-
-*Martha-I am not getting any tree*
 
 ```{r id_core_phylo, fig.height = 7}
 convert_id <- function(ids) {
@@ -88,4 +85,3 @@ for (x in name_key[sample_ids]) {
     
 phycanv
 ```
-

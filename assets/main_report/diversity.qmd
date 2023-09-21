@@ -21,14 +21,16 @@ execute:
 ```
 
 ```{r load_libraries, warning=FALSE, message=FALSE, file='load_libraries.R'}
-# When running manually for development: source('load_libraries.R')
+# When running manually for development: 
+source('load_libraries.R')
 ```
 
 ```{r parse_inputs, file='parse_inputs.R'}
-# When running manually for development: source('parse_inputs.R')
+# When running manually for development:
+source('parse_inputs.R')
 ```
 
-### *Things to address:*
+*Things to address:*
 
 1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
@@ -47,7 +49,7 @@ snp_alignment<-ape::read.dna(snp_align_paths, format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
-# SNP phylogeny
+## SNP phylogeny
 
 ```{r div_snp_tree_config, include=FALSE}
 #Rename tree tip labels
@@ -88,7 +90,7 @@ There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
-# Minimum spanning network
+## Minimum spanning network
 
 ### *Questions to address*
 
