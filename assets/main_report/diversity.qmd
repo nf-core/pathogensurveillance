@@ -35,11 +35,13 @@ execute:
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
 
 ```{r div_parse_inputs}
-ref_data$modified_id <- gsub(ref_data$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
-samp_data$modified_id <- paste0(gsub(samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
-#ani_matrix <-  read.csv(params$ani_matrix, sep = ',', check.names = FALSE)
+#ref_meta <- read.csv(params$ref_data, sep = '\t')
+#ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
+samp_meta <- read.csv(params$samp_data, sep = ',')
+samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
 #core_tree <- ape::read.tree(core_phylo_path)
 snp_trees <- ape::read.tree(snp_tree_paths)
+snp_alignment<-ape::read.dna(snp_align_paths, format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
@@ -47,7 +49,6 @@ snp_trees <- ape::read.tree(snp_tree_paths)
 
 ```{r div_snp_tree_config, include=FALSE}
 #Rename tree tip labels
-
 oldtips<-snp_trees$tip.label
 newtips <- gsub(".*_assembly_", "", oldtips)
 snp_trees$tip.label<-newtips
@@ -97,9 +98,15 @@ More info will be added later.
 
 ```{r poppr_config, include=FALSE, eval=FALSE}
 #Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
-snp_aln.gi <- DNAbin2genind(snp_aln)
+snp_aln.gi <- DNAbin2genind(snp_alignment)
 snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
 
 #Extract just sample data for relevant sample group(s)? Way to get this from other output and just pull here? 
+
+#Need to rename samples so no longer have prefix (may be better way)
 genind_names<-indNames(snp_aln.gi)
+cleaned_names <- gsub("22_331_assembly_", "", genind_names)
+indNames(snp_aln.gi) <- cleaned_names
+
+
 ```

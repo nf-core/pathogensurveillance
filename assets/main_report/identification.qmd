@@ -1,4 +1,4 @@
---- 
+---
 params:
     group: "xan_test"
     refs: "22_331_assembly"
