@@ -223,13 +223,7 @@ plot_poppr_msn(
 
 *Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes*
 
-```{r visnetwork}
-#node_data <- data.frame(
- # id = V(ms.loc$graph)$name,
-#  size=V(ms.loc$graph)$size,
- # group = V(ms.loc$graph)$color
-#)
-
+```{r visnetwork_setup}
 node_data <- data.frame(
   id = V(ms.loc$graph)$name,
   label = V(ms.loc$graph)$name,
@@ -255,3 +249,16 @@ visNetwork(node_data, edges_data) %>%
   visPhysics(stabilization = FALSE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
+```{r visnetwork_setup}
+visNetwork(node_data, edges_data) %>%
+  visGroups(groupname = node_groups) %>%
+  visNodes(shape = "dot", color = node_data$color) %>%
+  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>% 
+  #visEdges(arrows = "to") %>%
+  visPhysics(stabilization = FALSE) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+```
+
+
+### Network D3 experiment
+
