@@ -58,7 +58,11 @@ DT::datatable(samp_data)
 
 The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
 
-  - Software versions used: `r xfun::embed_file('_test_data/software_versions.yml')`
+  - Software versions used: 
+  
+  {{< include _test_data/software_versions.yml >}}
+  
+  `r xfun::embed_file('_test_data/software_versions.yml')`
   - A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
   - The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
 
