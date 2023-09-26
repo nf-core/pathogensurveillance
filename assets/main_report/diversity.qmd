@@ -249,7 +249,7 @@ visNetwork(node_data, edges_data) %>%
   visPhysics(stabilization = FALSE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
-```{r visnetwork_setup}
+```{r visnetwork_setup2}
 visNetwork(node_data, edges_data) %>%
   visGroups(groupname = node_groups) %>%
   visNodes(shape = "dot", color = node_data$color) %>%
