@@ -250,13 +250,13 @@ visNetwork(node_data, edges_data) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
 ```{r visnetwork_setup2}
-visNetwork(node_data, edges_data) %>%
-  visGroups(groupname = node_groups) %>%
-  visNodes(shape = "dot", color = node_data$color) %>%
-  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>% 
-  #visEdges(arrows = "to") %>%
-  visPhysics(stabilization = FALSE) %>%
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+#visNetwork(node_data, edges_data) %>%
+#  visGroups(groupname = node_groups) %>%
+#  visNodes(shape = "dot", color = node_data$color) %>%
+#  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) #%>% 
+#  #visEdges(arrows = "to") %>%
+#  visPhysics(stabilization = FALSE) %>%
+#  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
 
 
