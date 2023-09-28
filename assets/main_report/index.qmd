@@ -173,15 +173,31 @@ final_table$`WKID (%)` <- sapply(final_table$`WKID (%)`, function(x) bordered_ba
 final_table$`ANI (%)` <- sapply(final_table$`ANI (%)`, function(x) bordered_bar(x, 'lightgreen'))
 final_table$`Completeness (%)` <- sapply(final_table$`Completeness (%)`, function(x) bordered_bar(x, 'lightpink'))
 
+# Render the table using DT for HTML output, which will make it interactive
+DT::datatable(final_table, 
+          options = list(
+            pageLength = 10,  # Show 10 entries per page
+            autoWidth = TRUE,  # Automatically adjust column width
+            columnDefs = list(
+              list(width = '150px', targets = c(1, 2, 3))
+            ),
+            searchHighlight = TRUE  # Highlight search results
+          ),
+          rownames = FALSE,  # Hide row numbers
+          escape = FALSE  # Necessary if your table has HTML content, like the bordered bars
+)
+
+
+
 # Render the table using kable and kableExtra for HTML output
-final_table %>%
-  knitr::kable("html", escape = F, align = c('l', 'c', 'c', 'c', 'l')) %>%
-  kable_styling(bootstrap_options = "striped", full_width = F) %>%
-  column_spec(2, extra_css = "width: 150px;") %>%
-  column_spec(3, extra_css = "width: 150px;") %>%
-  column_spec(4, extra_css = "width: 150px;") %>%
-  column_spec(5, extra_css = "width: 350px;") %>%
-  column_spec(1:5, extra_css = "font-size: 14px;")
+#final_table %>%
+#  knitr::kable("html", escape = F, align = c('l', 'c', 'c', 'c', 'l')) %>%
+#  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+#  column_spec(2, extra_css = "width: 150px;") %>%
+#  column_spec(3, extra_css = "width: 150px;") %>%
+#  column_spec(4, extra_css = "width: 150px;") %>%
+#  column_spec(5, extra_css = "width: 350px;") %>%
+#  column_spec(1:5, extra_css = "font-size: 14px;")
 
 
 ```
