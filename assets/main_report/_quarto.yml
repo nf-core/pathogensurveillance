@@ -3,12 +3,11 @@ project:
 
 website:
   title: "Pathogen Surveillance Report"
+  search: false
   navbar:
     left:
       - href: index.qmd
-        text: Results
-      - href: about.qmd
-        text: About
+        text: Home
     tools:
       - icon: twitter
         href: https://twitter.com/phytophthoralab
@@ -16,26 +15,25 @@ website:
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         text: Nf-core PathogenSurveillance GitHub
-  sidebar:
-    style: "docked"
-    search: false
-    contents:
-      - section: "Results"
-        contents:
-          - index.qmd
-          - identification.qmd
-          - diversity.qmd
-          - gene_content.qmd
-          - map.qmd
-      - section: "Analysis Data"
-        contents:
-          - quality_control.qmd
-          - references.qmd
+
 format:
   html:
     theme: sandstone
-    css: styles.css
     toc: true
+    toc-depth: 3
+    toc-expand: 2
+    toc-title: "Contents"
+    toc-location: left
+    self-contained: true
     embed-resources: true
+    grid:
+      sidebar-width: 300px
+      body-width: 1200px
+      margin-width: 0px
+      gutter-width: 1.5rem
+  pdf:
+    toc: true
+    documentclass: scrreprt
+    prefer-html: true
     
 bibliography: references.bib

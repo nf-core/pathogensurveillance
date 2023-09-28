@@ -1,1 +1,0 @@
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
