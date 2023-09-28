@@ -5,6 +5,7 @@ website:
   title: "Pathogen Surveillance Report"
   search: false
   navbar:
+    pinned: true
     left:
       - href: index.qmd
         text: Home
@@ -15,20 +16,24 @@ website:
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         text: Nf-core PathogenSurveillance GitHub
+  sidebar:
+    style: "docked"
 
 format:
   html:
     theme: sandstone
+    fontsize: 1.1em
+    css: styles.css
     toc: true
     toc-depth: 3
-    toc-expand: 2
+    toc-expand: 1
     toc-title: "Contents"
     toc-location: left
     self-contained: true
     embed-resources: true
     grid:
-      sidebar-width: 300px
-      body-width: 1200px
+      sidebar-width: 350px
+      body-width: 1050px
       margin-width: 0px
       gutter-width: 1.5rem
   pdf:
