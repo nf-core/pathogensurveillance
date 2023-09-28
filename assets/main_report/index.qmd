@@ -1,4 +1,5 @@
---- 
+---
+title: Pathogen Surveillance Report
 params:
     group: "xan_test"
     refs: "22_331_assembly"
@@ -95,9 +96,7 @@ version_data <- tibble(
 )
 ```
 
-
-
-# Pipeline run Summary
+# Run Summary
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline** version **{{< var version >}}**.
 
@@ -130,7 +129,7 @@ Add settings used to run Nextflow and the pipeline parameters.
 
 
 
-
+    
 
 # Identification
 
@@ -583,7 +582,7 @@ DT::datatable(version_data)
 
 ## Report Software
 
-```{r}
+```{r, include=FALSE}
 # automatically create a bib database for R packages
 knitr::write_bib(c(
   .packages(), 'bookdown', 'knitr', 'rmarkdown'

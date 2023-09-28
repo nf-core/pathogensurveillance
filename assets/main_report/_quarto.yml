@@ -2,13 +2,10 @@ project:
   type: website
 
 website:
-  title: "Pathogen Surveillance Report"
+  title: "Pathogen Surveillance  "
   search: false
-  navbar:
-    pinned: true
-    left:
-      - href: index.qmd
-        text: Home
+  sidebar:
+    style: "docked"
     tools:
       - icon: twitter
         href: https://twitter.com/phytophthoralab
@@ -16,24 +13,21 @@ website:
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         text: Nf-core PathogenSurveillance GitHub
-  sidebar:
-    style: "docked"
 
 format:
   html:
-    theme: sandstone
-    fontsize: 1.1em
+    theme: flatly
     css: styles.css
     toc: true
     toc-depth: 3
-    toc-expand: 1
+    toc-expand: 2
     toc-title: "Contents"
     toc-location: left
     self-contained: true
     embed-resources: true
     grid:
-      sidebar-width: 350px
-      body-width: 1050px
+      sidebar-width: 400px
+      body-width: 1000px
       margin-width: 0px
       gutter-width: 1.5rem
   pdf:
