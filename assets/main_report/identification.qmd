@@ -32,12 +32,12 @@ source('parse_inputs.R')
 
 ## Sendsketch
 
-A table with sendsketch results
+The following table provides putative classifications of the samples based on a kmer clasification analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
-```{r}
+```{r sketchtable,fig.width=5}
 # Load additional packages for aesthetic formatting
-library(formattable)
-library(kableExtra)
+#install.packages("kableExtra")
+
 # Convert percentage fields from character to numeric
 sketch_data$WKID <- as.numeric(gsub("%", "", sketch_data$WKID))
 sketch_data$ANI <- as.numeric(gsub("%", "", sketch_data$ANI))
@@ -54,42 +54,35 @@ final_table <- sketch_data %>%
          `WKID (%)` = WKID,
          `ANI (%)` = ANI,
          `Completeness (%)` = Complt,
-         Taxa = taxName) %>%  # Rename columns
-  formattable::formattable(  # Apply aesthetic formatting
-    list(
-      `WKID (%)` = color_tile("white", "lightblue"),
-      `ANI (%)` = color_tile("white", "lightgreen"),
-      `Completeness (%)` = color_tile("white", "lightpink")
-    )
-  )
+         Taxa = taxName)  # Rename columns
 
-# Convert numeric percentages back to character with '%' for display
-final_table$`WKID (%)` <- paste0(final_table$`WKID (%)`, '%')
-final_table$`ANI (%)` <- paste0(final_table$`ANI (%)`, '%')
-final_table$`Completeness (%)` <- paste0(final_table$`Completeness (%)`, '%')
-
-# Create the HTML code for a bordered progress bar
+# Define a function called 'bordered_bar' that takes two arguments: 'value' and 'color'
 bordered_bar <- function(value, color) {
-  sprintf('<div style="border: 1px solid black; width: 100%%; border-radius: 12px;">
+  sprintf('<div style="border: 1px solid gray; width: 100%%; border-radius: 12px;">
             <div style="width: %s%%; background-color: %s; border-radius: 12px; text-align: center;">%s</div>
            </div>', 
           value, color, value)
 }
 
 # Apply the bordered_bar function to the relevant columns
-final_table$`WKID (%)` <- sapply(gsub("%", "", final_table$`WKID (%)`), function(x) bordered_bar(x, 'lightblue'))
-final_table$`ANI (%)` <- sapply(gsub("%", "", final_table$`ANI (%)`), function(x) bordered_bar(x, 'lightgreen'))
-final_table$`Completeness (%)` <- sapply(gsub("%", "", final_table$`Completeness (%)`), function(x) bordered_bar(x, 'lightpink'))
+final_table$`WKID (%)` <- sapply(final_table$`WKID (%)`, function(x) bordered_bar(x, 'lightblue'))
+final_table$`ANI (%)` <- sapply(final_table$`ANI (%)`, function(x) bordered_bar(x, 'lightgreen'))
+final_table$`Completeness (%)` <- sapply(final_table$`Completeness (%)`, function(x) bordered_bar(x, 'lightpink'))
 
 # Render the table using kable and kableExtra for HTML output
-
 final_table %>%
   knitr::kable("html", escape = F, align = c('l', 'c', 'c', 'c', 'l')) %>%
-  kable_styling(bootstrap_options = "striped", full_width = F)
-
+  kable_styling(bootstrap_options = "striped", full_width = F) %>%
+  column_spec(2, extra_css = "width: 150px;") %>%
+  column_spec(3, extra_css = "width: 150px;") %>%
+  column_spec(4, extra_css = "width: 150px;") %>%
+  column_spec(5, extra_css = "width: 350px;") %>%
+  column_spec(1:5, extra_css = "font-size: 14px;")
 
 
 ```
+
+> **Note:** WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 
 ## Initial ANI heatmap and dendrogram
 
