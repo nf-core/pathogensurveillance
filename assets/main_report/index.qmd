@@ -129,7 +129,7 @@ Add settings used to run Nextflow and the pipeline parameters.
 
 
 
-    
+
 
 # Identification
 
@@ -250,22 +250,21 @@ for (x in name_key[sample_ids]) {
 phycanv
 ```
 
-
 ### ANI heatmap and dendrogram
 
-*Martha-Not sure if this is useful, but one idea. The interactive version wasn't that useful-but maybe other options*
+*Martha-Not sure if this is useful, but one idea.
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
 
-
+### NJ tree option
+```{r ANI NJ tree, fig.height = 8, fig.width=8}
+p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
+p1
+```
 :::
-
-
-
-
 
 # Diversity
 
@@ -495,15 +494,6 @@ visNetwork(node_data, edges_data) %>%
   #visEdges(arrows = "to") %>%
   visPhysics(stabilization = FALSE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-```
-```{r visnetwork_setup2}
-#visNetwork(node_data, edges_data) %>%
-#  visGroups(groupname = node_groups) %>%
-#  visNodes(shape = "dot", color = node_data$color) %>%
-#  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) #%>% 
-#  #visEdges(arrows = "to") %>%
-#  visPhysics(stabilization = FALSE) %>%
-#  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
 
 
