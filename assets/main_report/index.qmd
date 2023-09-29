@@ -158,7 +158,7 @@ final_table <- sketch_data %>%
          `WKID (%)` = WKID,
          `ANI (%)` = ANI,
          `Completeness (%)` = Complt,
-         Taxa = taxName)  # Rename columns
+         `Top Hit` = taxName)  # Rename columns
 
 # Define a function called 'bordered_bar' that takes two arguments: 'value' and 'color'
 bordered_bar <- function(value, color) {

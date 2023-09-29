@@ -16,7 +16,7 @@ website:
 
 format:
   html:
-    theme: flatly
+    theme: journal
     css: styles.css
     toc: true
     toc-depth: 3
