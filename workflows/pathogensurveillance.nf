@@ -184,7 +184,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Create main summary report                                               
     grouped_sendsketch = INPUT_CHECK.out.sample_data // meta, fastq, ref_meta, reference, group_meta
-        .join(COARSE_SAMPLE_TAXONOMY.out.hits) // meta, fastq, ref_meta, reference, group_meta, sendsketch
+        .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
         .map { it[4..5] } // group_meta, sendsketch                             
         .groupTuple() // group_meta, [sendsketch]
     report_in = VARIANT_ANALYSIS.out.phylogeny // group_meta, ref_meta, tree    

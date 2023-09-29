@@ -57,6 +57,7 @@ if (! exists("params")) {
 group <- params$group
 refs <- strsplit(params$refs, ';', fixed = TRUE)[[1]]
 all_samp_data <- read_csv(params$samp_data, show_col_types = FALSE)
+all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE)
 group_data <- strsplit(all_samp_data$report_group, split = ";")
 all_groups <- unique(unlist(group_data))
 samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
@@ -213,7 +214,7 @@ WKID represents the Weighted Kmer IDentity, adjusted for genome size differences
 
 ### Core genome phylogeny
 
-```{r id_core_phylo}
+```{r id_core_phylo, eval = core_phylo_path != "../input.6"}
 convert_id <- function(ids) {
     gsub(ids, pattern = "[.-]", replacement = "_")
 }
@@ -274,16 +275,8 @@ p1
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
 
 ```{r div_parse_inputs}
-#ref_meta <- read.csv(params$ref_data, sep = '\t')
-#ref_meta$modified_id <- gsub(ref_meta$LastMajorReleaseAccession, pattern = ".", replacement = "_", fixed = TRUE)
-samp_meta <- read.csv(params$samp_data, sep = ',')
-samp_meta$modified_id <- paste0(gsub(samp_meta$sample, pattern = "-", replacement = "_", fixed = TRUE), "_T1")
-#core_tree <- ape::read.tree(core_phylo_path)
-#not sure this is the intended way to create snp_tree path, but just added this temporarily so everything could render
-snp_tree_paths <-file.path(params$variant_data, "xan_test_22_331_assembly.treefile")
-snp_align_paths <-file.path(params$variant_data, "xan_test_22_331_assembly.fasta")
 snp_trees <- ape::read.tree(snp_tree_paths)
-snp_alignment<-ape::read.dna(snp_align_paths, format =  "fasta")
+snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
@@ -310,10 +303,10 @@ snp_trees_midpoint<-midpoint(snp_trees)
 
 *May not be most generalizable as one has to specify how color tips-but just another tree option. Very powerful package-but trees are not interactive*
 
-```{r ggtree starting point, eval = ! is.null(snp_trees)}
-gg <- ggtree(snp_trees_midpoint) %<+% samp_meta +
+```{r ggtree starting point}
+gg <- ggtree(snp_trees_midpoint) %<+% samp_data +
   geom_tiplab(size=2.5) +
-  geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) +
+  #geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) + # commented out to make it run when year is not available
   theme(legend.position="left") +
   guides(color = guide_legend(override.aes = list(size=1))) +
   geom_treescale(fontsize =2.5) 
@@ -361,8 +354,8 @@ indNames(snp_aln.gi) <- cleaned_names
 ### MLG table (maybe helpful to include-not sure)
 
 ```{r mlg_config}
-mat <- match(indNames(snp_aln.gi), samp_meta$sample)
-samp_meta <- samp_meta[mat, ]
+mat <- match(indNames(snp_aln.gi), samp_data$sample)
+samp_data <- samp_data[mat, ]
 
 # Convert to genclone
 snp_genclone <- as.genclone(snp_aln.gi)
@@ -390,11 +383,15 @@ mlglist
 
 Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
 
-```{r mlg_config_test}
+```{r mlg_config_test, eval = FALSE}
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
 
 snpdist_stats<-filter_stats(snp_genclone)
-print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
+if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
+    print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
+} else {
+    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
+}
 mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
 idlist2<-mlg.id(snp_genclone)
 
@@ -418,10 +415,10 @@ mlglist2
 #Still have issues with metadata-reference seq has none-need way to include? 
 
 #NOTE-cannot have NAs in metadata-for temp fix, changed to NA-may need better solution
-samp_meta[is.na(samp_meta)] <- "unknown"
+samp_data <- map_dfc(samp_data, function(col) ifelse(is.na(col), "unknown", col))
 
-myColors <- rainbow(length(unique(samp_meta$nusery))) 
-names(myColors) <- levels(samp_meta$nusery)
+myColors <- rainbow(length(unique(samp_data$nusery))) 
+names(myColors) <- levels(samp_data$nusery)
 #myColors["Other"] <- "#808080"
 
 
@@ -429,7 +426,7 @@ setPop(snp_genclone) <- ~nusery
 
 
 # Setting the strata and pop properties
-strata(snp_genclone) <- samp_meta[, c(1:18)]
+strata(snp_genclone) <- samp_data[, c(1:18)]
 setPop(snp_genclone) <- ~nusery
 
 
