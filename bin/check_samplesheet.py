@@ -34,6 +34,7 @@ class RowChecker:
         sample_col="sample",
         first_col="fastq_1",
         second_col="fastq_2",
+        rgroup_col="report_group",
         single_col="single_end",
         **kwargs,
     ):
@@ -47,6 +48,8 @@ class RowChecker:
                 FASTQ file path (default "fastq_1").
             second_col (str): The name of the column that contains the second (if any)
                 FASTQ file path (default "fastq_2").
+            rgroup_col (str): The name of the column that contains the report group
+                name (default "report_group").
             single_col (str): The name of the new column that will be inserted and
                 records whether the sample contains single- or paired-end sequencing
                 reads (default "single_end").
@@ -56,6 +59,7 @@ class RowChecker:
         self._sample_col = sample_col
         self._first_col = first_col
         self._second_col = second_col
+        self._rgroup_col = rgroup_col
         self._single_col = single_col
         self._seen = set()
         self.modified = []
@@ -73,6 +77,7 @@ class RowChecker:
         self._validate_first(row)
         self._validate_second(row)
         self._validate_pair(row)
+        self._validate_rgroup(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
 
@@ -104,6 +109,13 @@ class RowChecker:
                 raise AssertionError("FASTQ pairs must have the same file extensions.")
         else:
             row[self._single_col] = True
+
+    def _validate_rgroup(self, row):
+        """Assert that the report group name exists and convert spaces to underscores."""
+        if len(row[self._rgroup_col]) <= 0:
+            raise AssertionError("Report group is required.")
+        # Sanitize samples slightly.
+        row[self._rgroup_col] = row[self._rgroup_col].replace(" ", "_")
 
     def _validate_fastq_format(self, filename):
         """Assert that a given filename has one of the expected FASTQ extensions."""
@@ -191,7 +203,7 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    required_columns = {"sample", "fastq_1", "fastq_2"}
+    required_columns = {"sample", "fastq_1", "fastq_2","report_group"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
