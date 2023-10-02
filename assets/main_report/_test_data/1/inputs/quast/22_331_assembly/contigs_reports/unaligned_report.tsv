@@ -1,0 +1,6 @@
+Assembly	22-301_filtered	SRR17286018_filtered	22-324_filtered	22-329A_filtered	22-299_filtered	22-300_filtered	22-329B_filtered	22-330_filtered
+# fully unaligned contigs	0	0	2	0	1	0	0	0
+Fully unaligned length	0	0	15084	0	689	0	0	0
+# partially unaligned contigs	1	4	8	1	0	1	0	1
+Partially unaligned length	1012	60470	190003	948	0	637	0	828
+# N's	230	826	308	253	355	292	235	210

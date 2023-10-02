@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/aa/385dae139f667d89ffa5880e072316"
+  inputs: "_test_data/2"
 execute:
   echo: false
 ---
@@ -133,7 +133,7 @@ Add settings used to run Nextflow and the pipeline parameters.
 
 The following table provides putative classifications of the samples based on a kmer classification analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
-```{r sketchtable,fig.width=5}
+```{r sketchtable, fig.width=5}
 # Load additional packages for aesthetic formatting
 #install.packages("kableExtra")
 
@@ -349,11 +349,10 @@ indNames(snp_aln.gi) <- cleaned_names
 
 ```{r mlg_config}
 mat <- match(indNames(snp_aln.gi), samp_data$sample)
-samp_data <- samp_data[mat, ]
+# samp_data <- samp_data[mat, ]
 
 # Convert to genclone
 snp_genclone <- as.genclone(snp_aln.gi)
-
 
 # Filter genotypes at 5 nucleotides (with the default farthest neighbor algo)
 mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- 6
@@ -404,12 +403,14 @@ mlglist2
 
 ### Poppr MSN
 
-```{r poppr msn, fig.height = 10}
+```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
 # Create a minimum spanning network with filtered data
 #Still have issues with metadata-reference seq has none-need way to include? 
 
 #NOTE-cannot have NAs in metadata-for temp fix, changed to NA-may need better solution
 samp_data <- map_dfc(samp_data, function(col) ifelse(is.na(col), "unknown", col))
+
+samp_data$nusery <- as.factor(samp_data$nusery)
 
 myColors <- rainbow(length(unique(samp_data$nusery))) 
 names(myColors) <- levels(samp_data$nusery)
@@ -460,7 +461,7 @@ plot_poppr_msn(
 
 *Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes*
 
-```{r visnetwork_setup}
+```{r visnetwork_setup, eval = nrow(samp_data) > 2}
 node_data <- data.frame(
   id = V(ms.loc$graph)$name,
   label = V(ms.loc$graph)$name,
