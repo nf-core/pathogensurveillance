@@ -1,17 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    group: "xan_test"
-    refs: "22_331_assembly"
-    samp_data: "_test_data/metadata_medium.csv"
-    ref_data: "_test_data/merged_assembly_stats.tsv"
-    sendsketch: "_test_data/sendsketch"
-    variant_data: "_test_data/variant_data"
-    ani_matrix: "_test_data/xan_test_comp.csv"
-    core_phylo: "_test_data/xan_test.treefile"
-    multiqc: "_test_data/multiqc"
-    quast: "_test_data/quast"
-    versions: "_test_data/software_versions.yml"
+    inputs: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/aa/385dae139f667d89ffa5880e072316"
 execute:
   echo: false
 ---
@@ -47,49 +37,53 @@ library(kableExtra)
 ```
 
 ```{r parse_inputs}
-# If being run manually (no params), then get default params from yaml header
-if (! exists("params")) {
-    header <- rmarkdown::yaml_front_matter('index.qmd')
-    params <- as.list(header$params)
-}
-
 # Parse metadata
-group <- params$group
-refs <- strsplit(params$refs, ';', fixed = TRUE)[[1]]
-all_samp_data <- read_csv(params$samp_data, show_col_types = FALSE)
+group_path <- file.path(params$inputs, "inputs", "group_id.txt")
+group <- read_lines(group_path)
+ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
+refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
+samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
+all_samp_data <- read_csv(samp_data_path, show_col_types = FALSE)
 all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE)
 group_data <- strsplit(all_samp_data$report_group, split = ";")
 all_groups <- unique(unlist(group_data))
 samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
-ref_data <- read_tsv(params$ref_data, col_types = 'dcccccccccccccccddc')
+ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
+ref_data <- read_tsv(ref_data_path, col_types = 'dcccccccccccccccddc')
 
 # Parse sendsketch data
-sketch_data <- map_dfr(list.files(params$sendsketch), function(path) {
-    data <- read_tsv(file.path(params$sendsketch, path), skip = 2,
+sendsketch_path <- file.path(params$inputs, "inputs", "sendsketch")
+sketch_data <- map_dfr(list.files(sendsketch_path), function(path) {
+    data <- read_tsv(file.path(sendsketch_path, path), skip = 2,
                      show_col_types = FALSE)
     id <- sub(path, pattern = '\\.txt$', replacement = '')
     return(bind_cols(sample_id = rep(id, nrow(data)), data))
 })
 
 # Parse variant data
-snp_tree_paths <- list.files(params$variant_data, pattern = "\\.treefile$", full.names = TRUE)
-vcf_paths <- list.files(params$variant_data, pattern = "\\.vcf\\.gz$", full.names = TRUE)
-snp_align_paths <- list.files(params$variant_data, pattern = "\\.fasta$", full.names = TRUE)
+variant_data_path <- file.path(params$inputs, "inputs", "variant_data")
+snp_tree_paths <- list.files(variant_data_path, pattern = "\\.treefile$", full.names = TRUE)
+vcf_paths <- list.files(variant_data_path, pattern = "\\.vcf\\.gz$", full.names = TRUE)
+snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.names = TRUE)
 
 # Parse ANI matrix
-ani_matrix <- read.csv(params$ani_matrix, check.names = FALSE)
+ani_matrix_path <- file.path(params$inputs, "inputs", "ani_matrix.csv")
+ani_matrix <- read.csv(ani_matrix_path, check.names = FALSE)
 rownames(ani_matrix) <- colnames(ani_matrix)
 
 # Parse core gene phylogeny
-core_phylo_path = params$core_phylo
+core_phylo_path <- file.path(params$inputs, "inputs", "core_phylo.treefile")
 
 # Parse quality control data
-multiqc_report_path <- file.path(params$multiqc, 'multiqc_report.html')
-quast_ref_names <- list.files(params$quast)
-quast_report_paths <- file.path(quast_ref_names, 'report.html')
+multiqc_path <- file.path(params$inputs, "inputs", "multiqc")
+multiqc_report_path <- file.path(multiqc_path, 'multiqc_report.html')
+quast_path <- file.path(params$inputs, "inputs", "quast")
+quast_ref_names <- list.files(quast_path)
+quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
 
 # Parse version data
-raw_version_data <- unlist(read_yaml(params$versions))
+version_path <- file.path(params$inputs, "inputs", "versions.yml")
+raw_version_data <- unlist(read_yaml(version_path))
 version_data <- tibble(
     module = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 1),
     program = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 2),
@@ -214,7 +208,7 @@ WKID represents the Weighted Kmer IDentity, adjusted for genome size differences
 
 ### Core genome phylogeny
 
-```{r id_core_phylo, eval = core_phylo_path != "../input.6"}
+```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 convert_id <- function(ids) {
     gsub(ids, pattern = "[.-]", replacement = "_")
 }

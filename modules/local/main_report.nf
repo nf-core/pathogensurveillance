@@ -29,40 +29,47 @@ process MAIN_REPORT {
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r ${projectDir}/assets/main_report ./
     
+    # Make directory for inputs so that a single path can be passed as parameters
+    mkdir inputs
+    
     # Put multiqc's output into a single folder for organization
-    mkdir multiqc
-    cp -r ${multiqc_data} multiqc/
-    cp -r ${multiqc_plots} multiqc/                                              
-    cp -r ${multiqc_report} multiqc/
+    mkdir inputs/multiqc
+    cp -r ${multiqc_data} inputs/multiqc/
+    cp -r ${multiqc_plots} inputs/multiqc/                                              
+    cp -r ${multiqc_report} inputs/multiqc/
     
     # Put quast's output into a single folder for organization
-    mkdir quast
-    cp -r ${quast_dirs} quast/
+    mkdir inputs/quast
+    cp -r ${quast_dirs} inputs/quast/
     
     # Put sendsketch's output into a single folder for organization
-    mkdir sendsketch
-    cp -r ${sendsketchs} sendsketch/
+    mkdir inputs/sendsketch
+    cp -r ${sendsketchs} inputs/sendsketch/
 
     # Put variant data into a single folder for organization
-    mkdir variant_data
-    cp -r ${snp_phylos} variant_data/
-    cp -r ${vcfs} variant_data/
-    cp -r ${snp_aligns} variant_data/
+    mkdir inputs/variant_data
+    cp -r ${snp_phylos} inputs/variant_data/
+    cp -r ${vcfs} inputs/variant_data/
+    cp -r ${snp_aligns} inputs/variant_data/
+    
+    # Save report group name to file
+    echo ${group_meta.id} > inputs/group_id.txt
+    
+    # Save reference IDs to file
+    echo ${ref_ids} > inputs/ref_ids.txt
+    
+    # Move single-value paths to input directory
+    mkdir other_inputs
+    mv ${samp_data} inputs/samp_data.csv
+    mv ${ref_data} inputs/ref_data.tsv
+    mv ${ani_matrix} inputs/ani_matrix.csv
+    mv ${core_phylo} inputs/core_phylo.treefile
+    mv ${versions} inputs/versions.yml
     
     # Render the report
     quarto render main_report \\
         --output-dir ${prefix}_report \\
-        -P group:${group_meta.id} \\
-        -P refs:${ref_ids} \\
-        -P samp_data:../${samp_data} \\
-        -P ref_data:../${ref_data} \\
-        -P sendsketch:../sendsketch \\
-        -P variant_data:../variant_data \\
-        -P ani_matrix:../${ani_matrix} \\
-        -P core_phylo:../${core_phylo} \\
-        -P multiqc:../multiqc \\
-        -P quast:../quast \\
-        -P versions:../${versions}
+        -P inputs:..
 
     # Save version of quarto used
     cat <<-END_VERSIONS > versions.yml
