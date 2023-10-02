@@ -42,12 +42,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK              } from '../subworkflows/local/input_check'
 include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
 include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
-include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
+include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysis'
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
 include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
 include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 
-include { MAIN_REPORT              } from '../modules/local/mainreport'
+include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/main_report'
+include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/main_report'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,7 +97,7 @@ workflow PATHOGENSURVEILLANCE {
         ch_reads
     )
     ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
-    
+
     // Search for and download reference assemblies for all samples
     DOWNLOAD_REFERENCES (
         COARSE_SAMPLE_TAXONOMY.out.species,
@@ -104,16 +105,24 @@ workflow PATHOGENSURVEILLANCE {
         COARSE_SAMPLE_TAXONOMY.out.families
     )
 
+    // Create main summary report                                               
+    //MAIN_REPORT_1 (                                                               
+    //    INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
+    //    ch_input,                                                               
+    //    DOWNLOAD_REFERENCES.out.stats                                           
+    //)                                                                           
+
     // Assign closest reference for samples without a user-assigned reference
     ASSIGN_REFERENCES (
         INPUT_CHECK.out.sample_data,
         DOWNLOAD_REFERENCES.out.assem_samp_combos,
         DOWNLOAD_REFERENCES.out.sequence,
-        DOWNLOAD_REFERENCES.out.signatures
+        DOWNLOAD_REFERENCES.out.signatures,
+        COARSE_SAMPLE_TAXONOMY.out.depth
     )
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_CALLING_ANALYSIS (
+    VARIANT_ANALYSIS (
         ASSIGN_REFERENCES.out.sample_data,
         ch_input
     )
@@ -121,7 +130,8 @@ workflow PATHOGENSURVEILLANCE {
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (                                                           
         ASSIGN_REFERENCES.out.sample_data                           
-            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)                                                   
+            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
+            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)                                                   
     )                                                                           
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
 
@@ -133,7 +143,8 @@ workflow PATHOGENSURVEILLANCE {
     gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
         .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-        .map { [it[0], it[5], it[4], it[6]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)] ]            
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
+        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]            
     CORE_GENOME_PHYLOGENY (                                                     
         gff_and_group,                             
         ch_input                                                          
@@ -144,12 +155,13 @@ workflow PATHOGENSURVEILLANCE {
     //)
 
     // Create main summary report
-    report_in = VARIANT_CALLING_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
-        .groupTuple() // [ group_meta, [ref_meta], [tree] ]
-        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
+    report_in = VARIANT_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
+        .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // [ group_meta, ref_meta, tree, snp_align ]
+        .groupTuple() // [ group_meta, [ref_meta], [tree], [snp_align] ]
+        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], [snp_align], ani_matrix ]
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], [snp_align], ani_matrix, core_tree ]
 
-    MAIN_REPORT ( 
+    MAIN_REPORT_2 ( 
         report_in,
         ch_input,
         DOWNLOAD_REFERENCES.out.stats
@@ -159,28 +171,29 @@ workflow PATHOGENSURVEILLANCE {
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
         ch_versions.unique().collect(sort:true)
     )
+
                                                                           
     // MultiQC
-    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
-    //ch_workflow_summary = Channel.value(workflow_summary)
+    workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
+    ch_workflow_summary = Channel.value(workflow_summary)
 
-    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    //ch_methods_description = Channel.value(methods_description)
+    methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
+    ch_methods_description = Channel.value(methods_description)
 
-    //ch_multiqc_files = Channel.empty()
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
-    //MULTIQC (
-    //    ch_multiqc_files.collect(),
-    //    ch_multiqc_config.collect().ifEmpty([]),
-    //    ch_multiqc_custom_config.collect().ifEmpty([]),
-    //    ch_multiqc_logo.collect().ifEmpty([])
-    //)
-    //multiqc_report = MULTIQC.out.report.toList()
-    //ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        ch_multiqc_config.collect().ifEmpty([]),
+        ch_multiqc_custom_config.collect().ifEmpty([]),
+        ch_multiqc_logo.collect().ifEmpty([])
+    )
+    multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 
 
 }

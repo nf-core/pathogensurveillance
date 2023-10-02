@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/plantpathsurveil",
-    "homePage": "https://github.com/nf-core/plantpathsurveil",
+    "name": "nf-core/pathogensurveillance",
+    "homePage": "https://github.com/nf-core/pathogensurveillance",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

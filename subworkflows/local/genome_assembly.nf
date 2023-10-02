@@ -1,13 +1,14 @@
 include { FASTP           } from '../../modules/nf-core/fastp/main'
 include { SPADES          } from '../../modules/nf-core/spades/main'
 include { FILTER_ASSEMBLY } from '../../modules/local/filter_assembly'
-include { QUAST           } from '../../modules/nf-core/quast/main'
+include { QUAST           } from '../../modules/local/quast.nf'
 include { BAKTA_BAKTA     } from '../../modules/nf-core/bakta/bakta/main'
+include { SUBSET_READS    } from '../../modules/local/subset_reads'                 
 
 workflow GENOME_ASSEMBLY {
 
     take:
-    ch_input // channel: [ val(meta), [fastq_1, fastq_2], val(ref_meta), file(reference), val(group_meta), val(kingdom) ]
+    ch_input // channel: [ val(meta), [fastq_1, fastq_2], val(ref_meta), file(reference), val(group_meta), val(kingdom), val(depth) ]
 
     main:
 
@@ -15,10 +16,17 @@ workflow GENOME_ASSEMBLY {
     ch_input_filtered = ch_input
         .filter { it[5] == "Bacteria" }
     ch_reads = ch_input_filtered
-        .map { it[0..1] }
+        .map { it[0..1] + [it[6]] }
         .unique()
     
-    FASTP ( ch_reads, [], false, false )
+    // Subset sample reads to increase speed of following steps                 
+    SUBSET_READS (
+        ch_reads,                                                              
+        params.sketch_max_depth                                                 
+    )                                                                           
+
+
+    FASTP ( SUBSET_READS.out.reads, [], false, false )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
     SPADES (
@@ -35,12 +43,10 @@ workflow GENOME_ASSEMBLY {
 
     ch_ref_grouped = ch_input_filtered
         .combine(FILTER_ASSEMBLY.out.filtered, by: 0)
-        .groupTuple(by: 2)
-        .map { [it[2], it[3].sort()[0], it[6]] } // [val(ref_meta), val(ref), [file(assembly] ]
+        .groupTuple(by: 2) // [val(meta)], [[fastq_1, fastq_2]], val(ref_meta), [file(reference)], [val(group_meta)], [val(kingdom)], val(depth), file(assembly)]
+        .map { [it[2], it[7].sort(), it[3].sort()[0], []] } // ref_meta, assembly, reference
     QUAST (
-        ch_ref_grouped.map { it[2] }, // consensus (one or more assemblies)
-        ch_ref_grouped.map { it[1] }, // fasta (reference, optional)
-        [], // gff (optional)
+        ch_ref_grouped,
         true, // use_fasta
         false // use_gff
     )

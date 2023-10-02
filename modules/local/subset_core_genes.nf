@@ -1,4 +1,4 @@
-process SUBSETCOREGENES {
+process SUBSET_CORE_GENES {
     tag "$ref_meta.id"
     label 'process_single'
                                                                                 
