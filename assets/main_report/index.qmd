@@ -122,10 +122,6 @@ samp_data %>%
 
 Add settings used to run Nextflow and the pipeline parameters.
 
-
-
-
-
 # Identification
 
 
