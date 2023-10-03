@@ -15,8 +15,9 @@ process MAIN_REPORT {
     path versions
 
     output:
-    tuple val(group_meta), path("main_report/${prefix}_report"), emit: html
-    path "versions.yml"                                        , emit: versions
+    tuple val(group_meta), path("${prefix}_pathsurveil_report.html"), emit: html
+    tuple val(group_meta), path("${prefix}_pathsurveil_report.pdf") , emit: pdf
+    path "versions.yml"                                             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -70,6 +71,10 @@ process MAIN_REPORT {
     quarto render main_report \\
         --output-dir ${prefix}_report \\
         -P inputs:..
+        
+    # Rename outputs 
+    mv main_report/${prefix}_report/index.html ${prefix}_pathsurveil_report.html
+    mv main_report/${prefix}_report/index.pdf ${prefix}_pathsurveil_report.pdf
 
     # Save version of quarto used
     cat <<-END_VERSIONS > versions.yml
