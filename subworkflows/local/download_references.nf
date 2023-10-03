@@ -30,8 +30,8 @@ workflow DOWNLOAD_REFERENCES {
 
     MERGE_ASSEMBLIES (
        FIND_ASSEMBLIES.out.stats
-       .map { it[1] }
-       .collect()
+           .map { it[1] }
+           .collect()
     )
     
     PICK_ASSEMBLIES (
@@ -45,7 +45,8 @@ workflow DOWNLOAD_REFERENCES {
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
         .map {it[1]}                                                            
         .splitText()                                                            
-        .map { it.replace('\n', '') }                                           
+        .map { it.replace('\n', '') }
+        .filter { it != '' }
         .collect()                                                              
         .toSortedList()                                                         
         .flatten()                                                              
