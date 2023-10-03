@@ -415,7 +415,7 @@ mlglist2
 #Still have issues with metadata-reference seq has none-need way to include? 
 
 #NOTE-cannot have NAs in metadata-for temp fix, changed to NA-may need better solution
-samp_data <- map_dfc(samp_data, function(col) ifelse(is.na(col), "unknown", col))
+samp_data <- purrr::map_dfc(samp_data, function(col) ifelse(is.na(col), "unknown", col))
 
 myColors <- rainbow(length(unique(samp_data$nusery))) 
 names(myColors) <- levels(samp_data$nusery)
@@ -439,7 +439,7 @@ ms.loc <- poppr.msn(snp_genclone,
 #ms.loc$graph[]
 #ms.loc
 #str(ms.loc)
-the_edges <-E(ms.loc$graph)$weight
+the_edges <-igraph::E(ms.loc$graph)$weight
 edges<-as.list(the_edges)
 
 # Plot a pretty plot
@@ -452,7 +452,7 @@ plot_poppr_msn(
   quantiles = FALSE,
   wscale = FALSE,
   inds="None",
-  layfun = layout_with_lgl,
+  layfun = igraph::layout_with_lgl,
   edge.label = the_edges,
   edge.label.font = 2,
   edge.label.cex = 1,
