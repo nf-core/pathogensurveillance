@@ -243,7 +243,7 @@ phycanv
 
 ### ANI heatmap and dendrogram
 
-*Martha-Not sure if this is useful, but one idea.
+*TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
