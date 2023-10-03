@@ -25,6 +25,7 @@ workflow ASSIGN_REFERENCES {
             .unique(), // [val(meta), [file(fastq)], depth], one per sample                                                           
         params.sketch_max_depth                                                
     )                                                                           
+    ch_versions = ch_versions.mix(SUBSET_READS.out.versions.toSortedList().map{it[0]})
 
     // Trim rare k-mers from raw reads
     KHMER_TRIMLOWABUND (

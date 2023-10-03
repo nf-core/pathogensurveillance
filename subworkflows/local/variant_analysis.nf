@@ -51,6 +51,7 @@ workflow VARIANT_ANALYSIS {
     ch_versions = ch_versions.mix(VCF_TO_SNPALN.out.versions.toSortedList().map{it[0]})
                                                                                 
     IQTREE2_SNP ( VCF_TO_SNPALN.out.fasta, [] ) 
+    ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions.toSortedList().map{it[0]})
 
     emit:
     picard_dict  = REFERENCE_INDEX.out.picard_dict

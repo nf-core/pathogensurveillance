@@ -51,6 +51,7 @@ workflow DOWNLOAD_REFERENCES {
         .flatten()                                                              
         .unique()
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
+    ch_versions = ch_versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
     
     MAKE_GFF_WITH_FASTA ( DOWNLOAD_ASSEMBLIES.out.sequence.join(DOWNLOAD_ASSEMBLIES.out.gff) )
    
@@ -58,6 +59,7 @@ workflow DOWNLOAD_REFERENCES {
         DOWNLOAD_ASSEMBLIES.out.sequence
         .map { [[id: it[0]], it[1]] }
     )
+    ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
 
     genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)

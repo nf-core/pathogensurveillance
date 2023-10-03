@@ -24,13 +24,13 @@ workflow GENOME_ASSEMBLY {
         ch_reads,                                                              
         params.sketch_max_depth                                                 
     )                                                                           
-
+    ch_versions = ch_versions.mix(SUBSET_READS.out.versions.first())
 
     FASTP ( SUBSET_READS.out.reads, [], false, false )
     ch_versions = ch_versions.mix(FASTP.out.versions.first())
 
     SPADES (
-        FASTP.out.reads.map { [it[0], it[1], [], []] }, // tuple val(meta), path(illumina), path(pacbio), path(nanopore)
+        FASTP.out.reads.map { [it[0], it[1], [], []] }, // val(meta), path(illumina), path(pacbio), path(nanopore)
         [], // val yml
         []  // val hmm
     )
@@ -50,6 +50,7 @@ workflow GENOME_ASSEMBLY {
         true, // use_fasta
         false // use_gff
     )
+    ch_versions = ch_versions.mix(QUAST.out.versions.first())
 
     ch_bakta_db = Channel.value("$projectDir/assets/bakta_db/db-light")
     BAKTA_BAKTA (
@@ -58,6 +59,7 @@ workflow GENOME_ASSEMBLY {
         [], // proteins (optional)
         [] // prodigal_tf (optional)
     )
+    ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions.first())
 
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [ fastq_1, fastq_2 ] ]

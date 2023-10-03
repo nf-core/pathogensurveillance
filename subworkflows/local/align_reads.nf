@@ -27,6 +27,7 @@ workflow ALIGN_READS {
             .combine(CALCULATE_DEPTH.out.depth, by:0), 
         params.variant_max_depth
     )
+    ch_versions = ch_versions.mix(SUBSET_READS.out.versions.toSortedList().map{it[0]})
 
     samp_ref_combo2 = samp_ref_combo1
         .combine(SUBSET_READS.out.reads, by:0) // ref_samp_meta, meta, [reads], ref_meta, reference, reference_index, bam_index, [reads_subset]

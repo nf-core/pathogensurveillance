@@ -104,6 +104,7 @@ workflow PATHOGENSURVEILLANCE {
         COARSE_SAMPLE_TAXONOMY.out.genera,
         COARSE_SAMPLE_TAXONOMY.out.families
     )
+    ch_versions = ch_versions.mix(DOWNLOAD_REFERENCES.out.versions)
 
     // Create main summary report                                               
     //MAIN_REPORT_1 (                                                               
@@ -120,12 +121,14 @@ workflow PATHOGENSURVEILLANCE {
         DOWNLOAD_REFERENCES.out.signatures,
         COARSE_SAMPLE_TAXONOMY.out.depth
     )
+    ch_versions = ch_versions.mix(ASSIGN_REFERENCES.out.versions)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
     VARIANT_ANALYSIS (
         ASSIGN_REFERENCES.out.sample_data,
         ch_input
     )
+    ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
 
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (                                                           
@@ -148,7 +151,8 @@ workflow PATHOGENSURVEILLANCE {
     CORE_GENOME_PHYLOGENY (                                                     
         gff_and_group,                             
         ch_input                                                          
-    )                                                                           
+    )
+    ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
 
     // Read2tree phylogeny for eukaryotes
     //READ2TREE_ANALYSIS (
