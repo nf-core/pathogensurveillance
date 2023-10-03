@@ -3,6 +3,7 @@ project:
 
 website:
   title: "Pathogen Surveillance  "
+  favicon: "images/favicon.png"
   search: false
   sidebar:
     style: "docked"
