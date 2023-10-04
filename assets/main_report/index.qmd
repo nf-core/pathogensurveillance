@@ -298,23 +298,28 @@ snp_trees_midpoint<-midpoint(snp_trees)
 #One way to parse metadata file so we can color tips in a descriptive way
 
 #add REF to metadata-only provide accession info (and maybe genus and species)
-new_row <- data.frame(matrix(ncol = ncol(samp_data), nrow = 1))
-colnames(new_row) <- colnames(samp_data)
+samp_data2<-samp_data
+new_row <- data.frame(matrix(ncol = ncol(samp_data2), nrow = 1))
+colnames(new_row) <- colnames(samp_data2)
 
 new_row$sample <- "REF"
-samp_data <- rbind(samp_data, new_row)
+
+#Don't mess with original data frame
+samp_data2 <- rbind(samp_data2, new_row)
 
 ```
 
 #### ggtree option (starting point-adjusted so samples are green, ref is black. Could add accession of ref or species/genus, but it doesn't fit well)
 
 ```{r ggtree, height=10, width=8}
-samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
-samp_data$tip_color <- "#24B064"
-samp_data$tip_color[samp_data$sample == "REF"] <- "black"
+samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
+
+#We can revise, but one way to color the samples as one color, the ref as another
+samp_data2$tip_color <- "#24B064"
+samp_data2$tip_color[samp_data2$sample == "REF"] <- "black"
 
 
-p <- ggtree(snp_trees_midpoint) %<+% samp_data +
+p <- ggtree(snp_trees_midpoint) %<+% samp_data2 +
   geom_tippoint(aes(color = tip_color), show.legend = FALSE, size=2.5) + 
   scale_color_identity() +
   geom_tiplab(size=2.5)
@@ -355,9 +360,8 @@ snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
 
 #Need to rename samples so no longer have prefix (may be better way)
 genind_names<-indNames(snp_aln.gi)
-cleaned_names <- gsub("22_331_assembly_", "", genind_names)
+cleaned_names <- gsub("^.*?_.*?_(.*)", "\\1", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
-
 ```
 
 ### MLG table (maybe helpful to include-not sure)
@@ -418,7 +422,7 @@ mlglist2
 
 ### Poppr MSN
 
-```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
+```{r poppr msn, fig.height = 10}
 # Create a minimum spanning network with filtered data
 #Still have issues with metadata-reference seq has none-need way to include? 
 
@@ -431,15 +435,8 @@ myColors <- rainbow(length(unique(samp_data$nusery)))
 names(myColors) <- levels(samp_data$nusery)
 #myColors["Other"] <- "#808080"
 
-
+strata(snp_genclone) <- samp_data[, c(1:15)]
 setPop(snp_genclone) <- ~nusery
-
-
-# Setting the strata and pop properties
-strata(snp_genclone) <- samp_data[, c(1:18)]
-setPop(snp_genclone) <- ~nusery
-
-
 
 ms.loc <- poppr.msn(snp_genclone,
                     distmat = bitwise.dist(snp_genclone, percent = FALSE),
