@@ -580,5 +580,5 @@ The **`pathogen surveillance` pipeline** was developed by:
 
 Please cite this pipeline in publications as follows: 
 
-Foster et al. 2024. PathogenSurveillance: A nf-core piplein for rapid analysis of pathogen genome data. In preparation.
+Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
 
