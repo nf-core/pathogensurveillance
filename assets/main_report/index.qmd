@@ -93,13 +93,13 @@ version_data <- tibble(
 
 # ![](images/favicon.png) Run Summary
 
-This report is produced by the **`nf-core/pathogensurveillance` pipeline** version **{{< var version >}}**.
+This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
 
-| <!-- --> | <!-- --> | 
-|-----|-----|
-| **Report group:**   | `r group` |
-| **Sample count:**   | `r nrow(samp_data)` |
-| **Last updated**    | `r format(Sys.time(), '%B %d , %Y')` |
+| <!-- -->          | <!-- -->                             |
+|-------------------|--------------------------------------|
+| **Report group:** | `r group`                            |
+| **Sample count:** | `r nrow(samp_data)`                  |
+| **Last updated**  | `r format(Sys.time(), '%B %d , %Y')` |
 
 ## Status
 
@@ -123,7 +123,6 @@ samp_data %>%
 Add settings used to run Nextflow and the pipeline parameters.
 
 # Identification
-
 
 ## Most similar organisms
 
@@ -193,15 +192,13 @@ DT::datatable(final_table,
 
 ```
 
-
-::: {.callout-note}
+::: callout-note
 WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 :::
 
 ## Phylogenetic context
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### Core genome phylogeny
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
@@ -251,9 +248,9 @@ p1
 ```
 
 ### NJ tree option
+
 ```{r ANI NJ tree, fig.height = 8, fig.width=8}
-p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
-p1
+
 ```
 :::
 
@@ -272,35 +269,55 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 
 ## Sample Phylogeny
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ### SNP phylogeny
 
 ```{r div_snp_tree_config, include=FALSE}
+#Martha-I notice SNP tree labels are now revised to include ref accession as prefix. Here I (martha), was just playing with how to make informative labels. There may be a more simplified approach. Please revise as needed
+
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
-newtips <- gsub(".*_assembly_", "", oldtips)
+
+#assume REF is always in first position
+prefix<- gsub("^(.*?_.*?)(?:_).*", "\\1", oldtips[2])
+ref_name <- paste0("REF_", prefix)
+
+
+#SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
+newtips <- gsub("^.*?_.*?_(.*)", "\\1", oldtips)
 snp_trees$tip.label<-newtips
+
+# Check if there's only one unique prefix
 
 # Root tree
 #option1
 snp_trees_rootref <- root(snp_trees, "REF")
 #option2
 snp_trees_midpoint<-midpoint(snp_trees)
+
+#One way to parse metadata file so we can color tips in a descriptive way
+
+#add REF to metadata-only provide accession info (and maybe genus and species)
+new_row <- data.frame(matrix(ncol = ncol(samp_data), nrow = 1))
+colnames(new_row) <- colnames(samp_data)
+
+new_row$sample <- "REF"
+samp_data <- rbind(samp_data, new_row)
+
 ```
 
-#### ggtree option (starting point)
+#### ggtree option (starting point-adjusted so samples are green, ref is black. Could add accession of ref or species/genus, but it doesn't fit well)
 
-*May not be most generalizable as one has to specify how color tips-but just another tree option. Very powerful package-but trees are not interactive*
+```{r ggtree, height=10, width=8}
+samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
 
-```{r ggtree starting point}
-gg <- ggtree(snp_trees_midpoint) %<+% samp_data +
-  geom_tiplab(size=2.5) +
-  #geom_tippoint(aes(color=factor(year),fill=factor(year)), size=4.5, stroke=0, alpha=0.75) + # commented out to make it run when year is not available
-  theme(legend.position="left") +
-  guides(color = guide_legend(override.aes = list(size=1))) +
-  geom_treescale(fontsize =2.5) 
-gg
+p <- ggtree(snp_trees_midpoint) %<+% samp_data +
+  geom_tippoint(aes(color = tip_color), show.legend = FALSE, size=2.5) + 
+  scale_color_identity() +
+  geom_tiplab(size=2.5)
+print(p)
+
+#TODO-try out plotly
 ```
 
 #### Phylocanvas version
@@ -316,7 +333,6 @@ More info will be added later.
 ```
 
 ### ANI tree
-
 :::
 
 ## Minimum spanning network
@@ -484,79 +500,54 @@ visNetwork(node_data, edges_data) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
 ```
 
-
 ### Network D3 experiment
-
-
-
-
-
-
-
-
 
 # Quality control
 
-
-* A quick indicator of status of each step. 
+-   A quick indicator of status of each step.
 
 ## Input data quality
 
-* multiqc link
+-   multiqc link
 
 ## Downloaded references
 
-* quast
-* table with rows for each sample with info on references chosen
-   - sample id
-   - reference id
-   - ANI between sample and reference
-* table with one row per reference (taxon id, GSA id, classification, link to ncbi)
-* sourmash output (tree?)
+-   quast
+-   table with rows for each sample with info on references chosen
+    -   sample id
+    -   reference id
+    -   ANI between sample and reference
+-   table with one row per reference (taxon id, GSA id, classification, link to ncbi)
+-   sourmash output (tree?)
 
 ## Assembly and annotation
 
-* depth of coverage
-* quast link
-* BUSCO gene content?
-* bakta output?       
+-   depth of coverage
+-   quast link
+-   BUSCO gene content?
+-   bakta output?
 
 ## Variant calling?
 
-* vcfr for plots
-* iqtree model selection, number of informative sites, indels
+-   vcfr for plots
+-   iqtree model selection, number of informative sites, indels
 
 ## Core genome phylogeny
 
-* core gene info (how many genes, length, paralogs)
-* outlier samples causing few genes to be chosen
-* iqtree model selection, number of informative sites, indels
-
-
-
-
-
-
-
-
-
-
+-   core gene info (how many genes, length, paralogs)
+-   outlier samples causing few genes to be chosen
+-   iqtree model selection, number of informative sites, indels
 
 # About
 
 The **`pathogen surveillance` pipeline** was developed by:
 
-  - Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
-  - Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
-  
-> To contribute or report bug please see our [github repository]( https://github.com/nf-core/pathogensurveillance). 
-  
+-   Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+-   Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
+
+> To contribute or report bug please see our [github repository](https://github.com/nf-core/pathogensurveillance).
+
 Please cite this pipeline in publications as follows: ...
-
-
-
-
-
 
 # References
 
@@ -564,9 +555,8 @@ Please cite this pipeline in publications as follows: ...
 
 The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
 
-  - A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
-  - The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
-
+-   A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
+-   The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
 
 ## Analysis Software
 
@@ -586,8 +576,6 @@ knitr::write_bib(c(
 ```{r}
 sessionInfo()
 ```
-
-
 
 ## Bibliography
 
