@@ -3,10 +3,11 @@ project:
 
 website:
   title: "Pathogen Surveillance  "
-  favicon: "images/favicon.png"
+  favicon: "favicon.png"
   search: false
   sidebar:
     style: "docked"
+    logo: "favicon.png"
     tools:
       - icon: twitter
         href: https://twitter.com/phytophthoralab
