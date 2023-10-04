@@ -23,7 +23,12 @@ process SUBSET_READS {
     def args = task.ext.args ?: ''
     """
     READ_COUNT=\$(zgrep -c '@' ${fastqs[0]})
-    SUBSET_COUNT=\$(echo "\$READ_COUNT * ${max_depth} / ${depth}" | bc)
+    
+    if [${depth} == 0]; then
+        SUBSET_COUNT=\$(echo "\$READ_COUNT * ${max_depth} / ${depth}" | bc)
+    else
+        SUBSET_COUNT=\$READ_COUNT
+    fi
     
     if [ \$SUBSET_COUNT -gt \$READ_COUNT ]; then
         for f in ${fastqs.join(' ')}                                      
