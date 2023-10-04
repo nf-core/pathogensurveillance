@@ -273,18 +273,16 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ### SNP phylogeny
 
 ```{r div_snp_tree_config, include=FALSE}
-#Martha-I notice SNP tree labels are now revised to include ref accession as prefix. Here I (martha), was just playing with how to make informative labels. There may be a more simplified approach. Please revise as needed
+#Martha-I notice SNP tree labels are now revised to include ref accession as prefix, for one dataset (2). Here I (martha), was just playing with how to make informative and simple labels. There may be a more simplified approach. Please revise as needed
 
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
+#TODO generalize for any prefix
 #assume REF is always in first position
-prefix<- gsub("^(.*?_.*?)(?:_).*", "\\1", oldtips[2])
-ref_name <- paste0("REF_", prefix)
-
+newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
 
 #SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
-newtips <- gsub("^.*?_.*?_(.*)", "\\1", oldtips)
 snp_trees$tip.label<-newtips
 
 # Check if there's only one unique prefix
@@ -360,7 +358,7 @@ snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
 
 #Need to rename samples so no longer have prefix (may be better way)
 genind_names<-indNames(snp_aln.gi)
-cleaned_names <- gsub("^.*?_.*?_(.*)", "\\1", genind_names)
+cleaned_names <- gsub("^[^_]+(?:_[^_]+)*_", "", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
 ```
 
@@ -422,7 +420,7 @@ mlglist2
 
 ### Poppr MSN
 
-```{r poppr msn, fig.height = 10}
+```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
 # Create a minimum spanning network with filtered data
 #Still have issues with metadata-reference seq has none-need way to include? 
 
