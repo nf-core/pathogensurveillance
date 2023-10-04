@@ -247,9 +247,10 @@ p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
 
-### NJ tree option
+### ANI NJ tree option
 
 ```{r ANI NJ tree, fig.height = 8, fig.width=8}
+
 
 ```
 :::
