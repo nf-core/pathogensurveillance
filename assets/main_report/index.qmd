@@ -310,6 +310,9 @@ samp_data <- rbind(samp_data, new_row)
 
 ```{r ggtree, height=10, width=8}
 samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
+samp_data$tip_color <- "#24B064"
+samp_data$tip_color[samp_data$sample == "REF"] <- "black"
+
 
 p <- ggtree(snp_trees_midpoint) %<+% samp_data +
   geom_tippoint(aes(color = tip_color), show.legend = FALSE, size=2.5) + 
