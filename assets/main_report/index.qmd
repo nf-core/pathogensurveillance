@@ -91,7 +91,7 @@ version_data <- tibble(
 )
 ```
 
-# ![](images/favicon.png) Run Summary
+# Run Summary
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
 
@@ -254,7 +254,7 @@ p1
 ```
 :::
 
-# Diversity
+# ![](favicon.png) Diversity
 
 *Things to address:*
 
