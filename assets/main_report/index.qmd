@@ -578,10 +578,11 @@ sessionInfo()
 
 Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
 
-:::{.callout-note}
-To contribute or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
-:::
+:::{.callout-tip}
+## Feedback
 
+To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+:::
 
 
 Please cite this pipeline in publications as follows: 
