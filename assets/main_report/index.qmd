@@ -574,14 +574,13 @@ sessionInfo()
 
 # About
 
-The **`nf-core/pathogen surveillance` pipeline** was developed by:
+{{< bi file-earmark-person >}} The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
--   Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
--   Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
+Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
 
 > To contribute or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
 
 Please cite this pipeline in publications as follows: 
 
-Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+{{< bi file-earmark-pdf >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
 
