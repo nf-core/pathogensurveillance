@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -34,6 +34,7 @@ library(phangorn)
 library(ggplot2)
 library(ggnewscale)
 library(kableExtra)
+library(plotly)
 ```
 
 ```{r parse_inputs}
@@ -308,8 +309,6 @@ samp_data2 <- rbind(samp_data2, new_row)
 
 ```
 
-#### ggtree option (starting point-adjusted so samples are green, ref is black. Could add accession of ref or species/genus, but it doesn't fit well)
-
 ```{r ggtree, height=10, width=8}
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
 
@@ -317,21 +316,25 @@ samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample),
 samp_data2$tip_color <- "#24B064"
 samp_data2$tip_color[samp_data2$sample == "REF"] <- "black"
 
+#Couldn't use some of ggtree functions with plotly, so here is a workaround
+snp_tree1 <- fortify(snp_trees_midpoint)
 
-p <- ggtree(snp_trees_midpoint) %<+% samp_data2 +
-  geom_tippoint(aes(color = tip_color), show.legend = FALSE, size=2.5) + 
+# Merge it with your samp_data2 for color information
+snp_tree1 <- merge(snp_tree1, samp_data2, by.x="label", by.y="sample")
+
+# Using theme_minimal for a cleaner background
+p <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
+  # Coloring nodes and adjusting size for visibility
+  geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
+  geom_point(data=snp_tree1, aes(x=x, y=y, color=tip_color), show.legend = FALSE, size=3) +
+  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label), size=3, hjust=0, vjust=0.5, fontface="bold") +
   scale_color_identity() +
-  geom_tiplab(size=2.5)
-print(p)
+  theme(legend.position = "none")
 
-#TODO-try out plotly
-```
+# Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
+p_interactive <- ggplotly(p)
+p_interactive
 
-#### Phylocanvas version
-
-```{r div_snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
-phycanv <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-phycanv
 ```
 
 ```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
@@ -339,7 +342,6 @@ There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
-### ANI tree
 :::
 
 ## Minimum spanning network
