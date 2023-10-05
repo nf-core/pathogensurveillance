@@ -554,7 +554,7 @@ The `pathogen surveillance` pipeline used the following tools that should be ref
 DT::datatable(version_data)
 ```
 
-## {{< bi gear-wide-connected >}} Report software
+## ![](Rlogo.png){height=30px} Report software
 
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
