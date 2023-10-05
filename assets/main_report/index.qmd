@@ -91,7 +91,7 @@ version_data <- tibble(
 )
 ```
 
-# ![](images/favicon.png) Run Summary
+# Summary
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
 
@@ -120,13 +120,13 @@ samp_data %>%
 
 ## Input settings
 
-Add settings used to run Nextflow and the pipeline parameters.
+Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given taht status is reported above).
 
 # Identification
 
-## Most similar organisms
+## Rapid ID to genus
 
-The following table provides putative classifications of the samples based on a kmer classification analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
+The following table provides putative classifications of the samples based on a kmer analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
 ```{r sketchtable, fig.width=5}
 # Load additional packages for aesthetic formatting
@@ -196,10 +196,10 @@ DT::datatable(final_table,
 WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 :::
 
-## Phylogenetic context
+## Rigorous ID to species or subspecies
 
 ::: panel-tabset
-### Core genome phylogeny
+### Core phylogeny
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 convert_id <- function(ids) {
@@ -247,14 +247,15 @@ p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
 
-### NJ tree option
+### ANI NJ tree option
 
 ```{r ANI NJ tree, fig.height = 8, fig.width=8}
+
 
 ```
 :::
 
-# Diversity
+# ![](favicon.png) Genetic diversity in the group(s)
 
 *Things to address:*
 
@@ -267,24 +268,22 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 #Rename sample names so they don't have prefixes-may be better way
 ```
 
-## Sample Phylogeny
+## Genetic diversity in sample
 
 ::: panel-tabset
-### SNP phylogeny
+### SNP tree
 
 ```{r div_snp_tree_config, include=FALSE}
-#Martha-I notice SNP tree labels are now revised to include ref accession as prefix. Here I (martha), was just playing with how to make informative labels. There may be a more simplified approach. Please revise as needed
+#Martha-I notice SNP tree labels are now revised to include ref accession as prefix, for one dataset (2). Here I (martha), was just playing with how to make informative and simple labels. There may be a more simplified approach. Please revise as needed
 
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
+#TODO generalize for any prefix
 #assume REF is always in first position
-prefix<- gsub("^(.*?_.*?)(?:_).*", "\\1", oldtips[2])
-ref_name <- paste0("REF_", prefix)
-
+newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
 
 #SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
-newtips <- gsub("^.*?_.*?_(.*)", "\\1", oldtips)
 snp_trees$tip.label<-newtips
 
 # Check if there's only one unique prefix
@@ -360,7 +359,7 @@ snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
 
 #Need to rename samples so no longer have prefix (may be better way)
 genind_names<-indNames(snp_aln.gi)
-cleaned_names <- gsub("^.*?_.*?_(.*)", "\\1", genind_names)
+cleaned_names <- gsub("^[^_]+(?:_[^_]+)*_", "", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
 ```
 
@@ -422,7 +421,7 @@ mlglist2
 
 ### Poppr MSN
 
-```{r poppr msn, fig.height = 10}
+```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
 # Create a minimum spanning network with filtered data
 #Still have issues with metadata-reference seq has none-need way to include? 
 
@@ -538,17 +537,6 @@ visNetwork(node_data, edges_data) %>%
 -   outlier samples causing few genes to be chosen
 -   iqtree model selection, number of informative sites, indels
 
-# About
-
-The **`pathogen surveillance` pipeline** was developed by:
-
--   Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
--   Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
-
-> To contribute or report bug please see our [github repository](https://github.com/nf-core/pathogensurveillance).
-
-Please cite this pipeline in publications as follows: ...
-
 # References
 
 ## Methods
@@ -581,3 +569,17 @@ sessionInfo()
 
 ::: {#refs}
 :::
+
+# About
+
+The **`nf-core/pathogen surveillance` pipeline** was developed by:
+
+-   Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+-   Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
+
+> To contribute or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+
+Please cite this pipeline in publications as follows: 
+
+Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+
