@@ -584,8 +584,10 @@ Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ..
 To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
 :::
 
-Please cite this pipeline in publications as follows: 
+Please cite this pipeline and nf-core in publications as follows: 
 
 {{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316–19. https://doi.org/10.1038/nbt.3820.
 
 Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).
