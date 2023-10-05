@@ -106,7 +106,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline** versi
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-## Input data
+## {{< bi clipboard-data >}} Input data
 
 ```{r}
 samp_data %>%
@@ -583,7 +583,6 @@ Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ..
 
 To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
 :::
-
 
 Please cite this pipeline in publications as follows: 
 
