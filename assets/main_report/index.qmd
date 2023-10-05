@@ -123,7 +123,7 @@ samp_data %>%
 
 Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given taht status is reported above).
 
-# Identification
+# ![](loupe_2099734.png){height=30px} Identification
 
 ## Rapid ID to genus
 
@@ -588,3 +588,4 @@ Please cite this pipeline in publications as follows:
 
 {{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
 
+Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).
