@@ -16,6 +16,7 @@ workflow ASSIGN_REFERENCES {
 
     main:
     ch_versions = Channel.empty()
+    ch_messages = Channel.empty()
 
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
@@ -103,6 +104,7 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1 )
         .map { [it[0].id] + it[1] } // [val(sample_id), val(group_id), val(reference_id)]
+    
 
     // Convert IDs back into full meta
     id_meta_key = sample_data                                                                 
@@ -116,9 +118,11 @@ workflow ASSIGN_REFERENCES {
         .filter { it[3] != null }
         .map { [it[2].id, it[2], it[3]] } 
         .unique() // [val(ref_id), val(ref_meta), file(reference)]
+    null_refs = Channel.of ( ["__NULL__", [id: null], null])
     all_refs = sequence
         .map { [it[0], [id: it[0]], it[1]] }
         .concat(user_refs) // [val(ref_id), val(ref_meta), file(reference)]
+        .concat(null_refs)
     assigned_refs_with_seq = assigned_refs
         .map { [it[2]] + it[0..1] } // [val(ref_id), val(meta), val(group_meta)]
         .combine(all_refs, by: 0)  // [val(ref_id), val(meta), val(group_meta), val(ref_meta), file(reference)]
@@ -129,6 +133,7 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0], it[4], it[1]] } // [val(meta), val(group_meta), [file(fastq)] ]
         .combine ( assigned_refs_with_seq, by: 0..1 ) // [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
         .map { [it[0], it[2], it[3], it[4], it[1]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
 
     emit:
     sample_data     = new_sample_data   // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]

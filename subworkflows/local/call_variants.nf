@@ -67,7 +67,8 @@ workflow CALL_VARIANTS {
     ch_versions = ch_versions.mix(VCFLIB_VCFFILTER.out.versions.toSortedList().map{it[0]}) 
 
     emit:
-    vcf      = VCFLIB_VCFFILTER.out.vcf        // channel: [ val(ref+group_meta), fil(vcf) ]
-    versions = ch_versions                     // channel: [ versions.yml ]
+    vcf      = VCFLIB_VCFFILTER.out.vcf               // val(ref+group_meta), file(vcf)
+    samples  = ch_ref_grouped.map { [it[0], it[4]] }  // val(ref+group_meta), [meta]
+    versions = ch_versions                            // versions.yml
 }
 

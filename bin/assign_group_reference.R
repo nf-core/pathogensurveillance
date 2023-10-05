@@ -1,5 +1,9 @@
 #!/usr/bin/env -S Rscript --vanilla
 
+start_min_ani <- 0.99 # The minimum ANI for a reference to be assigned to a samples 
+end_min_ani <- 0.99 # How low the minimum can go if no samples can be assigned
+ani_interval <- 0.02 # How much the minimum ANI threshold changes each time it is decreased 
+
 # Function to assign references based on a given min_ani threshold
 assign_ref_based_on_min_ani <- function(min_ani, sample_ani, user_ref_ids, down_ref_ids) {
   # Initialize empty data frame to hold the final assignments
@@ -71,28 +75,33 @@ sample_ani <- ani_matrix[refless_sample_ids, c(user_ref_ids, down_ref_ids)]
 final_output <- data.frame(sample_id = character(0), reference = character(0))
 
 # Main loop: loop over min_ani values from 0.9 to 0.7
-min_ani <- 0.9
-while (min_ani >= 0.7) {
-  print(paste("Current min_ani: ", min_ani))  # Debugging print statement
-  temp_output <- assign_ref_based_on_min_ani(min_ani, sample_ani, user_ref_ids, down_ref_ids)
-  if (nrow(temp_output) > 0) {
-    final_output <- rbind(final_output, temp_output)
-    break
-  }
-  min_ani <- min_ani - 0.01
+if (length(refless_sample_ids) > 0) {
+    min_ani <- start_min_ani
+    while (min_ani >= end_min_ani) {
+        print(paste("Current min_ani: ", min_ani))  # Debugging print statement
+        temp_output <- assign_ref_based_on_min_ani(min_ani, sample_ani, user_ref_ids, down_ref_ids)
+        if (nrow(temp_output) > 0) {
+            final_output <- rbind(final_output, temp_output)
+            break
+        }
+        min_ani <- min_ani - ani_interval
+    }
 }
 
 # If no reference found, fill with NAs
 if (nrow(final_output) == 0) {
-  final_output <- data.frame(sample_id = refless_sample_ids, reference = NA)
+  final_output <- data.frame(sample_id = refless_sample_ids, reference = rep(NA_character_, length(refless_sample_ids)))
 }
 
 # Combine with samples having user-defined references
 final_output <- rbind(final_output, samp_ref_pairs[!is.na(samp_ref_pairs$reference), ])
 rownames(final_output) <- final_output$sample_id
 
-# Sort output
+# Sort output to match order of input samples
 final_output <- final_output[samp_ref_pairs$sample_id, ]
 
+# Convert NAs to a string not likely to be confused with a real ref ID
+final_output$reference[is.na(final_output$reference)] <- "__NULL__"
+
 # Write output to file
-write.table(final_output, file = args$out_path, sep = ',', quote = FALSE, row.names = FALSE)
+write.table(final_output, file = args$out_path, sep = ',', quote = FALSE, row.names = FALSE, col.names = FALSE)

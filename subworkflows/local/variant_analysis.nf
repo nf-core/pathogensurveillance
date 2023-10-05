@@ -13,15 +13,26 @@ workflow VARIANT_ANALYSIS {
 
     main:
     ch_versions = Channel.empty()
-
-    ch_ref = input
+    messages = Channel.empty()
+    
+    // Remove any samples that do not have reference information
+    input_filtered = input
+        .filter { it[3] != null } // meta, [fastq], ref_meta, reference, group_meta
+        
+    // Report samples that do not have reference information
+    no_ref_warnings = input
+        .filter { it[3] == null } // meta, [fastq], ref_meta, reference, group_meta
+        .map { [it[0], it[4], null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(no_ref_warnings)
+    
+    ch_ref = input_filtered
         .map { it[2..3] }
         .groupTuple()
         .map { [it[0], it[1].sort()[0]] }
-    REFERENCE_INDEX ( input.map { it[2..3] }.unique() )
+    REFERENCE_INDEX ( input_filtered.map { it[2..3] }.unique() )
     ch_versions = ch_versions.mix(REFERENCE_INDEX.out.versions) 
 
-    input_with_indexes = input
+    input_with_indexes = input_filtered
         .map { [it[2], it[0], it[1], it[3], it[4]] } // [val(ref_meta), val(meta), [file(fastq)], file(reference), val(group_meta)]
         .combine(REFERENCE_INDEX.out.samtools_fai, by: 0)              
         .combine(REFERENCE_INDEX.out.bwa_index, by: 0)
@@ -49,8 +60,19 @@ workflow VARIANT_ANALYSIS {
                                                                                 
     VCF_TO_SNPALN ( VCF_TO_TAB.out.tab )                                            
     ch_versions = ch_versions.mix(VCF_TO_SNPALN.out.versions.toSortedList().map{it[0]})
+    
+    // Dont make trees for groups with less than 3 samples
+    align_with_samp_meta = VCF_TO_SNPALN.out.fasta // val(ref+group_meta), fasta
+        .combine(CALL_VARIANTS.out.samples, by:0) // val(ref+group_meta), fasta, [meta]
+    align_for_tree = align_with_samp_meta
+        .filter { it[2].size() >= 3 }
+        .map { it[0..1] } // val(ref+group_meta), fasta
+    too_few_samp_warnings = align_with_samp_meta // val(ref+group_meta), fasta, [meta]
+        .filter { it[2].size() < 3 } 
+        .map { [null, it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(too_few_samp_warnings)
                                                                                 
-    IQTREE2_SNP ( VCF_TO_SNPALN.out.fasta, [] ) 
+    IQTREE2_SNP ( align_for_tree, [] ) 
     ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions.toSortedList().map{it[0]})
 
     emit:
@@ -64,7 +86,8 @@ workflow VARIANT_ANALYSIS {
                        .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
     vcf          = CALL_VARIANTS.out.vcf                                      
                        .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
-    versions = ch_versions                           // channel: [ versions.yml ]
+    versions     = ch_versions                           // channel: [ versions.yml ]
+    messages     = messages // meta, group_meta, ref_meta, workflow, level, message
 
 }
 

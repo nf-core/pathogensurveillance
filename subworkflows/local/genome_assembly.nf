@@ -44,12 +44,8 @@ workflow GENOME_ASSEMBLY {
     ch_ref_grouped = ch_input_filtered
         .combine(FILTER_ASSEMBLY.out.filtered, by: 0)
         .groupTuple(by: 2) // [val(meta)], [[fastq_1, fastq_2]], val(ref_meta), [file(reference)], [val(group_meta)], [val(kingdom)], val(depth), file(assembly)]
-        .map { [it[2], it[7].sort(), it[3].sort()[0], []] } // ref_meta, assembly, reference
-    QUAST (
-        ch_ref_grouped,
-        true, // use_fasta
-        false // use_gff
-    )
+        .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
+    QUAST ( ch_ref_grouped )
     ch_versions = ch_versions.mix(QUAST.out.versions.first())
 
     ch_bakta_db = Channel.value("$projectDir/assets/bakta_db/db-light")

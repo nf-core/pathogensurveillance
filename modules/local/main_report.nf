@@ -13,6 +13,7 @@ process MAIN_REPORT {
     path multiqc_plots
     path multiqc_report
     path versions
+    path messages
 
     output:
     tuple val(group_meta), path("${prefix}_pathsurveil_report.html"), emit: html
