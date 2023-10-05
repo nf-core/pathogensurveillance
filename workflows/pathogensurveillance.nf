@@ -47,8 +47,6 @@ include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_refere
 include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
 include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 
-include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/main_report'
-include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/main_report'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,6 +61,9 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
+include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/main_report'
+include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/main_report'
+include { RECORD_MESSAGES              } from '../modules/local/record_messages'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,6 +77,7 @@ def multiqc_report = []
 workflow PATHOGENSURVEILLANCE {
 
     ch_versions = Channel.empty()
+    messages = Channel.empty()
 
     // Read in samplesheet, validate and stage input files
     INPUT_CHECK (
@@ -129,6 +131,7 @@ workflow PATHOGENSURVEILLANCE {
         ch_input
     )
     ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (                                                           
@@ -157,7 +160,8 @@ workflow PATHOGENSURVEILLANCE {
     // Read2tree phylogeny for eukaryotes
     //READ2TREE_ANALYSIS (
     //)
-
+    
+    
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
         ch_versions.unique().collect(sort:true)
@@ -185,18 +189,28 @@ workflow PATHOGENSURVEILLANCE {
     )
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-
+    
+    // Save error/waring/message info
+    RECORD_MESSAGES (                                               
+        messages.collect(sort:true, flat:false)
+    )
     // Create main summary report                                               
     grouped_sendsketch = INPUT_CHECK.out.sample_data // meta, fastq, ref_meta, reference, group_meta
         .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
         .map { it[4..5] } // group_meta, sendsketch                             
         .groupTuple() // group_meta, [sendsketch]
-    report_in = VARIANT_ANALYSIS.out.phylogeny // group_meta, ref_meta, tree    
+        
+        ASSIGN_REFERENCES.out.sample_data // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+        
+    report_in = ASSIGN_REFERENCES.out.sample_data // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
+        .map { [it[4]] } // val(group_meta)
+        .unique()
+        .join(VARIANT_ANALYSIS.out.phylogeny, remainder: true).view() // group_meta, ref_meta, tree    
         .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // group_meta, ref_meta, tree, snp_align
         .combine(VARIANT_ANALYSIS.out.vcf, by:0..1) // group_meta, ref_meta, tree, snp_align, vcf
         .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
         .join(GENOME_ASSEMBLY.out.quast, remainder: true) // ref_meta, group_meta, tree, snp_align, vcf, quast
-        .map { [it[1], it[0]] + it[2..5]}
+        .map { [it[1], it[0]] + it[2..5] }
         .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
         .join(ASSIGN_REFERENCES.out.ani_matrix, remainder: true) // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast] ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
@@ -209,7 +223,8 @@ workflow PATHOGENSURVEILLANCE {
         MULTIQC.out.data,                                                       
         MULTIQC.out.plots,                                                      
         MULTIQC.out.report,
-        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
+        RECORD_MESSAGES.out.tsv
     )                                                                           
 
 }
