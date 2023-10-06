@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -34,6 +34,7 @@ library(phangorn)
 library(ggplot2)
 library(ggnewscale)
 library(kableExtra)
+library(plotly)
 ```
 
 ```{r parse_inputs}
@@ -105,7 +106,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline** versi
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-## Input data
+## {{< bi clipboard-data >}} Input data
 
 ```{r}
 samp_data %>%
@@ -118,11 +119,11 @@ samp_data %>%
     DT::datatable()
 ```
 
-## Input settings
+## {{< bi sliders >}} Input settings
 
 Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given taht status is reported above).
 
-# Identification
+# ![](loupe_2099734.png){height=30px} Identification
 
 ## Rapid ID to genus
 
@@ -308,8 +309,6 @@ samp_data2 <- rbind(samp_data2, new_row)
 
 ```
 
-#### ggtree option (starting point-adjusted so samples are green, ref is black. Could add accession of ref or species/genus, but it doesn't fit well)
-
 ```{r ggtree, height=10, width=8}
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
 
@@ -317,21 +316,25 @@ samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample),
 samp_data2$tip_color <- "#24B064"
 samp_data2$tip_color[samp_data2$sample == "REF"] <- "black"
 
+#Couldn't use some of ggtree functions with plotly, so here is a workaround
+snp_tree1 <- fortify(snp_trees_midpoint)
 
-p <- ggtree(snp_trees_midpoint) %<+% samp_data2 +
-  geom_tippoint(aes(color = tip_color), show.legend = FALSE, size=2.5) + 
+# Merge it with your samp_data2 for color information
+snp_tree1 <- merge(snp_tree1, samp_data2, by.x="label", by.y="sample")
+
+# Using theme_minimal for a cleaner background
+p <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
+  # Coloring nodes and adjusting size for visibility
+  geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
+  geom_point(data=snp_tree1, aes(x=x, y=y, color=tip_color), show.legend = FALSE, size=3) +
+  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label), size=3, hjust=0, vjust=0.5, fontface="bold") +
   scale_color_identity() +
-  geom_tiplab(size=2.5)
-print(p)
+  theme(legend.position = "none")
 
-#TODO-try out plotly
-```
+# Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
+p_interactive <- ggplotly(p)
+p_interactive
 
-#### Phylocanvas version
-
-```{r div_snp_phylo, fig.height = 7, eval = ! is.null(snp_trees)}
-phycanv <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-phycanv
 ```
 
 ```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
@@ -339,7 +342,6 @@ There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
-### ANI tree
 :::
 
 ## Minimum spanning network
@@ -539,20 +541,20 @@ visNetwork(node_data, edges_data) %>%
 
 # References
 
-## Methods
+## {{< fa flask >}} Methods
 
 The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
 
 -   A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
 -   The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
 
-## Analysis Software
+## {{< bi gear-wide-connected >}} Analysis software
 
 ```{r}
 DT::datatable(version_data)
 ```
 
-## Report Software
+## ![](Rlogo.png){height=30px} version and packages
 
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
@@ -565,21 +567,27 @@ knitr::write_bib(c(
 sessionInfo()
 ```
 
-## Bibliography
+## {{< ai doi >}} Bibliography
 
 ::: {#refs}
 :::
 
 # About
 
-The **`nf-core/pathogen surveillance` pipeline** was developed by:
+{{< bi file-earmark-person >}} The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
--   Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
--   Contributors include [Alex Weisberg](https://alexandra-weisberg.com/), ...
+Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
 
-> To contribute or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+:::{.callout-tip}
+## Feedback
 
-Please cite this pipeline in publications as follows: 
+To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+:::
 
-Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+Please cite this pipeline and nf-core in publications as follows: 
 
+{{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316–19. https://doi.org/10.1038/nbt.3820.
+
+Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).
