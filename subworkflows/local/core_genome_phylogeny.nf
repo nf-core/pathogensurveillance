@@ -16,6 +16,7 @@ workflow CORE_GENOME_PHYLOGENY {
     main:
 
     ch_versions = Channel.empty()
+    messages = Channel.empty()
 
     // group samples by reference genome                                        
     ch_gff_grouped = sample_gff                                                  
@@ -24,12 +25,20 @@ workflow CORE_GENOME_PHYLOGENY {
 
     PIRATE ( ch_gff_grouped )
     ch_versions = ch_versions.mix(PIRATE.out.versions.first())
+    
+    // Check that Pirate worked and report
+    good_pirate_results = PIRATE.out.results
+        .filter { it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
+    pirate_failed = PIRATE.out.results // val(group_meta), [result_files]
+        .filter { ! it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
+        .map { [null, it[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Pirate failed to find a core genome, possibly becuase samples are very different or there are too few reads."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(pirate_failed)
 
-    REFORMAT_PIRATE_RESULTS ( PIRATE.out.results )                                                   
+    REFORMAT_PIRATE_RESULTS ( good_pirate_results )                                                   
     ch_versions = ch_versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())                  
     
     // Extract sequences of all genes (does not align, contrary to current name)
-    ALIGN_FEATURE_SEQUENCES ( PIRATE.out.results )                            
+    ALIGN_FEATURE_SEQUENCES ( good_pirate_results )                            
     ch_versions = ch_versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
 
     // Rename FASTA file headers to start with just sample ID for use with IQTREE
@@ -45,10 +54,20 @@ workflow CORE_GENOME_PHYLOGENY {
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
     ch_versions = ch_versions.mix(IQTREE2_CORE.out.versions.first())
-
+    
+    // Mix in null placeholders for failed groups
+    pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
+         .map { [it[1], null] }
+         .mix(PIRATE.out.aln) // group_meta, align_fasta
+    phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
+         .map { [it[1], null] }
+         .mix(IQTREE2_CORE.out.phylogeny) // group_meta, align_fasta
+     
+        
     emit:
-    pirate_aln      = PIRATE.out.aln             // channel: [ ref_meta, align_fasta ]
-    phylogeny       = IQTREE2_CORE.out.phylogeny // channel: [ group_meta, tree ]
-    versions        = ch_versions                // channel: [ versions.yml ]
-}
+    pirate_aln = pirate_aln  // group_meta, align_fasta
+    phylogeny  = phylogeny   // group_meta, tree
+    versions   = ch_versions // versions.yml
+    messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
 
+}
