@@ -80,7 +80,7 @@ workflow VARIANT_ANALYSIS {
     messages = messages.mix(too_few_samp_warnings)
                                                                                 
     IQTREE2_SNP ( align_for_tree, [] ) 
-    ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions.map{it[0]})
+    ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions)
 
     phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // group_meta, ref_meta, tree
     snp_align = VCF_TO_SNPALN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
