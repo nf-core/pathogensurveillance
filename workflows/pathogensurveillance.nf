@@ -61,9 +61,8 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
-include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/main_report'
-include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/main_report'
-include { RECORD_MESSAGES              } from '../modules/local/record_messages'
+include { MAIN_REPORT                 } from '../modules/local/main_report'
+include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -194,30 +193,41 @@ workflow PATHOGENSURVEILLANCE {
     report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
         .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
         .map { [it[2], it[0], it[1], it[3], it[4], it[5]]} // ref_meta, meta, fastq, reference, group_meta, sendsketch
-        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0).view() // ref_meta, meta, fastq, reference, group_meta, sendsketch
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, fastq, reference, group_meta, sendsketch
         .map { [it[4], it[0], it[1], it[2], it[3], it[5], it[6]]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, quast
         .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
     report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
-
-//        .map { it.size() == 1 ? [it, null, null] : it }
-//        .unique()
-//        .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
-//        .map { [it[1], it[0]] + it[2..5] }
-//        .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
-//        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
-//                                                                     
-//    MAIN_REPORT_2 (                                                             
-//        report_in,                                                              
-//        ch_input,                                                               
-//        DOWNLOAD_REFERENCES.out.stats,                                          
-//        MULTIQC.out.data,                                                       
-//        MULTIQC.out.plots,                                                      
-//        MULTIQC.out.report,
-//        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
-//        RECORD_MESSAGES.out.tsv
-//    )                                                                           
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, core_phylo
+    report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
+        .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
+        .map { it.size() == 11 ? it : it[0..6] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo
+        .map { it.size() == 13 ? it : it[0..10] + [[], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo
+        .map { it[0..1] + it[5..6] + it[8..12] } // group_meta, [ref_meta], [sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
+        .map { [
+            it[0],
+            it[1].findAll{ it.id != null }.unique(),
+            it[2],
+            it[3].findAll{ it != null },
+            it[4].findAll{ it != null },
+            it[5].findAll{ it != null },
+            it[6].findAll{ it != null },
+            it[7],
+            it[8] == null ? [] : it[9]
+         ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
+         
+    MAIN_REPORT (                                                             
+        report_in,                                                              
+        ch_input,                                                               
+        DOWNLOAD_REFERENCES.out.stats,                                          
+        MULTIQC.out.data,                                                       
+        MULTIQC.out.plots,                                                      
+        MULTIQC.out.report,
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
+        RECORD_MESSAGES.out.tsv
+    )                                                                           
 
 }
 

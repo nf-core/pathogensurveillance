@@ -6,7 +6,7 @@ process MAIN_REPORT {
     container null
 
     input:
-    tuple val(group_meta), val(ref_metas), file(snp_phylos), file(snp_aligns), file(vcfs), file(quast_dirs), file(ani_matrix), file(core_phylo), file(sendsketchs)
+    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)
     path samp_data
     path ref_data
     path multiqc_data
@@ -42,7 +42,9 @@ process MAIN_REPORT {
     
     # Put quast's output into a single folder for organization
     mkdir inputs/quast
-    cp -r ${quast_dirs} inputs/quast/
+    if [ ! -z "${quast_dirs}" ]; then
+      cp -r ${quast_dirs} inputs/quast/
+    fi
     
     # Put sendsketch's output into a single folder for organization
     mkdir inputs/sendsketch
@@ -50,22 +52,30 @@ process MAIN_REPORT {
 
     # Put variant data into a single folder for organization
     mkdir inputs/variant_data
-    cp -r ${snp_phylos} inputs/variant_data/
-    cp -r ${vcfs} inputs/variant_data/
-    cp -r ${snp_aligns} inputs/variant_data/
+    if [ ! -z "${snp_phylos}" ]; then
+         cp -r ${snp_phylos} inputs/variant_data/
+    fi
+    if [ ! -z "${vcfs}" ]; then
+        cp -r ${vcfs} inputs/variant_data/
+    fi
+    if [ ! -z "${snp_aligns}" ]; then
+        cp -r ${snp_aligns} inputs/variant_data/
+    fi
     
     # Save report group name to file
-    echo ${group_meta.id} > inputs/group_id.txt
+    echo "${group_meta.id}" > inputs/group_id.txt
     
     # Save reference IDs to file
-    echo ${ref_ids} > inputs/ref_ids.txt
+    echo "${ref_ids}" > inputs/ref_ids.txt
     
     # Move single-value paths to input directory
     mkdir other_inputs
     mv ${samp_data} inputs/samp_data.csv
     mv ${ref_data} inputs/ref_data.tsv
     mv ${ani_matrix} inputs/ani_matrix.csv
-    mv ${core_phylo} inputs/core_phylo.treefile
+    if [ ! -z "${core_phylo}" ]; then
+        mv ${core_phylo} inputs/core_phylo.treefile
+    fi
     mv ${versions} inputs/versions.yml
     
     # Render the report
