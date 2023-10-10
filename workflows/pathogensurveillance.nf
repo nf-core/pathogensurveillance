@@ -196,15 +196,14 @@ workflow PATHOGENSURVEILLANCE {
         .map { [it[2], it[0], it[1], it[3], it[4], it[5]]} // ref_meta, meta, fastq, reference, group_meta, sendsketch
         .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0).view() // ref_meta, meta, fastq, reference, group_meta, sendsketch
         .map { [it[4], it[0], it[1], it[2], it[3], it[5], it[6]]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, quast
-        .groupTuple() // group_meta, [meta], [fastq], [ref_meta], [reference], [sendsketch]
+        .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
     report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
-        
+
 //        .map { it.size() == 1 ? [it, null, null] : it }
 //        .unique()
 //        .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
-//        .join(GENOME_ASSEMBLY.out.quast, remainder: true) // ref_meta, group_meta, tree, snp_align, vcf, quast
 //        .map { [it[1], it[0]] + it[2..5] }
 //        .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
 //        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
