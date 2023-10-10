@@ -313,8 +313,8 @@ samp_data2 <- rbind(samp_data2, new_row)
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
 
 #We can revise, but one way to color the samples as one color, the ref as another
-samp_data2$tip_color <- "#24B064"
-samp_data2$tip_color[samp_data2$sample == "REF"] <- "black"
+samp_data2$text_color <- "#24B064"
+samp_data2$text_color[samp_data2$sample == "REF"] <- "black"
 
 #Couldn't use some of ggtree functions with plotly, so here is a workaround
 snp_tree1 <- fortify(snp_trees_midpoint)
@@ -326,8 +326,8 @@ snp_tree1 <- merge(snp_tree1, samp_data2, by.x="label", by.y="sample")
 p <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
   # Coloring nodes and adjusting size for visibility
   geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
-  geom_point(data=snp_tree1, aes(x=x, y=y, color=tip_color), show.legend = FALSE, size=3) +
-  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label), size=3, hjust=0, vjust=0.5, fontface="bold") +
+  geom_point(data=snp_tree1, aes(x=x, y=y, color="black"), show.legend = FALSE, size=3) +
+  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label, color=text_color), size=3, hjust=0, vjust=0.5, fontface="bold") +
   scale_color_identity() +
   theme(legend.position = "none")
 
