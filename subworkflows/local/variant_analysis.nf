@@ -16,29 +16,36 @@ workflow VARIANT_ANALYSIS {
     messages = Channel.empty()
     
     // Remove any samples that do not have reference information
-    input_filtered = input
-        .filter { it[3] != null } // meta, [fastq], ref_meta, reference, group_meta
+    input
+        .branch {
+            filtered: it[3] != null
+            no_ref: it[3] == null
+        }
+        .set { parsed_input }
+         
+    
+//    input_filtered = input
+//        .filter { it[3] != null } // meta, [fastq], ref_meta, reference, group_meta
         
     // Report samples that do not have reference information
-    no_ref_warnings = input
-        .filter { it[3] == null } // meta, [fastq], ref_meta, reference, group_meta
+    no_ref_warnings = parsed_input.no_ref
         .map { [it[0], it[4], null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
     
-    ch_ref = input_filtered
+    ch_ref = parsed_input.filtered
         .map { it[2..3] }
         .groupTuple()
         .map { [it[0], it[1].sort()[0]] }
-    REFERENCE_INDEX ( input_filtered.map { it[2..3] }.unique() )
+    REFERENCE_INDEX ( parsed_input.filtered.map { it[2..3] }.unique() )
     ch_versions = ch_versions.mix(REFERENCE_INDEX.out.versions) 
 
-    input_with_indexes = input_filtered
+    input_with_indexes = parsed_input.filtered
         .map { [it[2], it[0], it[1], it[3], it[4]] } // [val(ref_meta), val(meta), [file(fastq)], file(reference), val(group_meta)]
         .combine(REFERENCE_INDEX.out.samtools_fai, by: 0)              
         .combine(REFERENCE_INDEX.out.bwa_index, by: 0)
         .combine(REFERENCE_INDEX.out.picard_dict, by: 0)
         .map { [it[1], it[2], it[0], it[3], it[4], it[5], it[6], it[7]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), fai, bwa, picard]     
-    
+
     ALIGN_READS (
         input_with_indexes
             .map { it[0..3] + it[5..6] }
@@ -73,21 +80,28 @@ workflow VARIANT_ANALYSIS {
     messages = messages.mix(too_few_samp_warnings)
                                                                                 
     IQTREE2_SNP ( align_for_tree, [] ) 
-    ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions.toSortedList().map{it[0]})
+    ch_versions = ch_versions.mix(IQTREE2_SNP.out.versions.map{it[0]})
 
+    phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // group_meta, ref_meta, tree
+    snp_align = VCF_TO_SNPALN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
+    vcf = CALL_VARIANTS.out.vcf.map{ [it[0].group, it[0].ref, it[1]] }
+    
+    results = CALL_VARIANTS.out.vcf // ref+group_meta, vcf
+        .combine(VCF_TO_SNPALN.out.fasta, by:0) // ref+group_meta, vcf, align
+        .join(IQTREE2_SNP.out.phylogeny, remainder:true, by:0) // ref+group_meta, vcf, align, tree
+        .map{ [it[0].group, it[0].ref] + it[1..3] } // group_meta, ref_meta, vcf, align, tree
+        
     emit:
     picard_dict  = REFERENCE_INDEX.out.picard_dict
     samtools_fai = REFERENCE_INDEX.out.samtools_fai
     samtools_gzi = REFERENCE_INDEX.out.samtools_gzi
     bwa_index    = REFERENCE_INDEX.out.bwa_index 
-    phylogeny    = IQTREE2_SNP.out.phylogeny                                        
-                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, tree ]
-    snp_align    = VCF_TO_SNPALN.out.fasta
-                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
-    vcf          = CALL_VARIANTS.out.vcf                                      
-                       .map { [it[0].group, it[0].ref, it[1]] }        // channel: [ group_meta, ref_meta, fasta ]
-    versions     = ch_versions                           // channel: [ versions.yml ]
-    messages     = messages // meta, group_meta, ref_meta, workflow, level, message
+    phylogeny    = phylogeny   // group_meta, ref_meta, tree
+    snp_align    = snp_align   // group_meta, ref_meta, fasta
+    vcf          = vcf         // group_meta, ref_meta, fasta
+    results      = results     // group_meta, ref_meta, vcf, align, tree
+    versions     = ch_versions // versions.yml
+    messages     = messages    // meta, group_meta, ref_meta, workflow, level, message
 
 }
 

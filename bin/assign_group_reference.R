@@ -1,7 +1,7 @@
 #!/usr/bin/env -S Rscript --vanilla
 
-start_min_ani <- 0.99 # The minimum ANI for a reference to be assigned to a samples 
-end_min_ani <- 0.99 # How low the minimum can go if no samples can be assigned
+start_min_ani <- 0.9 # The minimum ANI for a reference to be assigned to a samples 
+end_min_ani <- 0.7 # How low the minimum can go if no samples can be assigned
 ani_interval <- 0.02 # How much the minimum ANI threshold changes each time it is decreased 
 
 # Function to assign references based on a given min_ani threshold

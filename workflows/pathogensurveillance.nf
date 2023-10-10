@@ -108,13 +108,6 @@ workflow PATHOGENSURVEILLANCE {
     )
     ch_versions = ch_versions.mix(DOWNLOAD_REFERENCES.out.versions)
 
-    // Create main summary report                                               
-    //MAIN_REPORT_1 (                                                               
-    //    INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
-    //    ch_input,                                                               
-    //    DOWNLOAD_REFERENCES.out.stats                                           
-    //)                                                                           
-
     // Assign closest reference for samples without a user-assigned reference
     ASSIGN_REFERENCES (
         INPUT_CHECK.out.sample_data,
@@ -124,6 +117,7 @@ workflow PATHOGENSURVEILLANCE {
         COARSE_SAMPLE_TAXONOMY.out.depth
     )
     ch_versions = ch_versions.mix(ASSIGN_REFERENCES.out.versions)
+    messages = messages.mix(ASSIGN_REFERENCES.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
     VARIANT_ANALYSIS (
@@ -156,6 +150,7 @@ workflow PATHOGENSURVEILLANCE {
         ch_input                                                          
     )
     ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     // Read2tree phylogeny for eukaryotes
     //READ2TREE_ANALYSIS (
@@ -194,38 +189,36 @@ workflow PATHOGENSURVEILLANCE {
     RECORD_MESSAGES (                                               
         messages.collect(sort:true, flat:false)
     )
-    // Create main summary report                                               
-    grouped_sendsketch = INPUT_CHECK.out.sample_data // meta, fastq, ref_meta, reference, group_meta
+    
+    // Create main summary report
+    report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
         .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
-        .map { it[4..5] } // group_meta, sendsketch                             
-        .groupTuple() // group_meta, [sendsketch]
+        .map { [it[2], it[0], it[1], it[3], it[4], it[5]]} // ref_meta, meta, fastq, reference, group_meta, sendsketch
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0).view() // ref_meta, meta, fastq, reference, group_meta, sendsketch
+        .map { [it[4], it[0], it[1], it[2], it[3], it[5], it[6]]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, quast
+        .groupTuple() // group_meta, [meta], [fastq], [ref_meta], [reference], [sendsketch]
+    report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
+        .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
+    report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         
-        ASSIGN_REFERENCES.out.sample_data // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        
-    report_in = ASSIGN_REFERENCES.out.sample_data // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
-        .map { [it[4]] } // val(group_meta)
-        .unique()
-        .join(VARIANT_ANALYSIS.out.phylogeny, remainder: true).view() // group_meta, ref_meta, tree    
-        .combine(VARIANT_ANALYSIS.out.snp_align, by:0..1) // group_meta, ref_meta, tree, snp_align
-        .combine(VARIANT_ANALYSIS.out.vcf, by:0..1) // group_meta, ref_meta, tree, snp_align, vcf
-        .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
-        .join(GENOME_ASSEMBLY.out.quast, remainder: true) // ref_meta, group_meta, tree, snp_align, vcf, quast
-        .map { [it[1], it[0]] + it[2..5] }
-        .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
-        .join(ASSIGN_REFERENCES.out.ani_matrix, remainder: true) // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast] ani_matrix
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
-        .join(grouped_sendsketch, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree, [sendsketch]
-                                                                     
-    MAIN_REPORT_2 (                                                             
-        report_in,                                                              
-        ch_input,                                                               
-        DOWNLOAD_REFERENCES.out.stats,                                          
-        MULTIQC.out.data,                                                       
-        MULTIQC.out.plots,                                                      
-        MULTIQC.out.report,
-        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
-        RECORD_MESSAGES.out.tsv
-    )                                                                           
+//        .map { it.size() == 1 ? [it, null, null] : it }
+//        .unique()
+//        .map { [it[1], it[0]] + it[2..4] } // ref_meta, group_meta, tree, snp_align, vcf
+//        .join(GENOME_ASSEMBLY.out.quast, remainder: true) // ref_meta, group_meta, tree, snp_align, vcf, quast
+//        .map { [it[1], it[0]] + it[2..5] }
+//        .groupTuple() // group_meta, [ref_meta], [tree], [snp_align], [vcf], [quast]
+//        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // group_meta, [ref_meta], [snp_tree], [snp_align], [vcf], [quast], ani_matrix, core_tree
+//                                                                     
+//    MAIN_REPORT_2 (                                                             
+//        report_in,                                                              
+//        ch_input,                                                               
+//        DOWNLOAD_REFERENCES.out.stats,                                          
+//        MULTIQC.out.data,                                                       
+//        MULTIQC.out.plots,                                                      
+//        MULTIQC.out.report,
+//        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
+//        RECORD_MESSAGES.out.tsv
+//    )                                                                           
 
 }
 
