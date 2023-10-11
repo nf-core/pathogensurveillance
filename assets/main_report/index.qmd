@@ -201,6 +201,8 @@ WKID represents the Weighted Kmer IDentity, adjusted for genome size differences
 
 This section provides an overview of the proportions of different species in the report.
 
+> From NIK: I think package plotly cand o this and is already laoded, see [https://plotly.com/r/treemaps/](https://plotly.com/r/treemaps/). 
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(billboarder)
 library(dplyr)
