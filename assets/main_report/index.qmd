@@ -197,6 +197,35 @@ DT::datatable(final_table,
 WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 :::
 
+# Summary of Species Proportions FYI, STILL WORKING ON THIS--Camilo
+
+This section provides an overview of the proportions of different species in the report.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(billboarder)
+library(dplyr)
+
+species_summary <- final_table %>%
+  group_by(`Top Hit`) %>%
+  summarise(Freq = n()) 
+
+# Create the treemap chart
+billboarder() %>% 
+  bb_treemapchart(
+    data = species_summary, 
+    mapping = aes(x = `Top Hit`, y = Freq),
+    label = list(show = TRUE, threshold = 0.03),
+    tile = "binary" 
+  ) %>% 
+  bb_data(
+    labels = list(colors = "#FFF")
+  ) %>% 
+  bb_color(
+    palette = colorRampPalette(c("#08519C", "#9ECAE1"))(nrow(species_summary)) 
+  )
+
+```
+
 ## Rigorous ID to species or subspecies
 
 ::: panel-tabset
