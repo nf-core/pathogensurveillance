@@ -12,7 +12,7 @@ workflow INPUT_CHECK {
     SAMPLESHEET_CHECK ( samplesheet )
     SAMPLESHEET_CHECK.out
         .csv
-        .splitCsv ( header:true, sep:',' )
+        .splitCsv ( header:true, sep:',', quote:'"')
         .map { create_reads_ref_channel(it) }
         .transpose ( by: 4 ) // Duplicate rows for each group when there are multiple groups per sample
         .map { it[0..3] + [[id: it[4]]] }
