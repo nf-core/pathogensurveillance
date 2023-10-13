@@ -121,9 +121,9 @@ samp_data %>%
 
 ## {{< bi sliders >}} Input settings
 
-Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given taht status is reported above).
+Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given that status is reported above).
 
-# ![](loupe_2099734.png){height=30px} Identification
+# Identification
 
 ## Rapid ID to genus
 
@@ -228,6 +228,58 @@ billboarder() %>%
 
 ```
 
+Here is how we can display the whole taxonomy with plotly using the `sunburst` and `treemap` plot types:
+
+```{r fig.height=8}
+library(metacoder)
+
+top_hits <- sketch_data %>%
+  arrange(desc(sample_id), desc(WKID), desc(ANI), desc(Complt)) %>%  # Sort by sample_id, WKID, ANI, and Complt in descending order
+  group_by(sample_id) %>%  # Group by sample_id
+  slice_head(n = 1) %>%  # Take the first entry per group
+  ungroup()
+
+x <- parse_tax_data(tax_data = top_hits,
+                    class_cols = 'taxonomy',
+                    class_key = c("taxon_rank", "taxon_name"),
+                    class_regex = "([a-z]+)?:?([a-zA-Z0-9.-_, ]+)",
+                    class_sep = ";") %>%
+    filter_taxa(taxon_ranks == "s", supertaxa = TRUE)
+
+# A more complex test data set included in metacoder
+# x = parse_tax_data(hmp_otus, class_cols = "lineage", class_sep = ";",
+#                    class_key = c(tax_rank = "taxon_rank", tax_name = "taxon_name"),
+#                    class_regex = "^(.+)__(.+)$")
+
+
+duplicated_names <- taxon_names(x)[duplicated(taxon_names(x))]
+unique_taxon_names <- paste0(taxon_names(x), " (", taxon_ranks(x), ")")
+names(unique_taxon_names) <- taxon_ids(x)
+unique_tax_names <- ifelse(taxon_names(x) %in% duplicated_names, unique_taxon_names, taxon_names(x))
+names(unique_tax_names) <- taxon_ids(x)
+
+plot_data <- x$edge_list
+plot_data$count <- n_obs_1(x)[plot_data$to]
+plot_data$from <- unique_tax_names[plot_data$from]
+plot_data$to <- unique_tax_names[plot_data$to]
+
+plot_ly(
+    type='treemap',
+    labels=plot_data$to,
+    parents=plot_data$from,
+    values=plot_data$count,
+    textinfo="label+value+percent parent+percent entry+percent root",
+    domain=list(column=0))
+
+plot_ly(
+    type='sunburst',
+    labels=plot_data$to,
+    parents=plot_data$from,
+    values=plot_data$count,
+    domain=list(column=0))
+```
+
+
 ## Rigorous ID to species or subspecies
 
 ::: panel-tabset
@@ -287,7 +339,7 @@ p1
 ```
 :::
 
-# ![](favicon.png) Genetic diversity in the group(s)
+# Genetic diversity in the group(s)
 
 *Things to address:*
 
@@ -585,7 +637,7 @@ The `pathogen surveillance` pipeline used the following tools that should be ref
 DT::datatable(version_data)
 ```
 
-## ![](Rlogo.png){height=30px} version and packages
+## version and packages
 
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
