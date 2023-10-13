@@ -40,10 +40,10 @@ include { PATHOGENSURVEILLANCE } from './workflows/pathogensurveillance'
 //
 // WORKFLOW: Run main nf-core/PATHOGENDX analysis pipeline
 //
-workflow NFCORE_PATHOGENSURVEILLANCE {
-    PATHOGENSURVEILLANCE ()
-}
-
+//workflow NFCORE_PATHOGENSURVEILLANCE {
+//    PATHOGENSURVEILLANCE ()
+//}
+//
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN ALL WORKFLOWS
@@ -55,7 +55,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    NFCORE_PATHOGENSURVEILLANCE ()
+    PATHOGENSURVEILLANCE ()
 }
 
 /*
