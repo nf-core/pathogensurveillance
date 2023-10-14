@@ -275,8 +275,6 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ### SNP tree
 
 ```{r div_snp_tree_config, include=FALSE}
-#Martha-I notice SNP tree labels are now revised to include ref accession as prefix, for one dataset (2). Here I (martha), was just playing with how to make informative and simple labels. There may be a more simplified approach. Please revise as needed
-
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
