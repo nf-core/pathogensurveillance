@@ -36,6 +36,8 @@ class RowChecker:
         second_col="fastq_2",
         rgroup_col="report_group",
         single_col="single_end",
+        ref_id_col="reference_id",
+        ref_col="reference",
         **kwargs,
     ):
         """
@@ -53,6 +55,10 @@ class RowChecker:
             single_col (str): The name of the new column that will be inserted and
                 records whether the sample contains single- or paired-end sequencing
                 reads (default "single_end").
+            ref_id_col (str): The name of the new column that has the IDs of user-defined
+                references.
+            ref_col (str): The name of the new column that has the paths to user-defined
+                references.
 
         """
         super().__init__(**kwargs)
@@ -61,7 +67,10 @@ class RowChecker:
         self._second_col = second_col
         self._rgroup_col = rgroup_col
         self._single_col = single_col
+        self._ref_id_col = ref_id_col
+        self._ref_col = ref_col
         self._seen = set()
+        self._ref_id_combos = {}
         self.modified = []
 
     def validate_and_transform(self, row):
@@ -78,8 +87,22 @@ class RowChecker:
         self._validate_second(row)
         self._validate_pair(row)
         self._validate_rgroup(row)
+        self._validate_ref_id(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
+
+    def _validate_ref_id(self, row):
+        """Assert that references are provided when reference IDs are provided and that the combination is unique."""
+        if len(row[self._ref_id_col]) > 0:
+            if len(row[self._ref_col]) <= 0:
+                raise AssertionError(f"If a reference ID is defined, then the path to a corresponding reference file must be defined. Either delete the reference ID '{row[self._ref_id_col]}' so one can be chosen automatically or supply a path to a reference seqeunce.")
+            elif row[self._ref_id_col] in self._ref_id_combos.keys() and self._ref_id_combos[row[self._ref_id_col]] != row[self._ref_col]:
+                raise AssertionError(f"If a reference ID is defined, then it must correspond to only one reference path. The ID '{row[self._ref_id_col]}' is assigned to multiple paths.")
+            else:
+                self._ref_id_combos[row[self._ref_id_col]] = row[self._ref_col]
+        
+        # Sanitize reference ID slightly.
+        row[self._ref_id_col] = row[self._ref_id_col].replace(" ", "_")
 
     def _validate_sample(self, row):
         """Assert that the sample name exists and convert spaces to underscores."""
