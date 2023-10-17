@@ -322,6 +322,49 @@ for (x in name_key[sample_ids]) {
 phycanv
 ```
 
+### ANI Neighbor-Joining Tree
+
+```{r ANI NJ tree, fig.height = 8, fig.width=8}
+ani_matrix_format <- as.matrix(ani_matrix, row.names=1, header=TRUE)
+#Convert ANI similarity values to distances
+dist_matrix <- 1 - ani_matrix_format
+nj_tree <- nj(dist_matrix)
+nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-5  # or some other small value
+nj_tree<-midpoint(nj_tree)
+#TODO-adjust how tree is rotted if necessary
+plot(nj_tree)
+
+#TODO fix labels like what was done with core gene phylogeny
+#convert_id <- function(ids) {
+##    gsub(ids, pattern = "[.-]", replacement = "_")
+#}
+#sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
+
+#colnames(ani_matrix) <- convert_id(colnames(ani_matrix))
+#rownames(ani_matrix) <- colnames(ani_matrix)
+#group_ani <- ani_matrix[rownames(ani_matrix) %in% nj_tree$tip.label, colnames(ani_matrix) %in% #nj_tree$tip.label]
+#nj_tree <- root(nj_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+
+# Set tip labels to taxon names for reference sequences
+# TODO: need a more reliable way to get IDs
+#name_key <- c(
+#  ref_data$Organism, 
+#  samp_data$sample
+#)
+#names(name_key) <- c(
+#  convert_id(ref_data$LastMajorReleaseAccession),
+#  convert_id(samp_data$sample)
+#)
+#nj_tree$tip.label <- name_key[nj_tree$tip.label]
+
+
+#TO discuss-ran into instances where negative branches were output. One idea is to set these negative branches to very small positive values. Tree is simply a means to visualize ANI data before core gene phylogeny is produced. 
+
+
+
+#TODO label tree tips like core gene phylogeny
+```
+
 ### ANI heatmap and dendrogram
 
 *TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
@@ -331,12 +374,7 @@ p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
 p1
 ```
 
-### ANI NJ tree option
 
-```{r ANI NJ tree, fig.height = 8, fig.width=8}
-
-
-```
 :::
 
 # Genetic diversity in the group(s)
@@ -358,8 +396,6 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ### SNP tree
 
 ```{r div_snp_tree_config, include=FALSE}
-#Martha-I notice SNP tree labels are now revised to include ref accession as prefix, for one dataset (2). Here I (martha), was just playing with how to make informative and simple labels. There may be a more simplified approach. Please revise as needed
-
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
@@ -406,7 +442,7 @@ snp_tree1 <- fortify(snp_trees_midpoint)
 snp_tree1 <- merge(snp_tree1, samp_data2, by.x="label", by.y="sample")
 
 # Using theme_minimal for a cleaner background
-p <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
+ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
   # Coloring nodes and adjusting size for visibility
   geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
   geom_point(data=snp_tree1, aes(x=x, y=y, color="black"), show.legend = FALSE, size=3) +
@@ -415,8 +451,8 @@ p <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
   theme(legend.position = "none")
 
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
-p_interactive <- ggplotly(p)
-p_interactive
+ggtree_interactive <- ggplotly(ggtree_snptree)
+ggtree_interactive
 
 ```
 
