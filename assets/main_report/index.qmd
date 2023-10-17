@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -325,6 +325,9 @@ phycanv
 ### ANI Neighbor-Joining Tree
 
 ```{r ANI NJ tree, fig.height = 8, fig.width=8}
+
+#Will tidy up code
+
 ani_matrix_format <- as.matrix(ani_matrix, row.names=1, header=TRUE)
 #Convert ANI similarity values to distances
 dist_matrix <- 1 - ani_matrix_format
@@ -359,9 +362,6 @@ plot(nj_tree)
 #  convert_id(samp_data$sample)
 #)
 #nj_tree$tip.label <- name_key[nj_tree$tip.label]
-
-
-
 
 
 #TODO label tree tips like core gene phylogeny
@@ -427,6 +427,8 @@ new_row$sample <- "REF"
 samp_data2 <- rbind(samp_data2, new_row)
 
 ```
+
+Here we are testing ggtree and ggplotly
 
 ```{r ggtree, height=10, width=8}
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
