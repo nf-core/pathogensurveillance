@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "_test_data/2"
 execute:
   echo: false
 ---
@@ -329,6 +329,9 @@ ani_matrix_format <- as.matrix(ani_matrix, row.names=1, header=TRUE)
 #Convert ANI similarity values to distances
 dist_matrix <- 1 - ani_matrix_format
 nj_tree <- nj(dist_matrix)
+
+#TO discuss-ran into instances where negative branches were output. One idea is to set these negative branches to very small positive values. Tree is simply a means to visualize ANI data before core gene phylogeny is produced. Discuss if there are better solutions.
+
 nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-5  # or some other small value
 nj_tree<-midpoint(nj_tree)
 #TODO-adjust how tree is rotted if necessary
@@ -343,7 +346,7 @@ plot(nj_tree)
 #colnames(ani_matrix) <- convert_id(colnames(ani_matrix))
 #rownames(ani_matrix) <- colnames(ani_matrix)
 #group_ani <- ani_matrix[rownames(ani_matrix) %in% nj_tree$tip.label, colnames(ani_matrix) %in% #nj_tree$tip.label]
-#nj_tree <- root(nj_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+#nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
 
 # Set tip labels to taxon names for reference sequences
 # TODO: need a more reliable way to get IDs
@@ -358,7 +361,6 @@ plot(nj_tree)
 #nj_tree$tip.label <- name_key[nj_tree$tip.label]
 
 
-#TO discuss-ran into instances where negative branches were output. One idea is to set these negative branches to very small positive values. Tree is simply a means to visualize ANI data before core gene phylogeny is produced. 
 
 
 
@@ -406,8 +408,6 @@ newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
 #SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
 snp_trees$tip.label<-newtips
 
-# Check if there's only one unique prefix
-
 # Root tree
 #option1
 snp_trees_rootref <- root(snp_trees, "REF")
@@ -423,7 +423,7 @@ colnames(new_row) <- colnames(samp_data2)
 
 new_row$sample <- "REF"
 
-#Don't mess with original data frame
+#Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
 samp_data2 <- rbind(samp_data2, new_row)
 
 ```
@@ -541,6 +541,8 @@ mlglist2
 ```
 
 ### Poppr MSN
+
+Martha-need to resolve issues with key. There is an extra repeated node in legend. 
 
 ```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
 # Create a minimum spanning network with filtered data
