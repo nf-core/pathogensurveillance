@@ -323,48 +323,70 @@ phycanv
 ```
 
 ### ANI Neighbor-Joining Tree
+```{r ANI NJ tree, include=TRUE}
+#Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this. 
 
-```{r ANI NJ tree, fig.height = 8, fig.width=8}
+convert_id <- function(ids) {
+    gsub(pattern = "[.-]", replacement = "_", x = ids)
+}
 
-#Will tidy up code
+# Convert data.frame to matrix
+ani_matrix_format <-as.matrix(ani_matrix)
 
-ani_matrix_format <- as.matrix(ani_matrix, row.names=1, header=TRUE)
-#Convert ANI similarity values to distances
+# Convert ANI similarity values to distances
 dist_matrix <- 1 - ani_matrix_format
+
+colnames(dist_matrix) <- convert_id(colnames(dist_matrix))
+rownames(dist_matrix) <- convert_id(rownames(dist_matrix))
+
 nj_tree <- nj(dist_matrix)
 
-#TO discuss-ran into instances where negative branches were output. One idea is to set these negative branches to very small positive values. Tree is simply a means to visualize ANI data before core gene phylogeny is produced. Discuss if there are better solutions.
+# Handle negative branch lengths-this is one idea, but if there is a better option, please change
+nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-4  
 
-nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-5  # or some other small value
-nj_tree<-midpoint(nj_tree)
-#TODO-adjust how tree is rotted if necessary
+sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
+
+group_ani <- dist_matrix[rownames(dist_matrix) %in% nj_tree$tip.label, colnames(dist_matrix) %in% nj_tree$tip.label]
+
+nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
+
+# Create a name key to relabel the tree tips
+#We have 1 entry with suffix assembly-may need to organize or rename to clarify to user what this sample is
+assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
+
+name_key <- c(
+  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
+  setNames(samp_data$sample, convert_id(samp_data$sample)),
+  setNames(assembly_entries, assembly_entries)
+)
+
+# Relabel the tree tips
+nj_tree$tip.label <- name_key[nj_tree$tip.label]
+
 plot(nj_tree)
+##Used static ggtree because I was having trouble rendering phycanvas option with tabular format
 
-#TODO fix labels like what was done with core gene phylogeny
-#convert_id <- function(ids) {
-##    gsub(ids, pattern = "[.-]", replacement = "_")
-#}
+# Basic tree visualization
+#p <- ggtree(nj_tree)
+
+# Highlight certain labels in green
+
 #sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
 
-#colnames(ani_matrix) <- convert_id(colnames(ani_matrix))
-#rownames(ani_matrix) <- colnames(ani_matrix)
-#group_ani <- ani_matrix[rownames(ani_matrix) %in% nj_tree$tip.label, colnames(ani_matrix) %in% #nj_tree$tip.label]
-#nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
+#p <- p + 
+  #geom_tiplab(aes(color = label %in% sample_ids), size = 3) +
+  #scale_color_manual(values = c("TRUE" = "green", "FALSE" = "black"))
 
-# Set tip labels to taxon names for reference sequences
-# TODO: need a more reliable way to get IDs
-#name_key <- c(
-#  ref_data$Organism, 
-#  samp_data$sample
-#)
-#names(name_key) <- c(
-#  convert_id(ref_data$LastMajorReleaseAccession),
-#  convert_id(samp_data$sample)
-#)
-#nj_tree$tip.label <- name_key[nj_tree$tip.label]
+# Print the tree
+#print(p)
 
-
-#TODO label tree tips like core gene phylogeny
+# Visualize-used phycanvas for now-won't render in tabular format ,but looks nice
+#phycanv_nj <- phylocanvas(nj_tree, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+#for (x in name_key[sample_ids]) {
+#  phycanv_nj <- style_node(phycanv_nj, x, labelcolor = "green", labeltextsize = 30)
+#}
+    
+#phycanv_nj
 ```
 
 ### ANI heatmap and dendrogram
@@ -377,6 +399,7 @@ p1
 ```
 
 
+
 :::
 
 # Genetic diversity in the group(s)
@@ -385,6 +408,7 @@ p1
 
 1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
+3. Need to clarify to use what REF is in the SNP tree or else rename
 
 ```{r div_parse_inputs}
 snp_trees <- ape::read.tree(snp_tree_paths)
@@ -393,11 +417,13 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ```
 
 ## Genetic diversity in sample
-
 ::: panel-tabset
 ### SNP tree
 
-```{r div_snp_tree_config, include=FALSE}
+**Phylocanvas option**
+```{r snp_tree_config, include=TRUE}
+#Will tidy up code once we finalize which tree program to use.
+
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
@@ -414,6 +440,19 @@ snp_trees_rootref <- root(snp_trees, "REF")
 #option2
 snp_trees_midpoint<-midpoint(snp_trees)
 
+#For phycanvas version-much simpler code-but have a ggtree and ggploty version below
+phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
+for (x in name_key[sample_ids]) {
+  phycanv_snp <- style_node(phycanv_snp, x, labelcolor = "green", labeltextsize = 30)
+}
+    
+phycanv_snp
+```
+
+**gtree and ggplotly option**
+
+We need to decide on best tree package. Here I experimented with ggtree and ggplotly. Requires many more lines of code than Phylocanvas. If we use ggtree alone, we lose interactivity, but may look nicer.
+```{r ggtree, height=10, width=8, include=TRUE}
 #One way to parse metadata file so we can color tips in a descriptive way
 
 #add REF to metadata-only provide accession info (and maybe genus and species)
@@ -425,12 +464,6 @@ new_row$sample <- "REF"
 
 #Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
 samp_data2 <- rbind(samp_data2, new_row)
-
-```
-
-Here we are testing ggtree and ggplotly
-
-```{r ggtree, height=10, width=8}
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
 
 #We can revise, but one way to color the samples as one color, the ref as another
@@ -455,7 +488,6 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
 ggtree_interactive
-
 ```
 
 ```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
