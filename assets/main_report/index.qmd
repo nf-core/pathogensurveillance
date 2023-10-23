@@ -106,7 +106,32 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline** versi
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-[see webstie](https://stackoverflow.com/questions/56787941/embedding-dash-plotly-graphs-into-html) to create interactive trees:
+## Sample plotly/ggtree tree from [here](https://plotly.com/ggplot2/dendrogram/)
+
+```{r}
+library(plotly)
+library(ggplot2)
+library(ggdendro)
+
+model <- hclust(dist(USArrests), "ave")
+dhc <- as.dendrogram(model)
+
+data <- dendro_data(dhc, type = "triangle")
+p <- ggplot(segment(data)) + 
+      geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
+      coord_flip() + 
+      scale_y_reverse(expand = c(0.2, 0)) +
+      theme_dendro()
+
+ggplotly(p)
+
+
+```
+
+## Sample Plotly graph
+
+[see webstie to create plotly graph](https://stackoverflow.com/questions/56787941/embedding-dash-plotly-graphs-into-html) to create interactive trees:
+
 <head>
   <!-- Plotly.js -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -116,6 +141,8 @@ Perhaps a table with a list of majors steps and a icon next to each for done/que
 <h1>Something</h1>
 <div><div id="d18660f3-1557-43c1-8f27-09292a9a8de7" style="height: 100%; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("d18660f3-1557-43c1-8f27-09292a9a8de7", [{"name": "Boats", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [9, 6, 2, 1, 5, 4, 6, 8, 1, 3], "type": "bar", "uid": "39c52ed4-e27d-4574-9cec-a3d50a8773a0"}, {"name": "Cars", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [19, 36, 12, 1, 35, 4, 6, 8, 1, 3], "type": "bar", "uid": "c0b658e9-bd5b-4c65-976d-1e03ba5836a3"}], {"title": {"text": "Title"}, "xaxis": {"tickangle": -45, "tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"text": "X axis"}}, "yaxis": {"tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"font": {"color": "rgb(107, 107, 107)", "size": 16}, "text": "Y axis"}}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"})</script><script type="text/javascript">window.addEventListener("resize", function(){Plotly.Plots.resize(document.getElementById("d18660f3-1557-43c1-8f27-09292a9a8de7"));});</script></div>
 </body>
+
+## Example Observable JS code
 
 ```{ojs}
 //| code-fold: true
@@ -498,6 +525,7 @@ phycanv_snp
 **gtree and ggplotly option**
 
 We need to decide on best tree package. Here I experimented with ggtree and ggplotly. Requires many more lines of code than Phylocanvas. If we use ggtree alone, we lose interactivity, but may look nicer.
+
 ```{r ggtree, height=10, width=8, include=TRUE}
 #One way to parse metadata file so we can color tips in a descriptive way
 
