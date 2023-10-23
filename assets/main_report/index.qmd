@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "_test_data/2"
 execute:
   echo: false
 ---
@@ -464,8 +464,15 @@ ggtree_ani
 *TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-p1 <- pheatmap(ani_matrix, show_rownames = T, labels_row = colnames(ani_matrix))
-p1
+ani_matrix_format <-as.matrix(ani_matrix)
+colnames(ani_matrix_format) <- convert_id(colnames(ani_matrix_format))
+rownames(ani_matrix_format) <- convert_id(rownames(ani_matrix_format))
+
+
+heatmap_ani <- pheatmap(ani_matrix, show_rownames = T, labels_row =colnames(ani_matrix))
+
+
+heatmap_ani
 ```
 
 
