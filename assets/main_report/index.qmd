@@ -416,14 +416,14 @@ plot(nj_tree)
 
 # Highlight certain labels in green
 
-#sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
+sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
 
-#p <- p + 
-  #geom_tiplab(aes(color = label %in% sample_ids), size = 3) +
-  #scale_color_manual(values = c("TRUE" = "green", "FALSE" = "black"))
+p <- p + 
+  geom_tiplab(aes(color = label %in% sample_ids), size = 3) +
+  scale_color_manual(values = c("TRUE" = "green", "FALSE" = "black"))
 
 # Print the tree
-#print(p)
+print(p)
 
 # Visualize-used phycanvas 
 # Sadly, for now-won't render if part of a tabular panel
