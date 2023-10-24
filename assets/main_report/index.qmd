@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -395,7 +395,7 @@ phycanv
 
 ### ANI Neighbor-Joining Tree
 ```{r ANI NJ tree, include=TRUE, height=8, width=8}
-#Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this. 
+#Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this-but I don't see that dataset 2 has this entry. 
 
 convert_id <- function(ids) {
     gsub(pattern = "[.-]", replacement = "_", x = ids)
@@ -424,7 +424,7 @@ nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
 # Create a name key to relabel the tree tips
 #We have 1 entry with suffix assembly-may need to organize or rename to clarify to user what this sample is
 
-
+#make more generalizable, because not every dataset has this. 
 assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
 
 name_key <- c(
@@ -468,14 +468,18 @@ ani_matrix_format <-as.matrix(ani_matrix)
 colnames(ani_matrix_format) <- convert_id(colnames(ani_matrix_format))
 rownames(ani_matrix_format) <- convert_id(rownames(ani_matrix_format))
 
+name_key <- c(
+  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
+  setNames(samp_data$sample, convert_id(samp_data$sample)),
+  setNames(assembly_entries, assembly_entries)
+)
 
-heatmap_ani <- pheatmap(ani_matrix, show_rownames = T, labels_row =colnames(ani_matrix))
+# Relabel the tree tips
+colnames(ani_matrix_format) <- name_key[colnames(ani_matrix_format)]
+rownames(ani_matrix_format) <- name_key[rownames(ani_matrix_format)]
 
-
-heatmap_ani
+heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnames(ani_matrix_format))
 ```
-
-
 
 :::
 
@@ -630,26 +634,26 @@ Please revise as needed. I think we need a better approach to coming up with SNP
 ```{r mlg_config_test, eval = FALSE}
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
 
-snpdist_stats<-filter_stats(snp_genclone)
-if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-    print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
-} else {
-    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
-}
-mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
-idlist2<-mlg.id(snp_genclone)
+#snpdist_stats<-filter_stats(snp_genclone)
+#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
+#    print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
+#} else {
+#    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
+#}
+#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+#idlist2<-mlg.id(snp_genclone)
 
-mlglist2<-data.frame("MLG","strain")
-colnames(mlglist2) <- c("V1","V2")
-for (name in names(idlist2)) {
-  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
-  mlglist2<-rbind(mlglist2,newframe)
-}
+#mlglist2<-data.frame("MLG","strain")
+#colnames(mlglist2) <- c("V1","V2")
+#for (name in names(idlist2)) {
+#  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
+#  mlglist2<-rbind(mlglist2,newframe)
+#}
 
-colnames(mlglist2)<-c("MLG","strain")
-mlglist2<-mlglist2[mlglist2$strain != "strain",]
+#colnames(mlglist2)<-c("MLG","strain")
+#mlglist2<-mlglist2[mlglist2$strain != "strain",]
 #make a prettier table
-mlglist2
+#mlglist2
 ```
 
 ### Poppr MSN
@@ -657,50 +661,65 @@ mlglist2
 Martha-need to resolve issues with key. There is an extra repeated node in legend. 
 
 ```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
-# Create a minimum spanning network with filtered data
-#Still have issues with metadata-reference seq has none-need way to include? 
+# Replace NAs with "unknown"
+samp_data[] <- lapply(samp_data, function(col) ifelse(is.na(col), "unknown", col))
 
-#NOTE-cannot have NAs in metadata-for temp fix, changed to NA-may need better solution
-samp_data <- purrr::map_dfc(samp_data, function(col) ifelse(is.na(col), "unknown", col))
+# Extract unique factors from the color_by column
+factors_to_analyze <- unique(unlist(strsplit(as.character(samp_data$color_by), split = ";")))
 
-samp_data$nusery <- as.factor(samp_data$nusery)
+# Loop over each factor to generate an MSN
+for (current_factor in factors_to_analyze) {
 
-myColors <- rainbow(length(unique(samp_data$nusery))) 
-names(myColors) <- levels(samp_data$nusery)
-#myColors["Other"] <- "#808080"
+    # If current factor is not a column name in samp_data, skip the iteration
+    if (!current_factor %in% names(samp_data)) {
+        next
+    }
 
-strata(snp_genclone) <- samp_data[, c(1:15)]
-setPop(snp_genclone) <- ~nusery
+    # Extract the values from the corresponding column in samp_data
+    temp_color_by <- as.factor(samp_data[[current_factor]])
 
-ms.loc <- poppr.msn(snp_genclone,
-                    distmat = bitwise.dist(snp_genclone, percent = FALSE),
-                    include.ties = TRUE,
-                    showplot = FALSE) # show nothing
+    myColors <- rainbow(length(unique(temp_color_by)))
+    names(myColors) <- levels(temp_color_by)
 
-#ms.loc$graph[]
-#ms.loc
-#str(ms.loc)
-the_edges <-igraph::E(ms.loc$graph)$weight
-edges<-as.list(the_edges)
+    # Set strata and pop with the temporary variable
+    num_columns <- ncol(samp_data)
 
-# Plot a pretty plot
-set.seed(8)
-plot_poppr_msn(
-  snp_genclone ,
-  poppr_msn = ms.loc,
-  palette = myColors,
-  mlg = FALSE,
-  quantiles = FALSE,
-  wscale = FALSE,
-  inds="None",
-  layfun = igraph::layout_with_lgl,
-  edge.label = the_edges,
-  edge.label.font = 2,
-  edge.label.cex = 1,
-  edge.lable.family = "Helvetica",
-  edge.label.color = "darkslateblue"
-  
-)
+    # Extract all columns from samp_data and append the temp_color_by column
+    strata(snp_genclone) <- cbind(samp_data[, c(1:num_columns)], temp_color_by)
+
+    # Rename the appended column to "temp_color_by"
+    names(strata(snp_genclone))[num_columns + 1] <- "temp_color_by"
+
+    setPop(snp_genclone) <- ~temp_color_by
+
+    ms.loc <- poppr.msn(snp_genclone,
+                        distmat = bitwise.dist(snp_genclone, percent = FALSE),
+                        include.ties = TRUE,
+                        showplot = FALSE)
+
+    the_edges <- E(ms.loc$graph)$weight
+    edges <- as.list(the_edges)
+
+    # Plot the MSN
+    set.seed(8)
+    plot_poppr_msn(
+        snp_genclone,
+        poppr_msn = ms.loc,
+        palette = myColors,
+        mlg = FALSE,
+        quantiles = FALSE,
+        wscale = FALSE,
+        inds = "None",
+        layfun = layout_with_lgl,
+        edge.label = the_edges,
+        edge.label.font = 2,
+        edge.label.cex = 1,
+        edge.label.family = "Helvetica",
+        edge.label.color = "darkslateblue",
+    )
+    
+}
+
 ```
 
 ### Visnetwork minimum spanning network
