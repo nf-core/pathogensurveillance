@@ -753,16 +753,34 @@ for (current_factor in factors_to_analyze) {
 
 ### Visnetwork minimum spanning network
 
-*Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes*
+**Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes**
 
-```{r visnetwork_setup, eval = nrow(samp_data) > 2}
+**Attempting to make Visnetwork plot more useful. If you hover, you now see all samples that group together and have the same genotype**
+```{r visnetwork_setup_testing, eval = nrow(samp_data) > 2}
+# Given a node ID (MLG), this function will return a string containing all sample names associated with that MLG
+# Returns the MLG for a given sample
+get_MLG <- function(sample_name) {
+  mlg_list <- mlg.id(snp_genclone)
+  mlg <- names(mlg_list)[which(sapply(mlg_list, function(samples) sample_name %in% samples))]
+  return(mlg)
+}
+
+# Returns a string with all samples for a given MLG
+generate_tooltip <- function(mlg) {
+  samples_with_mlg <- unlist(mlg.id(snp_genclone)[mlg])
+  return(paste(samples_with_mlg, collapse = ", "))
+}
+
 node_data <- data.frame(
   id = V(ms.loc$graph)$name,
-  label = V(ms.loc$graph)$name,
+  label = sapply(V(ms.loc$graph)$name, get_MLG),  # Get MLG for each sample
   group = V(ms.loc$graph)$color,
   size = V(ms.loc$graph)$size
 )
 node_data$value <- node_data$size.Freq
+
+# Apply the tooltip function to all nodes
+node_data$title <- sapply(node_data$label, generate_tooltip)  # Tooltip uses the MLG label
 
 node_data$color <- ms.loc$colors[node_data$group]
 node_groups <- lapply(names(ms.loc$colors), function(group_name) {
@@ -773,15 +791,15 @@ edges_data <- get.data.frame(ms.loc$graph, what="edges")
 edges_data$title <- paste("Distance:", edges_data$weight)
 edges_data$arrows <- NA
 
+
 visNetwork(node_data, edges_data) %>%
   visGroups(groupname = node_groups) %>%
-  visNodes(shape = "dot", color = node_data$color) %>%
-  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>% 
-  #visEdges(arrows = "to") %>%
+  visNodes(shape = "dot", color = node_data$color, title = node_data$title) %>%
+  visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>%
   visPhysics(stabilization = FALSE) %>%
   visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-```
 
+```
 ### Network D3 experiment
 
 # Quality control
