@@ -133,13 +133,32 @@ ggplotly(p)
 [see webstie to create plotly graph](https://stackoverflow.com/questions/56787941/embedding-dash-plotly-graphs-into-html) to create interactive trees:
 
 <head>
-  <!-- Plotly.js -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<!-- Plotly.js -->
+
+```{=html}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+```
 </head>
 
 <body>
+
 <h1>Something</h1>
-<div><div id="d18660f3-1557-43c1-8f27-09292a9a8de7" style="height: 100%; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("d18660f3-1557-43c1-8f27-09292a9a8de7", [{"name": "Boats", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [9, 6, 2, 1, 5, 4, 6, 8, 1, 3], "type": "bar", "uid": "39c52ed4-e27d-4574-9cec-a3d50a8773a0"}, {"name": "Cars", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [19, 36, 12, 1, 35, 4, 6, 8, 1, 3], "type": "bar", "uid": "c0b658e9-bd5b-4c65-976d-1e03ba5836a3"}], {"title": {"text": "Title"}, "xaxis": {"tickangle": -45, "tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"text": "X axis"}}, "yaxis": {"tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"font": {"color": "rgb(107, 107, 107)", "size": 16}, "text": "Y axis"}}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"})</script><script type="text/javascript">window.addEventListener("resize", function(){Plotly.Plots.resize(document.getElementById("d18660f3-1557-43c1-8f27-09292a9a8de7"));});</script></div>
+
+<div>
+
+::: {#d18660f3-1557-43c1-8f27-09292a9a8de7 .plotly-graph-div style="height: 100%; width: 100%;"}
+:::
+
+```{=html}
+<script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("d18660f3-1557-43c1-8f27-09292a9a8de7", [{"name": "Boats", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [9, 6, 2, 1, 5, 4, 6, 8, 1, 3], "type": "bar", "uid": "39c52ed4-e27d-4574-9cec-a3d50a8773a0"}, {"name": "Cars", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [19, 36, 12, 1, 35, 4, 6, 8, 1, 3], "type": "bar", "uid": "c0b658e9-bd5b-4c65-976d-1e03ba5836a3"}], {"title": {"text": "Title"}, "xaxis": {"tickangle": -45, "tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"text": "X axis"}}, "yaxis": {"tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"font": {"color": "rgb(107, 107, 107)", "size": 16}, "text": "Y axis"}}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"})</script>
+```
+```{=html}
+<script type="text/javascript">window.addEventListener("resize", function(){Plotly.Plots.resize(document.getElementById("d18660f3-1557-43c1-8f27-09292a9a8de7"));});</script>
+```
+
+</div>
+
 </body>
 
 ## Example Observable JS code
@@ -272,7 +291,7 @@ WKID represents the Weighted Kmer IDentity, adjusted for genome size differences
 
 This section provides an overview of the proportions of different species in the report.
 
-> From NIK: I think package plotly cand o this and is already laoded, see [https://plotly.com/r/treemaps/](https://plotly.com/r/treemaps/). 
+> From NIK: I think package plotly cand o this and is already laoded, see <https://plotly.com/r/treemaps/>.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(billboarder)
@@ -350,7 +369,6 @@ plot_ly(
     domain=list(column=0))
 ```
 
-
 ## Rigorous ID to species or subspecies
 
 ::: panel-tabset
@@ -394,6 +412,7 @@ phycanv
 ```
 
 ### ANI Neighbor-Joining Tree
+
 ```{r ANI NJ tree, include=TRUE, height=8, width=8}
 #Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this-but I don't see that dataset 2 has this entry. 
 
@@ -480,7 +499,6 @@ rownames(ani_matrix_format) <- name_key[rownames(ani_matrix_format)]
 
 heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnames(ani_matrix_format))
 ```
-
 :::
 
 # Genetic diversity in the group(s)
@@ -489,7 +507,7 @@ heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnam
 
 1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
 2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
-3. Need to clarify to use what REF is in the SNP tree or else rename
+3.  Need to clarify to use what REF is in the SNP tree or else rename
 
 ```{r div_parse_inputs}
 snp_trees <- ape::read.tree(snp_tree_paths)
@@ -498,10 +516,12 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ```
 
 ## Genetic diversity in sample
+
 ::: panel-tabset
 ### SNP tree
 
 **Phylocanvas option**
+
 ```{r snp_tree_config, include=TRUE}
 #Will tidy up code once we finalize which tree program to use.
 
@@ -576,7 +596,6 @@ ggtree_interactive
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
-
 :::
 
 ## Minimum spanning network
@@ -603,8 +622,8 @@ indNames(snp_aln.gi) <- cleaned_names
 ### MLG table (maybe helpful to include-not sure)
 
 ```{r mlg_config}
-mat <- match(indNames(snp_aln.gi), samp_data$sample)
-# samp_data <- samp_data[mat, ]
+mat <-match(indNames(snp_aln.gi), samp_data$sample)
+samp_data <- samp_data[mat, ]
 
 # Convert to genclone
 snp_genclone <- as.genclone(snp_aln.gi)
@@ -629,22 +648,28 @@ mlglist
 
 ### Experimenting with less subjective ways to provide SNP cutoff
 
-Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
-
 ```{r mlg_config_test, eval = FALSE}
-#Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
 
-#snpdist_stats<-filter_stats(snp_genclone)
+#Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
+ 
+#snpdist_stats<-filter_stats(snp_genclone) 
+ 
+ 
 #if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-#    print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
+ 
+#print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
+ 
 #} else {
-#    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS))
+#    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
 #}
 #mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+
 #idlist2<-mlg.id(snp_genclone)
 
 #mlglist2<-data.frame("MLG","strain")
+
 #colnames(mlglist2) <- c("V1","V2")
+
 #for (name in names(idlist2)) {
 #  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
 #  mlglist2<-rbind(mlglist2,newframe)
@@ -652,17 +677,21 @@ Please revise as needed. I think we need a better approach to coming up with SNP
 
 #colnames(mlglist2)<-c("MLG","strain")
 #mlglist2<-mlglist2[mlglist2$strain != "strain",]
+
 #make a prettier table
 #mlglist2
 ```
 
-### Poppr MSN
+Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
 
-Martha-need to resolve issues with key. There is an extra repeated node in legend. 
+**Martha-I cannot figure out why Poppr samples/nodes legend has a redundant node. I have not seen this with other datasets, and used pretty much the same code**
 
 ```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
 # Replace NAs with "unknown"
 samp_data[] <- lapply(samp_data, function(col) ifelse(is.na(col), "unknown", col))
+
+mat <-match(indNames(snp_genclone), samp_data$sample)
+samp_data <- samp_data[mat, ]
 
 # Extract unique factors from the color_by column
 factors_to_analyze <- unique(unlist(strsplit(as.character(samp_data$color_by), split = ";")))
@@ -697,7 +726,7 @@ for (current_factor in factors_to_analyze) {
                         include.ties = TRUE,
                         showplot = FALSE)
 
-    the_edges <- E(ms.loc$graph)$weight
+    the_edges <- igraph::E(ms.loc$graph)$weight
     edges <- as.list(the_edges)
 
     # Plot the MSN
@@ -710,7 +739,7 @@ for (current_factor in factors_to_analyze) {
         quantiles = FALSE,
         wscale = FALSE,
         inds = "None",
-        layfun = layout_with_lgl,
+        layfun = igraph::layout_with_lgl,
         edge.label = the_edges,
         edge.label.font = 2,
         edge.label.cex = 1,
@@ -830,16 +859,16 @@ sessionInfo()
 
 Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
 
-:::{.callout-tip}
+::: callout-tip
 ## Feedback
 
 To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
 :::
 
-Please cite this pipeline and nf-core in publications as follows: 
+Please cite this pipeline and nf-core in publications as follows:
 
 {{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
 
-{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316–19. https://doi.org/10.1038/nbt.3820.
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316--19. https://doi.org/10.1038/nbt.3820.
 
 Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).
