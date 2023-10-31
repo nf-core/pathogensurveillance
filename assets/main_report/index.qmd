@@ -652,18 +652,17 @@ mlglist
 
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
  
-#snpdist_stats<-filter_stats(snp_genclone) 
- 
- 
-#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
- 
-#print(farthest_thresh <- snpdist_stats$farthest$THRESHOLDS)
- 
-#} else {
-#    print(farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
-#}
-#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+#snpdist_stats <- filter_stats(snp_genclone)
 
+#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
+#    farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
+#    print(farthest_thresh)
+#} else {
+#    farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
+#    print(farthest_thresh)
+#}
+
+#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
 #idlist2<-mlg.id(snp_genclone)
 
 #mlglist2<-data.frame("MLG","strain")
@@ -672,7 +671,7 @@ mlglist
 
 #for (name in names(idlist2)) {
 #  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
-#  mlglist2<-rbind(mlglist2,newframe)
+# mlglist2<-rbind(mlglist2,newframe)
 #}
 
 #colnames(mlglist2)<-c("MLG","strain")
@@ -801,10 +800,12 @@ visNetwork(node_data, edges_data) %>%
 
 ```
 ### Network D3 experiment
+```{r vNe, eval = nrow(samp_data) > 2, include=FALSE}
+#Network D3 testing
 
+```
 # Quality control
 
--   A quick indicator of status of each step.
 
 ## Input data quality
 
