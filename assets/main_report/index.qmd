@@ -35,6 +35,8 @@ library(ggplot2)
 library(ggnewscale)
 library(kableExtra)
 library(plotly)
+library(webshot2)
+library(metacoder)
 ```
 
 ```{r parse_inputs}
@@ -106,19 +108,6 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline** versi
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-## Sample Plotly graph
-
-[see webstie to create plotly graph](https://stackoverflow.com/questions/56787941/embedding-dash-plotly-graphs-into-html) to create interactive trees:
-
-<head>
-  <!-- Plotly.js -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-
-<body>
-<h1>Something</h1>
-<div><div id="d18660f3-1557-43c1-8f27-09292a9a8de7" style="height: 100%; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("d18660f3-1557-43c1-8f27-09292a9a8de7", [{"name": "Boats", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [9, 6, 2, 1, 5, 4, 6, 8, 1, 3], "type": "bar", "uid": "39c52ed4-e27d-4574-9cec-a3d50a8773a0"}, {"name": "Cars", "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "y": [19, 36, 12, 1, 35, 4, 6, 8, 1, 3], "type": "bar", "uid": "c0b658e9-bd5b-4c65-976d-1e03ba5836a3"}], {"title": {"text": "Title"}, "xaxis": {"tickangle": -45, "tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"text": "X axis"}}, "yaxis": {"tickfont": {"color": "rgb(107, 107, 107)", "size": 14}, "title": {"font": {"color": "rgb(107, 107, 107)", "size": 16}, "text": "Y axis"}}}, {"showLink": false, "linkText": "Export to plot.ly", "plotlyServerURL": "https://plot.ly"})</script><script type="text/javascript">window.addEventListener("resize", function(){Plotly.Plots.resize(document.getElementById("d18660f3-1557-43c1-8f27-09292a9a8de7"));});</script></div>
-</body>
 
 ## Example Observable JS code
 
@@ -168,13 +157,14 @@ samp_data %>%
     DT::datatable()
 ```
 
-## {{< bi sliders >}} Input settings
-
-Add settings used to run Nextflow and the pipeline parameters. (Nik thinks this should go down at the end given that status is reported above).
 
 # Identification
 
-## Rapid ID to genus
+## Initial sketch-based identification
+
+::: panel-tabset
+
+### Sendsketch top hits
 
 The following table provides putative classifications of the samples based on a kmer analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
@@ -246,42 +236,13 @@ DT::datatable(final_table,
 WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 :::
 
-# Summary of Species Proportions FYI, STILL WORKING ON THIS--Camilo
+### Taxa of top hits
 
 This section provides an overview of the proportions of different species in the report.
-
-> From NIK: I think package plotly cand o this and is already laoded, see [https://plotly.com/r/treemaps/](https://plotly.com/r/treemaps/). 
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(billboarder)
-library(dplyr)
-
-species_summary <- final_table %>%
-  group_by(`Top Hit`) %>%
-  summarise(Freq = n()) 
-
-# Create the treemap chart
-billboarder() %>% 
-  bb_treemapchart(
-    data = species_summary, 
-    mapping = aes(x = `Top Hit`, y = Freq),
-    label = list(show = TRUE, threshold = 0.03),
-    tile = "binary" 
-  ) %>% 
-  bb_data(
-    labels = list(colors = "#FFF")
-  ) %>% 
-  bb_color(
-    palette = colorRampPalette(c("#08519C", "#9ECAE1"))(nrow(species_summary)) 
-  )
-
-```
 
 Here is how we can display the whole taxonomy with plotly using the `sunburst` and `treemap` plot types:
 
 ```{r fig.height=8}
-library(metacoder)
-
 top_hits <- sketch_data %>%
   arrange(desc(sample_id), desc(WKID), desc(ANI), desc(Complt)) %>%  # Sort by sample_id, WKID, ANI, and Complt in descending order
   group_by(sample_id) %>%  # Group by sample_id
@@ -313,20 +274,15 @@ plot_data$from <- unique_tax_names[plot_data$from]
 plot_data$to <- unique_tax_names[plot_data$to]
 
 plot_ly(
-    type='treemap',
-    labels=plot_data$to,
-    parents=plot_data$from,
-    values=plot_data$count,
-    textinfo="label+value+percent parent+percent entry+percent root",
-    domain=list(column=0))
-
-plot_ly(
     type='sunburst',
     labels=plot_data$to,
     parents=plot_data$from,
     values=plot_data$count,
     domain=list(column=0))
 ```
+
+
+::: 
 
 
 ## Rigorous ID to species or subspecies
@@ -513,15 +469,15 @@ colnames(new_row) <- colnames(samp_data2)
 
 new_row$sample <- "REF"
 
-#Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
+# Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
 samp_data2 <- rbind(samp_data2, new_row)
 samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
 
-#We can revise, but one way to color the samples as one color, the ref as another
+# We can revise, but one way to color the samples as one color, the ref as another
 samp_data2$text_color <- "#24B064"
 samp_data2$text_color[samp_data2$sample == "REF"] <- "black"
 
-#Couldn't use some of ggtree functions with plotly, so here is a workaround
+# Couldn't use some of ggtree functions with plotly, so here is a workaround
 snp_tree1 <- fortify(snp_trees_midpoint)
 
 # Merge it with your samp_data2 for color information
@@ -539,7 +495,16 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
 ggtree_interactive
+
+
+
+# 
+
+# How interactive plots can be made to work with PDF
+htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
+webshot(url = "ggtree_interactive.html", file = "ggtree_interactive.png", delay = 1, zoom = 4, vheight = 500)
 ```
+
 
 ```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
 There is no tree to draw, probably because there were too few samples.
@@ -753,6 +718,10 @@ The `pathogen surveillance` pipeline used the following tools that should be ref
 
 -   A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
 -   The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
+
+## {{< bi sliders >}} Input settings
+
+Add settings used to run Nextflow and the pipeline parameters.
 
 ## {{< bi gear-wide-connected >}} Analysis software
 
