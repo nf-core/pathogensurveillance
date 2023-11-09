@@ -3,13 +3,13 @@ project:
 
 website:
   title: "Pathogen Surveillance"
-  favicon: "logo.png"
+  favicon: "images/logo.png"
   search: false
   page-footer: 
     left: |
-        ![](nf-core-logo.png){height=30px} [![](logo.png){height=30px}](https://nf-co.re/pathogensurveillance)
+        ![](images/nf-core-logo.png){height=30px} [![](images/logo.png){height=30px}](https://nf-co.re/pathogensurveillance)
     center: |
-        [![](usda-logo-color.png){height=30px}](https://www.usda.gov/style-guide/logo)  [![](OSU_horizontal_2C_O_over_B.png){height=30px}](https://oregonstate.edu)
+        [![](images/usda-logo-color.png){height=30px}](https://www.usda.gov/style-guide/logo)  [![](images/OSU_horizontal_2C_O_over_B.png){height=30px}](https://oregonstate.edu)
     right:
       - icon: twitter
         href: https://twitter.com/PhytophthoraLab
@@ -20,7 +20,7 @@ website:
 
   sidebar:
     style: "docked"
-    logo: "logo.png"
+    logo: "images/logo.png"
     tools:
       - icon: twitter
         href: https://twitter.com/phytophthoralab
