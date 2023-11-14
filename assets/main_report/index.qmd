@@ -527,11 +527,7 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
 
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
-ggtree_interactive
-
-
-
-# 
+#ggtree_interactive
 
 # How interactive plots can be made to work with PDF
 htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
