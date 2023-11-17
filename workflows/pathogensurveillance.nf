@@ -46,6 +46,7 @@ include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysi
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
 include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
 include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
+include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny'
 
 
 /*
@@ -136,7 +137,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Create core gene phylogeny for bacterial samples
     ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
-        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(genome_id), val(meta), file(gff) ]
+        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(ref_meta), val(meta), file(gff) ]
         .map { it[1..2] } // [ val(meta), file(gff) ]
         .groupTuple() // [ val(meta), [file(gff)] ]
     gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
@@ -151,10 +152,19 @@ workflow PATHOGENSURVEILLANCE {
     ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
-    // Read2tree phylogeny for eukaryotes
-    //READ2TREE_ANALYSIS (
+    // Read2tree BUSCO phylogeny for eukaryotes
+    ref_metas = DOWNLOAD_REFERENCES.out.assem_samp_combos // val(ref_meta), val(meta)
+        .map { [it[1], it[0]] } // val(meta), val(ref_meta)
+        .groupTuple() // val(meta), [val(ref_meta)]
+    busco_input = ASSIGN_REFERENCES.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
+        .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)] 
+        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
+        .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)      
+    //BUSCO_PHYLOGENY (
+    //    busco_input,
+    //    DOWNLOAD_REFERENCES.out.sequence
     //)
-    
     
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               

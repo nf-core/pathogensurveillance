@@ -54,24 +54,27 @@ workflow DOWNLOAD_REFERENCES {
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
     ch_versions = ch_versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
     
-    MAKE_GFF_WITH_FASTA ( DOWNLOAD_ASSEMBLIES.out.sequence.join(DOWNLOAD_ASSEMBLIES.out.gff) )
-   
-    SOURMASH_SKETCH_GENOME (
-        DOWNLOAD_ASSEMBLIES.out.sequence
+    // Reformat the output DOWNLOAD_ASSEMBLIES to be in the standard ref_meta format
+    sequence = DOWNLOAD_ASSEMBLIES.out.sequence
         .map { [[id: it[0]], it[1]] }
-    )
+    gff = DOWNLOAD_ASSEMBLIES.out.gff
+        .map { [[id: it[0]], it[1]] }
+    
+    MAKE_GFF_WITH_FASTA ( sequence.join(gff) )
+   
+    SOURMASH_SKETCH_GENOME ( sequence )
     ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
 
     genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
-        .map { [it[1].replace('\n', ''), it[0]] } // [ val(genome_id), val(meta) ]
+        .map { [[id: it[1].replace('\n', '')], it[0]] } // [ val(genome_id), val(meta) ]
 
 
     emit:
-    assem_samp_combos = genome_ids                            // [ val(genome_id), val(meta) ] for each assembly/sample combination
-    sequence   = DOWNLOAD_ASSEMBLIES.out.sequence      // [ val(genome_id), file(fna) ] for each assembly
-    gff        = MAKE_GFF_WITH_FASTA.out.gff              // [ val(genome_id), file(gff) ] for each assembly
-    signatures = SOURMASH_SKETCH_GENOME.out.signatures // [ val(genome_id), file(signature) ] for each assembly
+    assem_samp_combos = genome_ids                     // [ val(ref_meta), val(meta) ] for each assembly/sample combination
+    sequence   = sequence                              // [ val(ref_meta), file(fna) ] for each assembly
+    gff        = MAKE_GFF_WITH_FASTA.out.gff           // [ val(ref_meta), file(gff) ] for each assembly
+    signatures = SOURMASH_SKETCH_GENOME.out.signatures // [ val(ref_meta), file(signature) ] for each assembly
     stats      = MERGE_ASSEMBLIES.out.merged_stats     // [ file(stats) ]
     versions   = ch_versions                           // [ versions.yml ]
 }

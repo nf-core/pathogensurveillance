@@ -1,5 +1,5 @@
 process MAKE_GFF_WITH_FASTA {
-    tag "${assembly_id}"
+    tag "${meta.id}"
     label 'process_single'
 
     conda "conda-forge::coreutils=9.1"
@@ -8,16 +8,16 @@ process MAKE_GFF_WITH_FASTA {
         'ubuntu:20.04' }"
 
     input:
-    tuple val(assembly_id), path(sequence), path(gff, stageAs: 'input.gff')
+    tuple val(meta), path(sequence), path(gff, stageAs: 'input.gff')
 
     output:
-    tuple val(assembly_id), path("${prefix}.gff"), emit: gff
+    tuple val(meta), path("${prefix}.gff"), emit: gff
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    prefix = task.ext.prefix ?: "${assembly_id}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
     # Copy gff info, removing the last "###" line
     head -n -1 input.gff > ${prefix}.gff

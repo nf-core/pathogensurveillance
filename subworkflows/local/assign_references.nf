@@ -9,9 +9,9 @@ workflow ASSIGN_REFERENCES {
 
     take:
     sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    assem_samp_combos // [val(assem_id), val(meta)] for each unique combination
-    sequence // [val(assem_meta), file(fna)] for each assembly
-    signatures // [val(assem_meta), file(sig)] for each assembly
+    assem_samp_combos // [val(ref_meta), val(meta)] for each unique combination
+    sequence // [val(ref_meta), file(fna)] for each assembly
+    signatures // [val(ref_meta), file(sig)] for each assembly
     depth // [val(meta), val(depth)] for each sample
 
     main:
@@ -66,7 +66,7 @@ workflow ASSIGN_REFERENCES {
 
     // Make list of downloaded reference genome signatures for each group
     assem_sigs = assem_samp_combos
-        .combine(signatures.map { [it[0].id, it[1]] }, by: 0)
+        .combine(signatures, by: 0)
         .map { [it[1], it[0], it[2]] } // meta, assem, sig
         .combine(sample_data, by: 0) // meta, assem, sig, fastq, ref_meta, ref, group_meta
         .map { [it[6], it[2]] } // group_meta, sig
