@@ -461,7 +461,7 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 **Phylocanvas option**
 
 ```{r snp_tree_config, include=TRUE}
-#Will tidy up code once we finalize which tree program to use.
+#NOTE-Will tidy up code once we finalize which tree program to use and input format. 
 
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
@@ -527,11 +527,7 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
 
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
-ggtree_interactive
-
-
-
-# 
+#ggtree_interactive
 
 # How interactive plots can be made to work with PDF
 htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
@@ -569,6 +565,9 @@ indNames(snp_aln.gi) <- cleaned_names
 ### MLG table (maybe helpful to include-not sure)
 
 ```{r mlg_config}
+
+#To do-great a function to adjust SNP threshold to different numbers of SNPs and rerun this function for each value (5, 10, 25, 50)
+
 mat <-match(indNames(snp_aln.gi), samp_data$sample)
 samp_data <- samp_data[mat, ]
 
@@ -704,7 +703,7 @@ for (current_factor in factors_to_analyze) {
 **Attempting to make Visnetwork plot more useful. If you hover, you now see all samples that group together and have the same genotype**
 ```{r visnetwork_setup_testing, eval = nrow(samp_data) > 2}
 # Given a node ID (MLG), this function will return a string containing all sample names associated with that MLG
-# Returns the MLG for a given sample
+# Work on simplifying code 
 get_MLG <- function(sample_name) {
   mlg_list <- mlg.id(snp_genclone)
   mlg <- names(mlg_list)[which(sapply(mlg_list, function(samples) sample_name %in% samples))]
