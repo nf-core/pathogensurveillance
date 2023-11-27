@@ -544,9 +544,8 @@ More info will be added later.
 
 ### *Questions to address*
 
-1.  Important discussion point-for running poppr, will user decide on SNP threshold? This differs depending on dataset. Can we use something like poppr *cutoff_predictor* function?
-
-*Martha is actively experimenting. So far looking into Visnetwork, but another option is networkD3?*
+1. Martha-Currently looking at providing a few different SNP threshold that the user can then select.
+2. Martha is actively experimenting with different network outputs. So far looking into Visnetwork, but another option is networkD3?*
 
 ```{r poppr_config}
 #Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
@@ -561,36 +560,6 @@ cleaned_names <- gsub("^[^_]+(?:_[^_]+)*_", "", genind_names)
 indNames(snp_aln.gi) <- cleaned_names
 ```
 
-### MLG table (maybe helpful to include-not sure)
-
-```{r mlg_config}
-
-#To do-great a function to adjust SNP threshold to different numbers of SNPs and rerun this function for each value (5, 10, 25, 50)
-
-mat <-match(indNames(snp_aln.gi), samp_data$sample)
-samp_data <- samp_data[mat, ]
-
-# Convert to genclone
-snp_genclone <- as.genclone(snp_aln.gi)
-
-# Filter genotypes at 5 nucleotides (with the default farthest neighbor algo)
-mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- 6
-
-idlist<-mlg.id(snp_genclone)
-
-mlglist<-data.frame("MLG","strain")
-colnames(mlglist) <- c("V1","V2")
-for (name in names(idlist)) {
-  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist[[name]]))
-  mlglist<-rbind(mlglist,newframe)
-}
-
-colnames(mlglist)<-c("MLG","strain")
-mlglist<-mlglist[mlglist$strain != "strain",]
-#make a prettier table
-mlglist
-```
-
 ### Experimenting with less subjective ways to provide SNP cutoff-this may be a viable option but requires review
 
 ```{r mlg_config_test, eval = FALSE}
@@ -598,51 +567,59 @@ mlglist
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
 # Convert to genclone
 
-mat <-match(indNames(snp_aln.gi), samp_data$sample)
-samp_data <- samp_data[mat, ]
+#mat <-match(indNames(snp_aln.gi), samp_data$sample)
+#samp_data <- samp_data[mat, ]
 
-snp_genclone <- as.genclone(snp_aln.gi)
-snpdist_stats <- filter_stats(snp_genclone)
+#snp_genclone <- as.genclone(snp_aln.gi)
+#snpdist_stats <- filter_stats(snp_genclone)
 
-if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-    farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
-    print(farthest_thresh)
-} else {
-    farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
-    print(farthest_thresh)
-}
+#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
+    #farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
+    #print(farthest_thresh)
+#} else {
+    #farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
+    #print(farthest_thresh)
+#}
 
 
-mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
 
-idlist2<-mlg.id(snp_genclone)
+#idlist2<-mlg.id(snp_genclone)
 
-mlglist2<-data.frame("MLG","strain")
+#mlglist2<-data.frame("MLG","strain")
 
-colnames(mlglist2) <- c("V1","V2")
+#colnames(mlglist2) <- c("V1","V2")
 
-for (name in names(idlist2)) {
-  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
- mlglist2<-rbind(mlglist2,newframe)
-}
+#for (name in names(idlist2)) {
+#  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
+# mlglist2<-rbind(mlglist2,newframe)
+#}
 
-colnames(mlglist2)<-c("MLG","strain")
-mlglist2<-mlglist2[mlglist2$strain != "strain",]
+#colnames(mlglist2)<-c("MLG","strain")
+#mlglist2<-mlglist2[mlglist2$strain != "strain",]
 
 #make a prettier table
-mlglist2
+#mlglist2
 ```
 
 Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
 
 **Martha-I cannot figure out why Poppr samples/nodes legend has a redundant node. I have not seen this with other datasets, and used pretty much the same code**
 
-```{r poppr msn, fig.height = 10, eval = nrow(samp_data) > 2}
-# Replace NAs with "unknown"
-samp_data[] <- lapply(samp_data, function(col) ifelse(is.na(col), "unknown", col))
-
-mat <-match(indNames(snp_genclone), samp_data$sample)
+```{r poppr msn, height=10, eval = nrow(samp_data) > 2}
+mat <-match(indNames(snp_aln.gi), samp_data$sample)
 samp_data <- samp_data[mat, ]
+
+# Convert to genclone
+snp_genclone <- as.genclone(snp_aln.gi)
+
+# Replace NAs with "unknown"
+samp_data[] <- lapply(samp_data, function(col) {
+  if (any(is.na(col))) {
+    col[is.na(col)] <- "unknown"
+  }
+  return(col)
+})
 
 # Extract unique factors from the color_by column
 factors_to_analyze <- unique(unlist(strsplit(as.character(samp_data$color_by), split = ";")))
@@ -671,18 +648,22 @@ for (current_factor in factors_to_analyze) {
     names(strata(snp_genclone))[num_columns + 1] <- "temp_color_by"
 
     setPop(snp_genclone) <- ~temp_color_by
+    
+    #Add additional for loop for different filter levels
+    
+    for (filter_level in c(6, 11, 26, 61, 101)) {
+      mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- filter_level
+      
+      ms.loc <- poppr.msn(snp_genclone,
+                            distmat = bitwise.dist(snp_genclone, percent = FALSE),
+                            include.ties = TRUE,
+                            showplot = FALSE)
+      
+      the_edges <- igraph::E(ms.loc$graph)$weight
+      edges <- as.list(the_edges)
 
-    ms.loc <- poppr.msn(snp_genclone,
-                        distmat = bitwise.dist(snp_genclone, percent = FALSE),
-                        include.ties = TRUE,
-                        showplot = FALSE)
-
-    the_edges <- igraph::E(ms.loc$graph)$weight
-    edges <- as.list(the_edges)
-
-    # Plot the MSN
-    set.seed(8)
-    plot_poppr_msn(
+      set.seed(8)
+      plot_poppr_msn(
         snp_genclone,
         poppr_msn = ms.loc,
         palette = myColors,
@@ -696,8 +677,9 @@ for (current_factor in factors_to_analyze) {
         edge.label.cex = 1,
         edge.label.family = "Helvetica",
         edge.label.color = "darkslateblue",
-    )
-    
+        main = paste("MSN Plot - SNP Threshold:", filter_level-1,".", "Nodes colored by", current_factor)
+      )
+    }
 }
 
 ```
