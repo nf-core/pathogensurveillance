@@ -303,7 +303,6 @@ plot_ly(
     domain=list(column=0))
 ```
 
-
 ::: 
 
 
@@ -393,16 +392,7 @@ name_key <- c(
 # Relabel the tree tips
 nj_tree$tip.label <- name_key[nj_tree$tip.label]
 
-# Visualize-used phycanvas 
-# Sadly, for now-won't render if part of a tabular panel
-#phycanv_nj <- phylocanvas(nj_tree, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-#for (x in name_key[sample_ids]) {
-#  phycanv_nj <- style_node(phycanv_nj, x, labelcolor = "green", labeltextsize = 30)
-#}
-    
-#phycanv_nj
-
-##Used static ggtree because I was having trouble rendering phycanvas option. It doesn't work if output is part of an output with multiple tabs. I can also try to convert to ggplotly object but you lost a lot of the ggtree functionality
+##Used static ggtree because I was having trouble rendering phycanvas option. It doesn't work if output is part of an output with multiple tabs. I can also try to convert to ggplotly object but you lose a lot of the ggtree functionality
 
 # Basic tree visualization with ggtree
 ggtree_ani <- ggtree(nj_tree) +
@@ -413,7 +403,6 @@ ggtree_ani <- ggtree(nj_tree) +
 
 
 ggtree_ani
-
 ```
 
 ### ANI heatmap and dendrogram
@@ -461,13 +450,14 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 **Phylocanvas option**
 
 ```{r snp_tree_config, include=TRUE}
-#NOTE-Will tidy up code once we finalize which tree program to use and input format. 
+#NOTE-Will tidy up code once we finalize which tree program to use and input format of files. There are many lines of code that deal with renaming samples, and these can be revised .  
 
 #Rename tree tip labels
 oldtips<-snp_trees$tip.label
 
 #TODO generalize for any prefix
-#assume REF is always in first position
+#Right now we assume REF is always in first position
+#After we finalize what characters aren't allowed, 
 newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
 
 #SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
@@ -478,6 +468,12 @@ snp_trees$tip.label<-newtips
 snp_trees_rootref <- root(snp_trees, "REF")
 #option2
 snp_trees_midpoint<-midpoint(snp_trees)
+
+name_key <- c(
+  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
+  setNames(samp_data$sample, convert_id(samp_data$sample)),
+  setNames(assembly_entries, assembly_entries)
+)
 
 #For phycanvas version-much simpler code-but have a ggtree and ggploty version below
 phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
@@ -496,42 +492,45 @@ We need to decide on best tree package. Here I experimented with ggtree and ggpl
 #One way to parse metadata file so we can color tips in a descriptive way
 
 #add REF to metadata-only provide accession info (and maybe genus and species)
-samp_data2<-samp_data
-new_row <- data.frame(matrix(ncol = ncol(samp_data2), nrow = 1))
-colnames(new_row) <- colnames(samp_data2)
+#This part can be simplified
+samp_data<-samp_data
+new_row <- data.frame(matrix(ncol = ncol(samp_data), nrow = 1))
+colnames(new_row) <- colnames(samp_data)
 
 new_row$sample <- "REF"
 
 # Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
-samp_data2 <- rbind(samp_data2, new_row)
-samp_data2 <- samp_data2[match(snp_trees_midpoint$tip.label, samp_data2$sample), ]
+samp_data <- rbind(samp_data, new_row)
+samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
 
 # We can revise, but one way to color the samples as one color, the ref as another
-samp_data2$text_color <- "#24B064"
-samp_data2$text_color[samp_data2$sample == "REF"] <- "black"
+samp_data$text_color <- ifelse(samp_data$sample == "REF", "black", "#24B064")
 
 # Couldn't use some of ggtree functions with plotly, so here is a workaround
 snp_tree1 <- fortify(snp_trees_midpoint)
 
-# Merge it with your samp_data2 for color information
-snp_tree1 <- merge(snp_tree1, samp_data2, by.x="label", by.y="sample")
+# Merge it with your samp_data for color information
+snp_tree1 <- merge(snp_tree1, samp_data, by.x="label", by.y="sample")
 
 # Using theme_minimal for a cleaner background
-ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + # Adjusted branch size
-  # Coloring nodes and adjusting size for visibility
+ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + 
   geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
   geom_point(data=snp_tree1, aes(x=x, y=y, color="black"), show.legend = FALSE, size=3) +
   geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label, color=text_color), size=3, hjust=0, vjust=0.5, fontface="bold") +
   scale_color_identity() +
   theme(legend.position = "none")
 
+
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
-#ggtree_interactive
+ggtree_interactive
+
 
 # How interactive plots can be made to work with PDF
-htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
-webshot(url = "ggtree_interactive.html", file = "ggtree_interactive.png", delay = 1, zoom = 4, vheight = 500)
+#Perhaps adjust with if/else statement rendering as pdf vs. html, also changes interactivity of html document
+
+#htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
+#webshot(url = "ggtree_interactive.html", file = "ggtree_interactive.png", delay = 1, zoom = 4, vheight = 500)
 ```
 
 
@@ -592,39 +591,46 @@ mlglist<-mlglist[mlglist$strain != "strain",]
 mlglist
 ```
 
-### Experimenting with less subjective ways to provide SNP cutoff
+### Experimenting with less subjective ways to provide SNP cutoff-this may be a viable option but requires review
 
 ```{r mlg_config_test, eval = FALSE}
 
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
- 
-#snpdist_stats <- filter_stats(snp_genclone)
+# Convert to genclone
 
-#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-#    farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
-#    print(farthest_thresh)
-#} else {
-#    farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
-#    print(farthest_thresh)
-#}
+mat <-match(indNames(snp_aln.gi), samp_data$sample)
+samp_data <- samp_data[mat, ]
 
-#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
-#idlist2<-mlg.id(snp_genclone)
+snp_genclone <- as.genclone(snp_aln.gi)
+snpdist_stats <- filter_stats(snp_genclone)
 
-#mlglist2<-data.frame("MLG","strain")
+if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
+    farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
+    print(farthest_thresh)
+} else {
+    farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
+    print(farthest_thresh)
+}
 
-#colnames(mlglist2) <- c("V1","V2")
 
-#for (name in names(idlist2)) {
-#  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
-# mlglist2<-rbind(mlglist2,newframe)
-#}
+mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
 
-#colnames(mlglist2)<-c("MLG","strain")
-#mlglist2<-mlglist2[mlglist2$strain != "strain",]
+idlist2<-mlg.id(snp_genclone)
+
+mlglist2<-data.frame("MLG","strain")
+
+colnames(mlglist2) <- c("V1","V2")
+
+for (name in names(idlist2)) {
+  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
+ mlglist2<-rbind(mlglist2,newframe)
+}
+
+colnames(mlglist2)<-c("MLG","strain")
+mlglist2<-mlglist2[mlglist2$strain != "strain",]
 
 #make a prettier table
-#mlglist2
+mlglist2
 ```
 
 Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
@@ -742,7 +748,7 @@ visNetwork(node_data, edges_data) %>%
   visNodes(shape = "dot", color = node_data$color, title = node_data$title) %>%
   visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>%
   visPhysics(stabilization = FALSE) %>%
-  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+  visOptions(nodesIdSelection = TRUE)
 
 ```
 ### Network D3 experiment
