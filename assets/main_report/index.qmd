@@ -651,9 +651,9 @@ for (current_factor in factors_to_analyze) {
     
     #Add additional for loop for different filter levels
     
-    for (filter_level in c(6, 11, 26, 61, 101)) {
-      mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE) <- filter_level
-      
+    for (filt_threshold in c(6, 11, 26, 61, 101)) {
+      mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE, threshold=filt_threshold) 
+    
       ms.loc <- poppr.msn(snp_genclone,
                             distmat = bitwise.dist(snp_genclone, percent = FALSE),
                             include.ties = TRUE,
