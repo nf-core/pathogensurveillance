@@ -8,6 +8,7 @@ import argparse
 import csv
 import logging
 import sys
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -80,7 +81,6 @@ class RowChecker:
         Args:
             row (dict): A mapping from column headers (keys) to elements of that row
                 (values).
-
         """
         self._validate_sample(row)
         self._validate_first(row)
@@ -101,15 +101,15 @@ class RowChecker:
             else:
                 self._ref_id_combos[row[self._ref_id_col]] = row[self._ref_col]
         
-        # Sanitize reference ID slightly.
-        row[self._ref_id_col] = row[self._ref_id_col].replace(" ", "_")
+        # Sanitize reference IDs
+        row[self._ref_id_col] = re.sub(r'[\/:*?"<>| .]', "_", row[self._ref_id_col])
 
     def _validate_sample(self, row):
         """Assert that the sample name exists and convert spaces to underscores."""
         if len(row[self._sample_col]) <= 0:
             raise AssertionError("Sample input is required.")
-        # Sanitize samples slightly.
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
+        # Sanitize samples IDs
+        row[self._sample_col] = re.sub(r'[\/:*?"<>| .]', "_", row[self._sample_col])
 
     def _validate_first(self, row):
         """Assert that the first FASTQ entry is non-empty and has the right format."""

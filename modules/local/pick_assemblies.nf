@@ -9,11 +9,12 @@ process PICK_ASSEMBLIES {
 
     input:
     tuple val(meta), path(families), path(genera), path(species)
-    path stats
+    path assem_data_tsvs
 
     output:
     tuple val(meta), path("${prefix}.tsv")    , emit: stats
     tuple val(meta), path("${prefix}_ids.txt"), emit: id_list
+    path "merged_assembly_stats.tsv", emit: merged_stats
     path "versions.yml", emit: versions
 
     when:
@@ -23,10 +24,9 @@ process PICK_ASSEMBLIES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    Rscript --version
-    Rscript --vanilla ${projectDir}/bin/pick_assemblies.R ${families} ${genera} ${species} ${stats} 5 ${prefix}.tsv
+    Rscript --vanilla ${projectDir}/bin/pick_assemblies.R ${families} ${genera} ${species} 5 ${prefix}.tsv ${assem_data_tsvs}
 
-    tail -n +2 ${prefix}.tsv | cut -f2 > ${prefix}_ids.txt
+    tail -n +2 ${prefix}.tsv | cut -f1,3 > ${prefix}_ids.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

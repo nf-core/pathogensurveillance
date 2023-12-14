@@ -1,5 +1,5 @@
 process DOWNLOAD_ASSEMBLIES {                                                  
-    tag "$id"                                                              
+    tag "${ref_meta.id}"                                                              
     label 'process_single'
     maxForks 1
     errorStrategy { return task.attempt > 3 ? 'ignore' : 'retry' }
@@ -11,14 +11,14 @@ process DOWNLOAD_ASSEMBLIES {
         'quay.io/biocontainers/ncbi-datasets-cli:14.26.0' }"               
                                                                                 
     input:                                                                      
-    val id // There is no meta because we want to cache based only the ID                                                                
+    tuple val(ref_meta), val(id)                                                                 
                                                                                 
     output:                                                                     
-    tuple val(id), path("${prefix}.zip"), emit: assembly
-    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}_*_genomic.fna"), emit: sequence
-    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}.gff"), emit: gff, optional: true
-    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}_cds.fna"), emit: cds, optional: true
-    tuple val(id), path("ncbi_dataset/data/${prefix}/${prefix}.faa"), emit: protein, optional: true
+    tuple val(ref_meta), path("${prefix}.zip"), emit: assembly
+    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}_genomic.fna"), emit: sequence
+    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}.gff"), emit: gff, optional: true
+    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}_cds.fna"), emit: cds, optional: true
+    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}.faa"), emit: protein, optional: true
                              
     path "versions.yml"                 , emit: versions                       
                                                                                 
@@ -26,7 +26,7 @@ process DOWNLOAD_ASSEMBLIES {
     task.ext.when == null || task.ext.when                                      
                                                                                 
     script:                                                                     
-    prefix = task.ext.prefix ?: "${id}".replaceAll(' ', '_')                               
+    prefix = task.ext.prefix ?: "${ref_meta.id}"                               
     def args = task.ext.args ?: ''                                              
     """
     # Download assemblies as zip archives
@@ -36,14 +36,17 @@ process DOWNLOAD_ASSEMBLIES {
     unzip ${prefix}.zip
 
     # Rename files with assembly name
-    if [ -f ncbi_dataset/data/${prefix}/genomic.gff ]; then
-        mv ncbi_dataset/data/${prefix}/genomic.gff ncbi_dataset/data/${prefix}/${prefix}.gff
+    if [ -f ncbi_dataset/data/${id}/${id}_*_genomic.fna ]; then
+        mv ncbi_dataset/data/${id}/${id}_*_genomic.fna ncbi_dataset/data/${id}/${prefix}_genomic.fna
     fi
-    if [ -f ncbi_dataset/data/${prefix}/cds_from_genomic.fna ]; then
-        mv ncbi_dataset/data/${prefix}/cds_from_genomic.fna ncbi_dataset/data/${prefix}/${prefix}_cds.fna
+    if [ -f ncbi_dataset/data/${id}/genomic.gff ]; then
+        mv ncbi_dataset/data/${id}/genomic.gff ncbi_dataset/data/${id}/${prefix}.gff
     fi
-    if [ -f ncbi_dataset/data/${prefix}/protein.faa ]; then
-        mv ncbi_dataset/data/${prefix}/protein.faa ncbi_dataset/data/${prefix}/${prefix}.faa
+    if [ -f ncbi_dataset/data/${id}/cds_from_genomic.fna ]; then
+        mv ncbi_dataset/data/${id}/cds_from_genomic.fna ncbi_dataset/data/${id}/${prefix}_cds.fna
+    fi
+    if [ -f ncbi_dataset/data/${id}/protein.faa ]; then
+        mv ncbi_dataset/data/${id}/protein.faa ncbi_dataset/data/${id}/${prefix}.faa
     fi
  
     cat <<-END_VERSIONS > versions.yml                                          

@@ -28,17 +28,13 @@ workflow DOWNLOAD_REFERENCES {
     FIND_ASSEMBLIES ( ch_all_families )
     ch_versions = ch_versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
-    MERGE_ASSEMBLIES (
-       FIND_ASSEMBLIES.out.stats
-           .map { it[1] }
-           .collect()
-    )
-    
     PICK_ASSEMBLIES (
         ch_families
             .join(ch_genera)
             .join(ch_species),
-        MERGE_ASSEMBLIES.out.merged_stats
+        FIND_ASSEMBLIES.out.stats
+            .map { it[1] }
+            .toSortedList()
     )
 
     // Make channel with all unique assembly IDs 
@@ -47,34 +43,30 @@ workflow DOWNLOAD_REFERENCES {
         .splitText()                                                            
         .map { it.replace('\n', '') }
         .filter { it != '' }
-        .collect()                                                              
-        .toSortedList()                                                         
-        .flatten()                                                              
+        .map { it.split('\t') }
+        .map { [[id: it[0]], it[1]] }
         .unique()
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
     ch_versions = ch_versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
     
-    // Reformat the output DOWNLOAD_ASSEMBLIES to be in the standard ref_meta format
-    sequence = DOWNLOAD_ASSEMBLIES.out.sequence
-        .map { [[id: it[0]], it[1]] }
-    gff = DOWNLOAD_ASSEMBLIES.out.gff
-        .map { [[id: it[0]], it[1]] }
-    
-    MAKE_GFF_WITH_FASTA ( sequence.join(gff) )
+    // Add sequence to the gff
+    MAKE_GFF_WITH_FASTA ( 
+        DOWNLOAD_ASSEMBLIES.out.sequence
+            .join(DOWNLOAD_ASSEMBLIES.out.gff)
+    )
    
-    SOURMASH_SKETCH_GENOME ( sequence )
+    SOURMASH_SKETCH_GENOME ( DOWNLOAD_ASSEMBLIES.out.sequence )
     ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
 
     genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
-        .map { [[id: it[1].replace('\n', '')], it[0]] } // [ val(genome_id), val(meta) ]
-
+        .map { [[id: it[1].replace('\n', '').split('\t')[0]], it[0]] } // [ val(ref_meta), val(meta) ]
 
     emit:
-    assem_samp_combos = genome_ids                     // [ val(ref_meta), val(meta) ] for each assembly/sample combination
-    sequence   = sequence                              // [ val(ref_meta), file(fna) ] for each assembly
-    gff        = MAKE_GFF_WITH_FASTA.out.gff           // [ val(ref_meta), file(gff) ] for each assembly
-    signatures = SOURMASH_SKETCH_GENOME.out.signatures // [ val(ref_meta), file(signature) ] for each assembly
-    stats      = MERGE_ASSEMBLIES.out.merged_stats     // [ file(stats) ]
-    versions   = ch_versions                           // [ versions.yml ]
+    assem_samp_combos = genome_ids                        // [ val(ref_meta), val(meta) ] for each assembly/sample combination
+    sequence   = DOWNLOAD_ASSEMBLIES.out.sequence         // [ val(ref_meta), file(fna) ] for each assembly
+    gff        = MAKE_GFF_WITH_FASTA.out.gff              // [ val(ref_meta), file(gff) ] for each assembly
+    signatures = SOURMASH_SKETCH_GENOME.out.signatures    // [ val(ref_meta), file(signature) ] for each assembly
+    stats      = PICK_ASSEMBLIES.out.merged_stats.first() // [ file(stats) ]
+    versions   = ch_versions                              // [ versions.yml ]
 }

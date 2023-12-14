@@ -2,13 +2,13 @@ process MERGE_ASSEMBLIES {
     tag "All"
     label 'process_single'
                                                                                 
-    conda "conda-forge::coreutils=9.1"                                          
+    conda "conda-forge::r-base=4.2.1"                                           
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :            
-        'ubuntu:20.04' }"                                                       
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
+        'quay.io/biocontainers/r-base:4.2.1' }"                                 
 
     input:
-    path stats // multiple outputs from FIND_ASSEMBLIES
+    path stats // multiple TSV outputs from FIND_ASSEMBLIES
 
     output:
     path "merged_assembly_stats.tsv", emit: merged_stats
@@ -17,12 +17,12 @@ process MERGE_ASSEMBLIES {
     task.ext.when == null || task.ext.when
 
     script:
-    def first = stats[0]
     """
-    # Save header from first path, adding a header for a new column for family
-    head -n 1 ${first} | sed 's/\$/\\tFamily/' > merged_assembly_stats.tsv
+    Rscript --vanilla ${projectDir}/bin/merge_assemblies.R ${stats}
 
-    # Copy all data to this new file, except for headers, adding family column contents
-    find ${stats} | xargs -I '{}' sh -c 'tail -n +2 {} | sed "s/\$/\\t\$(basename {} .tsv)/"' >> merged_assembly_stats.tsv
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+    END_VERSIONS
     """
 }

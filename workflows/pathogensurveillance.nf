@@ -122,7 +122,7 @@ workflow PATHOGENSURVEILLANCE {
     // Call variants and create SNP-tree and minimum spanning nextwork
     VARIANT_ANALYSIS (
         ASSIGN_REFERENCES.out.sample_data,
-        ch_input
+        INPUT_CHECK.out.csv
     )
     ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
@@ -147,7 +147,7 @@ workflow PATHOGENSURVEILLANCE {
         .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]            
     CORE_GENOME_PHYLOGENY (                                                     
         gff_and_group,                             
-        ch_input                                                          
+        INPUT_CHECK.out.csv                                                          
     )
     ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
@@ -230,7 +230,7 @@ workflow PATHOGENSURVEILLANCE {
          
     MAIN_REPORT (                                                             
         report_in,                                                              
-        ch_input,                                                               
+        INPUT_CHECK.out.csv,                                                               
         DOWNLOAD_REFERENCES.out.stats,                                          
         MULTIQC.out.data,                                                       
         MULTIQC.out.plots,                                                      

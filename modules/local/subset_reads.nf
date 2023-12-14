@@ -1,6 +1,6 @@
 process SUBSET_READS {
     tag "$meta.id"
-    label 'process_single'
+    label 'process_low'
 
     conda "bioconda::seqkit=2.2.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

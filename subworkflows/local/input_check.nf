@@ -10,8 +10,7 @@ workflow INPUT_CHECK {
 
     main:
     SAMPLESHEET_CHECK ( samplesheet )
-    SAMPLESHEET_CHECK.out
-        .csv
+    SAMPLESHEET_CHECK.out.csv
         .splitCsv ( header:true, sep:',', quote:'"')
         .map { create_reads_ref_channel(it) }
         .transpose ( by: 4 ) // Duplicate rows for each group when there are multiple groups per sample
@@ -19,8 +18,9 @@ workflow INPUT_CHECK {
         .set { sample_data }
 
     emit:
-    sample_data                               // channel: [ val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups) ]
-    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+    sample_data                               // val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups)
+    csv      = SAMPLESHEET_CHECK.out.csv      // modified csv of metadata 
+    versions = SAMPLESHEET_CHECK.out.versions // versions.yml
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
