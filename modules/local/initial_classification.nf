@@ -25,8 +25,7 @@ process INITIAL_CLASSIFICATION {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    which Rscript
-    Rscript --version
+    ls -la ${projectDir}
     Rscript --vanilla ${projectDir}/bin/sendsketch_filter.R $hits
 
     KINGDOM="\$(cat kingdom.txt)"
