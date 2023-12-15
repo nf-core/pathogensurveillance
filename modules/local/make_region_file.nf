@@ -5,7 +5,7 @@ process MAKE_REGION_FILE {
     conda "conda-forge::coreutils=9.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-        'ubuntu:20.04' }"
+        'nf-core/ubuntu:20.04' }"
 
     input:
     tuple val(ref_meta), path(ref)

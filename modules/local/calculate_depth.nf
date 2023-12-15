@@ -5,10 +5,10 @@ process CALCULATE_DEPTH {
     conda "conda-forge::coreutils=9.1"                                          
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :            
-        'ubuntu:20.04' }"                                                       
+        'nf-core/ubuntu:20.04' }"                                                       
                                                                                 
     input:                                                                      
-    tuple val(meta), val(fastqs), path(ref)                                     
+    tuple val(meta), path(fastqs), path(ref)                                     
                                                                                 
     output:                                                                     
     tuple val(meta), env(DEPTH), emit: depth                     
