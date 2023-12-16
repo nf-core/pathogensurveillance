@@ -25,7 +25,6 @@ process INITIAL_CLASSIFICATION {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    ls -la ${projectDir}
     sendsketch_filter.R $hits
 
     KINGDOM="\$(cat kingdom.txt)"
