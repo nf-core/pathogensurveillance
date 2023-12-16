@@ -21,7 +21,7 @@ process ASSIGN_GROUP_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    Rscript --vanilla ${projectDir}/bin/assign_group_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.csv
+    assign_group_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.csv
 
     cat <<-END_VERSIONS > versions.yml                                          
     "${task.process}":                                                          

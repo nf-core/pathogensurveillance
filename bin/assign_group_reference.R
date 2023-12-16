@@ -1,4 +1,4 @@
-#!/usr/bin/env -S Rscript --vanilla
+#!/usr/bin/env Rscript
 
 start_min_ani <- 0.9 # The minimum ANI for a reference to be assigned to a samples 
 end_min_ani <- 0.7 # How low the minimum can go if no samples can be assigned

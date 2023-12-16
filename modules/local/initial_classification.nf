@@ -26,7 +26,7 @@ process INITIAL_CLASSIFICATION {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     ls -la ${projectDir}
-    Rscript --vanilla ${projectDir}/bin/sendsketch_filter.R $hits
+    sendsketch_filter.R $hits
 
     KINGDOM="\$(cat kingdom.txt)"
     CLASS="\$(cat classification.txt)"
