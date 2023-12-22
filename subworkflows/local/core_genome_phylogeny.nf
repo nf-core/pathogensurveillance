@@ -48,7 +48,7 @@ workflow CORE_GENOME_PHYLOGENY {
     SUBSET_CORE_GENES ( REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs) )
 
     // Align each gene family with mafft
-    MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [] )
+    MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [], [], [], [], [] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes

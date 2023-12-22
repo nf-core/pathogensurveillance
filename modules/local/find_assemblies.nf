@@ -6,7 +6,7 @@ process FIND_ASSEMBLIES {
     conda "bioconda::entrez-direct=16.2"                                        
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/entrez-direct:16.2--he881be0_1':
-        'quay.io/biocontainers/entrez-direct:16.2--he881be0_1' }"               
+        'biocontainers/entrez-direct:16.2--he881be0_1' }"               
                                                                                 
     input:                                                                      
     val taxon // There is no meta because we dont want to cache based only the taxon                                                                

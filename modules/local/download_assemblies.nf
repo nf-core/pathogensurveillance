@@ -8,7 +8,7 @@ process DOWNLOAD_ASSEMBLIES {
     conda "conda-forge::ncbi-datasets-cli=15.11.0"                                
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ncbi-datasets-cli:14.26.0 ':
-        'quay.io/biocontainers/ncbi-datasets-cli:14.26.0' }"               
+        'docker.io/biocontainers/ncbi-datasets-cli:14.2.2_cv2' }"               
                                                                                 
     input:                                                                      
     tuple val(ref_meta), val(id)                                                                 

@@ -52,8 +52,8 @@ workflow ALIGN_READS {
 
     PICARD_MARKDUPLICATES (
         picard_input.map { it[0..1] },
-        picard_input.map { it[2] },
-        picard_input.map { it[3] }
+        picard_input.map { [it[0], it[2]] },
+        picard_input.map { [it[0], it[3]] }
     )
     ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions.toSortedList().map{it[0]})
 

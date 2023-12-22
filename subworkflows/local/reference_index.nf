@@ -34,7 +34,7 @@ workflow REFERENCE_INDEX {
     PICARD_CREATESEQUENCEDICTIONARY ( reference )
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions.toSortedList().map{it[0]})
 
-    SAMTOOLS_FAIDX ( reference )
+    SAMTOOLS_FAIDX ( reference, [[], []] )
     ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions.toSortedList().map{it[0]})
 
     BWA_INDEX ( reference ) 

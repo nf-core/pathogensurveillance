@@ -5,7 +5,7 @@ process INITIAL_CLASSIFICATION {
     conda "conda-forge::r-base=4.2.1"                                           
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
-        'quay.io/biocontainers/r-base:4.2.1' }"                                 
+        'biocontainers/r-base:4.2.1' }"                                 
 
     input:
     tuple val(meta), path(hits)
@@ -25,9 +25,7 @@ process INITIAL_CLASSIFICATION {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    which Rscript
-    Rscript --version
-    Rscript --vanilla ${projectDir}/bin/sendsketch_filter.R $hits
+    sendsketch_filter.R $hits
 
     KINGDOM="\$(cat kingdom.txt)"
     CLASS="\$(cat classification.txt)"

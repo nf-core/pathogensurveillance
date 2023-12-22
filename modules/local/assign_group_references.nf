@@ -5,7 +5,7 @@ process ASSIGN_GROUP_REFERENCES {
     conda "conda-forge::r-base=4.2.1"                                           
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
-        'quay.io/biocontainers/r-base:4.2.1' }"                                 
+        'biocontainers/r-base:4.2.1' }"                                 
 
     input:
     tuple val(group_meta), path(ani_matrix), path(samp_ref_pairs)
@@ -21,7 +21,7 @@ process ASSIGN_GROUP_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    Rscript --vanilla ${projectDir}/bin/assign_group_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.csv
+    assign_group_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.csv
 
     cat <<-END_VERSIONS > versions.yml                                          
     "${task.process}":                                                          

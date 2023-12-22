@@ -24,7 +24,7 @@ process PICK_ASSEMBLIES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    Rscript --vanilla ${projectDir}/bin/pick_assemblies.R ${families} ${genera} ${species} 5 ${prefix}.tsv ${assem_data_tsvs}
+    pick_assemblies.R ${families} ${genera} ${species} ${stats} 5 ${prefix}.tsv
 
     tail -n +2 ${prefix}.tsv | cut -f1,3 > ${prefix}_ids.txt
 
