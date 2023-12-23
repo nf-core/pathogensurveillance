@@ -5,12 +5,14 @@ min_coverage <- 30
 
 # Parse taxonomomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c("/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/families.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/genera.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/work/7e/d237e4239125be2ecc2c30520fcb3c/species.txt",
+# args <- c("/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_families.txt",
+#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_genera.txt",
+#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_species.txt",
 #           "5",
-#           "result.tsv",
-#           "")
+#           "pram2.tsv",
+#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Pythiaceae.tsv", 
+#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Peronosporaceae.tsv",
+#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Xanthomonadaceae.tsv")
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])

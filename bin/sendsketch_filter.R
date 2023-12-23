@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
 # Options
-ani_threshold <- c(species = 90, genus = 90, family = 60)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
-complt_threshold <- c(species = 60, genus = 40, family = 20) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+ani_threshold <- c(species = 90, genus = 80, family = 50)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 
 # Parse inputs
 args = commandArgs(trailingOnly = TRUE)

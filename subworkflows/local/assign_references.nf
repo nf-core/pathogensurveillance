@@ -74,9 +74,9 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0], it[1].unique()] }
 
     // Combine all signatures for each group
-    group_sigs = sample_sigs
-        .join(assem_sigs)
-        .join(user_sigs, remainder: true)
+    group_sigs = sample_sigs // group_meta, sample_sigs
+        .join(assem_sigs) // group_meta, sample_sigs, assem_sigs
+        .join(user_sigs, remainder: true) // group_meta, sample_sigs, assem_sigs, user_sigs
         .map { [it[0], it[1] + it[2] + (it[3] != null ? it[3] : [])] }
 
     // Compare all genomes/samples to eachother to create an ANI matrix

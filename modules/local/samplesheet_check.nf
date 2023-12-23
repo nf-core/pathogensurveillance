@@ -1,3 +1,7 @@
+/*
+Validates the input data and returns a reformatted version that is used for the rest of the pipeline.
+*/
+
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
 
@@ -13,11 +17,9 @@ process SAMPLESHEET_CHECK {
     path '*.csv'       , emit: csv
     path "versions.yml", emit: versions
 
-    script: // This script is bundled with the pipeline, in nf-core/plantpathsurveil/bin/
+    script:
     """
-    check_samplesheet.py \\
-        $samplesheet \\
-        samplesheet.valid.csv
+    check_samplesheet.py $samplesheet samplesheet.valid.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
