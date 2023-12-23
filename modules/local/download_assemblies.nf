@@ -8,7 +8,7 @@ process DOWNLOAD_ASSEMBLIES {
     conda "conda-forge::ncbi-datasets-cli=15.11.0"                                
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ncbi-datasets-cli:14.26.0 ':
-        'docker.io/biocontainers/ncbi-datasets-cli:14.2.2_cv2' }"               
+        'zachary-foster/ncbi-datasets-cli:16.0.0' }"               
                                                                                 
     input:                                                                      
     tuple val(ref_meta), val(id)                                                                 
@@ -29,6 +29,9 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${ref_meta.id}"                               
     def args = task.ext.args ?: ''                                              
     """
+    # Test that unzip is in the docker image
+    # unzip --version
+    
     # Download assemblies as zip archives
     datasets download genome accession $id --include gff3,rna,cds,protein,genome,seq-report --filename ${prefix}.zip
     

@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+# Set random number generator seed
+set.seed(1)
+
 # Options
 min_coverage <- 30
 
