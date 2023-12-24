@@ -1,7 +1,7 @@
 process DOWNLOAD_ASSEMBLIES {                                                  
     tag "${ref_meta.id}"                                                              
     label 'process_single'
-    maxForks 1
+    maxForks 3
     errorStrategy { return task.attempt > 3 ? 'ignore' : 'retry' }
     maxRetries 5                                                      
                                                                                 
