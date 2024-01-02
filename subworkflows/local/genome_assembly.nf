@@ -48,7 +48,7 @@ workflow GENOME_ASSEMBLY {
     QUAST ( ch_ref_grouped )
     ch_versions = ch_versions.mix(QUAST.out.versions.first())
 
-    ch_bakta_db = Channel.value("$projectDir/assets/bakta_db/db-light")
+    ch_bakta_db = Channel.value(params.bakta_db)
     BAKTA_BAKTA (
         FILTER_ASSEMBLY.out.filtered, // Genome assembly
         ch_bakta_db, // Bakta database
