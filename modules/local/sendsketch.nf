@@ -1,6 +1,6 @@
 process BBMAP_SENDSKETCH {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
     maxForks 1
 
     conda "bioconda::bbmap=39.01"

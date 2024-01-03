@@ -168,7 +168,7 @@ workflow PATHOGENSURVEILLANCE {
     
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (                                               
-        ch_versions.unique().collect(sort:true)
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
                                                                           

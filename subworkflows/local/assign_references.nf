@@ -119,18 +119,18 @@ workflow ASSIGN_REFERENCES {
         .unique() // [val(ref_id), val(ref_meta), file(reference)]
     null_refs = Channel.of ( ["__NULL__", [id: null], null])
     all_refs = sequence
-        .map { [it[0], [id: it[0]], it[1]] }
+        .map { [it[0].id, it[0], it[1]] }
         .concat(user_refs) // [val(ref_id), val(ref_meta), file(reference)]
         .concat(null_refs)
     assigned_refs_with_seq = assigned_refs
         .map { [it[2]] + it[0..1] } // [val(ref_id), val(meta), val(group_meta)]
         .combine(all_refs, by: 0)  // [val(ref_id), val(meta), val(group_meta), val(ref_meta), file(reference)]
-        .map { it[1..4] } // [val(meta), val(group_meta), val(ref_meta), file(reference)]
+        .map { it[1..4] }  // [val(meta), val(group_meta), val(ref_meta), file(reference)]
 
     // Recreate sample data with new references picked
     new_sample_data = sample_data
         .map { [it[0], it[4], it[1]] } // [val(meta), val(group_meta), [file(fastq)] ]
-        .combine ( assigned_refs_with_seq, by: 0..1 ) // [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
+        .combine ( assigned_refs_with_seq, by: 0..1 )// [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
         .map { [it[0], it[2], it[3], it[4], it[1]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
 
     // Report any samples that could not be assigned a reference
