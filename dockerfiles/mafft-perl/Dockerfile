@@ -2,7 +2,7 @@
 
 FROM condaforge/mambaforge:23.1.0-4
 
-################## METADATA ######################
+################## METADATA #######################
 
 LABEL base_image="mambaforge"
 LABEL version="23.1.0-4"
