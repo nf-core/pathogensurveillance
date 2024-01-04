@@ -1,9 +1,11 @@
-include { FASTP           } from '../../modules/nf-core/fastp/main'
-include { SPADES          } from '../../modules/nf-core/spades/main'
-include { FILTER_ASSEMBLY } from '../../modules/local/filter_assembly'
-include { QUAST           } from '../../modules/local/quast.nf'
-include { BAKTA_BAKTA     } from '../../modules/nf-core/bakta/bakta/main'
-include { SUBSET_READS    } from '../../modules/local/subset_reads'                 
+include { FASTP                 } from '../../modules/nf-core/fastp/main'
+include { SPADES                } from '../../modules/nf-core/spades/main'
+include { FILTER_ASSEMBLY       } from '../../modules/local/filter_assembly'
+include { QUAST                 } from '../../modules/local/quast.nf'
+include { BAKTA_BAKTA           } from '../../modules/nf-core/bakta/bakta/main'
+include { BAKTA_BAKTADBDOWNLOAD } from '../../modules/nf-core/bakta/baktadbdownload/main'
+include { SUBSET_READS          } from '../../modules/local/subset_reads'
+include { UNTAR                 } from '../../modules/nf-core/untar/main'
 
 workflow GENOME_ASSEMBLY {
 
@@ -47,11 +49,28 @@ workflow GENOME_ASSEMBLY {
         .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
     QUAST ( ch_ref_grouped )
     ch_versions = ch_versions.mix(QUAST.out.versions.first())
+    
+    // Download the bakta database if needed
+    //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
+    if (params.bakta_db) {
+        if (params.bakta_db.endsWith('.tar.gz')) {
+            bakta_db_tar = Channel.from(params.bakta_db).map{ [ [id: 'baktadb'], it] }
+            UNTAR( bakta_db_tar )
+            bakta_db = UNTAR.out.untar.map{ meta, db -> db }
+            ch_versions = ch_versions.mix(UNTAR.out.versions)
+        } else {
+            bakta_db = Channel.value(params.bakta_db)
+        }
+    } else if (!params.bakta_db && params.download_bakta_db){
+        BAKTA_BAKTADBDOWNLOAD()
+        bakta_db  = BAKTA_BAKTADBDOWNLOAD.out.db
+        ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
+    } 
 
-    ch_bakta_db = Channel.value(params.bakta_db)
+    // Run bakta
     BAKTA_BAKTA (
         FILTER_ASSEMBLY.out.filtered, // Genome assembly
-        ch_bakta_db, // Bakta database
+        bakta_db, // Bakta database
         [], // proteins (optional)
         [] // prodigal_tf (optional)
     )

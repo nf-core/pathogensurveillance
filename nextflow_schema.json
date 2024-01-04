@@ -42,8 +42,13 @@
                 },
                 "bakta_db": {
                     "type": "string",
-                    "description": "The path to the Bakta database folder.",
+                    "description": "The path to the Bakta database folder. This or --download_bakta_db must be included.",
                     "fa_icon": "fas fa-folder-open"
+                },
+                "download_bakta_db": {
+                    "type": "boolean",
+                    "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
+                    "fa_icon": "fas fa-download"
                 }
             }
         },
