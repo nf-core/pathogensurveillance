@@ -1,0 +1,10 @@
+[M::mm_idx_gen::0.238*1.00] collected minimizers
+[M::mm_idx_gen::0.303*0.94] sorted minimizers
+[M::main::0.303*0.94] loaded/built the index for 4 target sequence(s)
+[M::mm_mapopt_update::0.313*0.94] mid_occ = 200
+[M::mm_idx_stat] kmer size: 19; skip: 19; is_hpc: 0; #seq: 4
+[M::mm_idx_stat::0.320*0.94] distinct minimizers: 540711 (98.66% are singletons); average occurrences: 1.040; average spacing: 10.000; total length: 5625449
+[M::worker_pipeline::2.501*0.99] mapped 147 sequences
+[M::main] Version: 2.26-r1175
+[M::main] CMD: /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/conda/env-f38689f9f38b3a0144c1177870cd93ca/bin/minimap2 -c -x asm10 -B5 -O4,16 --no-long-join -r 200 -N 50 -s 65 -z 200 --mask-level 0.9 --min-occ 200 -g 2500 --score-N 2 --cs -t 1 /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/99/489cfc127f4e4b1e6d66d5a02dd38c/GCF_001908775.1/quast_corrected_input/GCF_001908775.1_ASM190877v1_genomic.fna /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/99/489cfc127f4e4b1e6d66d5a02dd38c/GCF_001908775.1/quast_corrected_input/22-299_filtered.fasta
+[M::main] Real time: 2.508 sec; CPU: 2.490 sec; Peak RSS: 0.116 GB

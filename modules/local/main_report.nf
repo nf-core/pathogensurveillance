@@ -2,8 +2,10 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::quarto=1.3.450" // TODO: it just uses the local computers R packages for now
-    container null
+    conda "conda-forge::quarto conda-forge::r-knitr" // TODO: it just uses the local computers R packages for now
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/main-report-r-packages':
+        'zachary-foster/main-report-r-packages' }"
 
     input:
     tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)

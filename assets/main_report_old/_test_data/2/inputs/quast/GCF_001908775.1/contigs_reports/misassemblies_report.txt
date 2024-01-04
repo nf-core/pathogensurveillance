@@ -1,0 +1,23 @@
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+Assembly                     22-301_filtered  22-324_filtered  22-299_filtered  22-300_filtered
+# misassemblies              107              111              106              107            
+  # contig misassemblies     107              111              105              106            
+    # c. relocations         104              109              103              104            
+    # c. translocations      3                2                2                2              
+    # c. inversions          0                0                0                0              
+  # scaffold misassemblies   0                0                1                1              
+    # s. relocations         0                0                1                1              
+    # s. translocations      0                0                0                0              
+    # s. inversions          0                0                0                0              
+# misassembled contigs       53               55               54               58             
+Misassembled contigs length  3731619          3237847          3730118          3675576        
+# local misassemblies        119              120              126              124            
+# scaffold gap ext. mis.     0                1                0                1              
+# scaffold gap loc. mis.     0                2                3                2              
+# unaligned mis. contigs     13               12               9                11             
+# mismatches                 134928           137309           134547           134916         
+# indels                     5384             5362             5355             5362           
+    # indels (<= 5 bp)       4722             4712             4703             4720           
+    # indels (> 5 bp)        662              650              652              642            
+Indels length                25469            24681            25725            24814          
