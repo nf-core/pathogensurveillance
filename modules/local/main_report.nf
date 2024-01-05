@@ -5,7 +5,7 @@ process MAIN_REPORT {
     conda "conda-forge::quarto conda-forge::r-knitr" // TODO: it just uses the local computers R packages for now
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/main-report-r-packages':
-        'zachary-foster/main-report-r-packages' }"
+        'zachary-foster/main-report-r-packages:master' }"
 
     input:
     tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)
