@@ -16,7 +16,12 @@ apt-get update && apt install -y --no-install-recommends \
     pandoc-citeproc \
     curl \
     gdebi-core \
-    && rm -rf /var/lib/apt/lists/*
+    texlive-base \
+    texlive-xetex \
+    lmodern \
+    texlive-fonts-recommended \
+    texlive-fonts-extra
+rm -rf /var/lib/apt/lists/*
 EOF
     
 RUN <<EOF 
@@ -32,8 +37,10 @@ install.r \
     quarto
 EOF
 
-RUN curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
-RUN gdebi --non-interactive quarto-linux-amd64.deb
+RUN <<EOF
+curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
+gdebi --non-interactive quarto-linux-amd64.deb
+EOF
 
-CMD ["bash"]
+
 
