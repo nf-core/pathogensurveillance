@@ -238,7 +238,8 @@ workflow PATHOGENSURVEILLANCE {
         MULTIQC.out.plots,                                                      
         MULTIQC.out.report,
         CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
-        RECORD_MESSAGES.out.tsv
+        RECORD_MESSAGES.out.tsv,
+        Channel.fromPath("$projectDir/assets/main_report", checkIfExists: true)
     )                                                                           
 
 }

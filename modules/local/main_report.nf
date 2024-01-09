@@ -16,6 +16,7 @@ process MAIN_REPORT {
     path multiqc_report
     path versions
     path messages
+    path template, stageAs: 'main_report_template'
 
     output:
     tuple val(group_meta), path("${prefix}_pathsurveil_report.html"), emit: html
@@ -31,7 +32,7 @@ process MAIN_REPORT {
     def ref_ids = ref_metas.collect{ it.id }.join(';')
     """
     # Copy source of report here cause quarto seems to want to make its output in the source
-    cp -r ${projectDir}/assets/main_report ./
+    cp -r --dereference main_report_template main_report
     
     # Make directory for inputs so that a single path can be passed as parameters
     mkdir inputs
