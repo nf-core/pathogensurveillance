@@ -22,7 +22,7 @@ process READ2TREE {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"   
-    # If the process detects only 1 species
+    // If the process detects only 1 species
     if (fastq1.size() == 1) { 
         """
         read2tree \\
@@ -37,7 +37,7 @@ process READ2TREE {
         	read2tree: \$(echo \$(read2tree --version))
     	END_VERSIONS
         """   
-    # Otherwise, use multiple species mode
+    // Otherwise, use multiple species mode
     } else {
     	"""
     	# This creates the reference folder

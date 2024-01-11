@@ -11,8 +11,8 @@ process BUSCO_DOWNLOAD {
     val lineage
 
     output:
-    tuple val(meta), path("busco_downloads"), emit: download_dir
-    path "versions.yml"                     , emit: versions
+    path "busco_downloads", emit: download_dir
+    path "versions.yml"   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

@@ -1,5 +1,6 @@
 include { BUSCO          } from '../../modules/nf-core/busco'
 include { BUSCO_DOWNLOAD } from '../../modules/local/busco_download'
+include { READ2TREE      } from '../../modules/local/read2tree'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -15,7 +16,6 @@ workflow BUSCO_PHYLOGENY {
     // Only process Eukaryotic samples 
     input_filtered = input
         .filter { it[4] == "Eukaryota" }
-    input_filtered
         
     // Get all reference genomes in any group/sample
     unique_ref_fnas = input_filtered
@@ -28,11 +28,17 @@ workflow BUSCO_PHYLOGENY {
     BUSCO_DOWNLOAD ( Channel.from( "eukaryota_odb10" ) )
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group
-    BUSCO ( unique_ref_fnas, "genome", "eukaryota_odb", BUSCO_DOWNLOAD.out.download_dir, [] )
+    BUSCO (
+        unique_ref_fnas,
+        "genome",
+        "eukaryota_odb10",
+        BUSCO_DOWNLOAD.out.download_dir.first(), // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
+        [] )
     
     // Create Read2tree database
     
     // Run Read2tree
+    // READ2TREE ( )
      
         
     emit:
