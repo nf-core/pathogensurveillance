@@ -7,7 +7,7 @@ execute:
 ---
 
 ```{r knitr_settings}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10, warning = FALSE)
 ```
 
 ```{r load_libraries, warning=FALSE, message=FALSE}
@@ -607,6 +607,7 @@ Please revise as needed. I think we need a better approach to coming up with SNP
 **Martha-I cannot figure out why Poppr samples/nodes legend has a redundant node. I have not seen this with other datasets, and used pretty much the same code**
 
 ```{r poppr msn, height=10, eval = nrow(samp_data) > 2}
+filter_level = 5
 mat <-match(indNames(snp_aln.gi), samp_data$sample)
 samp_data <- samp_data[mat, ]
 

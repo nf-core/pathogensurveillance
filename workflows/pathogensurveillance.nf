@@ -17,7 +17,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified.' }
 if (!params.bakta_db && !params.download_bakta_db ) {
-    exit 1, "No bakta database specified. Use either '--bakta_db' to point to a local bakta database or use '--bakta_db_download true' to download the Bakta database."
+    exit 1, "No bakta database specified. Use either '--bakta_db' to point to a local bakta database or use '--download_bakta_db true' to download the Bakta database."
 }
 
 
@@ -130,12 +130,12 @@ workflow PATHOGENSURVEILLANCE {
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Assemble and annotate bacterial genomes
-    GENOME_ASSEMBLY (                                                           
-        ASSIGN_REFERENCES.out.sample_data                           
+    GENOME_ASSEMBLY (
+        ASSIGN_REFERENCES.out.sample_data
             .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
-            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)                                                   
-    )                                                                           
-    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
+            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
+    )
+    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
 
     // Create core gene phylogeny for bacterial samples
     ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
@@ -146,10 +146,10 @@ workflow PATHOGENSURVEILLANCE {
         .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
         .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
         .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
-        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]            
-    CORE_GENOME_PHYLOGENY (                                                     
-        gff_and_group,                             
-        INPUT_CHECK.out.csv                                                          
+        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]
+    CORE_GENOME_PHYLOGENY (
+        gff_and_group,
+        INPUT_CHECK.out.csv
     )
     ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
@@ -159,21 +159,21 @@ workflow PATHOGENSURVEILLANCE {
         .map { [it[1], it[0]] } // val(meta), val(ref_meta)
         .groupTuple() // val(meta), [val(ref_meta)]
     busco_input = ASSIGN_REFERENCES.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
-        .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)] 
+        .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)]
         .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
         .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
-        .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)      
+        .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
     BUSCO_PHYLOGENY (
         busco_input,
         DOWNLOAD_REFERENCES.out.sequence
     )
 
     // Save version info
-    CUSTOM_DUMPSOFTWAREVERSIONS (                                               
+    CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
 
-                                                                          
+
     // MultiQC
     workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
@@ -195,12 +195,12 @@ workflow PATHOGENSURVEILLANCE {
     )
     multiqc_report = MULTIQC.out.report.toList()
     ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-    
+
     // Save error/waring/message info
-    RECORD_MESSAGES (                                               
+    RECORD_MESSAGES (
         messages.collect(sort:true, flat:false)
     )
-    
+
     // Create main summary report
     report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
         .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
@@ -229,18 +229,18 @@ workflow PATHOGENSURVEILLANCE {
             it[7],
             it[8] == null ? [] : it[9]
          ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
-         
-    MAIN_REPORT (                                                             
-        report_in,                                                              
-        INPUT_CHECK.out.csv,                                                               
-        DOWNLOAD_REFERENCES.out.stats,                                          
-        MULTIQC.out.data,                                                       
-        MULTIQC.out.plots,                                                      
+
+    MAIN_REPORT (
+        report_in,
+        INPUT_CHECK.out.csv,
+        DOWNLOAD_REFERENCES.out.stats,
+        MULTIQC.out.data,
+        MULTIQC.out.plots,
         MULTIQC.out.report,
         CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
         RECORD_MESSAGES.out.tsv,
         Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true)
-    )                                                                           
+    )
 
 }
 
