@@ -7,7 +7,7 @@ execute:
 ---
 
 ```{r knitr_settings}
-knitr::opts_chunk$set(echo = TRUE, fig.width = 10, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 ```
 
 ```{r load_libraries, warning=FALSE, message=FALSE}
@@ -37,6 +37,7 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
+library(psminer)
 ```
 
 ```{r parse_inputs}
@@ -126,57 +127,22 @@ p <- ggplot(segment(data)) +
       theme_dendro()
 
 ggplotly(p)
-
-
 ```
 
-
-## Example Observable JS code
-
-```{ojs}
-//| code-fold: true
-pdata = FileAttachment("palmer-penguins.csv").csv({typed: true})
-
-Plot.plot({
-  facet: {
-    data: pdata,
-    x: "sex",
-    y: "species",
-    marginRight: 80
-  },
-  marks: [
-    Plot.frame(),
-    Plot.rectY(pdata, 
-      Plot.binX(
-        {y: "count"}, 
-        {x: "body_mass_g", thresholds: 20, fill: "species"}
-      )
-    ),
-    Plot.tickX(pdata, 
-      Plot.groupZ(
-        {x: "median"}, 
-        {x: "body_mass_g",
-         z: d => d.sex + d.species,
-         stroke: "#333",
-         strokeWidth: 2
-        }
-      )
-    )
-  ]
-})
-```
 
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-samp_data %>%
-    select(
-        `Sample ID`=sample,
-        `Forward Reads`=fastq_1,
-        `Reverse Reads`=fastq_2,
-        `Reference ID`=reference_id,
-        `Reference`=reference) %>%
-    DT::datatable()
+# samp_data %>%
+#     select(
+#         `Sample ID`=sample,
+#         `Forward Reads`=fastq_1,
+#         `Reverse Reads`=fastq_2,
+#         `Reference ID`=reference_id,
+#         `Reference`=reference) %>%
+#     DT::datatable()
+
+print_sample_metadata(samp_data, interactive = knitr::is_html_output())
 ```
 
 

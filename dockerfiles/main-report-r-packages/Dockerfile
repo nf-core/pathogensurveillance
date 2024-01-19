@@ -61,6 +61,11 @@ install.r \
 EOF
 
 RUN <<EOF
+install.r devtools
+Rscript -e 'devtools::install_github("grunwaldlab/psminer")'
+EOF
+
+RUN <<EOF
 curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
 gdebi --non-interactive quarto-linux-amd64.deb
 EOF
