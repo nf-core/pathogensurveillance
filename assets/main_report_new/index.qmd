@@ -1,0 +1,67 @@
+---
+title: Pathogen Surveillance Report
+params:
+  inputs: "_test_data/1"
+execute:
+  echo: false
+---
+
+```{r knitr_settings}
+knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
+```
+
+```{r load_libraries, warning=FALSE, message=FALSE}
+# library(dplyr)
+# library(ggplot2)
+# library(readr)
+# library(knitr)
+# library(readr)
+# library(purrr)
+# library(yaml)
+# library(phylocanvas)
+# library(ape)
+# library(magrittr)
+# library(pheatmap)
+# library(tidyverse)
+# library(palmerpenguins)
+# library(ade4)
+# library(adegenet)
+# library(poppr)
+# library(ggtree)
+# library(igraph)
+# library(visNetwork)
+# library(phangorn)
+# library(ggplot2)
+# library(ggnewscale)
+# library(kableExtra)
+# library(plotly)
+# library(webshot2)
+# library(metacoder)
+```
+
+
+
+## {{< ai doi >}} Bibliography
+
+::: {#refs}
+:::
+
+# About
+
+{{< bi file-earmark-person >}} The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+
+Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
+
+::: callout-tip
+## Feedback
+
+To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+:::
+
+Please cite this pipeline and nf-core in publications as follows:
+
+{{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316--19. https://doi.org/10.1038/nbt.3820.
+
+Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).

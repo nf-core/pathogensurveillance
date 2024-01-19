@@ -23,18 +23,41 @@ apt-get update && apt install -y --no-install-recommends \
     texlive-fonts-extra
 rm -rf /var/lib/apt/lists/*
 EOF
-    
-RUN <<EOF 
+
+RUN <<EOF
 install.r \
     shiny \
     jsonlite \
-    ggplot2 \
     htmltools \
     remotes \
     renv \
-    knitr \
     rmarkdown \
-    quarto
+    quarto \
+    dplyr \
+    readr \
+    knitr \
+    readr \
+    purrr \
+    yaml \
+    phylocanvas \
+    ape \
+    magrittr \
+    pheatmap \
+    tidyverse \
+    palmerpenguins \
+    ade4 \
+    adegenet \
+    poppr \
+    ggtree \
+    igraph \
+    visNetwork \
+    phangorn \
+    ggplot2 \
+    ggnewscale \
+    kableExtra \
+    plotly \
+    webshot2 \
+    metacoder \
 EOF
 
 RUN <<EOF
