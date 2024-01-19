@@ -59,7 +59,7 @@ ref_data <- read_tsv(ref_data_path, col_types = 'dcccccccccccccccddc')
 sendsketch_path <- file.path(params$inputs, "inputs", "sendsketch")
 sketch_data <- map_dfr(list.files(sendsketch_path), function(path) {
     data <- read_tsv(file.path(sendsketch_path, path), skip = 2,
-                     show_col_types = FALSE)
+                     show_col_types = FALSE, col_types = 'ccccdccccddddddddddddddcccdddddddcccc')
     id <- sub(path, pattern = '\\.txt$', replacement = '')
     return(bind_cols(sample_id = rep(id, nrow(data)), data))
 })
