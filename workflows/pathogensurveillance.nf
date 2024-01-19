@@ -163,10 +163,10 @@ workflow PATHOGENSURVEILLANCE {
         .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
         .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
         .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
-    BUSCO_PHYLOGENY (
-        busco_input,
-        DOWNLOAD_REFERENCES.out.sequence
-    )
+    //BUSCO_PHYLOGENY (
+    //    busco_input,
+    //    DOWNLOAD_REFERENCES.out.sequence
+    //)
 
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (
