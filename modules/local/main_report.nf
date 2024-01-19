@@ -5,7 +5,7 @@ process MAIN_REPORT {
     conda "conda-forge::quarto conda-forge::r-knitr" // TODO: it just uses the local computers R packages for now
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/main-report-r-packages':
-        'docker.io/zacharyfoster/main-report-r-packages:0.1' }"
+        'docker.io/zacharyfoster/main-report-r-packages:0.3' }"
 
     input:
     tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)
@@ -33,22 +33,22 @@ process MAIN_REPORT {
     """
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r --dereference main_report_template main_report
-    
+
     # Make directory for inputs so that a single path can be passed as parameters
     mkdir inputs
-    
+
     # Put multiqc's output into a single folder for organization
     mkdir inputs/multiqc
     cp -r ${multiqc_data} inputs/multiqc/
-    cp -r ${multiqc_plots} inputs/multiqc/                                              
+    cp -r ${multiqc_plots} inputs/multiqc/
     cp -r ${multiqc_report} inputs/multiqc/
-    
+
     # Put quast's output into a single folder for organization
     mkdir inputs/quast
     if [ ! -z "${quast_dirs}" ]; then
       cp -r ${quast_dirs} inputs/quast/
     fi
-    
+
     # Put sendsketch's output into a single folder for organization
     mkdir inputs/sendsketch
     cp -r ${sendsketchs} inputs/sendsketch/
@@ -64,13 +64,13 @@ process MAIN_REPORT {
     if [ ! -z "${snp_aligns}" ]; then
         cp -r ${snp_aligns} inputs/variant_data/
     fi
-    
+
     # Save report group name to file
     echo "${group_meta.id}" > inputs/group_id.txt
-    
+
     # Save reference IDs to file
     echo "${ref_ids}" > inputs/ref_ids.txt
-    
+
     # Move single-value paths to input directory
     mkdir other_inputs
     mv ${samp_data} inputs/samp_data.csv
@@ -80,13 +80,13 @@ process MAIN_REPORT {
         mv ${core_phylo} inputs/core_phylo.treefile
     fi
     mv ${versions} inputs/versions.yml
-    
+
     # Render the report
     quarto render main_report \\
         --output-dir ${prefix}_report \\
         -P inputs:..
-        
-    # Rename outputs 
+
+    # Rename outputs
     mv main_report/${prefix}_report/index.html ${prefix}_pathsurveil_report.html
     mv main_report/${prefix}_report/index.pdf ${prefix}_pathsurveil_report.pdf
 
