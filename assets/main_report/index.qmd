@@ -38,6 +38,7 @@ library(plotly)
 library(webshot2)
 library(metacoder)
 library(psminer)
+library(ggdendro)
 ```
 
 ```{r parse_inputs}
@@ -112,10 +113,6 @@ Perhaps a table with a list of majors steps and a icon next to each for done/que
 ## Sample plotly/ggtree tree from [here](https://plotly.com/ggplot2/dendrogram/)
 
 ```{r}
-library(plotly)
-library(ggplot2)
-library(ggdendro)
-
 model <- hclust(dist(USArrests), "ave")
 dhc <- as.dendrogram(model)
 
@@ -133,15 +130,6 @@ ggplotly(p)
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-# samp_data %>%
-#     select(
-#         `Sample ID`=sample,
-#         `Forward Reads`=fastq_1,
-#         `Reverse Reads`=fastq_2,
-#         `Reference ID`=reference_id,
-#         `Reference`=reference) %>%
-#     DT::datatable()
-
 print_sample_metadata(samp_data, interactive = knitr::is_html_output())
 ```
 
