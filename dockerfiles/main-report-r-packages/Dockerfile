@@ -58,7 +58,8 @@ install.r \
     plotly \
     webshot2 \
     metacoder \
-    ggdendro
+    ggdendro \
+    DT
 EOF
 
 RUN <<EOF
