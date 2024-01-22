@@ -22,6 +22,7 @@ library(phylocanvas)
 library(ape)
 library(magrittr)
 library(pheatmap)
+library(heatmaply)
 library(tidyverse)
 library(palmerpenguins)
 library(ade4)
@@ -386,9 +387,9 @@ heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnam
 
 *Things to address:*
 
-1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
-2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
-3.  Need to clarify to use what REF is in the SNP tree or else rename
+1.  There are lots of NAs in metadata. I ran into issues when trying run poppr. I was trying to select a specific factor to color nodes by. As a quick workaround, changed these to 'unknown', but what is a better solution?
+2.  The assembly prefix in sample names present in SNP aln output and treefile need to be discussed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
+3.  Need to clarify whether to use REF in the SNP tree or else rename
 
 ```{r div_parse_inputs}
 snp_trees <- ape::read.tree(snp_tree_paths)
