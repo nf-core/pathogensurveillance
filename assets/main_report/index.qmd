@@ -362,7 +362,7 @@ ggtree_ani
 
 ### ANI heatmap and dendrogram
 
-*TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
+*TODO still want option to make interactive plot, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 psminer::make_ani_heatmap(ani_matrix, ref_data, samp_data, interactive = FALSE)
