@@ -38,6 +38,7 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
+devtools::install_github("grunwaldlab/psminer")
 library(psminer)
 library(ggdendro)
 ```
@@ -206,7 +207,6 @@ DT::datatable(final_table,
 #  column_spec(5, extra_css = "width: 350px;") %>%
 #  column_spec(1:5, extra_css = "font-size: 14px;")
 
-
 ```
 
 ::: callout-note
@@ -365,21 +365,7 @@ ggtree_ani
 *TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-ani_matrix_format <-as.matrix(ani_matrix)
-colnames(ani_matrix_format) <- convert_id(colnames(ani_matrix_format))
-rownames(ani_matrix_format) <- convert_id(rownames(ani_matrix_format))
-
-name_key <- c(
-  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
-  setNames(samp_data$sample, convert_id(samp_data$sample)),
-  setNames(assembly_entries, assembly_entries)
-)
-
-# Relabel the tree tips
-colnames(ani_matrix_format) <- name_key[colnames(ani_matrix_format)]
-rownames(ani_matrix_format) <- name_key[rownames(ani_matrix_format)]
-
-heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnames(ani_matrix_format))
+psminer::make_ani_heatmap(ani_matrix, ref_data, samp_data, interactive = FALSE)
 ```
 :::
 
