@@ -149,7 +149,6 @@ The following table provides putative classifications of the samples based on a 
 ```{r sketchtable, fig.width=5}
 # Load additional packages for aesthetic formatting
 #install.packages("kableExtra")
-
 # Convert percentage fields from character to numeric
 sketch_data$WKID <- as.numeric(gsub("%", "", sketch_data$WKID))
 sketch_data$ANI <- as.numeric(gsub("%", "", sketch_data$ANI))
@@ -269,40 +268,7 @@ plot_ly(
 TODO-make psminer function, where plot is interactive if output is HTML, and not, if PDF. Ensure that dimensions are correct.
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-convert_id <- function(ids) {
-    gsub(ids, pattern = "[.-]", replacement = "_")
-}
-
-core_tree <- ape::read.tree(core_phylo_path)
-
-# Identify which tips are samples and references
-sample_ids <- core_tree$tip.label[core_tree$tip.label %in% convert_id(samp_data$sample)]
-
-# Root tree 
-colnames(ani_matrix) <- convert_id(colnames(ani_matrix))
-rownames(ani_matrix) <- colnames(ani_matrix)
-group_ani <- ani_matrix[rownames(ani_matrix) %in% core_tree$tip.label, colnames(ani_matrix) %in% core_tree$tip.label]
-core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
-
-# Set tip labels to taxon names for reference sequences
-# TODO: need a more reliable way to get IDs
-name_key <- c(
-  ref_data$Organism, 
-  samp_data$sample
-)
-names(name_key) <- c(
-  convert_id(ref_data$LastMajorReleaseAccession),
-  convert_id(samp_data$sample)
-)
-core_tree$tip.label <- name_key[core_tree$tip.label]
-
-# Plot tree
-phycanv <- phylocanvas(core_tree, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-for (x in name_key[sample_ids]) {
-  phycanv <- style_node(phycanv, x, labelcolor = "green", labeltextsize = 30)
-}
-    
-phycanv
+psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix, ref_data, interactive=TRUE)
 ```
 
 ### ANI Neighbor-Joining Tree
