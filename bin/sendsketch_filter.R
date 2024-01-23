@@ -13,20 +13,35 @@ data$ANI <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, data$A
 data$Complt <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, data$Complt))
 
 # Filter data by threshold and extract passing taxon names
-filter_and_extract <- function(table, level, pattern) {
-  table <- table[table$ANI > ani_threshold[level] & table$Complt > complt_threshold[level], ]
-  gsub(pattern, "\\1", table$taxonomy)
+filter_and_extract <- function(table, level, rank_code) {
+    # Filter table by ANI threshold and completness
+    table <- table[table$ANI > ani_threshold[level] & table$Complt > complt_threshold[level], ]
+    # Make list of vectors of taxa named by rank
+    parsed_classifications <- lapply(strsplit(table$taxonomy, split = ';', fixed = TRUE), function(split_text) {
+        rank_and_taxon <- strsplit(split_text, split = ':', fixed = TRUE)
+        output <- unlist(lapply(rank_and_taxon, `[`, 2))
+        names(output) <- unlist(lapply(rank_and_taxon, `[`, 1))
+        return(output)
+    })
+    # Extract taxa for rank of interest
+    output <- unname(unlist(lapply(parsed_classifications, `[`, rank_code)))
+    # Remove NAs and make unique
+    output <- unique(output[!is.na(output)])
+    return(output)
 }
 
 # Extract taxon info
-genus <- filter_and_extract(data, "genus", ".*g:(.+);s:.*")
-family <- filter_and_extract(data, "family", ".*f:(.+);g:.*")
-species <- filter_and_extract(data, "species", ".*;s:([a-zA-Z0-9 .]+);?.*")
+genus <- filter_and_extract(data, "genus", "g")
+family <- filter_and_extract(data, "family", "f")
+species <- filter_and_extract(data, "species", "s")
+
+# Remove NAs
+
 
 # Write output
-writeLines(unique(species), "species.txt")
-writeLines(unique(genus), "genera.txt")
-writeLines(unique(family), "families.txt")
+writeLines(species, "species.txt")
+writeLines(genus, "genera.txt")
+writeLines(family, "families.txt")
 
 # Save kingdom 
 kingdom <- gsub("sk:(.+);p:.*", "\\1", data$taxonomy[1])
