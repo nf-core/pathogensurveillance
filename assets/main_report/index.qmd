@@ -266,6 +266,8 @@ plot_ly(
 ::: panel-tabset
 ### Core phylogeny
 
+TODO-make psminer function, where plot is interactive if output is HTML, and not, if PDF. Ensure that dimensions are correct.
+
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 convert_id <- function(ids) {
     gsub(ids, pattern = "[.-]", replacement = "_")
@@ -362,7 +364,7 @@ ggtree_ani
 
 ### ANI heatmap and dendrogram
 
-*TODO still want option to make interactive plot, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
+*TODO still want option to make interactive plot if output is an HTML file, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 psminer::make_ani_heatmap(ani_matrix, ref_data, samp_data, interactive = FALSE)
