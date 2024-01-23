@@ -22,6 +22,7 @@ library(phylocanvas)
 library(ape)
 library(magrittr)
 library(pheatmap)
+library(heatmaply)
 library(tidyverse)
 library(palmerpenguins)
 library(ade4)
@@ -37,6 +38,7 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
+devtools::install_github("grunwaldlab/psminer")
 library(psminer)
 library(ggdendro)
 ```
@@ -205,7 +207,6 @@ DT::datatable(final_table,
 #  column_spec(5, extra_css = "width: 350px;") %>%
 #  column_spec(1:5, extra_css = "font-size: 14px;")
 
-
 ```
 
 ::: callout-note
@@ -264,6 +265,8 @@ plot_ly(
 
 ::: panel-tabset
 ### Core phylogeny
+
+TODO-make psminer function, where plot is interactive if output is HTML, and not, if PDF. Ensure that dimensions are correct.
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 convert_id <- function(ids) {
@@ -361,24 +364,10 @@ ggtree_ani
 
 ### ANI heatmap and dendrogram
 
-*TODO Relabel the row names if we opt to use heatmap, otherwise, maybe just NJ tree. Martha will look at this.*
+*TODO still want option to make interactive plot if output is an HTML file, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-ani_matrix_format <-as.matrix(ani_matrix)
-colnames(ani_matrix_format) <- convert_id(colnames(ani_matrix_format))
-rownames(ani_matrix_format) <- convert_id(rownames(ani_matrix_format))
-
-name_key <- c(
-  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
-  setNames(samp_data$sample, convert_id(samp_data$sample)),
-  setNames(assembly_entries, assembly_entries)
-)
-
-# Relabel the tree tips
-colnames(ani_matrix_format) <- name_key[colnames(ani_matrix_format)]
-rownames(ani_matrix_format) <- name_key[rownames(ani_matrix_format)]
-
-heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnames(ani_matrix_format))
+psminer::make_ani_heatmap(ani_matrix, ref_data, samp_data, interactive = FALSE)
 ```
 :::
 
@@ -386,9 +375,9 @@ heatmap_ani <- pheatmap(ani_matrix_format, show_rownames = T, labels_row =colnam
 
 *Things to address:*
 
-1.  There are lots of NAs in metadata. I ran into issues when trying run poppr and I was trying to select a specific column to color nodes. As a quick workaround, changed these to 'unknown', but what is a better solution?
-2.  The assembly prefix in sample names present in SNP aln output and treefile need to be addressed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
-3.  Need to clarify to use what REF is in the SNP tree or else rename
+1.  There are lots of NAs in metadata. I ran into issues when trying run poppr. I was trying to select a specific factor to color nodes by. As a quick workaround, changed these to 'unknown', but what is a better solution?
+2.  The assembly prefix in sample names present in SNP aln output and treefile need to be discussed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
+3.  Need to clarify whether to use REF in the SNP tree or else rename
 
 ```{r div_parse_inputs}
 snp_trees <- ape::read.tree(snp_tree_paths)
