@@ -35,6 +35,7 @@ class RowChecker:
         sample_col="sample",
         first_col="fastq_1",
         second_col="fastq_2",
+        sra_col="sra",
         rgroup_col="report_group",
         single_col="single_end",
         ref_id_col="reference_id",
@@ -66,6 +67,7 @@ class RowChecker:
         self._sample_col = sample_col
         self._first_col = first_col
         self._second_col = second_col
+        self._sra_col = sra_col
         self._rgroup_col = rgroup_col
         self._single_col = single_col
         self._ref_id_col = ref_id_col
@@ -83,12 +85,12 @@ class RowChecker:
                 (values).
         """
         self._validate_sample(row)
-        self._validate_first(row)
+        self._validate_read_input(row)
         self._validate_second(row)
         self._validate_pair(row)
         self._validate_rgroup(row)
         self._validate_ref_id(row)
-        self._seen.add((row[self._sample_col], row[self._first_col]))
+        self._seen.add((row[self._sample_col], row[self._first_col], row[self._sra_col]))
         self.modified.append(row)
 
     def _validate_ref_id(self, row):
@@ -100,7 +102,7 @@ class RowChecker:
                 raise AssertionError(f"If a reference ID is defined, then it must correspond to only one reference path. The ID '{row[self._ref_id_col]}' is assigned to multiple paths.")
             else:
                 self._ref_id_combos[row[self._ref_id_col]] = row[self._ref_col]
-        
+
         # Sanitize reference IDs
         row[self._ref_id_col] = re.sub(r'[\/:*?"<>| .]', "_", row[self._ref_id_col])
 
@@ -111,10 +113,10 @@ class RowChecker:
         # Sanitize samples IDs
         row[self._sample_col] = re.sub(r'[\/:*?"<>| .]', "_", row[self._sample_col])
 
-    def _validate_first(self, row):
-        """Assert that the first FASTQ entry is non-empty and has the right format."""
-        if len(row[self._first_col]) <= 0:
-            raise AssertionError("At least the first FASTQ file is required.")
+    def _validate_read_input(self, row):
+        """Assert that either the first FASTQ entry is non-empty or sra is non-empty and has the right format."""
+        if (len(row[self._first_col]) <= 0 and len(row[self._sra_col]) <= 0) or (len(row[self._first_col]) > 0 and len(row[self._sra_col]) > 0):
+            raise AssertionError("Either FASTQ files or an SRA accession must be provided, but not both.")
         self._validate_fastq_format(row[self._first_col])
 
     def _validate_second(self, row):
@@ -142,7 +144,7 @@ class RowChecker:
 
     def _validate_fastq_format(self, filename):
         """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
+        if filename != "" and not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
             raise AssertionError(
                 f"The FASTQ file has an unrecognized extension: {filename}\n"
                 f"It should be one of: {', '.join(self.VALID_FORMATS)}"
@@ -226,7 +228,7 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    required_columns = {"sample", "fastq_1", "fastq_2","report_group"}
+    required_columns = {"sample", "fastq_1", "fastq_2", "sra", "report_group"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))

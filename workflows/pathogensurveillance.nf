@@ -64,6 +64,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
+include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 
@@ -85,7 +86,23 @@ workflow PATHOGENSURVEILLANCE {
     INPUT_CHECK (
         ch_input
     )
-    ch_reads = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
+    // Download FASTQ files if SRA accessions is provided
+    ch_sra = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
+        .map { [it[0], it[2]] }
+        .filter { it[1] != null }
+        .distinct()
+    SRATOOLS_FASTERQDUMP ( ch_sra )
+
+    ch_sra_fastqs = SRATOOLS_FASTERQDUMP.out.reads // [val(meta), [file(fastq)]
+        .join(INPUT_CHECK.out.sample_data.map { [it[0]] + it[3..5] }, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
+    ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
+        .filter { it[2] == null }
+        .map { it[0..1] + it[3..5] }
+        .concat(ch_sra_fastqs) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
+    ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
         .distinct()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
@@ -112,7 +129,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Assign closest reference for samples without a user-assigned reference
     ASSIGN_REFERENCES (
-        INPUT_CHECK.out.sample_data,
+        ch_input_parsed,
         DOWNLOAD_REFERENCES.out.assem_samp_combos,
         DOWNLOAD_REFERENCES.out.sequence,
         DOWNLOAD_REFERENCES.out.signatures,

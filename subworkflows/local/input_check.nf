@@ -13,17 +13,17 @@ workflow INPUT_CHECK {
     SAMPLESHEET_CHECK.out.csv
         .splitCsv ( header:true, sep:',', quote:'"')
         .map { create_reads_ref_channel(it) }
-        .transpose ( by: 4 ) // Duplicate rows for each group when there are multiple groups per sample
-        .map { it[0..3] + [[id: it[4]]] }
+        .transpose ( by: 5 ) // Duplicate rows for each group when there are multiple groups per sample
+        .map { it[0..4] + [[id: it[5]]] }
         .set { sample_data }
 
     emit:
-    sample_data                               // val(meta), [ file(reads) ], val(ref_meta), file(ref), val(groups)
-    csv      = SAMPLESHEET_CHECK.out.csv      // modified csv of metadata 
+    sample_data                               // val(meta), [ file(reads) ], val(sra), val(ref_meta), file(ref), val(groups)
+    csv      = SAMPLESHEET_CHECK.out.csv      // modified csv of metadata
     versions = SAMPLESHEET_CHECK.out.versions // versions.yml
 }
 
-// Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
+// Function to get list of [ meta, [ fastq_1, fastq_2 ], sra ]
 def create_reads_ref_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
@@ -34,7 +34,7 @@ def create_reads_ref_channel(LinkedHashMap row) {
     if (row.reference != '' && !file(row.reference).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> Reference file does not exist!\n${row.reference}"
     }
-    if (!file(row.fastq_1).exists()) {
+    if (row.fastq_1 != "" && !file(row.fastq_1).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
     }
 
@@ -43,17 +43,20 @@ def create_reads_ref_channel(LinkedHashMap row) {
     def output = []
     def groups = row.report_group.split(";") as ArrayList
     def reference = null
+    def sra = row.sra
     if (row.reference != '') {
         reference = file(row.reference)
         ref_meta.id = row.reference_id ?: row.reference.replaceAll('/', '_')
     }
-    if (meta.single_end) {
-        output = [ meta, [ file(row.fastq_1) ], ref_meta, reference, groups ]
+    if (sra != '') {
+        output = [ meta, [], sra, ref_meta, reference, groups ]
+    } else if (meta.single_end) {
+        output = [ meta, [ file(row.fastq_1) ], null, ref_meta, reference, groups ]
     } else {
         if (!file(row.fastq_2).exists()) {
             exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
         }
-        output = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], ref_meta, reference, groups ]
+        output = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], null, ref_meta, reference, groups ]
     }
     return output
 }
