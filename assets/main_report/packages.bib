@@ -32,15 +32,6 @@ in Environmental Sciences},
   url = {https://www.R-project.org/},
 }
 
-@Manual{R-bookdown,
-  title = {bookdown: Authoring Books and Technical Documents with R Markdown},
-  author = {Yihui Xie},
-  year = {2023},
-  note = {R package version 0.37, 
-https://pkgs.rstudio.com/bookdown/},
-  url = {https://github.com/rstudio/bookdown},
-}
-
 @Manual{R-dplyr,
   title = {dplyr: A Grammar of Data Manipulation},
   author = {Hadley Wickham and Romain François and Lionel Henry and Kirill Müller and Davis Vaughan},
@@ -87,9 +78,19 @@ https://github.com/tidyverse/ggplot2},
   title = {ggtree: an R package for visualization of tree and annotation data},
   author = {Guangchuang Yu and Tommy Tsan-Yuk Lam and Shuangbin Xu},
   year = {2023},
-  note = {R package version 3.8.2},
+  note = {R package version 3.10.0},
   url = {https://bioconductor.org/packages/ggtree},
   doi = {10.18129/B9.bioc.ggtree},
+}
+
+@Manual{R-heatmaply,
+  title = {heatmaply: Interactive Cluster Heat Maps Using plotly and ggplot2},
+  author = {Tal Galili and Alan O'Callaghan},
+  year = {2023},
+  note = {R package version 1.5.0, 
+https://cran.r-project.org/package=heatmaply,
+https://github.com/talgalili/heatmaply/},
+  url = {https://talgalili.github.io/heatmaply/},
 }
 
 @Manual{R-igraph,
@@ -175,16 +176,16 @@ JavaScript Library},
 @Manual{R-plotly,
   title = {plotly: Create Interactive Web Graphics via plotly.js},
   author = {Carson Sievert and Chris Parmer and Toby Hocking and Scott Chamberlain and Karthik Ram and Marianne Corvellec and Pedro Despouy},
-  year = {2024},
-  note = {R package version 4.10.4},
+  year = {2023},
+  note = {R package version 4.10.3},
   url = {https://plotly-r.com},
 }
 
 @Manual{R-poppr,
   title = {poppr: Genetic Analysis of Populations with Mixed Reproduction},
   author = {Zhian N. Kamvar and Javier F. Tabima and Jonah C. Brooks and David Folarin},
-  year = {2024},
-  note = {R package version 2.9.5, 
+  year = {2023},
+  note = {R package version 2.9.4, 
 https://github.com/grunwaldlab/poppr/},
   url = {https://grunwaldlab.github.io/poppr/},
 }
@@ -247,6 +248,24 @@ https://github.com/tidyverse/stringr},
   note = {R package version 2.0.0, 
 https://github.com/tidyverse/tidyverse},
   url = {https://tidyverse.tidyverse.org},
+}
+
+@Manual{R-viridis,
+  title = {viridis: Colorblind-Friendly Color Maps for R},
+  author = {Simon Garnier},
+  year = {2023},
+  note = {R package version 0.6.4, 
+https://github.com/sjmgarnier/viridis/},
+  url = {https://sjmgarnier.github.io/viridis/},
+}
+
+@Manual{R-viridisLite,
+  title = {viridisLite: Colorblind-Friendly Color Maps (Lite Version)},
+  author = {Simon Garnier},
+  year = {2023},
+  note = {R package version 0.4.2, 
+https://github.com/sjmgarnier/viridisLite/},
+  url = {https://sjmgarnier.github.io/viridisLite/},
 }
 
 @Manual{R-visNetwork,
@@ -354,16 +373,6 @@ https://github.com/rstudio/webshot2},
   doi = {10.1093/bioinformatics/bty633},
 }
 
-@Book{bookdown2016,
-  title = {bookdown: Authoring Books and Technical Documents with {R} Markdown},
-  author = {Yihui Xie},
-  publisher = {Chapman and Hall/CRC},
-  address = {Boca Raton, Florida},
-  year = {2016},
-  isbn = {978-1138700109},
-  url = {https://bookdown.org/yihui/bookdown},
-}
-
 @Book{ggplot22016,
   author = {Hadley Wickham},
   title = {ggplot2: Elegant Graphics for Data Analysis},
@@ -385,7 +394,7 @@ https://github.com/rstudio/webshot2},
 
 @Article{ggtree2022b,
   title = {Ggtree: A serialized data object for visualization of a phylogenetic tree and annotation data},
-  author = {Shuangbin Xu and Lin Li and Xiao Luo and Meijun Chen and Wenli Tang and Li Zhan and Zehan Dai and Tommy T. Lam and Yi Guan and Guangchuang Yu},
+  author = {Shuangbin Xu and Lin Li and Xiao Luo and Meijun Chen and Wenli Tang and Li Zhan and Zehan Dai and {Tommy T. Lam} and Yi Guan and Guangchuang Yu},
   year = {2022},
   journal = {iMeta},
   volume = {1},
@@ -429,6 +438,15 @@ https://github.com/rstudio/webshot2},
   pages = {28-36},
   doi = {10.1111/2041-210X.12628},
   url = {http://onlinelibrary.wiley.com/doi/10.1111/2041-210X.12628/abstract},
+}
+
+@Article{heatmaply2017,
+  author = {{Galili} and {Tal} and {O'Callaghan} and {Alan} and {Sidi} and {Jonathan} and {Sievert} and {Carson}},
+  title = {heatmaply: an R package for creating interactive cluster heatmaps for online publishing},
+  journal = {Bioinformatics},
+  year = {2017},
+  doi = {10.1093/bioinformatics/btx657},
+  url = {https://academic.oup.com/bioinformatics/article-pdf/doi/10.1093/bioinformatics/btx657/21358327/btx657.pdf},
 }
 
 @Article{igraph2006,
@@ -574,5 +592,23 @@ https://github.com/rstudio/webshot2},
   number = {43},
   pages = {1686},
   doi = {10.21105/joss.01686},
+}
+
+@Manual{viridis2023,
+  title = {{viridis(Lite)} - Colorblind-Friendly Color Maps for R},
+  author = {{Garnier} and {Simon} and {Ross} and {Noam} and {Rudis} and {Robert} and {Camargo} and Antônio Pedro and {Sciaini} and {Marco} and {Scherer} and {Cédric}},
+  year = {2023},
+  note = {viridis package version 0.6.4},
+  url = {https://sjmgarnier.github.io/viridis/},
+  doi = {10.5281/zenodo.4679423},
+}
+
+@Manual{viridisLite2023,
+  title = {{viridis(Lite)} - Colorblind-Friendly Color Maps for R},
+  author = {{Garnier} and {Simon} and {Ross} and {Noam} and {Rudis} and {Robert} and {Camargo} and Antônio Pedro and {Sciaini} and {Marco} and {Scherer} and {Cédric}},
+  year = {2023},
+  note = {viridisLite package version 0.4.2},
+  url = {https://sjmgarnier.github.io/viridis/},
+  doi = {10.5281/zenodo.4678327},
 }
 
