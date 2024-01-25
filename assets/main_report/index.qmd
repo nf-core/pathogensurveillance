@@ -44,28 +44,61 @@ library(ggdendro)
 ```
 
 ```{r parse_inputs}
-# Parse metadata
+# Parse metadata (Martha)
+parse_sample_meta <- function(path, group) {
+    all_samp_data <- read_csv(path, show_col_types = FALSE)
+    all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE) #TODO: check that this is needed with new data format
+    group_data <- strsplit(all_samp_data$report_group, split = ";")
+    samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
+    return(samp_data)
+}
+
 group_path <- file.path(params$inputs, "inputs", "group_id.txt")
 group <- read_lines(group_path)
-ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
 samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
-all_samp_data <- read_csv(samp_data_path, show_col_types = FALSE)
-all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE)
-group_data <- strsplit(all_samp_data$report_group, split = ";")
-all_groups <- unique(unlist(group_data))
-samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
-ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
-ref_data <- read_tsv(ref_data_path, col_types = 'dcccccccccccccccddc')
+samp_data <- parse_sample_meta(samp_data_path, group)
 
-# Parse sendsketch data
-sendsketch_path <- file.path(params$inputs, "inputs", "sendsketch")
-sketch_data <- map_dfr(list.files(sendsketch_path), function(path) {
-    data <- read_tsv(file.path(sendsketch_path, path), skip = 2,
-                     show_col_types = FALSE, col_types = 'ccccdccccddddddddddddddcccdddddddcccc')
-    id <- sub(path, pattern = '\\.txt$', replacement = '')
-    return(bind_cols(sample_id = rep(id, nrow(data)), data))
-})
+# Parse reference metadata (Martha)
+parse_ref_meta <- function(refseq_path, user_ref_path) {
+    # Get metadata for all possible refseq references
+    ref_data <- read_tsv(refseq_path, col_types = 'dcccccccccccccccddc')
+    
+    # Get names of user-defined references
+    refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
+    
+    # Add column for origin of reference
+    ref_data$origin = "refseq"
+    
+    # additional columns needed when tables are combined
+    #   - origin: whether each row is a refseq or user-defined
+    #   - reference_id: "LastMajorReleaseAccession" for refseq, reference_id for user-defined,
+    #   - display_name: 'organism' for refseq and "reference_id" user-defined
+    
+}
+
+ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
+ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
+parse_ref_meta(ref_data_path, ref_ids_path)
+
+
+# Parse sendsketch data (Camilo)
+
+parse_sendsketch <- function(paths) {
+    
+    parse_one_file <- function(path) {
+        data <- read_tsv(path, 
+                         skip = 2,
+                         show_col_types = FALSE, 
+                         col_types = 'ccccdccccddddddddddddddcccdddddddcccc')
+        id <- sub(basename(path), pattern = '\\.txt$', replacement = '')
+        return(bind_cols(sample_id = rep(id, nrow(data)), data))
+    }
+    
+    return(map_dfr(paths, parse_one_file))
+}
+
+sendsketch_paths <- list.files(file.path(params$inputs, "inputs", "sendsketch"), full.names = T)
+sketch_data <- parse_sendsketch(sendsketch_paths)
 
 # Parse variant data
 variant_data_path <- file.path(params$inputs, "inputs", "variant_data")
@@ -81,21 +114,26 @@ rownames(ani_matrix) <- colnames(ani_matrix)
 # Parse core gene phylogeny
 core_phylo_path <- file.path(params$inputs, "inputs", "core_phylo.treefile")
 
-# Parse quality control data
+# Parse quality control data (currently not used)
 multiqc_path <- file.path(params$inputs, "inputs", "multiqc")
 multiqc_report_path <- file.path(multiqc_path, 'multiqc_report.html')
 quast_path <- file.path(params$inputs, "inputs", "quast")
 quast_ref_names <- list.files(quast_path)
 quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
 
-# Parse version data
+# Parse version data (Camilo)
+parse_software_meta <- function(version_path) {
+    raw_version_data <- unlist(read_yaml(version_path))
+    version_data <- tibble(
+        module = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 1),
+        program = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 2),
+        version = unname(raw_version_data),
+    )
+    return(version_data)
+}
+
 version_path <- file.path(params$inputs, "inputs", "versions.yml")
-raw_version_data <- unlist(read_yaml(version_path))
-version_data <- tibble(
-    module = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 1),
-    program = map_chr(strsplit(names(raw_version_data), split = '.', fixed = TRUE), `[`, 2),
-    version = unname(raw_version_data)
-)
+version_data <- parse_software_meta(version_path)
 ```
 
 # Summary
