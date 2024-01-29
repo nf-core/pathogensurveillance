@@ -41,22 +41,23 @@ library(metacoder)
 devtools::install_github("grunwaldlab/psminer")
 library(psminer)
 library(ggdendro)
+library(rcrossref)
 ```
 
 ```{r parse_inputs}
 # Parse metadata (Martha)
-parse_sample_meta <- function(path, group) {
-    all_samp_data <- read_csv(path, show_col_types = FALSE)
-    all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE) #TODO: check that this is needed with new data format
-    group_data <- strsplit(all_samp_data$report_group, split = ";")
-    samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
-    return(samp_data)
-}
+#parse_sample_meta <- function(path, group) {
+#    all_samp_data <- read_csv(path, show_col_types = FALSE)
+#    all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = # "_", fixed = TRUE) #TODO: check that this is needed with new data format
+#    group_data <- strsplit(all_samp_data$report_group, split = ";")
+#    samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
+#    return(samp_data)
+#}
 
 group_path <- file.path(params$inputs, "inputs", "group_id.txt")
 group <- read_lines(group_path)
 samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
-samp_data <- parse_sample_meta(samp_data_path, group)
+samp_data <- psminer::parse_sample_meta(samp_data_path, group)
 
 # Parse reference metadata (Martha)
 parse_ref_meta <- function(refseq_path, user_ref_path) {
@@ -243,7 +244,6 @@ DT::datatable(final_table,
 #  column_spec(4, extra_css = "width: 150px;") %>%
 #  column_spec(5, extra_css = "width: 350px;") %>%
 #  column_spec(1:5, extra_css = "font-size: 14px;")
-
 ```
 
 ::: callout-note
@@ -306,7 +306,6 @@ plot_ly(
 TODO-make psminer function, where plot is interactive if output is HTML, and not, if PDF. Ensure that dimensions are correct.
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-
 #Still fixing non interactive version
 psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix, ref_data, interactive=TRUE)
 ```
