@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "_test_data/2"
 execute:
   echo: false
 ---
@@ -45,63 +45,14 @@ library(rcrossref)
 ```
 
 ```{r parse_inputs}
-# Parse metadata (Martha)
-#parse_sample_meta <- function(path, group) {
-#    all_samp_data <- read_csv(path, show_col_types = FALSE)
-#    all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = # "_", fixed = TRUE) #TODO: check that this is needed with new data format
-#    group_data <- strsplit(all_samp_data$report_group, split = ";")
-#    samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
-#    return(samp_data)
-#}
-
 group_path <- file.path(params$inputs, "inputs", "group_id.txt")
 group <- read_lines(group_path)
 samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
 samp_data <- psminer::parse_sample_meta(samp_data_path, group)
 
-# Parse reference metadata (Martha)
-parse_ref_meta <- function(refseq_path, user_ref_path) {
-    # Get metadata for all possible refseq references
-    ref_data <- read_tsv(refseq_path, col_types = 'dcccccccccccccccddc')
-    
-    # Get names of user-defined references
-    refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
-    
-    # Add column for origin of reference
-    ref_data$origin = "refseq"
-    
-    # additional columns needed when tables are combined
-    #   - origin: whether each row is a refseq or user-defined
-    #   - reference_id: "LastMajorReleaseAccession" for refseq, reference_id for user-defined,
-    #   - display_name: 'organism' for refseq and "reference_id" user-defined
-    
-}
-
-
-#testing lines of code-just a placeholder for now. 
 ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
 ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-ref_data <- read_tsv(ref_data_path , col_types = 'dcccccccccccccccddc')
-refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
-ref_data$origin = "refseq"
-ref_data$reference_id = ref_data$LastMajorReleaseAccession
-ref_data$display_name = ref_data$Organism
-
-new_reference_ids <- unique(samp_data$reference_id[!is.na(samp_data$reference_id) & !samp_data$reference_id %in% ref_data$reference_id])
-
-
-# Create a data frame with new rows
-new_rows <- data.frame(
-  reference_id = new_reference_ids,
-  display_name = new_reference_ids,
-  origin = "user"
-)
-
-ref_data <- bind_rows(ref_data, new_rows)
-
-parse_ref_meta(ref_data_path, reformatted_sample_df)
-
-
+ref_data<-psminer::parse_ref_meta(ref_data_path, samp_data)
 
 # Parse sendsketch data (Camilo)
 
@@ -192,7 +143,7 @@ ggplotly(p)
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-print_sample_metadata(samp_data, interactive = knitr::is_html_output())
+psminer::print_sample_metadata(samp_data, interactive = knitr::is_html_output())
 ```
 
 
@@ -254,7 +205,7 @@ DT::datatable(final_table,
           escape = FALSE  # Necessary if your table has HTML content, like the bordered bars
 )
 
-
+psminer::sketch_idtb(sketch_data)
 
 # Render the table using kable and kableExtra for HTML output
 #final_table %>%
@@ -318,7 +269,6 @@ plot_ly(
 
 ::: 
 
-
 ## Rigorous ID to species or subspecies
 
 ::: panel-tabset
@@ -329,63 +279,6 @@ TODO-make psminer function, where plot is interactive if output is HTML, and not
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 #Still fixing non interactive version
 psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix, ref_data, interactive=TRUE)
-```
-
-### ANI Neighbor-Joining Tree
-
-```{r ANI NJ tree, include=TRUE, height=8, width=8}
-#Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this-but I don't see that dataset 2 has this entry. 
-
-convert_id <- function(ids) {
-    gsub(pattern = "[.-]", replacement = "_", x = ids)
-}
-
-# Convert data.frame to matrix
-ani_matrix_format <-as.matrix(ani_matrix)
-
-# Convert ANI similarity values to distances
-dist_matrix <- 1 - ani_matrix_format
-
-colnames(dist_matrix) <- convert_id(colnames(dist_matrix))
-rownames(dist_matrix) <- convert_id(rownames(dist_matrix))
-
-nj_tree <- nj(dist_matrix)
-
-# Handle negative branch lengths-this is one idea, but if there is a better option, please change
-nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-4  
-
-sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
-
-group_ani <- dist_matrix[rownames(dist_matrix) %in% nj_tree$tip.label, colnames(dist_matrix) %in% nj_tree$tip.label]
-
-nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
-
-# Create a name key to relabel the tree tips
-#We have 1 entry with suffix assembly-may need to organize or rename to clarify to user what this sample is
-
-#make more generalizable, because not every dataset has this. 
-assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
-
-name_key <- c(
-  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
-  setNames(samp_data$sample, convert_id(samp_data$sample)),
-  setNames(assembly_entries, assembly_entries)
-)
-
-# Relabel the tree tips
-nj_tree$tip.label <- name_key[nj_tree$tip.label]
-
-##Used static ggtree because I was having trouble rendering phycanvas option. It doesn't work if output is part of an output with multiple tabs. I can also try to convert to ggplotly object but you lose a lot of the ggtree functionality
-
-# Basic tree visualization with ggtree
-ggtree_ani <- ggtree(nj_tree) +
-  geom_tippoint() +
-  geom_tiplab(aes(color=ifelse(label %in% name_key[sample_ids], "#24B064", "black")), size=2.2) +
-  scale_color_identity(guide=FALSE) +
-  xlim(c(NA, max(nj_tree$edge.length) * 1.5))
-
-
-ggtree_ani
 ```
 
 ### ANI heatmap and dendrogram
