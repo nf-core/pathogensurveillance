@@ -77,9 +77,30 @@ parse_ref_meta <- function(refseq_path, user_ref_path) {
     
 }
 
+
+#testing lines of code-just a placeholder for now. 
 ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
 ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-parse_ref_meta(ref_data_path, ref_ids_path)
+ref_data <- read_tsv(ref_data_path , col_types = 'dcccccccccccccccddc')
+refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
+ref_data$origin = "refseq"
+ref_data$reference_id = ref_data$LastMajorReleaseAccession
+ref_data$display_name = ref_data$Organism
+
+new_reference_ids <- unique(samp_data$reference_id[!is.na(samp_data$reference_id) & !samp_data$reference_id %in% ref_data$reference_id])
+
+
+# Create a data frame with new rows
+new_rows <- data.frame(
+  reference_id = new_reference_ids,
+  display_name = new_reference_ids,
+  origin = "user"
+)
+
+ref_data <- bind_rows(ref_data, new_rows)
+
+parse_ref_meta(ref_data_path, reformatted_sample_df)
+
 
 
 # Parse sendsketch data (Camilo)
