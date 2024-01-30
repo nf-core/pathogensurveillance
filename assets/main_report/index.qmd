@@ -357,11 +357,17 @@ snp_trees_rootref <- root(snp_trees, "REF")
 #option2
 snp_trees_midpoint<-midpoint(snp_trees)
 
+ani_matrix_format <-as.matrix(ani_matrix)
+assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
+
+
 name_key <- c(
   setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
   setNames(samp_data$sample, convert_id(samp_data$sample)),
   setNames(assembly_entries, assembly_entries)
 )
+
+sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% convert_id(samp_data$sample)]
 
 #For phycanvas version-much simpler code-but have a ggtree and ggploty version below
 phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
