@@ -263,28 +263,11 @@ TODO-make psminer function, where plot is interactive if output is HTML, and not
 
 Test code chunk for building revised ggtree function-not to be run
 ```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0}
-# Read core tree
-#core_tree <- ape::read.tree(core_phylo_path)
-
-# Identify sample IDs in the tree
-#sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
-
-# Root tree based on sample IDs
-#rownames(sourmash_ani_matrix) <- colnames(sourmash_ani_matrix)
-#group_ani <- ani_matrix[rownames(ani_matrix) %in% core_tree$tip.label,
-#                                 colnames(ani_matrix) %in% core_tree$tip.label]
-#core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
-
-  # Set tip labels to taxon names
-#name_key <- set_names(c(ref_data$display_name, samp_data$sample), #c(ref_data$display_name,samp_data$sample))
-
-#core_tree$tip.label <- name_key[core_tree$tip.label]
-
+#in progress
 ```
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-#Still fixing non interactive version
-psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix, ref_data, interactive=knitr::is_html_output())
+psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
 ```
 
 ### ANI heatmap and dendrogram
@@ -398,7 +381,6 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) +
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
 ggtree_interactive
-
 
 # How interactive plots can be made to work with PDF
 #Perhaps adjust with if/else statement rendering as pdf vs. html, also changes interactivity of html document
