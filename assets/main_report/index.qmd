@@ -41,45 +41,18 @@ library(metacoder)
 devtools::install_github("grunwaldlab/psminer")
 library(psminer)
 library(ggdendro)
+library(rcrossref)
 ```
 
 ```{r parse_inputs}
-# Parse metadata (Martha)
-parse_sample_meta <- function(path, group) {
-    all_samp_data <- read_csv(path, show_col_types = FALSE)
-    all_samp_data$modified_id <- gsub(all_samp_data$sample, pattern = "-", replacement = "_", fixed = TRUE) #TODO: check that this is needed with new data format
-    group_data <- strsplit(all_samp_data$report_group, split = ";")
-    samp_data <- all_samp_data[map_lgl(group_data, function(x) group %in% x), ]
-    return(samp_data)
-}
-
 group_path <- file.path(params$inputs, "inputs", "group_id.txt")
 group <- read_lines(group_path)
 samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
-samp_data <- parse_sample_meta(samp_data_path, group)
-
-# Parse reference metadata (Martha)
-parse_ref_meta <- function(refseq_path, user_ref_path) {
-    # Get metadata for all possible refseq references
-    ref_data <- read_tsv(refseq_path, col_types = 'dcccccccccccccccddc')
-    
-    # Get names of user-defined references
-    refs <- strsplit(read_lines(ref_ids_path), split = ';', fixed = TRUE)[[1]]
-    
-    # Add column for origin of reference
-    ref_data$origin = "refseq"
-    
-    # additional columns needed when tables are combined
-    #   - origin: whether each row is a refseq or user-defined
-    #   - reference_id: "LastMajorReleaseAccession" for refseq, reference_id for user-defined,
-    #   - display_name: 'organism' for refseq and "reference_id" user-defined
-    
-}
+samp_data <- psminer::parse_sample_meta(samp_data_path, group)
 
 ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
 ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-parse_ref_meta(ref_data_path, ref_ids_path)
-
+ref_data<-psminer::parse_ref_meta(ref_data_path, ref_ids_path, samp_data)
 
 # Parse sendsketch data (Camilo)
 
@@ -109,7 +82,7 @@ snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.nam
 # Parse ANI matrix
 ani_matrix_path <- file.path(params$inputs, "inputs", "ani_matrix.csv")
 ani_matrix <- read.csv(ani_matrix_path, check.names = FALSE)
-rownames(ani_matrix) <- colnames(ani_matrix)
+ani_matrix_reformatted<-psminer::parse_ani_matrix_names(ani_matrix)
 
 # Parse core gene phylogeny
 core_phylo_path <- file.path(params$inputs, "inputs", "core_phylo.treefile")
@@ -150,27 +123,10 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline** versi
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-## Sample plotly/ggtree tree from [here](https://plotly.com/ggplot2/dendrogram/)
-
-```{r}
-model <- hclust(dist(USArrests), "ave")
-dhc <- as.dendrogram(model)
-
-data <- dendro_data(dhc, type = "triangle")
-p <- ggplot(segment(data)) + 
-      geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) + 
-      coord_flip() + 
-      scale_y_reverse(expand = c(0.2, 0)) +
-      theme_dendro()
-
-ggplotly(p)
-```
-
-
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-print_sample_metadata(samp_data, interactive = knitr::is_html_output())
+psminer::print_sample_metadata(samp_data, interactive = knitr::is_html_output())
 ```
 
 
@@ -185,53 +141,52 @@ print_sample_metadata(samp_data, interactive = knitr::is_html_output())
 The following table provides putative classifications of the samples based on a kmer analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
 ```{r sketchtable, fig.width=5}
-# Load additional packages for aesthetic formatting
-#install.packages("kableExtra")
-# Convert percentage fields from character to numeric
-sketch_data$WKID <- as.numeric(gsub("%", "", sketch_data$WKID))
-sketch_data$ANI <- as.numeric(gsub("%", "", sketch_data$ANI))
-sketch_data$Complt <- as.numeric(gsub("%", "", sketch_data$Complt))
-
-# Sort and filter data
-final_table <- sketch_data %>%
-  arrange(desc(sample_id), desc(WKID), desc(ANI), desc(Complt)) %>%  # Sort by sample_id, WKID, ANI, and Complt in descending order
-  group_by(sample_id) %>%  # Group by sample_id
-  slice_head(n = 1) %>%  # Take the first entry per group
-  ungroup() %>%  # Remove grouping
-  select(sample_id, WKID, ANI, Complt, taxName) %>%  # Select required columns
-  rename(Sample = sample_id, 
-         `WKID (%)` = WKID,
-         `ANI (%)` = ANI,
-         `Completeness (%)` = Complt,
-         `Top Hit` = taxName)  # Rename columns
-
-# Define a function called 'bordered_bar' that takes two arguments: 'value' and 'color'
-bordered_bar <- function(value, color) {
-  sprintf('<div style="border: 1px solid gray; width: 100%%; border-radius: 12px;">
-            <div style="width: %s%%; background-color: %s; border-radius: 12px; text-align: center;">%s</div>
-           </div>', 
-          value, color, value)
-}
-
-# Apply the bordered_bar function to the relevant columns
-final_table$`WKID (%)` <- sapply(final_table$`WKID (%)`, function(x) bordered_bar(x, 'lightblue'))
-final_table$`ANI (%)` <- sapply(final_table$`ANI (%)`, function(x) bordered_bar(x, 'lightgreen'))
-final_table$`Completeness (%)` <- sapply(final_table$`Completeness (%)`, function(x) bordered_bar(x, 'lightpink'))
-
-# Render the table using DT for HTML output, which will make it interactive
-DT::datatable(final_table, 
-          options = list(
-            pageLength = 10,  # Show 10 entries per page
-            autoWidth = TRUE,  # Automatically adjust column width
-            columnDefs = list(
-              list(width = '150px', targets = c(1, 2, 3))
-            ),
-            searchHighlight = TRUE  # Highlight search results
-          ),
-          rownames = FALSE,  # Hide row numbers
-          escape = FALSE  # Necessary if your table has HTML content, like the bordered bars
-)
-
+# # Load additional packages for aesthetic formatting
+# #install.packages("kableExtra")
+# # Convert percentage fields from character to numeric
+# sketch_data$WKID <- as.numeric(gsub("%", "", sketch_data$WKID))
+# sketch_data$ANI <- as.numeric(gsub("%", "", sketch_data$ANI))
+# sketch_data$Complt <- as.numeric(gsub("%", "", sketch_data$Complt))
+# 
+# # Sort and filter data
+# final_table <- sketch_data %>%
+#   arrange(desc(sample_id), desc(WKID), desc(ANI), desc(Complt)) %>%  # Sort by sample_id, WKID, ANI, and Complt in descending order
+#   group_by(sample_id) %>%  # Group by sample_id
+#   slice_head(n = 1) %>%  # Take the first entry per group
+#   ungroup() %>%  # Remove grouping
+#   select(sample_id, WKID, ANI, Complt, taxName) %>%  # Select required columns
+#   rename(Sample = sample_id, 
+#          `WKID (%)` = WKID,
+#          `ANI (%)` = ANI,
+#          `Completeness (%)` = Complt,
+#          `Top Hit` = taxName)  # Rename columns
+# 
+# # Define a function called 'bordered_bar' that takes two arguments: 'value' and 'color'
+# bordered_bar <- function(value, color) {
+#   sprintf('<div style="border: 1px solid gray; width: 100%%; border-radius: 12px;">
+#             <div style="width: %s%%; background-color: %s; border-radius: 12px; text-align: center;">%s</div>
+#            </div>', 
+#           value, color, value)
+# }
+# 
+# # Apply the bordered_bar function to the relevant columns
+# final_table$`WKID (%)` <- sapply(final_table$`WKID (%)`, function(x) bordered_bar(x, 'lightblue'))
+# final_table$`ANI (%)` <- sapply(final_table$`ANI (%)`, function(x) bordered_bar(x, 'lightgreen'))
+# final_table$`Completeness (%)` <- sapply(final_table$`Completeness (%)`, function(x) bordered_bar(x, 'lightpink'))
+# 
+# # Render the table using DT for HTML output, which will make it interactive
+# DT::datatable(final_table, 
+#           options = list(
+#             pageLength = 10,  # Show 10 entries per page
+#             autoWidth = TRUE,  # Automatically adjust column width
+#             columnDefs = list(
+#               list(width = '150px', targets = c(1, 2, 3))
+#             ),
+#             searchHighlight = TRUE  # Highlight search results
+#           ),
+#           rownames = FALSE,  # Hide row numbers
+#           escape = FALSE  # Necessary if your table has HTML content, like the bordered bars
+# )
 
 
 # Render the table using kable and kableExtra for HTML output
@@ -243,6 +198,8 @@ DT::datatable(final_table,
 #  column_spec(4, extra_css = "width: 150px;") %>%
 #  column_spec(5, extra_css = "width: 350px;") %>%
 #  column_spec(1:5, extra_css = "font-size: 14px;")
+
+psminer::sketch_idtb(sketch_data)
 
 ```
 
@@ -297,7 +254,6 @@ plot_ly(
 
 ::: 
 
-
 ## Rigorous ID to species or subspecies
 
 ::: panel-tabset
@@ -305,65 +261,13 @@ plot_ly(
 
 TODO-make psminer function, where plot is interactive if output is HTML, and not, if PDF. Ensure that dimensions are correct.
 
-```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix, ref_data, interactive=TRUE)
+Test code chunk for building revised ggtree function-not to be run
+```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0}
+#in progress
 ```
 
-### ANI Neighbor-Joining Tree
-
-```{r ANI NJ tree, include=TRUE, height=8, width=8}
-#Check-what is the significance of the entry in ANI matrix with the suffix "_assembly". It isn't in "samp_data" or "ref_data". Will this be in each dataset? Right now my code assumes this-but I don't see that dataset 2 has this entry. 
-
-convert_id <- function(ids) {
-    gsub(pattern = "[.-]", replacement = "_", x = ids)
-}
-
-# Convert data.frame to matrix
-ani_matrix_format <-as.matrix(ani_matrix)
-
-# Convert ANI similarity values to distances
-dist_matrix <- 1 - ani_matrix_format
-
-colnames(dist_matrix) <- convert_id(colnames(dist_matrix))
-rownames(dist_matrix) <- convert_id(rownames(dist_matrix))
-
-nj_tree <- nj(dist_matrix)
-
-# Handle negative branch lengths-this is one idea, but if there is a better option, please change
-nj_tree$edge.length[nj_tree$edge.length < 0] <- 1e-4  
-
-sample_ids <- nj_tree$tip.label[nj_tree$tip.label %in% convert_id(samp_data$sample)]
-
-group_ani <- dist_matrix[rownames(dist_matrix) %in% nj_tree$tip.label, colnames(dist_matrix) %in% nj_tree$tip.label]
-
-nj_tree <- root(nj_tree, names(which.max(colMeans(group_ani[sample_ids, ]))))
-
-# Create a name key to relabel the tree tips
-#We have 1 entry with suffix assembly-may need to organize or rename to clarify to user what this sample is
-
-#make more generalizable, because not every dataset has this. 
-assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
-
-name_key <- c(
-  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
-  setNames(samp_data$sample, convert_id(samp_data$sample)),
-  setNames(assembly_entries, assembly_entries)
-)
-
-# Relabel the tree tips
-nj_tree$tip.label <- name_key[nj_tree$tip.label]
-
-##Used static ggtree because I was having trouble rendering phycanvas option. It doesn't work if output is part of an output with multiple tabs. I can also try to convert to ggplotly object but you lose a lot of the ggtree functionality
-
-# Basic tree visualization with ggtree
-ggtree_ani <- ggtree(nj_tree) +
-  geom_tippoint() +
-  geom_tiplab(aes(color=ifelse(label %in% name_key[sample_ids], "#24B064", "black")), size=2.2) +
-  scale_color_identity(guide=FALSE) +
-  xlim(c(NA, max(nj_tree$edge.length) * 1.5))
-
-
-ggtree_ani
+```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
+psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
 ```
 
 ### ANI heatmap and dendrogram
@@ -371,7 +275,7 @@ ggtree_ani
 *TODO still want option to make interactive plot if output is an HTML file, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-psminer::make_ani_heatmap(ani_matrix, ref_data, samp_data, interactive = FALSE)
+psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
 ```
 :::
 
@@ -416,11 +320,17 @@ snp_trees_rootref <- root(snp_trees, "REF")
 #option2
 snp_trees_midpoint<-midpoint(snp_trees)
 
+ani_matrix_format <-as.matrix(ani_matrix)
+assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
+
+
 name_key <- c(
-  setNames(ref_data$Organism, convert_id(ref_data$LastMajorReleaseAccession)),
-  setNames(samp_data$sample, convert_id(samp_data$sample)),
+  setNames(ref_data$Organism, ref_data$LastMajorReleaseAccession),
+  setNames(samp_data$modified_id, samp_data$modified_id),
   setNames(assembly_entries, assembly_entries)
 )
+
+sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% samp_data$modified_id]
 
 #For phycanvas version-much simpler code-but have a ggtree and ggploty version below
 phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
@@ -471,7 +381,6 @@ ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) +
 # Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
 ggtree_interactive <- ggplotly(ggtree_snptree)
 ggtree_interactive
-
 
 # How interactive plots can be made to work with PDF
 #Perhaps adjust with if/else statement rendering as pdf vs. html, also changes interactivity of html document
