@@ -20,12 +20,12 @@ workflow ASSIGN_REFERENCES {
 
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        sample_data                                                             
+        sample_data
             .map { it[0..1] } // [val(meta), [file(fastq)]], possibly duplicated
             .combine(depth, by:0) // [val(meta), [file(fastq)], depth], possibly duplicated
-            .unique(), // [val(meta), [file(fastq)], depth], one per sample                                                           
-        params.sketch_max_depth                                                
-    )                                                                           
+            .unique(), // [val(meta), [file(fastq)], depth], one per sample
+        params.sketch_max_depth
+    )
     ch_versions = ch_versions.mix(SUBSET_READS.out.versions.toSortedList().map{it[0]})
 
     // Trim rare k-mers from raw reads
@@ -38,25 +38,25 @@ workflow ASSIGN_REFERENCES {
     SOURMASH_SKETCH_READS (
         KHMER_TRIMLOWABUND.out.sequence
     )
-    ch_versions = ch_versions.mix(SOURMASH_SKETCH_READS.out.versions)              
-    
+    ch_versions = ch_versions.mix(SOURMASH_SKETCH_READS.out.versions)
+
     // Create signature for each user-defined reference genome
     user_refs = sample_data
         .filter { it[3] != null }
         .map { it[2..3] } // val(ref_meta), file(ref)
         .unique()
-    SOURMASH_SKETCH_GENOME (                                                           
-        user_refs                                         
-    )                                                                           
-    ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions)           
+    SOURMASH_SKETCH_GENOME (
+        user_refs
+    )
+    ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions)
 
-    // Make list of user-defined reference signatures for each group                            
+    // Make list of user-defined reference signatures for each group
     user_sigs = sample_data
-        .map { [it[2], it[4]] } // ref_meta, group_meta                                                  
-        .combine(SOURMASH_SKETCH_GENOME.out.signatures, by: 0) // ref_meta, group_meta, sig               
+        .map { [it[2], it[4]] } // ref_meta, group_meta
+        .combine(SOURMASH_SKETCH_GENOME.out.signatures, by: 0) // ref_meta, group_meta, sig
         .map { it[1..2] }  // [group_meta, sig], possibly duplicated
-        .unique()                                           
-        .groupTuple() // group_meta, [sig]                                      
+        .unique()
+        .groupTuple() // group_meta, [sig]
 
     // Make list of sample signatures for each group
     sample_sigs = sample_data
@@ -86,7 +86,7 @@ workflow ASSIGN_REFERENCES {
         true, // save numpy matrix
         true  // save CSV
     )
-    ch_versions = ch_versions.mix(SOURMASH_COMPARE.out.versions)          
+    ch_versions = ch_versions.mix(SOURMASH_COMPARE.out.versions)
 
     // Make file with smaple IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
@@ -106,7 +106,7 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0].id] + it[1] } // [val(sample_id), val(group_id), val(reference_id)]
 
     // Convert IDs back into full meta
-    id_meta_key = sample_data                                                                 
+    id_meta_key = sample_data
         .map { [it[4].id, it[0].id, it[4], it[0]] }
     assigned_refs = assigned_refs_ids
         .combine(id_meta_key, by: 0..1)
@@ -115,7 +115,7 @@ workflow ASSIGN_REFERENCES {
     // Add reference file based on ref_meta
     user_refs = sample_data
         .filter { it[3] != null }
-        .map { [it[2].id, it[2], it[3]] } 
+        .map { [it[2].id, it[2], it[3]] }
         .unique() // [val(ref_id), val(ref_meta), file(reference)]
     null_refs = Channel.of ( ["__NULL__", [id: null], null])
     all_refs = sequence
@@ -138,7 +138,7 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0], it[4], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
 
-    
+
     emit:
     sample_data = new_sample_data          // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
     ani_matrix  = SOURMASH_COMPARE.out.csv // [val(group_meta), val(csv)]

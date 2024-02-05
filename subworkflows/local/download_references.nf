@@ -12,19 +12,20 @@ workflow DOWNLOAD_REFERENCES {
     ch_species  // channel: [val(meta), file(taxa)]
     ch_genera  // channel: [val(meta), file(taxa)]
     ch_families  // channel: [val(meta), file(taxa)]
+    ch_input // channel: [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
 
     main:
     ch_versions = Channel.empty()
 
-    ch_all_families = ch_families                             
-        .map {it[1]}                                                            
-        .splitText()                                                            
-        .map { it.replace('\n', '') }                                           
-        .collect()                                                              
-        .toSortedList()                                                         
-        .flatten()                                                              
+    ch_all_families = ch_families
+        .map {it[1]}
+        .splitText()
+        .map { it.replace('\n', '') }
+        .collect()
+        .toSortedList()
+        .flatten()
         .unique()
-    
+
     FIND_ASSEMBLIES ( ch_all_families )
     ch_versions = ch_versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
@@ -37,24 +38,31 @@ workflow DOWNLOAD_REFERENCES {
             .toSortedList()
     )
 
-    // Make channel with all unique assembly IDs 
+    // Make channel with all unique assembly IDs
+    user_acc_list = ch_input
+        .map { [it[3], it[5]] } // ref_meta, ref_acc
+        .distinct()
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
-        .map {it[1]}                                                            
-        .splitText()                                                            
+        .map {it[1]}
+        .splitText()
         .map { it.replace('\n', '') }
         .filter { it != '' }
         .map { it.split('\t') }
         .map { [[id: it[0]], it[1]] }
         .unique()
+        .join(user_acc_list, by:1, remainder: true) // this is used to provide something for the following filter to work
+        .filter {it[2] == null} // remove any user-defined accession numbers that have already been downloaded
+        .map { it[1..0] }
+        .unique()
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
     ch_versions = ch_versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
-    
+
     // Add sequence to the gff
-    MAKE_GFF_WITH_FASTA ( 
+    MAKE_GFF_WITH_FASTA (
         DOWNLOAD_ASSEMBLIES.out.sequence
             .join(DOWNLOAD_ASSEMBLIES.out.gff)
     )
-   
+
     SOURMASH_SKETCH_GENOME ( DOWNLOAD_ASSEMBLIES.out.sequence )
     ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
 

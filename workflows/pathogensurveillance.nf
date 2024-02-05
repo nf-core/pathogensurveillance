@@ -67,6 +67,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
+include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,19 +89,35 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Download FASTQ files if SRA accessions is provided
-    ch_sra = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
+    ch_sra = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
         .map { [it[0], it[2]] }
         .filter { it[1] != null }
         .distinct()
     SRATOOLS_FASTERQDUMP ( ch_sra )
 
-    ch_sra_fastqs = SRATOOLS_FASTERQDUMP.out.reads // [val(meta), [file(fastq)]
-        .join(INPUT_CHECK.out.sample_data.map { [it[0]] + it[3..5] }, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    // Download reference files if an accession is provided instead of a file
+    ch_ref_accessions = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+        .filter { it[5] != "" }
+        .map { [it[3], it[5]] } // val(ref_meta), file(ref_acc)
+        .distinct()
+    DOWNLOAD_ASSEMBLIES ( ch_ref_accessions )
+    ch_downloaded_refs = DOWNLOAD_ASSEMBLIES.out.sequence // val(ref_meta), file(downloaded_ref)
+        .combine( INPUT_CHECK.out.sample_data.map { [it[3], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
+        .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
 
-    ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
-        .filter { it[2] == null }
-        .map { it[0..1] + it[3..5] }
-        .concat(ch_sra_fastqs) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    // Replace NCBI SRAs/Assembly accessions with downloaded reads and references
+    ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), [file(sra_fastq)]]
+        .join(ch_downloaded_refs, remainder:true) // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), [file(ncbi_fastq)], file(downloaded_ref)]
+        .map { [it[0], it[7] ?: it[1], it[3], it[8] ?: it[4], it[6]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
+    // ch_sra_fastqs = SRATOOLS_FASTERQDUMP.out.reads // [val(meta), [file(fastq)]
+    //     .join(INPUT_CHECK.out.sample_data.map { [it[0]] + it[3..5] }, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+
+    // ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
+    //     .filter { it[2] == null }
+    //     .map { it[0..1] + it[3..5] }
+    //     .concat(ch_sra_fastqs) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
@@ -123,7 +140,8 @@ workflow PATHOGENSURVEILLANCE {
     DOWNLOAD_REFERENCES (
         COARSE_SAMPLE_TAXONOMY.out.species,
         COARSE_SAMPLE_TAXONOMY.out.genera,
-        COARSE_SAMPLE_TAXONOMY.out.families
+        COARSE_SAMPLE_TAXONOMY.out.families,
+        INPUT_CHECK.out.sample_data
     )
     ch_versions = ch_versions.mix(DOWNLOAD_REFERENCES.out.versions)
 
