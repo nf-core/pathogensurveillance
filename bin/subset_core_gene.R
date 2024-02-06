@@ -2,9 +2,8 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c("PIRATE.gene_families.ordered.tsv", "metadata_medium.csv", "10", "0.8", "0.5") # NOTE: this is for testing, should be commented out for production code
-args <- c("Bradyrhizobium_yuanmingense.tsv", "metadata_brady.csv", "10", "0.8", "0.5") # NOTE: this is for testing, should be commented out for production code
-names(args) <- c("gene_families", "metadata", "min_core_genes", "min_core_samps", "min_core_refs")
+# args <- c("/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/9b/6b516a6b21dd200a5f76a91d9e48f9/all.tsv", "/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/56/3dbb9d7270b9d68e2eb5b27c07e237/all_feat_seqs_renamed", "/media/fosterz/external_primary/files/projects/work/current/foul_brood/intermediate/pathogensurveillance_input_local.csv", "10", "0.8", "0.5", 'test_output.tsv', 'test_feat_seqs') # NOTE: this is for testing, should be commented out for production code
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = TRUE, sep = ',')
@@ -20,7 +19,11 @@ ref_ids <- all_ids[! all_ids %in% sample_ids]
 min_core_samps <- ceiling(as.numeric(args$min_core_samps) * length(sample_ids))
 min_core_refs <- ceiling(as.numeric(args$min_core_refs) * length(ref_ids))
 
+# Remove rows that cannot meet the minimum number of genomes
+raw_gene_data <- raw_gene_data[raw_gene_data$number_genomes >= min_core_samps + min_core_refs, ]
+
 # Replace gene name columns for each sample/ref with number of genes found
+gene_data <- raw_gene_data
 gene_data[, all_ids] <- lapply(raw_gene_data[, all_ids], function(column) {
     unlist(lapply(strsplit(column, split = '[;:]'), length))
 })
@@ -36,9 +39,9 @@ current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(curren
                               get_n_core_single(current_ref_ids) == length(current_ref_ids))
 while (current_core_genes < min_core_genes) {
     # Temporary debugging output TODO: delete when done
-    print(paste0('samples: ', length(current_sample_ids)))
-    print(paste0('refs:    ', length(current_ref_ids)))
-    print(paste0('core:    ', current_core_genes))
+    # print(paste0('samples:  ', length(current_sample_ids)))
+    # print(paste0('refs:     ', length(current_ref_ids)))
+    # print(paste0('core:     ', current_core_genes))
     
     # Find how many genes each sample are missing or multi-copy
     n_bad_samp <- colSums(gene_data_subset[, current_sample_ids] != 1)
@@ -46,11 +49,11 @@ while (current_core_genes < min_core_genes) {
     
     # Remove worst sample/ref if possible, preferring to remove references
     if (length(current_sample_ids) > min_core_samps && length(current_ref_ids) > min_core_refs) {
-        worst_id <- names(which.min(c(n_bad_samp, n_bad_ref)))
+        worst_id <- names(which.max(c(n_bad_samp, n_bad_ref)))
     } else if (length(current_ref_ids) > min_core_refs) {
-        worst_id <- names(which.min(n_bad_ref))
+        worst_id <- names(which.max(n_bad_ref))
     } else if (length(current_sample_ids) > min_core_samps) {
-        worst_id <- names(which.min(n_bad_samp))
+        worst_id <- names(which.max(n_bad_samp))
     } else {
         worst_id <- NULL
         break
@@ -71,4 +74,39 @@ output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_
                             get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
 
 # Write filtered output table
-write.table(output, file = 'test_output.tsv', row.names = FALSE, sep = '\t', quote = FALSE)
+write.table(output, file = args$csv_output_path, row.names = FALSE, sep = '\t', quote = FALSE)
+
+# Copy sequences for selected genes and samples and put in new folder
+read_fasta <- function(path) {
+    # Read file as a single character
+    raw <- paste0(base::readLines(path), collapse = "\n")
+    
+    # Split by header
+    raw_seqs <- strsplit(raw, split = '\n>')[[1]]
+    
+    # Split header and sequence
+    split_seqs <- strsplit(raw_seqs, split = '\n')
+    
+    # Format as character vector named by header
+    seqs <- unlist(lapply(split_seqs, function(x) gsub(x[2], pattern = '\n', replacement = '')))
+    names(seqs) <- unlist(lapply(split_seqs, function(x) trimws(x[1])))
+    
+    return(seqs)
+}
+
+write_fasta <- function(seqs, path) {
+    output <- paste0('>', names(seqs), '\n', seqs)
+    writeLines(output, path)
+}
+
+dir.create(args$fasta_output_path, showWarnings = FALSE)
+passing_sample_ids <- c(current_sample_ids, current_ref_ids)
+for (gene_id in output$gene_family) {
+    in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))
+    out_path <- file.path(args$fasta_output_path, paste0(gene_id, '.fasta'))
+    seqs <- read_fasta(in_path)
+    seqs <- seqs[passing_sample_ids]
+    seqs <- seqs[!is.na(seqs)]
+    write_fasta(seqs, out_path)
+}
+

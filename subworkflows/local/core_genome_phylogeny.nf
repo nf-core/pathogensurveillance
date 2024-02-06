@@ -45,7 +45,13 @@ workflow CORE_GENOME_PHYLOGENY {
     RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
 
     // Filter for core single copy genes with no paralogs
-    SUBSET_CORE_GENES ( REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs) )
+    SUBSET_CORE_GENES (
+        REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs),
+        ch_samplesheet,
+        10, // min_core_genes
+        0.8, // min_core_samps
+        0.5 // min_core_refs
+    )
 
     // Align each gene family with mafft
     MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
