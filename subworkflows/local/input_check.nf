@@ -37,7 +37,7 @@ def create_reads_ref_channel(LinkedHashMap row) {
     if (row.fastq_1 != "" && !file(row.fastq_1).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
     }
-    if (row.reference != "" && row.reference_accession != "") {
+    if (row.reference && row.reference_accession) {
         exit 1, "ERROR: Both a reference path (URL or local file) and a reference accession ID (e.g. from RefSeq) cannot be defined."
     }
 

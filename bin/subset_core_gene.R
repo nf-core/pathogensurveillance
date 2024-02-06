@@ -35,18 +35,18 @@ current_ref_ids <- ref_ids
 get_n_core_single <- function(ids) {
     rowSums(gene_data_subset[, ids] == 1)
 }
-current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) & 
+current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                               get_n_core_single(current_ref_ids) == length(current_ref_ids))
 while (current_core_genes < min_core_genes) {
     # Temporary debugging output TODO: delete when done
     # print(paste0('samples:  ', length(current_sample_ids)))
     # print(paste0('refs:     ', length(current_ref_ids)))
     # print(paste0('core:     ', current_core_genes))
-    
+
     # Find how many genes each sample are missing or multi-copy
     n_bad_samp <- colSums(gene_data_subset[, current_sample_ids] != 1)
     n_bad_ref <- colSums(gene_data_subset[, current_ref_ids] != 1)
-    
+
     # Remove worst sample/ref if possible, preferring to remove references
     if (length(current_sample_ids) > min_core_samps && length(current_ref_ids) > min_core_refs) {
         worst_id <- names(which.max(c(n_bad_samp, n_bad_ref)))
@@ -58,19 +58,19 @@ while (current_core_genes < min_core_genes) {
         worst_id <- NULL
         break
     }
-    
+
     # Remove worst sample/reference
     gene_data_subset <- gene_data_subset[, colnames(gene_data_subset) != worst_id]
     current_sample_ids <- current_sample_ids[current_sample_ids != worst_id]
     current_ref_ids <- current_ref_ids[current_ref_ids != worst_id]
 
-    current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) & 
+    current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                                   get_n_core_single(current_ref_ids) == length(current_ref_ids))
 }
 
 
-# Filter out non-core genes 
-output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_sample_ids) & 
+# Filter out non-core genes
+output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                             get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
 
 # Write filtered output table
@@ -80,17 +80,17 @@ write.table(output, file = args$csv_output_path, row.names = FALSE, sep = '\t', 
 read_fasta <- function(path) {
     # Read file as a single character
     raw <- paste0(base::readLines(path), collapse = "\n")
-    
+
     # Split by header
     raw_seqs <- strsplit(raw, split = '\n>')[[1]]
-    
+
     # Split header and sequence
     split_seqs <- strsplit(raw_seqs, split = '\n')
-    
+
     # Format as character vector named by header
     seqs <- unlist(lapply(split_seqs, function(x) gsub(x[2], pattern = '\n', replacement = '')))
     names(seqs) <- unlist(lapply(split_seqs, function(x) trimws(x[1])))
-    
+
     return(seqs)
 }
 
