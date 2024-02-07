@@ -6,6 +6,7 @@ complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are 
 
 # Parse inputs
 args = commandArgs(trailingOnly = TRUE)
+args = c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/dd/e3fd2003114bf4407f3ff695ed7f23/22-335.txt')
 data <- read.csv(args[1], skip = 2, header = TRUE, sep = '\t')
 
 # Format table
@@ -14,8 +15,12 @@ data$Complt <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, dat
 
 # Filter data by threshold and extract passing taxon names
 filter_and_extract <- function(table, level, rank_code) {
-    # Filter table by ANI threshold and completness
+    # Filter table by ANI threshold and completeness
     table <- table[table$ANI > ani_threshold[level] & table$Complt > complt_threshold[level], ]
+    # If no taxa are found, return an empty vector
+    if (nrow(table) == 0) {
+        return(character())
+    }
     # Make list of vectors of taxa named by rank
     parsed_classifications <- lapply(strsplit(table$taxonomy, split = ';', fixed = TRUE), function(split_text) {
         rank_and_taxon <- strsplit(split_text, split = ':', fixed = TRUE)
@@ -34,9 +39,6 @@ filter_and_extract <- function(table, level, rank_code) {
 genus <- filter_and_extract(data, "genus", "g")
 family <- filter_and_extract(data, "family", "f")
 species <- filter_and_extract(data, "species", "s")
-
-# Remove NAs
-
 
 # Write output
 writeLines(species, "species.txt")
