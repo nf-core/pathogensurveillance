@@ -262,7 +262,7 @@ workflow PATHOGENSURVEILLANCE {
             it[5].findAll{ it != null },
             it[6].findAll{ it != null },
             it[7],
-            it[8] == null ? [] : it[9]
+            it[8] == null ? [] : it[8]
          ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
 
     MAIN_REPORT (
