@@ -126,7 +126,7 @@ Perhaps a table with a list of majors steps and a icon next to each for done/que
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-psminer::print_sample_metadata(samp_data, interactive = knitr::is_html_output())
+psminer::print_sample_metadata(samp_data)
 ```
 
 
@@ -170,7 +170,7 @@ TODO-make psminer function, where plot is interactive if output is HTML, and not
 TODO-what bootstrap method is being used? If we want, we can color the branches. 
 
 Test code chunk for building revised ggtree function-not to be run
-```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0}
+```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0, eval = FALSE}
 library(ape)
 library(phangorn)
 
