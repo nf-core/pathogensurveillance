@@ -113,11 +113,9 @@ version_data <- parse_software_meta(version_path)
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
 
-| <!-- -->          | <!-- -->                             |
-|-------------------|--------------------------------------|
-| **Report group:** | `r group`                            |
-| **Sample count:** | `r nrow(samp_data)`                  |
-| **Last updated**  | `r format(Sys.time(), '%B %d , %Y')` |
+**Report group:** `r group`                           
+**Sample count:** `r nrow(samp_data)`                 
+**Last updated:** `r format(Sys.time(), '%B %d , %Y')`
 
 ## Status
 
@@ -132,35 +130,71 @@ psminer::print_sample_metadata(samp_data)
 
 # Identification
 
-## Initial sketch-based identification
+## Initial identification
+
+The following data provides putative classifications of the samples based on a kmer analysis
+It is important to note that these are preliminary identifications.
 
 ::: panel-tabset
 
 ### Sendsketch top hits
 
-The following table provides putative classifications of the samples based on a kmer analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
+
 
 ```{r sketchtable, fig.width=5}
 psminer::sketch_idtb(sketch_data)
 ```
 
-::: callout-note
-WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
+::: {.callout-tip collapse="true"}
+## How to interpret this table
+
+This table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness.
+These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
+WKID represents the Weighted Kmer IDentity, adjusted for genome size differences.
+ANI, or Average Nucleotide Identity, is derived from WKID and kmer length.
+Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
 :::
 
 ### Taxa of top hits
 
-This section provides an overview of the proportions of different species in the report.
+```{r}
+top_hits <- psminer::best_sendsketch_hits(sketch_data)
+unique_tax <- unique(top_hits$taxonomy)
+is_single_taxon <- length(unique_tax) == 1
+```
 
-Here is how we can display the whole taxonomy with plotly using the `sunburst` and `treemap` plot types:
-
-```{r fig.height=8}
+```{r fig.height = 8, eval = !is_single_taxon}
 psminer::plot_sendsketch_taxonomy(sketch_data)
+```
+
+```{r, results='asis', eval = !is_single_taxon}
+cat('
+::: {.callout-tip collapse="true"}
+## How to interact with this plot
+
+Hover your cursor over parts of the sunburst plot to see the number of samples in each taxon.
+Clicking on a section will subset the plot to that taxon.
+Clicking on the middle with undo the subset.
+:::
+')
+```
+
+
+```{r, results='asis', eval = is_single_taxon}
+n_samp <- nrow(top_hits)
+formatted_classification <- unique_tax %>%
+    gsub(pattern = "[a-z]+:", replacement = "") %>%
+    gsub(pattern = ";", replacement = " > ") 
+cat(paste0(
+"Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
+" identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
+"**", formatted_classification, "**"
+))
 ```
 
 ::: 
 
-## Rigorous ID to species or subspecies
+## Rigorous identification
 
 ::: panel-tabset
 ### Core phylogeny
@@ -270,7 +304,7 @@ psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interacti
 ```
 :::
 
-# Genetic diversity in the group(s)
+# Genetic diversity
 
 *Things to address:*
 
