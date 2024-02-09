@@ -265,9 +265,15 @@ workflow PATHOGENSURVEILLANCE {
             it[8] == null ? [] : it[8]
          ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
 
+    // Make CSV of modified input data
+    ch_modified_input = ch_input_parsed // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
+        .map { [it[0].id, it[1][0], it[1][1], it[2].id == null ? "" : it[2].id, it[3] == null ? "" : it[3], it[4].id == null ? "" : it[4].id].join(',') }
+        .collectFile (name: "samp_data_modified.csv", newLine: true, seed: 'sample,fastq_1,fastq_2,reference_id,reference,report_group')
+
     MAIN_REPORT (
         report_in,
-        INPUT_CHECK.out.csv,
+        ch_input, // User-submitted inputs
+        ch_modified_input, // Modified inputs
         DOWNLOAD_REFERENCES.out.stats,
         MULTIQC.out.data,
         MULTIQC.out.plots,

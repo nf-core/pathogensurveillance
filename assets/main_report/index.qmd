@@ -136,25 +136,6 @@ The following data provides putative classifications of the samples based on a k
 It is important to note that these are preliminary identifications.
 
 ::: panel-tabset
-
-### Sendsketch top hits
-
-
-
-```{r sketchtable, fig.width=5}
-psminer::sketch_idtb(sketch_data)
-```
-
-::: {.callout-tip collapse="true"}
-## How to interpret this table
-
-This table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness.
-These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
-WKID represents the Weighted Kmer IDentity, adjusted for genome size differences.
-ANI, or Average Nucleotide Identity, is derived from WKID and kmer length.
-Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
-:::
-
 ### Taxa of top hits
 
 ```{r}
@@ -179,7 +160,6 @@ Clicking on the middle with undo the subset.
 ')
 ```
 
-
 ```{r, results='asis', eval = is_single_taxon}
 n_samp <- nrow(top_hits)
 formatted_classification <- unique_tax %>%
@@ -192,7 +172,26 @@ cat(paste0(
 ))
 ```
 
+
+### Sendsketch top hits
+
+```{r sketchtable, fig.width=5}
+psminer::sketch_idtb(sketch_data)
+```
+
+::: {.callout-tip collapse="true"}
+## How to interpret this table
+
+This table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness.
+These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
+WKID represents the Weighted Kmer IDentity, adjusted for genome size differences.
+ANI, or Average Nucleotide Identity, is derived from WKID and kmer length.
+Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID
+:::
+
 ::: 
+
+
 
 ## Rigorous identification
 

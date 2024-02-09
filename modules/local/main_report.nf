@@ -9,7 +9,8 @@ process MAIN_REPORT {
 
     input:
     tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)
-    path samp_data
+    path samp_data_user
+    path samp_data_modified
     path ref_data
     path multiqc_data
     path multiqc_plots
@@ -73,13 +74,15 @@ process MAIN_REPORT {
 
     # Move single-value paths to input directory
     mkdir other_inputs
-    mv ${samp_data} inputs/samp_data.csv
+    mv ${samp_data_user} inputs/samp_data_user.csv
+    mv ${samp_data_modified} inputs/samp_data_modified.csv
     mv ${ref_data} inputs/ref_data.tsv
     mv ${ani_matrix} inputs/ani_matrix.csv
     if [ ! -z "${core_phylo}" ]; then
         mv ${core_phylo} inputs/core_phylo.treefile
     fi
     mv ${versions} inputs/versions.yml
+    mv ${messages} inputs/messages.tsv
 
     # Render the report
     quarto render main_report \\
