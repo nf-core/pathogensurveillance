@@ -296,7 +296,6 @@ psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_
 
 ### ANI heatmap and dendrogram
 
-*TODO still want option to make interactive plot if output is an HTML file, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
