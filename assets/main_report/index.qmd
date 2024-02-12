@@ -115,11 +115,9 @@ version_data <- parse_software_meta(version_path)
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
 
-| <!-- -->          | <!-- -->                             |
-|-------------------|--------------------------------------|
-| **Report group:** | `r group`                            |
-| **Sample count:** | `r nrow(samp_data)`                  |
-| **Last updated**  | `r format(Sys.time(), '%B %d , %Y')` |
+**Report group:** `r group`                           
+**Sample count:** `r nrow(samp_data)`                 
+**Last updated:** `r format(Sys.time(), '%B %d , %Y')`
 
 ## Status
 
@@ -128,41 +126,76 @@ Perhaps a table with a list of majors steps and a icon next to each for done/que
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-psminer::print_sample_metadata(samp_data, interactive = knitr::is_html_output())
+psminer::print_sample_metadata(samp_data)
 ```
 
 
 # Identification
 
-## Initial sketch-based identification
+## Initial identification
+
+The following data provides putative classifications of the samples based on a kmer analysis
+It is important to note that these are preliminary identifications.
 
 ::: panel-tabset
+### Taxa of top hits
+
+```{r}
+top_hits <- psminer::best_sendsketch_hits(sketch_data)
+unique_tax <- unique(top_hits$taxonomy)
+is_single_taxon <- length(unique_tax) == 1
+```
+
+```{r fig.height = 8, eval = !is_single_taxon}
+psminer::plot_sendsketch_taxonomy(sketch_data)
+```
+
+```{r, results='asis', eval = !is_single_taxon}
+cat('
+::: {.callout-tip collapse="true"}
+## How to interact with this plot
+
+Hover your cursor over parts of the sunburst plot to see the number of samples in each taxon.
+Clicking on a section will subset the plot to that taxon.
+Clicking on the middle with undo the subset.
+:::
+')
+```
+
+```{r, results='asis', eval = is_single_taxon}
+n_samp <- nrow(top_hits)
+formatted_classification <- unique_tax %>%
+    gsub(pattern = "[a-z]+:", replacement = "") %>%
+    gsub(pattern = ";", replacement = " > ") 
+cat(paste0(
+"Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
+" identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
+"**", formatted_classification, "**"
+))
+```
+
 
 ### Sendsketch top hits
-
-The following table provides putative classifications of the samples based on a kmer analysis. It is important to note that these are preliminary identifications. The table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness. These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
 
 ```{r sketchtable, fig.width=5}
 psminer::sketch_idtb(sketch_data)
 ```
 
-::: callout-note
-WKID represents the Weighted Kmer IDentity, adjusted for genome size differences. ANI, or Average Nucleotide Identity, is derived from WKID and kmer length. Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID.
+::: {.callout-tip collapse="true"}
+## How to interpret this table
+
+This table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness.
+These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
+WKID represents the Weighted Kmer IDentity, adjusted for genome size differences.
+ANI, or Average Nucleotide Identity, is derived from WKID and kmer length.
+Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID
 :::
-
-### Taxa of top hits
-
-This section provides an overview of the proportions of different species in the report.
-
-Here is how we can display the whole taxonomy with plotly using the `sunburst` and `treemap` plot types:
-
-```{r fig.height=8}
-psminer::plot_sendsketch_taxonomy(sketch_data)
-```
 
 ::: 
 
-## Rigorous ID to species or subspecies
+
+
+## Rigorous identification
 
 ::: panel-tabset
 ### Core phylogeny
@@ -171,88 +204,92 @@ TODO-make psminer function, where plot is interactive if output is HTML, and not
 
 TODO-what bootstrap method is being used? If we want, we can color the branches. 
 
-Test code chunk for building revised ggtree function-not to be run yet. 
-```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0}
-# library(ape)
-# library(phangorn)
-# 
-# core_phylogeny_path <- core_phylo_path
-# core_tree <- ape::read.tree(core_phylogeny_path)
-# sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
-# 
-# group_ani <- ani_matrix_reformatted[rownames(ani_matrix_reformatted) %in% core_tree$tip.label, colnames(ani_matrix_reformatted) %in% core_tree$tip.label]
-# 
-# core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
-# 
-# name_key <- set_names(c(ref_data$display_name_shorter, samp_data$modified_id), c(ref_data$LastMajorReleaseAccession, samp_data$modified_id))
-# 
-# core_tree$tip.label <- name_key[core_tree$tip.label]
-# core_tree$node.label[core_tree$node.label == ""] <- "100"
-# 
-# bootcol <- c("black", "gray")
-# names(bootcol) <- c("TRUE", "FALSE")
-# 
-# all_tip_labels <- core_tree$tip.label
-# 
-# # Create an empty dataframe with tip labels
-# combined_data <- data.frame(tip_label = all_tip_labels)
-# 
-# 
-# # Check for matching names in samp_data and add columns to the combined_data dataframe
-# matching_names <- intersect(all_tip_labels, samp_data$modified_id)
-# 
-# if (length(matching_names) > 0) {
-#   matching_data <- samp_data[samp_data$modified_id %in% matching_names, ]
-#   combined_data <- merge(combined_data, matching_data, by.x = "tip_label", by.y = "modified_id", all.x = TRUE)
-# }
-# 
-# # Extract unique non-NA values from color_by column
-# 
-# color_factors <- unique(unlist(strsplit(as.character(combined_data$color_by), ";")))
-# color_factors <- color_factors[!is.na(color_factors)]
-# 
-# combined_data[is.na(combined_data)] <- 'unknown'
-# 
-# if ("color_by" %in% colnames(combined_data)) {
-#   # Loop through each factor and create a ggtree plot
-#   for (fact in color_factors) {
-#     layout_type <- ifelse(length(core_tree$tip.label) < 15, "rectangular", "circular")
-# 
-#     # Create ggtree plot with conditional layout
-#     tree_plot <- if (layout_type == "rectangular") {
-#       ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "rectangular") %<+% combined_data +
-#         geom_tiplab(size = 1.0) +
-#         geom_tippoint(
-#           aes(
-#             color = nursery,
-#             fill = nursery
-#           ),
-#           size = 0.5
-#         ) +
-#         scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
-#         theme(legend.position = "right") +
-#         theme(plot.title = element_text(hjust = 0.5)) +
-#         guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
-#         geom_treescale(fontsize = 2)
-#     } else {
-#       ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "circular") %<+% combined_data + 
-#         geom_tiplab(size = 1.0) +
-#         geom_tippoint(
-#           aes(
-#             color = nursery,
-#             fill = nursery
-#           ),
-#           size = 0.5
-#         ) +
-#         scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
-#         theme(legend.position = "right") +
-#         theme(plot.title = element_text(hjust = 0.5)) +
-#         guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
-#         geom_treescale(fontsize = 2)
-#     }
-#     print(tree_plot)
-#   }
-# }
+Test code chunk for building revised ggtree function-not to be run
+```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0, eval = FALSE}
+library(ape)
+library(phangorn)
+
+core_phylogeny_path <- core_phylo_path
+core_tree <- ape::read.tree(core_phylogeny_path)
+sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
+
+group_ani <- ani_matrix_reformatted[rownames(ani_matrix_reformatted) %in% core_tree$tip.label, colnames(ani_matrix_reformatted) %in% core_tree$tip.label]
+
+core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+
+name_key <- set_names(c(ref_data$display_name_shorter, samp_data$modified_id), c(ref_data$LastMajorReleaseAccession, samp_data$modified_id))
+
+core_tree$tip.label <- name_key[core_tree$tip.label]
+core_tree$node.label[core_tree$node.label == ""] <- "100"
+
+bootcol <- c("black", "gray")
+names(bootcol) <- c("TRUE", "FALSE")
+
+all_tip_labels <- core_tree$tip.label
+
+# Create an empty dataframe with tip labels
+combined_data <- data.frame(tip_label = all_tip_labels)
+
+
+
+# Check for matching names in samp_data and add columns to the combined_data dataframe
+matching_names <- intersect(all_tip_labels, samp_data$modified_id)
+
+if (length(matching_names) > 0) {
+  matching_data <- samp_data[samp_data$modified_id %in% matching_names, ]
+  combined_data <- merge(combined_data, matching_data, by.x = "tip_label", by.y = "modified_id", all.x = TRUE)
+}
+
+# Extract unique non-NA values from color_by column
+
+color_factors <- unique(unlist(strsplit(as.character(combined_data$color_by), ";")))
+color_factors <- color_factors[!is.na(color_factors)]
+
+combined_data[is.na(combined_data)] <- 'unknown'
+
+if ("color_by" %in% colnames(combined_data)) {
+  # Loop through each factor and create a ggtree plot
+  for (fact in color_factors) {
+    layout_type <- ifelse(length(core_tree$tip.label) < 15, "rectangular", "circular")
+
+    # Create ggtree plot with conditional layout
+    tree_plot <- if (layout_type == "rectangular") {
+      ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "rectangular") %<+% combined_data +
+        geom_tiplab(size = 1.0) +
+        geom_tippoint(
+          aes(
+            color = nursery,
+            fill = nursery
+          ),
+          size = 0.5
+        ) +
+        scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
+        theme(legend.position = "right") +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
+        geom_treescale(fontsize = 2)
+    } else {
+      ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "circular") %<+% combined_data + 
+        geom_tiplab(size = 1.0) +
+        geom_tippoint(
+          aes(
+            color = nursery,
+            fill = nursery
+          ),
+          size = 0.5
+        ) +
+        scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
+        theme(legend.position = "right") +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
+        geom_treescale(fontsize = 2)
+    }
+    print(tree_plot)
+  }
+} else {
+  cat("Warning: 'color_by' column not found in combined_data.")
+}
+>>>>>>> aa85d8e9df30fce8e6427860dfa5c02ad2aec054
 ```
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
@@ -269,7 +306,7 @@ psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interacti
 ```
 :::
 
-# Genetic diversity in the group(s)
+# Genetic diversity
 
 *Things to address:*
 
