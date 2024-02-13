@@ -182,7 +182,8 @@ Included metrics can provide insights into how each sample compares with referen
 ### Core phylogeny
 
 TODO-add descriptioon
-TODO color nodes black for now. 
+TODO-color nodes black for now
+TODO-make static tree
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
@@ -214,9 +215,12 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 ::: panel-tabset
 ### SNP tree
 
+
+
 **Phylocanvas option**
 
-TODO-fix how trees are rooted, test with larger datasets
+TODO-fix how trees are rooted, so consistent with how core gene phylogeny is
+TODO-may need to fix fundamental logic since only tested on two small datasets
 
 ```{r snp_tree_config, include=TRUE}
 #NOTE-Will tidy up code once we finalize which tree program to use and input format of files. There are many lines of code that deal with renaming samples, and these can be revised .  
