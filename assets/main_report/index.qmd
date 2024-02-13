@@ -193,8 +193,6 @@ Completeness indicates the percentage of the reference genome represented in the
 
 ::: 
 
-
-
 ## Rigorous identification
 
 ::: panel-tabset
@@ -613,11 +611,7 @@ for (current_factor in factors_to_analyze) {
 #   visOptions(nodesIdSelection = TRUE)
 
 ```
-### Network D3 experiment
-```{r vNe, eval = nrow(samp_data) > 2, include=FALSE}
-#Network D3 testing
 
-```
 # Quality control
 
 
