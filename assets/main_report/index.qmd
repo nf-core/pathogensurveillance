@@ -181,10 +181,6 @@ Included metrics can provide insights into how each sample compares with referen
 ::: panel-tabset
 ### Core phylogeny
 
-TODO-add descriptioon
-TODO-color nodes black for now
-TODO-make static tree
-
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
 ```
