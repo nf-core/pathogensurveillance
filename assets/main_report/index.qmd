@@ -88,11 +88,12 @@ version_data <- psminer::parse_software_meta(version_path)
 
 # Summary
 
-This report is produced by the **`nf-core/pathogensurveillance` pipeline** version {{< var version >}}.
+This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 **Report group:** `r group`                           
 **Sample count:** `r nrow(samp_data)`                 
-**Last updated:** `r format(Sys.time(), '%B %d , %Y')`
+**Last updated:** `r format(Sys.time(), '%B %d , %Y')`       
+**Pipeline version:** {{< var version >}}
 
 ## Status
 
@@ -109,11 +110,12 @@ psminer::print_sample_metadata(samp_data)
 
 ## Initial identification
 
-The following data provides putative classifications of the samples based on a kmer analysis
-It is important to note that these are preliminary identifications.
+The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences. 
+These are intended to be preliminary identifications.
+For more robust identifications based on whole genome sequences, see the results of the core genome phylogeny below.
 
 ::: panel-tabset
-### Taxa of top hits
+### Taxonomic classification summary
 
 ```{r}
 top_hits <- psminer::best_sendsketch_hits(sketch_data)
@@ -128,11 +130,14 @@ psminer::plot_sendsketch_taxonomy(sketch_data)
 ```{r, results='asis', eval = !is_single_taxon}
 cat('
 ::: {.callout-tip collapse="true"}
-## How to interact with this plot
+## About this plot
 
-Hover your cursor over parts of the sunburst plot to see the number of samples in each taxon.
+This plot shows the distribution of tentative taxonomic classifications for all samples.
+Only the "highest scoring" results for each sample is considered.
+
+Hover your cursor over parts of the sunburst plot will display the number of samples in each taxon.
 Clicking on a section will subset the plot to that taxon.
-Clicking on the middle with undo the subset.
+Clicking on the middle will undo the subset.
 :::
 ')
 ```
@@ -150,20 +155,23 @@ cat(paste0(
 ```
 
 
-### Sendsketch top hits
+### Per-sample classification
 
 ```{r sketchtable, fig.width=5}
 psminer::sketch_idtb(sketch_data)
 ```
 
 ::: {.callout-tip collapse="true"}
-## How to interpret this table
+## About this table
 
-This table incorporates several key metrics: Weighted Kmer IDentity (WKID), Average Nucleotide Identity (ANI), and Completeness.
-These metrics provide insights into the genomic similarity and representational completeness between the query and reference genomes.
-WKID represents the Weighted Kmer IDentity, adjusted for genome size differences.
-ANI, or Average Nucleotide Identity, is derived from WKID and kmer length.
-Completeness indicates the percentage of the reference genome represented in the query, and is derived from WKID and KID
+This table shows the "highest scoring" tentative taxonomic classification for each sample.
+Included metrics can provide insights into how each sample compares with reference genomes on online databases and the likelihood these comparisions are valid.
+
+* **Sample:** The sample ID submitted by the user.
+* **WKID:** Weighted k-mer Identity, adjusted for genome size differences.
+* **ANI:** An estimate of average nucleotide identity (ANI), derived from WKID and kmer length.
+* **Completeness:** The percentage of the reference genome represented in the query.
+* **Top Hit:** The name of the reference genome most similar to each sample based on the scoring criteria used.
 :::
 
 ::: 
@@ -180,6 +188,7 @@ TODO-make psminer function, where plot is interactive if output is HTML, and not
 TODO-what bootstrap method is being used? If we want, we can color the branches. 
 
 Test code chunk for building revised ggtree function-not to be run
+
 ```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0, eval = FALSE}
 # library(ape)
 # library(phangorn)
