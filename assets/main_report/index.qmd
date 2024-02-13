@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/57/99d7f9be0b4db26eb4d464998da5a2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -10,6 +10,7 @@ execute:
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
 options(bspm.sudo = TRUE) # Something needed when running in containers (not sure why)
 ```
+
 
 ```{r load_libraries, warning=FALSE, message=FALSE}
 library(dplyr)
@@ -39,6 +40,7 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
+devtools::install_github("grunwaldlab/psminer")
 library(psminer)
 library(ggdendro)
 library(rcrossref)
@@ -213,89 +215,87 @@ TODO-what bootstrap method is being used? If we want, we can color the branches.
 Test code chunk for building revised ggtree function-not to be run
 
 ```{r test chunk, eval = length(read_lines(core_phylo_path)) > 0, eval = FALSE}
-library(ape)
-library(phangorn)
-
-core_phylogeny_path <- core_phylo_path
-core_tree <- ape::read.tree(core_phylogeny_path)
-sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
-
-group_ani <- ani_matrix_reformatted[rownames(ani_matrix_reformatted) %in% core_tree$tip.label, colnames(ani_matrix_reformatted) %in% core_tree$tip.label]
-
-core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
-
-name_key <- set_names(c(ref_data$display_name_shorter, samp_data$modified_id), c(ref_data$LastMajorReleaseAccession, samp_data$modified_id))
-
-core_tree$tip.label <- name_key[core_tree$tip.label]
-core_tree$node.label[core_tree$node.label == ""] <- "100"
-
-bootcol <- c("black", "gray")
-names(bootcol) <- c("TRUE", "FALSE")
-
-all_tip_labels <- core_tree$tip.label
-
-# Create an empty dataframe with tip labels
-combined_data <- data.frame(tip_label = all_tip_labels)
-
-
-
-# Check for matching names in samp_data and add columns to the combined_data dataframe
-matching_names <- intersect(all_tip_labels, samp_data$modified_id)
-
-if (length(matching_names) > 0) {
-  matching_data <- samp_data[samp_data$modified_id %in% matching_names, ]
-  combined_data <- merge(combined_data, matching_data, by.x = "tip_label", by.y = "modified_id", all.x = TRUE)
-}
-
-# Extract unique non-NA values from color_by column
-
-color_factors <- unique(unlist(strsplit(as.character(combined_data$color_by), ";")))
-color_factors <- color_factors[!is.na(color_factors)]
-
-combined_data[is.na(combined_data)] <- 'unknown'
-
-if ("color_by" %in% colnames(combined_data)) {
-  # Loop through each factor and create a ggtree plot
-  for (fact in color_factors) {
-    layout_type <- ifelse(length(core_tree$tip.label) < 15, "rectangular", "circular")
-
-    # Create ggtree plot with conditional layout
-    tree_plot <- if (layout_type == "rectangular") {
-      ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "rectangular") %<+% combined_data +
-        geom_tiplab(size = 1.0) +
-        geom_tippoint(
-          aes(
-            color = nursery,
-            fill = nursery
-          ),
-          size = 0.5
-        ) +
-        scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
-        theme(legend.position = "right") +
-        theme(plot.title = element_text(hjust = 0.5)) +
-        guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
-        geom_treescale(fontsize = 2)
-    } else {
-      ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "circular") %<+% combined_data + 
-        geom_tiplab(size = 1.0) +
-        geom_tippoint(
-          aes(
-            color = nursery,
-            fill = nursery
-          ),
-          size = 0.5
-        ) +
-        scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
-        theme(legend.position = "right") +
-        theme(plot.title = element_text(hjust = 0.5)) +
-        guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
-        geom_treescale(fontsize = 2)
-    }
-    print(tree_plot)
-  }
-} else {
-  cat("Warning: 'color_by' column not found in combined_data.")
-}
+# library(ape)
+# library(phangorn)
+# 
+# core_phylogeny_path <- core_phylo_path
+# core_tree <- ape::read.tree(core_phylogeny_path)
+# sample_ids <- core_tree$tip.label[core_tree$tip.label %in% samp_data$modified_id]
+# 
+# group_ani <- ani_matrix_reformatted[rownames(ani_matrix_reformatted) %in% core_tree$tip.label, colnames(ani_matrix_reformatted) %in% core_tree$tip.label]
+# 
+# core_tree <- root(core_tree, names(which.min(colMeans(group_ani[sample_ids, ]))))
+# 
+# name_key <- set_names(c(ref_data$display_name_shorter, samp_data$modified_id), c(ref_data$LastMajorReleaseAccession, samp_data$modified_id))
+# 
+# core_tree$tip.label <- name_key[core_tree$tip.label]
+# core_tree$node.label[core_tree$node.label == ""] <- "100"
+# 
+# bootcol <- c("black", "gray")
+# names(bootcol) <- c("TRUE", "FALSE")
+# 
+# all_tip_labels <- core_tree$tip.label
+# 
+# # Create an empty dataframe with tip labels
+# combined_data <- data.frame(tip_label = all_tip_labels)
+# 
+# 
+# 
+# # Check for matching names in samp_data and add columns to the combined_data dataframe
+# matching_names <- intersect(all_tip_labels, samp_data$modified_id)
+# 
+# if (length(matching_names) > 0) {
+#   matching_data <- samp_data[samp_data$modified_id %in% matching_names, ]
+#   combined_data <- merge(combined_data, matching_data, by.x = "tip_label", by.y = "modified_id", all.x = TRUE)
+# }
+# 
+# # Extract unique non-NA values from color_by column
+# 
+# color_factors <- unique(unlist(strsplit(as.character(combined_data$color_by), ";")))
+# color_factors <- color_factors[!is.na(color_factors)]
+# 
+# combined_data[is.na(combined_data)] <- 'unknown'
+# 
+# if ("color_by" %in% colnames(combined_data)) {
+#   # Loop through each factor and create a ggtree plot
+#   for (fact in color_factors) {
+#     layout_type <- ifelse(length(core_tree$tip.label) < 15, "rectangular", "circular")
+# 
+#     # Create ggtree plot with conditional layout
+#     tree_plot <- if (layout_type == "rectangular") {
+#       ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "rectangular") %<+% combined_data +
+#         geom_tiplab(size = 1.0) +
+#         geom_tippoint(
+#           aes(
+#             color = nursery,
+#             fill = nursery
+#           ),
+#           size = 0.5
+#         ) +
+#         scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
+#         theme(legend.position = "right") +
+#         theme(plot.title = element_text(hjust = 0.5)) +
+#         guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
+#         geom_treescale(fontsize = 2)
+#     } else {
+#       ggtree(core_tree, size = 0.4, aes(color = as.numeric(sub(".*/", "", label)) > 95 | isTip), layout = "circular") %<+% combined_data + 
+#         geom_tiplab(size = 1.0) +
+#         geom_tippoint(
+#           aes(
+#             color = nursery,
+#             fill = nursery
+#           ),
+#           size = 0.5
+#         ) +
+#         scale_color_manual("Bootstrap support", values = bootcol, labels = c("Bootstrap > 95%", "unsupported")) +
+#         theme(legend.position = "right") +
+#         theme(plot.title = element_text(hjust = 0.5)) +
+#         guides(color = guide_legend(override.aes = list(size = 3), order = 1)) +
+#         geom_treescale(fontsize = 2)
+#     }
+#     print(tree_plot)
+#   }
+# }
 ```
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
@@ -305,7 +305,6 @@ psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_
 
 ### ANI heatmap and dendrogram
 
-*TODO still want option to make interactive plot if output is an HTML file, but with the renaming of columns and rows, some of the interative heatmap fxns fail to work. Still looking at how to simplify this. 
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
