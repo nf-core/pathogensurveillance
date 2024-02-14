@@ -1,5 +1,12 @@
+# This script takes 2 arguments:
+#   1. The path to the CSV input to the pipeline supplied by the user
+#   2. The path to the reformatted version of the CSV output by this script
+#
+# The first part of this script defines constants that might need to be changed in the future.
+
 # Column names that can be used by the pipeline
 # These will always be present and in this order in the output
+# See the README.md for descriptions of each column
 known_columns <- c(
     'sample_id',
     'sample_name',
@@ -41,10 +48,19 @@ known_extensions <- c(
     '.fa.gz'
 )
 
+# Regular expression for characters that cannot appear in IDs
+invalid_id_char_pattern <- '[\\/:*?"<>| .]+'
+
+# Name of default group if all samples do not have a group defined
+defualt_group_full <- 'all'
+
+# Name of default group if some samples do not have a group defined
+defualt_group_partial <- '__other__'
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-args <- list('test/data/metadata_small.csv', 'test_out.csv') 
+# args <- list('test/data/metadata_small.csv', 'test_out.csv') 
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -204,7 +220,7 @@ metadata$sample_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
 }))
 
 # Replace any characters in sample IDs that cannot be present in file names
-metadata$sample_id <- gsub(metadata$sample_id, pattern = '[\\/:*?"<>| .]+', replacement = '_')
+metadata$sample_id <- gsub(metadata$sample_id, pattern = invalid_id_char_pattern, replacement = '_')
 
 # Ensure sample IDs are unique
 metadata$sample_id <- make.unique(metadata$sample_id, sep = '_')
@@ -233,16 +249,16 @@ metadata$reference_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
 }))
 
 # Replace any characters in reference IDs that cannot be present in file names
-metadata$reference_id <- gsub(metadata$reference_id, pattern = '[\\/:*?"<>| .]+', replacement = '_')
+metadata$reference_id <- gsub(metadata$reference_id, pattern = invalid_id_char_pattern, replacement = '_')
 
 # Ensure reference IDs are unique
 metadata$reference_id <- make.unique(metadata$reference_id, sep = '_')
 
 # Add a default group for samples without a group defined
 if (all(!is_present(metadata$report_group))) {
-    metadata$report_group <- 'all'
+    metadata$report_group <- defualt_group_full
 } else {
-    metadata$report_group[!is_present(metadata$report_group)] <- '__other__'
+    metadata$report_group[!is_present(metadata$report_group)] <- defualt_group_partial
 }
 
 # Write output metadata
