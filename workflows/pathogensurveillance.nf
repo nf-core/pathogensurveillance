@@ -89,14 +89,14 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Download FASTQ files if SRA accessions is provided
-    ch_sra = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+    ch_sra = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), val(sample_id_user)]
         .map { [it[0], it[2]] }
         .filter { it[1] != null }
         .distinct()
     SRATOOLS_FASTERQDUMP ( ch_sra )
 
     // Download reference files if an accession is provided instead of a file
-    ch_ref_accessions = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+    ch_ref_accessions = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), val(sample_id_user)]
         .filter { it[5] != "" }
         .map { [it[3], it[5]] } // val(ref_meta), file(ref_acc)
         .distinct()
@@ -106,18 +106,10 @@ workflow PATHOGENSURVEILLANCE {
         .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
 
     // Replace NCBI SRAs/Assembly accessions with downloaded reads and references
-    ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+    ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), val(sample_id_user)]
         .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), [file(sra_fastq)]]
         .join(ch_downloaded_refs, remainder:true) // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), [file(ncbi_fastq)], file(downloaded_ref)]
         .map { [it[0], it[7] ?: it[1], it[3], it[8] ?: it[4], it[6]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-
-    // ch_sra_fastqs = SRATOOLS_FASTERQDUMP.out.reads // [val(meta), [file(fastq)]
-    //     .join(INPUT_CHECK.out.sample_data.map { [it[0]] + it[3..5] }, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-
-    // ch_input_parsed = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(group_meta)]
-    //     .filter { it[2] == null }
-    //     .map { it[0..1] + it[3..5] }
-    //     .concat(ch_sra_fastqs) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
@@ -266,14 +258,24 @@ workflow PATHOGENSURVEILLANCE {
          ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
 
     // Make CSV of modified input data
-    ch_modified_input = ch_input_parsed // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
-        .map { [it[0].id, it[1][0], it[1][1], it[2].id == null ? "" : it[2].id, it[3] == null ? "" : it[3], it[4].id == null ? "" : it[4].id].join(',') }
-        .collectFile (name: "samp_data_modified.csv", newLine: true, seed: 'sample,fastq_1,fastq_2,reference_id,reference,report_group')
+    ch_modified_input = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta), val(sample_id_user)]
+
+        .map { [
+                it[0].id,
+                it[7],
+                it[1][0],
+                it[1][1],
+                it[2],
+                it[3].id == null ? "" : it[3].id,
+                it[4] == null ? "" : it[4],
+                it[5],
+                it[6].id == null ? "" : it[6].id
+            ].join(',') }
+        .collectFile (name: "samp_data_modified.csv", newLine: true, seed: 'sample,sample_user,fastq_1,fastq_2,sra,reference_id,reference,ref_acc,report_group')
 
     MAIN_REPORT (
         report_in,
-        ch_input, // User-submitted inputs
-        ch_modified_input, // Modified inputs
+        ch_modified_input,
         DOWNLOAD_REFERENCES.out.stats,
         MULTIQC.out.data,
         MULTIQC.out.plots,
