@@ -60,7 +60,7 @@ defualt_group_partial <- '__other__'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata_small.csv', 'test_out.csv') 
+args <- list('test/data/metadata_small.csv', 'test_out.csv')
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -74,19 +74,35 @@ if (nrow(metadata_original) == 0) {
 colnames(metadata_original) <- trimws(colnames(metadata_original))
 metadata_original[] <- lapply(metadata_original, trimws)
 
+# Replace NAs with empty stings
+metadata_original[] <- lapply(metadata_original, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+
 # Check that required input columns are present
 for (columns in required_input_columns) {
     if (! any(columns %in% colnames(metadata_original))) {
         stop(call. = FALSE,
-             'At least one of the following columns must be present: ',
-             paste0('"', columns, '"', collapse = ', '),
+             'At least one of the following columns must be present in the input CSV: ',
+             paste0('"', columns, '"', collapse = ', ')
         )
     }
 }
 
+# Check for duplicated columns
+present_known_cols <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
+duplicated_cols <- unique(present_known_cols[duplicated(present_known_cols)])
+if (length(duplicated_cols) > 0) {
+    stop(call. = FALSE,
+         'The following columns occur more than once in the input CSV: ',
+         paste0('"', duplicated_cols, '"', collapse = ', ')
+    )
+}
+
 # Reorder columns and add any missing columns (initialized with NA)
 empty_columns <- lapply(known_columns, function(column) {
-    rep(NA_character_, nrow(metadata_original))
+    rep('', nrow(metadata_original))
 })
 names(empty_columns) <- known_columns
 metadata <- as.data.frame(empty_columns)
@@ -97,7 +113,7 @@ validate_required_input <- function(row_index, columns) {
     values <- unlist(metadata[row_index, columns])
     if (all(values == '' | is.na(values))) {
         stop(call. = FALSE, paste0(
-            'At least one of the following columns must have a value on row ', row_index, ': ',
+            'At least one of the following columns in the input CSV must have a value on row ', row_index, ': ',
             paste0('"', columns, '"', collapse = ', ')
         ))
     }
@@ -119,9 +135,9 @@ validate_mutually_exclusive <- function(row_index, columns) {
     if (sum(has_value) > 1) {
         problem_columns <- columns[has_value]
         stop(call. = FALSE, paste0(
-            'The following mutually exclusive columns all have values on row ', row_index, ': ',
+            'The following mutually exclusive columns in the input CSV all have values on row ', row_index, ': ',
             paste0('"', problem_columns, '"', collapse = ', '), '\n',
-            'For this group of columns, only a single column type can have a value.'
+            'For this group of columns, only a single column type can have a value for each sample.'
         ))
     }
 }
@@ -140,10 +156,10 @@ shared_char <- function(col, end = FALSE) {
         return(unlist(lapply(reversed, paste, collapse = "")))
     }
     if (all(is.na(col))) {
-        return("")
+        return('')
     }
     shorest_length <- min(unlist(lapply(col, nchar)), na.rm = TRUE)
-    result <- ""
+    result <- ''
     if (end) {
         col <- reverse_char(col)
     }
@@ -193,7 +209,7 @@ shortread_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
     } else if (is_present(shortread_2)) {
         shortread <- shortread_2
     } else {
-        shortread <- NA_character_
+        shortread <- ''
     }
 }))
 id_sources <- list( # These are all possible sources of IDs, ordered by preference
@@ -222,8 +238,30 @@ metadata$sample_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
 # Replace any characters in sample IDs that cannot be present in file names
 metadata$sample_id <- gsub(metadata$sample_id, pattern = invalid_id_char_pattern, replacement = '_')
 
-# Ensure sample IDs are unique
-metadata$sample_id <- make.unique(metadata$sample_id, sep = '_')
+# Ensure that the same sample ID is not used for different sets of data
+make_ids_unique <- function(metadata, id_col, other_cols) {
+    # Find which IDs need to be changed
+    subset <- metadata[, c(id_col, other_cols)]
+    subset$row_num <- 1:nrow(subset)
+    unique_ids <- unique(subset[[id_col]])
+    unique_ids <- unique_ids[is_present(unique_ids)]
+    id_key <- lapply(unique_ids, function(id) {
+        print(id)
+        same_id_rows <- subset[subset[[id_col]] == id, ]
+        split_by_other <- split(same_id_rows, apply(same_id_rows[, other_cols], 1, paste0, collapse = ''))
+        names(split_by_other) <- make.unique(rep(id, length(split_by_other)), sep = '_')
+        new_id_key <- lapply(names(split_by_other), function(new_id) { # Get list of data.frames with new IDs and associated row numbers
+            data.frame(new_id = new_id, row_num = split_by_other[[new_id]]$row_num)
+        })
+        new_id_key <- do.call(rbind, new_id_key) # combine list of data.frames to a single one
+        return(new_id_key)
+    })
+    id_key <- do.call(rbind, id_key) # combine list of data.frames to a single one
+    # Apply the changes
+    metadata[id_key$row_num, id_col] <- id_key$new_id
+    return(metadata)
+}
+metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'sra'))
 
 # Ensure reference IDs are present
 ref_id_sources <- list( # These are all possible sources of IDs, ordered by preference
@@ -234,7 +272,11 @@ ref_id_sources <- list( # These are all possible sources of IDs, ordered by pref
 )
 metadata$reference_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
     ids <- unlist(lapply(ref_id_sources, `[`, row_index))
-    return(ids[is_present(ids)][1])
+    id <- ids[is_present(ids)][1]
+    if (is.na(id)) {
+        id <- ''
+    }
+    return(id)
 }))
 
 # Ensure reference names are present
@@ -248,11 +290,16 @@ metadata$reference_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
     }
 }))
 
+# Remove reference names and IDs for samples that have no reference specified
+no_reference_data <- ! is_present(metadata$reference) & ! is_present(metadata$reference_refseq)
+metadata$reference_id[no_reference_data] <- ''
+metadata$reference_name[no_reference_data] <- ''
+
 # Replace any characters in reference IDs that cannot be present in file names
 metadata$reference_id <- gsub(metadata$reference_id, pattern = invalid_id_char_pattern, replacement = '_')
 
-# Ensure reference IDs are unique
-metadata$reference_id <- make.unique(metadata$reference_id, sep = '_')
+# Ensure that the same reference ID is not used for different sets of data
+metadata <- make_ids_unique(metadata, id_col = 'reference_id', other_cols = c('reference', 'reference_refseq'))
 
 # Add a default group for samples without a group defined
 if (all(!is_present(metadata$report_group))) {
@@ -262,4 +309,5 @@ if (all(!is_present(metadata$report_group))) {
 }
 
 # Write output metadata
-write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
+# write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
+View(metadata)
