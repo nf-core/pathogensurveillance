@@ -43,23 +43,23 @@ def create_reads_ref_channel(LinkedHashMap row) {
 
     // Create reference metadata map
     def ref_meta = [id: row.reference_id ?: null]
-    
-    // Format path(s) of the shortread fastq file(s) 
+
+    // Format path(s) of the shortread fastq file(s)
     def shortread = null
     if (row.shortread_1 != "") {
-        shortread = [row.shortread_1]
+        shortread = [file(row.shortread_1)]
         if (row.shortread_2 != "") {
-            shortread.add(row.shortread_2)
+            shortread.add(file(row.shortread_2))
         }
     }
-    
+
     // Format paths to single files
-    def nanopore = row.nanopore ?: null
+    def nanopore = row.nanopore ? file(row.nanopore): null
     def sra = row.sra ?: null
-    def reference = row.reference ?: null
+    def reference = row.reference ? file(row.reference): null
     def reference_refseq = row.reference_refseq ?: null
     def groups = row.report_group.split(";") as ArrayList
-    
+
     return [meta, shortread, nanopore, sra, ref_meta, reference, reference_refseq, groups]
 }
 
