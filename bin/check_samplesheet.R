@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # This script takes 2 arguments:
 #   1. The path to the CSV input to the pipeline supplied by the user
 #   2. The path to the reformatted version of the CSV output by this script

@@ -12,7 +12,7 @@ workflow DOWNLOAD_REFERENCES {
     ch_species  // channel: [val(meta), file(taxa)]
     ch_genera  // channel: [val(meta), file(taxa)]
     ch_families  // channel: [val(meta), file(taxa)]
-    ch_input // channel: [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+    ch_input // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group
 
     main:
     ch_versions = Channel.empty()
@@ -40,7 +40,7 @@ workflow DOWNLOAD_REFERENCES {
 
     // Make channel with all unique assembly IDs
     user_acc_list = ch_input
-        .map { [it[3], it[5]] } // ref_meta, ref_acc
+        .map { [it[4], it[6]] } // ref_meta, ref_acc
         .distinct()
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
         .map {it[1]}
