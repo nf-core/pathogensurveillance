@@ -57,10 +57,13 @@ defualt_group_full <- 'all'
 # Name of default group if some samples do not have a group defined
 defualt_group_partial <- '__other__'
 
+# Prefix added to column names to distinguish modified columns from user-supplied columns
+user_column_name_prefix <- '__user_'
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-args <- list('test/data/metadata_small.csv', 'test_out.csv')
+# args <- list('test/data/metadata_small.csv', 'test_out.csv')
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -100,7 +103,7 @@ if (length(duplicated_cols) > 0) {
     )
 }
 
-# Reorder columns and add any missing columns (initialized with NA)
+# Reorder columns and add any missing columns
 empty_columns <- lapply(known_columns, function(column) {
     rep('', nrow(metadata_original))
 })
@@ -308,6 +311,11 @@ if (all(!is_present(metadata$report_group))) {
     metadata$report_group[!is_present(metadata$report_group)] <- defualt_group_partial
 }
 
+# Add user-supplied data as columns with modified names
+cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
+unmodified_data <- metadata_original[, cols_to_add]
+colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
+metadata <- cbind(metadata, unmodified_data)
+
 # Write output metadata
-# write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
-View(metadata)
+write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
