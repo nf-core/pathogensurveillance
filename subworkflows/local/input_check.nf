@@ -49,7 +49,7 @@ def create_reads_ref_channel(LinkedHashMap row) {
     if (row.shortread_1 != "") {
         shortread = [row.shortread_1]
         if (row.shortread_2 != "") {
-            shortread.append(row.shortread_2)
+            shortread.add(row.shortread_2)
         }
     }
     
