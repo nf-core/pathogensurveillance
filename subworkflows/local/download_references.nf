@@ -26,16 +26,19 @@ workflow DOWNLOAD_REFERENCES {
         .flatten()
         .unique()
 
+    // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES ( ch_all_families )
     ch_versions = ch_versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
+    // Choose reference sequences to provide context for each sample
     PICK_ASSEMBLIES (
         ch_families
             .join(ch_genera)
             .join(ch_species),
         FIND_ASSEMBLIES.out.stats
             .map { it[1] }
-            .toSortedList()
+            .toSortedList(),
+        params.refseq_download_num
     )
 
     // Make channel with all unique assembly IDs
