@@ -2,14 +2,15 @@ process PICK_ASSEMBLIES {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::r-base=4.2.1"                                           
+    conda "conda-forge::r-base=4.2.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
-        'quay.io/biocontainers/r-base:4.2.1' }"                                 
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'quay.io/biocontainers/r-base:4.2.1' }"
 
     input:
     tuple val(meta), path(families), path(genera), path(species)
     path assem_data_tsvs
+    val refseq_download_num
 
     output:
     tuple val(meta), path("${prefix}.tsv")    , emit: stats
@@ -24,7 +25,7 @@ process PICK_ASSEMBLIES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    pick_assemblies.R ${families} ${genera} ${species} 5 ${prefix}.tsv ${assem_data_tsvs}
+    pick_assemblies.R ${families} ${genera} ${species} ${refseq_download_num} ${prefix}.tsv ${assem_data_tsvs}
 
     tail -n +2 ${prefix}.tsv | cut -f1,3 > ${prefix}_ids.txt
 

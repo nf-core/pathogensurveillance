@@ -71,10 +71,13 @@ process MAIN_REPORT {
     # Save reference IDs to file
     echo "${ref_ids}" > inputs/ref_ids.txt
 
+    # Move RefSeq reference data (for phylogenetic context) to its own directory
+    mkdir inputs/ref_data
+    cp -r ${ref_data} inputs/ref_data/
+
     # Move single-value paths to input directory
     mkdir other_inputs
     mv ${samp_data} inputs/samp_data.csv
-    mv ${ref_data} inputs/ref_data.tsv
     mv ${ani_matrix} inputs/ani_matrix.csv
     if [ ! -z "${core_phylo}" ]; then
         mv ${core_phylo} inputs/core_phylo.treefile

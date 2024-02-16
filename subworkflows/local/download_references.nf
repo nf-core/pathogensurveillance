@@ -78,6 +78,7 @@ workflow DOWNLOAD_REFERENCES {
     sequence   = DOWNLOAD_ASSEMBLIES.out.sequence         // [ val(ref_meta), file(fna) ] for each assembly
     gff        = MAKE_GFF_WITH_FASTA.out.gff              // [ val(ref_meta), file(gff) ] for each assembly
     signatures = SOURMASH_SKETCH_GENOME.out.signatures    // [ val(ref_meta), file(signature) ] for each assembly
-    stats      = PICK_ASSEMBLIES.out.merged_stats.first() // [ file(stats) ]
+    stats      = PICK_ASSEMBLIES.out.stats                // [ file(stats) ] for each sample
+    stats_all  = PICK_ASSEMBLIES.out.merged_stats.first() // file(merged_stats)
     versions   = ch_versions                              // [ versions.yml ]
 }
