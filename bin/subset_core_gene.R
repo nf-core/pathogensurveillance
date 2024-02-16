@@ -2,12 +2,12 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c("/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/9b/6b516a6b21dd200a5f76a91d9e48f9/all.tsv", "/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/56/3dbb9d7270b9d68e2eb5b27c07e237/all_feat_seqs_renamed", "/media/fosterz/external_primary/files/projects/work/current/foul_brood/intermediate/pathogensurveillance_input_local.csv", "10", "0.8", "0.5", 'test_output.tsv', 'test_feat_seqs') # NOTE: this is for testing, should be commented out for production code
-names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "csv_output_path", "fasta_output_path")
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = TRUE, sep = ',')
 min_core_genes <- as.integer(args$min_core_genes)
+max_core_genes <- as.integer(args$max_core_genes)
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
@@ -72,6 +72,11 @@ while (current_core_genes < min_core_genes) {
 # Filter out non-core genes
 output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                             get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
+
+# Remove excess genes if more than needed were found
+if (nrow(output) > args$max_core_genes) {
+    output <- output[1:max_core_genes, ]
+}
 
 # Write filtered output table
 write.table(output, file = args$csv_output_path, row.names = FALSE, sep = '\t', quote = FALSE)
