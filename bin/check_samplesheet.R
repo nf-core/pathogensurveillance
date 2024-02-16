@@ -12,7 +12,7 @@
 known_columns <- c(
     'sample_id',
     'sample_name',
-    'shortread_1', 
+    'shortread_1',
     'shortread_2',
     'nanopore',
     'sra',
@@ -305,6 +305,10 @@ metadata$reference_id <- gsub(metadata$reference_id, pattern = invalid_id_char_p
 
 # Ensure that the same reference ID is not used for different sets of data
 metadata <- make_ids_unique(metadata, id_col = 'reference_id', other_cols = c('reference', 'reference_refseq'))
+
+# Ensure references and samples do not share ids
+is_shared <- metadata$reference_id %in% metadata$sample_id
+metadata$reference_id[is_shared] <- paste0(metadata$reference_id[is_shared], '_ref')
 
 # Add a default group for samples without a group defined
 if (all(!is_present(metadata$report_group))) {
