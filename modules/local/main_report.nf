@@ -8,7 +8,7 @@ process MAIN_REPORT {
         'docker.io/zacharyfoster/main-report-r-packages:0.5' }"
 
     input:
-    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo)
+    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(assigned_refs)
     path samp_data
     path ref_data
     path multiqc_data
@@ -71,14 +71,15 @@ process MAIN_REPORT {
     # Save reference IDs to file
     echo "${ref_ids}" > inputs/ref_ids.txt
 
-    # Move RefSeq reference data (for phylogenetic context) to its own directory
+    # Move RefSeq reference data for each sample (for phylogenetic context) to their own directory
     mkdir inputs/ref_data
     cp -r ${ref_data} inputs/ref_data/
 
-    # Move single-value paths to input directory
+    # Move other single-value paths to input directory
     mkdir other_inputs
     mv ${samp_data} inputs/samp_data.csv
     mv ${ani_matrix} inputs/ani_matrix.csv
+    mv ${assigned_refs} inputs/assigned_refs.csv
     if [ ! -z "${core_phylo}" ]; then
         mv ${core_phylo} inputs/core_phylo.treefile
     fi

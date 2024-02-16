@@ -239,12 +239,13 @@ workflow PATHOGENSURVEILLANCE {
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, core_phylo
+        .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, core_phylo, assigned_refs
     report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
         .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
         .map { it.size() == 11 ? it : it[0..6] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo
-        .map { it.size() == 13 ? it : it[0..10] + [[], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo
-        .map { it[0..1] + it[5..6] + it[8..12] } // group_meta, [ref_meta], [sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+        .map { it.size() == 14 ? it : it[0..10] + [[], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+        .map { it[0..1] + it[5..6] + it[8..13] } // group_meta, [ref_meta], [sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
         .map { [
             it[0],
             it[1].findAll{ it.id != null }.unique(),
@@ -254,8 +255,9 @@ workflow PATHOGENSURVEILLANCE {
             it[5].findAll{ it != null },
             it[6].findAll{ it != null },
             it[7],
-            it[8] == null ? [] : it[8]
-         ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo
+            it[8] == null ? [] : it[8],
+            it[9]
+         ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
 
     MAIN_REPORT (
         report_in,
