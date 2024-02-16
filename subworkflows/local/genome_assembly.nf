@@ -56,10 +56,10 @@ workflow GENOME_ASSEMBLY {
         if (params.bakta_db.endsWith('.tar.gz')) {
             bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
             UNTAR( bakta_db_tar )
-            bakta_db = UNTAR.out.untar.map{ meta, db -> db }
+            bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
             ch_versions = ch_versions.mix(UNTAR.out.versions)
         } else {
-            bakta_db = Channel.fromPath(params.bakta_db)
+            bakta_db = Channel.fromPath(params.bakta_db).first()
         }
     } else if (params.download_bakta_db){
         BAKTA_BAKTADBDOWNLOAD()
