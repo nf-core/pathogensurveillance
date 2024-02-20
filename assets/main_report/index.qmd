@@ -320,11 +320,11 @@ More info will be added later.
 TODO-fix nodes to black
 
 ```{r poppr_config}
-#Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using )
+snp_trees <- ape::read.tree(snp_tree_paths)
+
+#Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using)
 snp_aln.gi <- DNAbin2genind(snp_alignment)
 snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
-
-#Extract just sample data for relevant sample group(s)? Way to get this from other output and just pull here? 
 
 #Need to rename samples so no longer have prefix (may be better way)
 genind_names<-indNames(snp_aln.gi)
@@ -374,88 +374,6 @@ indNames(snp_aln.gi) <- cleaned_names
 #mlglist2
 ```
 
-Please revise as needed. I think we need a better approach to coming up with SNP threshold-as shown in code chunk above. Providing arbitrary cutoff for all datasets will sometimes not be meaningful and even incorrect.
-
-**Martha-I cannot figure out why Poppr samples/nodes legend has a redundant node. I have not seen this with other datasets, and used pretty much the same code**
-
-```{r poppr msn, height=10, eval = nrow(samp_data) > 2}
-filter_level = 5
-mat <-match(indNames(snp_aln.gi), samp_data$sample)
-samp_data <- samp_data[mat, ]
-
-# Convert to genclone
-snp_genclone <- as.genclone(snp_aln.gi)
-
-# Replace NAs with "unknown"
-samp_data[] <- lapply(samp_data, function(col) {
-  if (any(is.na(col))) {
-    col[is.na(col)] <- "unknown"
-  }
-  return(col)
-})
-
-# Extract unique factors from the color_by column
-factors_to_analyze <- unique(unlist(strsplit(as.character(samp_data$color_by), split = ";")))
-
-# Loop over each factor to generate an MSN
-for (current_factor in factors_to_analyze) {
-
-    # If current factor is not a column name in samp_data, skip the iteration
-    if (!current_factor %in% names(samp_data)) {
-        next
-    }
-
-    # Extract the values from the corresponding column in samp_data
-    temp_color_by <- as.factor(samp_data[[current_factor]])
-
-    myColors <- rainbow(length(unique(temp_color_by)))
-    names(myColors) <- levels(temp_color_by)
-
-    # Set strata and pop with the temporary variable
-    num_columns <- ncol(samp_data)
-
-    # Extract all columns from samp_data and append the temp_color_by column
-    strata(snp_genclone) <- cbind(samp_data[, c(1:num_columns)], temp_color_by)
-
-    # Rename the appended column to "temp_color_by"
-    names(strata(snp_genclone))[num_columns + 1] <- "temp_color_by"
-
-    setPop(snp_genclone) <- ~temp_color_by
-    
-    #Add additional for loop for different filter levels
-    
-    for (filt_threshold in c(6, 11, 26, 61, 101)) {
-      mlg.filter(snp_genclone, distance = bitwise.dist, percent = FALSE, threshold=filt_threshold) 
-    
-      ms.loc <- poppr.msn(snp_genclone,
-                            distmat = bitwise.dist(snp_genclone, percent = FALSE),
-                            include.ties = TRUE,
-                            showplot = FALSE)
-      
-      the_edges <- igraph::E(ms.loc$graph)$weight
-      edges <- as.list(the_edges)
-
-      set.seed(8)
-      plot_poppr_msn(
-        snp_genclone,
-        poppr_msn = ms.loc,
-        palette = myColors,
-        mlg = FALSE,
-        quantiles = FALSE,
-        wscale = FALSE,
-        inds = "None",
-        layfun = igraph::layout_with_lgl,
-        edge.label = the_edges,
-        edge.label.font = 2,
-        edge.label.cex = 1,
-        edge.label.family = "Helvetica",
-        edge.label.color = "darkslateblue",
-        main = paste("MSN Plot - SNP Threshold:", filter_level-1,".", "Nodes colored by", current_factor)
-      )
-    }
-}
-
-```
 
 ### Visnetwork minimum spanning network
 
