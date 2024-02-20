@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/57/99d7f9be0b4db26eb4d464998da5a2"
 execute:
   echo: false
 ---
@@ -178,18 +178,50 @@ Included metrics can provide insights into how each sample compares with referen
 
 ## Rigorous identification
 
+This section includes phylogenetic trees of samples with references sequences downloaded from RefSeq meant to provide a reliable identification using genome-scale data.
+
 ::: panel-tabset
-### Core phylogeny
+
+### Core gene phylogeny
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
 psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
 ```
+
+```{r, results='asis', eval = length(read_lines(core_phylo_path)) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This a core gene phylogeny of samples with RefSeq genomes for context.
+A core gene phylogeny uses the sequences of all gene shared by all of the genomes included in the tree to infer evolutionary relationships.
+It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences. 
+:::
+')
+```
+
+```{r, results='asis', eval = length(read_lines(core_phylo_path)) == 0}
+cat('
+Could not generate core genome phylogeny.
+')
+```
+
 
 ### ANI heatmap and dendrogram
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
 psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
 ```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the similarity of all samples and references to eachother.
+These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
+These measurments are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
+:::
+
+
 :::
 
 # Genetic diversity

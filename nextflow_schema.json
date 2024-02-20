@@ -75,6 +75,36 @@
                     "default": 30,
                     "description": "Depth reads are subsampled to for genome assembly. This will be multiplied by the predicted ploidy of each sample",
                     "fa_icon": "fas fa-align-center"
+                },
+                "refseq_download_num": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "The maximum number of RefSeq sequences to select and download for each sample at each taxonomic level (species, genus, and family). The total number will vary based on the diversity of samples.",
+                    "fa_icon": "fas fa-download"
+                },
+                "min_core_genes": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "The minimum number of genes needed to conduct a core gene phylogeny. Samples and references will be removed (as allowed by the `min_core_samps` and `min_core_refs` options) until this minimum is met.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "min_core_samps": {
+                    "type": "number",
+                    "default": 0.8,
+                    "description": "The minimum proportion of samples needed to conduct a core gene phylogeny. Samples will be removed until the `min_core_genes` option is satisfied or this minimum is met.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "min_core_refs": {
+                    "type": "number",
+                    "default": 0.5,
+                    "description": "The minimum proportion of references needed to conduct a core gene phylogeny. References will be removed until the `min_core_genes` option is satisfied or this minimum is met.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "max_core_genes": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "The maximum number of genes used to conduct a core gene phylogeny.",
+                    "fa_icon": "fas fa-align-center"
                 }
             }
         },

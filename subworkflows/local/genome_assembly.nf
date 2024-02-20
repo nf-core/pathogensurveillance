@@ -20,12 +20,12 @@ workflow GENOME_ASSEMBLY {
     ch_reads = ch_input_filtered
         .map { it[0..1] + [it[6]] }
         .unique()
-    
-    // Subset sample reads to increase speed of following steps                 
+
+    // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        ch_reads,                                                              
-        params.sketch_max_depth                                                 
-    )                                                                           
+        ch_reads,
+        params.sketch_max_depth
+    )
     ch_versions = ch_versions.mix(SUBSET_READS.out.versions.first())
 
     FASTP ( SUBSET_READS.out.reads, [], false, false )
@@ -49,23 +49,23 @@ workflow GENOME_ASSEMBLY {
         .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
     QUAST ( ch_ref_grouped )
     ch_versions = ch_versions.mix(QUAST.out.versions.first())
-    
+
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
     if (params.bakta_db) {
         if (params.bakta_db.endsWith('.tar.gz')) {
-            bakta_db_tar = Channel.from(params.bakta_db).map{ [ [id: 'baktadb'], it] }
+            bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
             UNTAR( bakta_db_tar )
-            bakta_db = UNTAR.out.untar.map{ meta, db -> db }
+            bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
             ch_versions = ch_versions.mix(UNTAR.out.versions)
         } else {
-            bakta_db = Channel.value(params.bakta_db)
+            bakta_db = Channel.fromPath(params.bakta_db).first()
         }
-    } else if (!params.bakta_db && params.download_bakta_db){
+    } else if (params.download_bakta_db){
         BAKTA_BAKTADBDOWNLOAD()
         bakta_db  = BAKTA_BAKTADBDOWNLOAD.out.db
         ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
-    } 
+    }
 
     // Run bakta
     BAKTA_BAKTA (

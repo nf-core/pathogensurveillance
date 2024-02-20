@@ -5,10 +5,10 @@ Validates the input data and returns a reformatted version that is used for the 
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
 
-    conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
+    conda "conda-forge::r-base=4.2.1"                                           
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/python:3.8.3' :
-        'quay.io/biocontainers/python:3.8.3' }"
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
+        'quay.io/biocontainers/r-base:4.2.1' }"                                 
 
     input:
     path samplesheet
@@ -19,11 +19,11 @@ process SAMPLESHEET_CHECK {
 
     script:
     """
-    check_samplesheet.py $samplesheet samplesheet.valid.csv
+    check_samplesheet.R $samplesheet samplesheet.valid.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
+        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
     END_VERSIONS
     """
 }

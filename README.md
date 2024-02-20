@@ -78,6 +78,27 @@ nextflow run nf-core/pathogensurveillance --input https://raw.githubusercontent.
 
 The nf-core/pathogensurveillance pipeline comes with documentation about the pipeline [usage](https://nf-co.re/pathogensurveillance/usage), [parameters](https://nf-co.re/pathogensurveillance/parameters) and [output](https://nf-co.re/pathogensurveillance/output).
 
+### Input format
+
+The primary input to the pipeline is a CSV (comma comma-separated value).
+Columns can be in any order and unneeded columns can be left out or left blank.
+Only a single column containing paths to raw sequence data or SRA (Sequence Read Archive) accessions is required and each sample can have values in different columns.
+Any columns not recognized by `pathogensurveillance` will be ignored, allowing users to adapt existing sample metadata table by adding new columns.
+Below is a description of each column used by `pathogensurveillance`:
+
+* **sample_id**: The unique identifier for each sample. This will be used in file names to distinguish samples in the output. Each sample ID must correspond to a single set of sequence data (The `shortread_*`, `nanopore`, and `sra` columns), although the same sequence data can be used by multiple different IDs. Any values that correspond to multiple different sets of sequence data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the names of input data.
+* **sample_name**: A human-readable label for the sample that is used in plots and tables. If not supplied, it will be inferred from the names of `sample_id`.
+* **shortread_1**: Path to short read FASTQs like that produced by Illumina. When paired end sequencing is used, this is used for the forward read's data. This can be a local file path or a URL to an online location.
+* **shortread_2**: Path to short read FASTQs like that produced by Illumina. This is used for the reverse read's data when paired-end sequencing is used. This can be a local file path or a URL to an online location.
+* **nanopore**: Path to nanopore FASTQs. This can be a local file path or a URL to an online location.
+* **sra**: Sequence Read Archive (SRA) accession numbers. These will be automatically downloaded and used as input.
+* **reference_id**: The unique identifier for each user-defined reference genome. This will be used in file names to distinguish samples in the output. Each reference ID must correspond to a single set of reference data (The `reference` and `reference_refseq` columns), although the same reference data can be used by multiple different IDs. Any values that correspond to multiple different sets of reference data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the names of reference genomes.
+* **reference_name**: A human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from the names of reference_id.
+* **reference**: Path to user-defined reference genomes for each sample. This can be a local file path or a URL to an online location.
+* **reference_refseq**: RefSeq accession ID for a user-defined reference genome. These will be automatically downloaded and used as input.
+* **report_group**: How to group samples into reports. For every unique value in this column a report will be generated. Samples can be assigned to multiple reports by separating group IDs by `;`. For example `all;subset` will put the sample in both `all` and `subset` report groups. If not included, all samples will be
+* **color_by**: The names of user-specific columns (not usually any of the ones described here) containing variables to base the color of some plots by (e.g. the minimum spanning network). If not include, plots will not be colored.
+
 ## Credits
 
 nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald.

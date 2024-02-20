@@ -12,7 +12,7 @@ workflow DOWNLOAD_REFERENCES {
     ch_species  // channel: [val(meta), file(taxa)]
     ch_genera  // channel: [val(meta), file(taxa)]
     ch_families  // channel: [val(meta), file(taxa)]
-    ch_input // channel: [val(meta), [file(fastq)], val(sra), val(ref_meta), file(reference), val(ref_acc), val(group_meta)]
+    ch_input // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group
 
     main:
     ch_versions = Channel.empty()
@@ -26,21 +26,24 @@ workflow DOWNLOAD_REFERENCES {
         .flatten()
         .unique()
 
+    // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES ( ch_all_families )
     ch_versions = ch_versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
+    // Choose reference sequences to provide context for each sample
     PICK_ASSEMBLIES (
         ch_families
             .join(ch_genera)
             .join(ch_species),
         FIND_ASSEMBLIES.out.stats
             .map { it[1] }
-            .toSortedList()
+            .toSortedList(),
+        params.refseq_download_num
     )
 
     // Make channel with all unique assembly IDs
     user_acc_list = ch_input
-        .map { [it[3], it[5]] } // ref_meta, ref_acc
+        .map { [it[4], it[6]] } // ref_meta, ref_acc
         .distinct()
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
         .map {it[1]}
@@ -75,6 +78,7 @@ workflow DOWNLOAD_REFERENCES {
     sequence   = DOWNLOAD_ASSEMBLIES.out.sequence         // [ val(ref_meta), file(fna) ] for each assembly
     gff        = MAKE_GFF_WITH_FASTA.out.gff              // [ val(ref_meta), file(gff) ] for each assembly
     signatures = SOURMASH_SKETCH_GENOME.out.signatures    // [ val(ref_meta), file(signature) ] for each assembly
-    stats      = PICK_ASSEMBLIES.out.merged_stats.first() // [ file(stats) ]
+    stats      = PICK_ASSEMBLIES.out.stats                // [ file(stats) ] for each sample
+    stats_all  = PICK_ASSEMBLIES.out.merged_stats.first() // file(merged_stats)
     versions   = ch_versions                              // [ versions.yml ]
 }
