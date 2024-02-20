@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/media/fosterz/external_primary/files/projects/work/current/foul_brood/work/57/99d7f9be0b4db26eb4d464998da5a2"
+  inputs: "_test_data/1"
 execute:
   echo: false
 ---
@@ -81,6 +81,12 @@ quast_path <- file.path(params$inputs, "inputs", "quast")
 quast_ref_names <- list.files(quast_path)
 quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
 
+# Parse messages
+messages_path <- file.path(params$inputs, "inputs", "messages.tsv")
+messages <- readr::read_tsv(messages_path)
+messages <- messages %>%
+  separate(message, into = c("message_level", "message_text"), sep = "\t")
+
 # Parse version data
 version_path <- file.path(params$inputs, "inputs", "versions.yml")
 version_data <- psminer::parse_software_meta(version_path)
@@ -98,6 +104,34 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 ## Status
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
+
+```{r generate-tables, echo=FALSE}
+# Generate the tables using the status_tables function
+tables <- status_tables(messages, interactive = TRUE)
+```
+
+::: {.panel-tabset}
+
+## Simple Summary Table
+
+```{r simple-table, echo=FALSE}
+tables$simpleTable
+```
+
+## Detailed Samples Table
+
+```{r detailed-samples-table, echo=FALSE}
+tables$detailedSamplesTable
+```
+
+## Detailed Groups Table
+
+```{r detailed-groups-table, echo=FALSE}
+tables$detailedGroupsTable
+```
+
+:::
+
 
 ## {{< bi clipboard-data >}} Input data
 
