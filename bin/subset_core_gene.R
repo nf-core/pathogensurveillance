@@ -2,12 +2,18 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/e4/92e25d85a7c78b33ea238a17e2f95f/subgroup.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/b0/907fb505fc3f5f7154b6e963cb038c/subgroup_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/73/ef34ab175d331f52bfbbbec60ea8c2/samplesheet.valid.csv',
+#           '10', '0.8', '0.5', '100', 'subgroup_core_genes.tsv', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = TRUE, sep = ',')
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
+min_core_samps <- as.integer(args$min_core_samps)
+min_core_refs <- as.integer(args$min_core_refs)
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
@@ -16,8 +22,8 @@ sample_ids <- all_ids[all_ids %in% gsub(pattern = '[-.]+', replacement = '_', me
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
 # Get minimum number of samples and references that is acceptable
-min_core_samps <- ceiling(as.numeric(args$min_core_samps) * length(sample_ids))
-min_core_refs <- ceiling(as.numeric(args$min_core_refs) * length(ref_ids))
+min_core_samps <- ceiling(min_core_samps * length(sample_ids))
+min_core_refs <- ceiling(min_core_refs * length(ref_ids))
 
 # Remove rows that cannot meet the minimum number of genomes
 raw_gene_data <- raw_gene_data[raw_gene_data$number_genomes >= min_core_samps + min_core_refs, ]
@@ -74,7 +80,7 @@ output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_
                             get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
 
 # Remove excess genes if more than needed were found
-if (nrow(output) > args$max_core_genes) {
+if (nrow(output) > max_core_genes) {
     output <- output[1:max_core_genes, ]
 }
 
