@@ -15,6 +15,7 @@ known_columns <- c(
     'shortread_1',
     'shortread_2',
     'nanopore',
+    'pacbio',
     'sra',
     'reference_id',
     'reference_name',
@@ -27,14 +28,14 @@ known_columns <- c(
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
 required_input_columns <- list(
-    c('shortread_1', 'shortread_2', 'nanopore', 'sra')
+    c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
 # If a regular expression matches multiple columns, then both matches can have a value
 mutually_exclusive_columns <- list(
     c('reference', 'reference_refseq'),
-    c('shortread_[12]', 'nanopore', 'sra')
+    c('shortread_[12]', 'nanopore', 'sra', 'pacbio')
 )
 
 # These are file extensions that are expected in the input data.
@@ -222,6 +223,7 @@ id_sources <- list( # These are all possible sources of IDs, ordered by preferen
     metadata$sample_name,
     metadata$sra,
     remove_file_extensions(remove_shared(metadata$nanopore)),
+    remove_file_extensions(remove_shared(metadata$pacbio)),
     remove_file_extensions(remove_shared(shortread_ids))
 )
 metadata$sample_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
@@ -266,7 +268,7 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)
 }
-metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'sra'))
+metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra'))
 
 # Ensure reference IDs are present
 ref_id_sources <- list( # These are all possible sources of IDs, ordered by preference

@@ -89,27 +89,27 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Download FASTQ files if SRA accessions is provided
-    ch_sra = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group
-        .map { [it[0], it[3]] }
+    ch_sra = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
+        .map { [it[0], it[4]] } // meta, sra
         .filter { it[1] != null }
         .distinct()
     SRATOOLS_FASTERQDUMP ( ch_sra )
 
     // Download reference files if an accession is provided instead of a file
-    ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group
-        .filter { it[6] != null }
-        .map { [it[4], it[6]] } // val(ref_meta), file(ref_acc)
+    ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
+        .filter { it[7] != null }
+        .map { [it[5], it[7]] } // ref_meta, reference_refseq
         .distinct()
     DOWNLOAD_ASSEMBLIES ( ch_ref_accessions )
     ch_downloaded_refs = DOWNLOAD_ASSEMBLIES.out.sequence // val(ref_meta), file(downloaded_ref)
-        .combine( INPUT_CHECK.out.sample_data.map { [it[4], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
+        .combine( INPUT_CHECK.out.sample_data.map { [it[5], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
         .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
 
     // Replace NCBI SRAs/Assembly accessions with downloaded reads and references
-    ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group
-        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
-        .join(ch_downloaded_refs, remainder:true) // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
-        .map { [it[0], it[8] ?: it[1], it[4], it[9] ?: it[5], it[7]] } // meta, [fastq], ref_meta, reference, group_meta
+    ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
+        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
+        .join(ch_downloaded_refs, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
+        .map { [it[0], it[9] ?: it[1], it[5], it[9] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
