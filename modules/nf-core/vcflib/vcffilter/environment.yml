@@ -5,3 +5,4 @@ channels:
   - defaults
 dependencies:
   - bioconda::vcflib=1.0.3
+  - bioconda::tabixpp=1.1.0
