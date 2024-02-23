@@ -8,9 +8,8 @@ process MAIN_REPORT {
         'docker.io/zacharyfoster/main-report-r-packages:0.5' }"
 
     input:
-    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(assigned_refs)
+    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(ref_data), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(assigned_refs)
     path samp_data
-    path ref_data
     path multiqc_data
     path multiqc_plots
     path multiqc_report
@@ -29,7 +28,6 @@ process MAIN_REPORT {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
-    def ref_ids = ref_metas.collect{ it.id }.join(';')
     """
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r --dereference main_report_template main_report
@@ -67,9 +65,6 @@ process MAIN_REPORT {
 
     # Save report group name to file
     echo "${group_meta.id}" > inputs/group_id.txt
-
-    # Save reference IDs to file
-    echo "${ref_ids}" > inputs/ref_ids.txt
 
     # Move RefSeq reference data for each sample (for phylogenetic context) to their own directory
     mkdir inputs/ref_data

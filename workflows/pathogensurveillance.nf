@@ -231,38 +231,39 @@ workflow PATHOGENSURVEILLANCE {
     // Create main summary report
     report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
         .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
-        .map { [it[2], it[0], it[1], it[3], it[4], it[5]]} // ref_meta, meta, fastq, reference, group_meta, sendsketch
-        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, fastq, reference, group_meta, sendsketch
-        .map { [it[4], it[0], it[1], it[2], it[3], it[5], it[6]]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, quast
-        .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
+        .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch, ref_stats
+        .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats, quast
+        .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, ref_stats, quast
+        .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
     report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, core_phylo
         .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, core_phylo, assigned_refs
-    report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast]
-        .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
-        .map { it.size() == 11 ? it : it[0..6] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
-        .map { it.size() == 14 ? it : it[0..10] + [[], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
-        .map { it[0..1] + it[5..6] + it[8..13] } // group_meta, [ref_meta], [sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+    report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
+        .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
+        .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+        .map { it.size() == 15 ? it : it[0..11] + [[], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+        .map { it[0..1] + it[5..7] + it[9..14] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
         .map { [
             it[0],
             it[1].findAll{ it.id != null }.unique(),
             it[2],
-            it[3].findAll{ it != null },
+            it[3],
             it[4].findAll{ it != null },
             it[5].findAll{ it != null },
             it[6].findAll{ it != null },
-            it[7],
-            it[8] == null ? [] : it[8],
-            it[9]
-         ] } // group_meta, [ref_meta],[sendsketch], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+            it[7].findAll{ it != null },
+            it[8],
+            it[9] == null ? [] : it[9],
+            it[10]
+         ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
 
     MAIN_REPORT (
         report_in,
         INPUT_CHECK.out.csv,
-        DOWNLOAD_REFERENCES.out.stats,
         MULTIQC.out.data,
         MULTIQC.out.plots,
         MULTIQC.out.report,
