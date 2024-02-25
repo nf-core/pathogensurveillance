@@ -51,7 +51,7 @@ assigned_refs_path <- file.path(params$inputs, "inputs", "assigned_refs.csv")
  
 group <- read_lines(group_path)
 sample_data <- psminer::parse_sample_meta(sample_data_path, assigned_refs_path, group)
-ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data)
+ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data_path, group)
 
 # Parse sendsketch data
 sendsketch_paths <- list.files(file.path(params$inputs, "inputs", "sendsketch"), full.names = T)
@@ -65,8 +65,7 @@ snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.nam
 
 # Parse ANI matrix
 ani_matrix_path <- file.path(params$inputs, "inputs", "ani_matrix.csv")
-ani_matrix <- read.csv(ani_matrix_path, check.names = FALSE)
-ani_matrix_reformatted <- psminer::parse_ani_matrix_names(ani_matrix)
+ani_matrix <- psminer::parse_ani_matrix(ani_matrix_path)
 
 # Parse core gene phylogeny
 core_phylo_path <- file.path(params$inputs, "inputs", "core_phylo.treefile")
@@ -92,7 +91,7 @@ version_data <- psminer::parse_software_meta(version_path)
 This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 **Report group:** `r group`                           
-**Sample count:** `r nrow(samp_data)`                 
+**Sample count:** `r nrow(sample_data)`                 
 **Last updated:** `r format(Sys.time(), '%B %d , %Y')`       
 **Pipeline version:** {{< var version >}}
 
@@ -100,7 +99,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-```{r generate-tables, echo=FALSE}
+```{r generate-tables, eval=FALSE}
 # Generate the tables using the status_tables function
 tables <- status_tables(messages, interactive = TRUE)
 ```
@@ -109,19 +108,19 @@ tables <- status_tables(messages, interactive = TRUE)
 
 ## Simple Summary Table
 
-```{r simple-table, echo=FALSE}
+```{r simple-table, eval=FALSE}
 tables$simpleTable
 ```
 
 ## Detailed Samples Table
 
-```{r detailed-samples-table, echo=FALSE}
+```{r detailed-samples-table, eval=FALSE}
 tables$detailedSamplesTable
 ```
 
 ## Detailed Groups Table
 
-```{r detailed-groups-table, echo=FALSE}
+```{r detailed-groups-table, eval=FALSE}
 tables$detailedGroupsTable
 ```
 
@@ -131,7 +130,7 @@ tables$detailedGroupsTable
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-psminer::print_sample_metadata(samp_data)
+psminer::print_sample_metadata(sample_data)
 ```
 
 
@@ -214,7 +213,7 @@ This section includes phylogenetic trees of samples with references sequences do
 ### Core gene phylogeny
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
+psminer::make_phylogeny(core_phylo_path, sample_data, ref_data, interactive = TRUE)
 ```
 
 ```{r, results='asis', eval = length(read_lines(core_phylo_path)) > 0}
@@ -239,7 +238,7 @@ Could not generate core genome phylogeny.
 ### ANI heatmap and dendrogram
 
 ```{r ANI dendrogram, fig.height = 8, fig.width=8}
-psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
+psminer::make_ani_heatmap(ani_matrix, ref_data, sample_data)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -304,11 +303,11 @@ assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani
 
 name_key <- c(
   setNames(ref_data$Organism, ref_data$LastMajorReleaseAccession),
-  setNames(samp_data$modified_id, samp_data$modified_id),
+  setNames(sample_data$modified_id, sample_data$modified_id),
   setNames(assembly_entries, assembly_entries)
 )
 
-sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% samp_data$modified_id]
+sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% sample_data$modified_id]
 
 #For phycanvas version-much simpler code-but have a ggtree and ggploty version below
 phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
@@ -328,24 +327,24 @@ We need to decide on best tree package. Here I experimented with ggtree and ggpl
 
 #add REF to metadata-only provide accession info (and maybe genus and species)
 #This part can be simplified
-samp_data<-samp_data
-new_row <- data.frame(matrix(ncol = ncol(samp_data), nrow = 1))
-colnames(new_row) <- colnames(samp_data)
+sample_data<-sample_data
+new_row <- data.frame(matrix(ncol = ncol(sample_data), nrow = 1))
+colnames(new_row) <- colnames(sample_data)
 
 new_row$sample <- "REF"
 
 # Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
-samp_data <- rbind(samp_data, new_row)
-samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
+sample_data <- rbind(sample_data, new_row)
+sample_data <- sample_data[match(snp_trees_midpoint$tip.label, sample_data$sample), ]
 
 # We can revise, but one way to color the samples as one color, the ref as another
-samp_data$text_color <- ifelse(samp_data$sample == "REF", "black", "#24B064")
+sample_data$text_color <- ifelse(sample_data$sample == "REF", "black", "#24B064")
 
 # Couldn't use some of ggtree functions with plotly, so here is a workaround
 snp_tree1 <- fortify(snp_trees_midpoint)
 
-# Merge it with your samp_data for color information
-snp_tree1 <- merge(snp_tree1, samp_data, by.x="label", by.y="sample")
+# Merge it with your sample_data for color information
+snp_tree1 <- merge(snp_tree1, sample_data, by.x="label", by.y="sample")
 
 # Using theme_minimal for a cleaner background
 ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + 
@@ -400,8 +399,8 @@ indNames(snp_aln.gi) <- cleaned_names
 #Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
 # Convert to genclone
 
-#mat <-match(indNames(snp_aln.gi), samp_data$sample)
-#samp_data <- samp_data[mat, ]
+#mat <-match(indNames(snp_aln.gi), sample_data$sample)
+#sample_data <- sample_data[mat, ]
 
 #snp_genclone <- as.genclone(snp_aln.gi)
 #snpdist_stats <- filter_stats(snp_genclone)
@@ -441,7 +440,7 @@ indNames(snp_aln.gi) <- cleaned_names
 **Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes**
 
 **Attempting to make Visnetwork plot more useful. If you hover, you now see all samples that group together and have the same genotype**
-```{r visnetwork_setup_testing, eval = nrow(samp_data) > 2}
+```{r visnetwork_setup_testing, eval = nrow(sample_data) > 2}
 # # Given a node ID (MLG), this function will return a string containing all sample names associated with that MLG
 # # Work on simplifying code 
 # get_MLG <- function(sample_name) {
