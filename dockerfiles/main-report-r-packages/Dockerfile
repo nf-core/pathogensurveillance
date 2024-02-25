@@ -59,7 +59,8 @@ install.r \
     webshot2 \
     metacoder \
     ggdendro \
-    DT
+    DT \
+    heatmaply
 EOF
 
 RUN <<EOF

@@ -24,7 +24,7 @@ for PROFILE in ${PROFILES[@]}; do
     # For each report group, copy the main report input and put it in the test data directory for the main report
     for WORK_DIR in $(grep MAIN_REPORT $PROFILE_OUT_DIR/pipeline_info/trace_report.tsv | cut -f 35); do
         REPORT_GROUP="$(cat ${WORK_DIR}/inputs/group_id.txt)"
-        REPORT_INPUT_DEST="${REPORT_TEST_DIR}/${PROFILE}_${REPORT_GROUP}"
+        REPORT_INPUT_DEST="${REPORT_TEST_DIR}/${PROFILE}--${REPORT_GROUP}"
         printf "Saving report input to:\n $REPORT_INPUT_DEST"
         mkdir -p $REPORT_INPUT_DEST
         cp -rf "$WORK_DIR/inputs" $REPORT_INPUT_DEST

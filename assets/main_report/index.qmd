@@ -1,23 +1,21 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "_test_data/test--xan_test"
 execute:
   echo: false
 ---
 
 ```{r knitr_settings}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
-options(bspm.sudo = TRUE) # Something needed when running in containers (not sure why)
 ```
 
-
+ 
 ```{r load_libraries, warning=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 library(readr)
 library(knitr)
-library(readr)
 library(purrr)
 library(yaml)
 library(phylocanvas)
@@ -40,21 +38,20 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-#devtools::install_github("grunwaldlab/psminer")
-library(psminer)
+library(psminer) # Install with: devtools::install_github("grunwaldlab/psminer")
 library(ggdendro)
 library(rcrossref)
 ```
 
 ```{r parse_inputs}
 group_path <- file.path(params$inputs, "inputs", "group_id.txt")
+sample_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
+ref_data_path <- file.path(params$inputs, "inputs", "ref_data")
+assigned_refs_path <- file.path(params$inputs, "inputs", "assigned_refs.csv")
+ 
 group <- read_lines(group_path)
-samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
-samp_data <- psminer::parse_sample_meta(samp_data_path, group)
-
-ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
-ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-ref_data <- psminer::parse_ref_meta(ref_data_path, ref_ids_path, samp_data)
+sample_data <- psminer::parse_sample_meta(sample_data_path, assigned_refs_path, group)
+ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data)
 
 # Parse sendsketch data
 sendsketch_paths <- list.files(file.path(params$inputs, "inputs", "sendsketch"), full.names = T)
@@ -84,8 +81,6 @@ quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
 # Parse messages
 messages_path <- file.path(params$inputs, "inputs", "messages.tsv")
 messages <- readr::read_tsv(messages_path)
-messages <- messages %>%
-  separate(message, into = c("message_level", "message_text"), sep = "\t")
 
 # Parse version data
 version_path <- file.path(params$inputs, "inputs", "versions.yml")

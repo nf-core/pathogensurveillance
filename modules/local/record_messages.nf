@@ -24,7 +24,7 @@ process RECORD_MESSAGES {
                 it[3], it[4], it[5]] }
         .collect {it.join('\t')}
         .join('\n')
-    text = ['sample_id', 'group_id', 'ref_id', 'workflow', 'message'].join('\t') + '\n' + text
+    text = ['sample_id', 'group_id', 'ref_id', 'workflow', 'level', 'message'].join('\t') + '\n' + text
     """
     echo "${text}" >> messages.tsv
     """
