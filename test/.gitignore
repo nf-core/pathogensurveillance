@@ -1,6 +1,3 @@
 !data/
 data/reads
-output_small
-output_full
-output_medium
-output_*
+output*

@@ -261,9 +261,7 @@ These measurments are not as reliable as the methods used to create phylogenetic
 3.  Need to clarify whether to use REF in the SNP tree or else rename
 
 ```{r div_parse_inputs}
-snp_trees <- ape::read.tree(snp_tree_paths)
 snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
-#Rename sample names so they don't have prefixes-may be better way
 ```
 
 ## Genetic diversity in sample
@@ -273,49 +271,11 @@ snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
 
 **Phylocanvas option**
 
-TODO-fix how trees are rooted, so consistent with how core gene phylogeny is
-TODO-may need to fix fundamental logic since only tested on two small datasets
-TODO-with new data parsing functions much of the below code can be revised.
-
 ```{r snp_tree_config, include=TRUE}
-#NOTE-Will tidy up code once we finalize which tree program to use and input format of files. There are many lines of code that deal with renaming samples, and these can be revised .  
-
-#Rename tree tip labels
-oldtips<-snp_trees$tip.label
-
-#TODO generalize for any prefix
-#Right now we assume REF is always in first position
-#After we finalize what characters aren't allowed, 
-newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
-
-#SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
-snp_trees$tip.label<-newtips
-
-# Root tree
-#option1
-snp_trees_rootref <- root(snp_trees, "REF")
-#option2
-snp_trees_midpoint<-midpoint(snp_trees)
-
-ani_matrix_format <-as.matrix(ani_matrix)
-assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
-
-
-name_key <- c(
-  setNames(ref_data$Organism, ref_data$LastMajorReleaseAccession),
-  setNames(sample_data$modified_id, sample_data$modified_id),
-  setNames(assembly_entries, assembly_entries)
-)
-
-sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% sample_data$modified_id]
-
-#For phycanvas version-much simpler code-but have a ggtree and ggploty version below
-phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-for (x in name_key[sample_ids]) {
-  phycanv_snp <- style_node(phycanv_snp, x, labelcolor = "#24B064", labeltextsize = 30)
+snp_trees <- parse_snp_trees(snp_tree_paths, group)
+for (tree in snp_trees) {
+    print(psminer::make_phylogeny(tree, sample_data, ref_data, interactive = TRUE))
 }
-    
-phycanv_snp
 ```
 
 **gtree and ggplotly option**
