@@ -7,7 +7,7 @@ execute:
 ---
 
 ```{r knitr_settings}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE, message = FALSE)
 ```
 
  
@@ -147,7 +147,7 @@ For more robust identifications based on whole genome sequences, see the results
 
 ```{r}
 top_hits <- psminer::best_sendsketch_hits(sketch_data)
-unique_tax <- unique(top_hits$taxonomy)
+unique_tax <- unique(sub(top_hits$taxonomy, pattern = ';s:(.+);.+$', replacement = ';s:\\1')) # ignore below species level information
 is_single_taxon <- length(unique_tax) == 1
 ```
 
@@ -252,233 +252,42 @@ These measurments are not as reliable as the methods used to create phylogenetic
 
 :::
 
-# Genetic diversity
+## Genetic diversity
 
-*Things to address:*
+### SNP trees
 
-1.  There are lots of NAs in metadata. I ran into issues when trying run poppr. I was trying to select a specific factor to color nodes by. As a quick workaround, changed these to 'unknown', but what is a better solution?
-2.  The assembly prefix in sample names present in SNP aln output and treefile need to be discussed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
-3.  Need to clarify whether to use REF in the SNP tree or else rename
-
-```{r div_parse_inputs}
-snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
-```
-
-## Genetic diversity in sample
-
-::: panel-tabset
-### SNP tree
-
-**Phylocanvas option**
-
-```{r snp_tree_config, include=TRUE}
+```{r parse_snp_trees}
 snp_trees <- parse_snp_trees(snp_tree_paths, group)
-for (tree in snp_trees) {
-    print(psminer::make_phylogeny(tree, sample_data, ref_data, interactive = TRUE))
-}
-```
-
-**gtree and ggplotly option**
-
-We need to decide on best tree package. Here I experimented with ggtree and ggplotly. Requires many more lines of code than Phylocanvas. If we use ggtree alone, we lose interactivity, but may look nicer.
-
-```{r ggtree, height=10, width=8, include=TRUE}
-#One way to parse metadata file so we can color tips in a descriptive way
-
-#add REF to metadata-only provide accession info (and maybe genus and species)
-#This part can be simplified
-sample_data<-sample_data
-new_row <- data.frame(matrix(ncol = ncol(sample_data), nrow = 1))
-colnames(new_row) <- colnames(sample_data)
-
-new_row$sample <- "REF"
-
-# Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
-sample_data <- rbind(sample_data, new_row)
-sample_data <- sample_data[match(snp_trees_midpoint$tip.label, sample_data$sample), ]
-
-# We can revise, but one way to color the samples as one color, the ref as another
-sample_data$text_color <- ifelse(sample_data$sample == "REF", "black", "#24B064")
-
-# Couldn't use some of ggtree functions with plotly, so here is a workaround
-snp_tree1 <- fortify(snp_trees_midpoint)
-
-# Merge it with your sample_data for color information
-snp_tree1 <- merge(snp_tree1, sample_data, by.x="label", by.y="sample")
-
-# Using theme_minimal for a cleaner background
-ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + 
-  geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
-  geom_point(data=snp_tree1, aes(x=x, y=y, color="black"), show.legend = FALSE, size=3) +
-  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label, color=text_color), size=3, hjust=0, vjust=0.5, fontface="bold") +
-  scale_color_identity() +
-  theme(legend.position = "none")
-
-
-# Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
-ggtree_interactive <- ggplotly(ggtree_snptree)
-ggtree_interactive
-
-# How interactive plots can be made to work with PDF
-#Perhaps adjust with if/else statement rendering as pdf vs. html, also changes interactivity of html document
-
-#htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
-#webshot(url = "ggtree_interactive.html", file = "ggtree_interactive.png", delay = 1, zoom = 4, vheight = 500)
+snp_tree_js <- unlist(lapply(snp_trees, function(tree) {
+    as.character(htmltools::as.tags(psminer::make_phylogeny(tree, sample_data, ref_data, interactive = TRUE), standalone = TRUE))
+}))
 ```
 
 
-```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
+```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0}
+cat(paste0(collapse = "\n",
+'
+::: panel-tabset
+',
+paste0('### ', names(snp_tree_js), '\n\n'),
+snp_tree_js,
+'
+:::
+'
+))
+```
+
+
+```{asis div_no_snp_phylo, echo = length(snp_trees) == 0}
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
-:::
-
-## Minimum spanning network
-
-### *Questions to address*
-
-TODO-fix nodes to black
-
-```{r poppr_config}
-snp_trees <- ape::read.tree(snp_tree_paths)
-
-#Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using)
-snp_aln.gi <- DNAbin2genind(snp_alignment)
-snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
-
-#Need to rename samples so no longer have prefix (may be better way)
-genind_names<-indNames(snp_aln.gi)
-cleaned_names <- gsub("^[^_]+(?:_[^_]+)*_", "", genind_names)
-indNames(snp_aln.gi) <- cleaned_names
-```
-
-### Experimenting with less subjective ways to provide SNP cutoff-this may be a viable option but requires review
-
-```{r mlg_config_test, eval = FALSE}
-
-#Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
-# Convert to genclone
-
-#mat <-match(indNames(snp_aln.gi), sample_data$sample)
-#sample_data <- sample_data[mat, ]
-
-#snp_genclone <- as.genclone(snp_aln.gi)
-#snpdist_stats <- filter_stats(snp_genclone)
-
-#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-    #farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
-    #print(farthest_thresh)
-#} else {
-    #farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
-    #print(farthest_thresh)
-#}
 
 
-#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
+### Minimum spanning network
 
-#idlist2<-mlg.id(snp_genclone)
+TODO
 
-#mlglist2<-data.frame("MLG","strain")
-
-#colnames(mlglist2) <- c("V1","V2")
-
-#for (name in names(idlist2)) {
-#  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
-# mlglist2<-rbind(mlglist2,newframe)
-#}
-
-#colnames(mlglist2)<-c("MLG","strain")
-#mlglist2<-mlglist2[mlglist2$strain != "strain",]
-
-#make a prettier table
-#mlglist2
-```
-
-
-### Visnetwork minimum spanning network
-
-**Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes**
-
-**Attempting to make Visnetwork plot more useful. If you hover, you now see all samples that group together and have the same genotype**
-```{r visnetwork_setup_testing, eval = nrow(sample_data) > 2}
-# # Given a node ID (MLG), this function will return a string containing all sample names associated with that MLG
-# # Work on simplifying code 
-# get_MLG <- function(sample_name) {
-#   mlg_list <- mlg.id(snp_genclone)
-#   mlg <- names(mlg_list)[which(sapply(mlg_list, function(samples) sample_name %in% samples))]
-#   return(mlg)
-# }
-# 
-# # Returns a string with all samples for a given MLG
-# generate_tooltip <- function(mlg) {
-#   samples_with_mlg <- unlist(mlg.id(snp_genclone)[mlg])
-#   return(paste(samples_with_mlg, collapse = ", "))
-# }
-# 
-# node_data <- data.frame(
-#   id = V(ms.loc$graph)$name,
-#   label = sapply(V(ms.loc$graph)$name, get_MLG),  # Get MLG for each sample
-#   group = V(ms.loc$graph)$color,
-#   size = V(ms.loc$graph)$size
-# )
-# node_data$value <- node_data$size.Freq
-# 
-# # Apply the tooltip function to all nodes
-# node_data$title <- sapply(node_data$label, generate_tooltip)  # Tooltip uses the MLG label
-# 
-# node_data$color <- ms.loc$colors[node_data$group]
-# node_groups <- lapply(names(ms.loc$colors), function(group_name) {
-#   list(color = list(background = ms.loc$colors[group_name], border = 'black'))
-# })
-# names(node_groups) <- names(ms.loc$colors)
-# edges_data <- get.data.frame(ms.loc$graph, what="edges")
-# edges_data$title <- paste("Distance:", edges_data$weight)
-# edges_data$arrows <- NA
-# 
-# 
-# visNetwork(node_data, edges_data) %>%
-#   visGroups(groupname = node_groups) %>%
-#   visNodes(shape = "dot", color = node_data$color, title = node_data$title) %>%
-#   visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>%
-#   visPhysics(stabilization = FALSE) %>%
-#   visOptions(nodesIdSelection = TRUE)
-
-```
-
-# Quality control
-
-
-## Input data quality
-
--   multiqc link
-
-## Downloaded references
-
--   quast
--   table with rows for each sample with info on references chosen
-    -   sample id
-    -   reference id
-    -   ANI between sample and reference
--   table with one row per reference (taxon id, GSA id, classification, link to ncbi)
--   sourmash output (tree?)
-
-## Assembly and annotation
-
--   depth of coverage
--   quast link
--   BUSCO gene content?
--   bakta output?
-
-## Variant calling?
-
--   vcfr for plots
--   iqtree model selection, number of informative sites, indels
-
-## Core genome phylogeny
-
--   core gene info (how many genes, length, paralogs)
--   outlier samples causing few genes to be chosen
--   iqtree model selection, number of informative sites, indels
 
 # References
 
