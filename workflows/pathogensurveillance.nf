@@ -92,14 +92,14 @@ workflow PATHOGENSURVEILLANCE {
     ch_sra = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
         .map { [it[0], it[4]] } // meta, sra
         .filter { it[1] != null }
-        .distinct()
+        .unique()
     SRATOOLS_FASTERQDUMP ( ch_sra )
 
     // Download reference files if an accession is provided instead of a file
     ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
         .filter { it[7] != null }
         .map { [it[5], it[7]] } // ref_meta, reference_refseq
-        .distinct()
+        .unique()
     DOWNLOAD_ASSEMBLIES ( ch_ref_accessions )
     ch_downloaded_refs = DOWNLOAD_ASSEMBLIES.out.sequence // val(ref_meta), file(downloaded_ref)
         .combine( INPUT_CHECK.out.sample_data.map { [it[5], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
@@ -113,7 +113,7 @@ workflow PATHOGENSURVEILLANCE {
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
-        .distinct()
+        .unique()
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     // Run FastQC
