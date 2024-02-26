@@ -1,0 +1,290 @@
+sample_id,sra,color_by,geo_loc_name_country,geo_loc_name_country_continent,serovar,specific_host,collection_date,host_health_state,isolation_source,scientific_name
+ERR024818,ERR024818,geo_loc_name_country,Australia,Oceania,AJ033,Homo sapiens,2001,diseased,respiratory,Klebsiella pneumoniae
+ERR024819,ERR024819,geo_loc_name_country,Australia,Oceania,AJ034,Homo sapiens,2001,diseased,urine,
+ERR024821,ERR024821,geo_loc_name_country,Australia,Oceania,AJ048,Homo sapiens,2001,diseased,urine,Klebsiella pneumoniae
+ERR024822,ERR024822,geo_loc_name_country,Australia,Oceania,AJ049,Homo sapiens,2001,diseased,,
+ERR024823,ERR024823,geo_loc_name_country,Australia,Oceania,AJ054,Homo sapiens,2001,diseased,urine,Klebsiella pneumoniae
+ERR024824,ERR024824,geo_loc_name_country,Australia,Oceania,AJ006,Homo sapiens,2001,diseased,sterile,Klebsiella pneumoniae
+ERR024826,ERR024826,geo_loc_name_country,Australia,Oceania,AJ026,Homo sapiens,2001,diseased,respiratory,
+ERR024827,ERR024827,geo_loc_name_country,Australia,Oceania,AJ027,Homo sapiens,2001,diseased,sterile,Klebsiella variicola
+ERR024828,ERR024828,geo_loc_name_country,Australia,Oceania,AJ031,Homo sapiens,2001,diseased,urine,Klebsiella pneumoniae
+ERR024830,ERR024830,geo_loc_name_country,Australia,Oceania,AJ055,Homo sapiens,2001,diseased,urine,Klebsiella quasipneumoniae
+ERR024831,ERR024831,geo_loc_name_country,Australia,Oceania,AJ094,Homo sapiens,2002,diseased,respiratory,Klebsiella pneumoniae
+ERR024832,ERR024832,geo_loc_name_country,Australia,Oceania,AJ097,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR024833,ERR024833,geo_loc_name_country,Australia,Oceania,AJ099,Homo sapiens,2002,diseased,,
+ERR024834,ERR024834,geo_loc_name_country,Australia,Oceania,AJ135,Homo sapiens,2002,diseased,respiratory,
+ERR024835,ERR024835,geo_loc_name_country,Australia,Oceania,AJ146,Homo sapiens,2002,diseased,respiratory,Klebsiella pneumoniae
+ERR024836,ERR024836,geo_loc_name_country,Australia,Oceania,AJ148,Homo sapiens,2002,diseased,urine,
+ERR024837,ERR024837,geo_loc_name_country,Australia,Oceania,AJ056,Homo sapiens,2001,diseased,respiratory,Klebsiella pneumoniae
+ERR024838,ERR024838,geo_loc_name_country,Australia,Oceania,AJ064,Homo sapiens,2001,diseased,urine,
+ERR024839,ERR024839,geo_loc_name_country,Australia,Oceania,AJ082,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR024840,ERR024840,geo_loc_name_country,Australia,Oceania,AJ083,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR024843,ERR024843,geo_loc_name_country,Australia,Oceania,AJ155,Homo sapiens,2002,diseased,,
+ERR024844,ERR024844,geo_loc_name_country,Australia,Oceania,AJ196,Homo sapiens,2002,diseased,respiratory,Klebsiella pneumoniae
+ERR024845,ERR024845,geo_loc_name_country,Australia,Oceania,AJ205,Homo sapiens,2002,diseased,,
+ERR024847,ERR024847,geo_loc_name_country,Australia,Oceania,AJ210,Homo sapiens,2002,diseased,sterile,Klebsiella pneumoniae
+ERR024848,ERR024848,geo_loc_name_country,Australia,Oceania,AJ211,Homo sapiens,2002,diseased,respiratory,
+ERR024850,ERR024850,geo_loc_name_country,Australia,Oceania,AJ156,Homo sapiens,2002,diseased,respiratory,Klebsiella pneumoniae
+ERR024851,ERR024851,geo_loc_name_country,Australia,Oceania,AJ158,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR024852,ERR024852,geo_loc_name_country,Australia,Oceania,AJ170,Homo sapiens,2002,diseased,sterile,
+ERR024853,ERR024853,geo_loc_name_country,Australia,Oceania,AJ182,Homo sapiens,2002,diseased,urine,Klebsiella variicola
+ERR024854,ERR024854,geo_loc_name_country,Australia,Oceania,AJ188,Homo sapiens,2002,diseased,urine,
+ERR025098,ERR025098,geo_loc_name_country,Australia,Oceania,AJ214,Homo sapiens,2002,diseased,sterile,Klebsiella pneumoniae
+ERR025099,ERR025099,geo_loc_name_country,Australia,Oceania,AJ281,Homo sapiens,2002,diseased,sterile,
+ERR025100,ERR025100,geo_loc_name_country,Australia,Oceania,AJ289,Homo sapiens,2002,diseased,sterile,Klebsiella pneumoniae
+ERR025101,ERR025101,geo_loc_name_country,Australia,Oceania,AJ290,Homo sapiens,2002,diseased,sterile,Klebsiella pneumoniae
+ERR025102,ERR025102,geo_loc_name_country,Australia,Oceania,AJ292,Homo sapiens,2002,diseased,sterile,Klebsiella variicola
+ERR025103,ERR025103,geo_loc_name_country,Australia,Oceania,AJ299,Homo sapiens,2002,diseased,sterile,
+ERR025104,ERR025104,geo_loc_name_country,Australia,Oceania,AJ303,Homo sapiens,2002,diseased,urine,
+ERR025105,ERR025105,geo_loc_name_country,Australia,Oceania,AJ218,Homo sapiens,2002,diseased,urine,
+ERR025107,ERR025107,geo_loc_name_country,Australia,Oceania,AJ229,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR025108,ERR025108,geo_loc_name_country,Australia,Oceania,AJ256,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR025109,ERR025109,geo_loc_name_country,Australia,Oceania,AJ278,Homo sapiens,2002,diseased,urine,Klebsiella pneumoniae
+ERR025646,ERR025646,geo_loc_name_country,Indonesia,Asia,1517,Homo sapiens,2005,diseased,sterile,
+ERR025647,ERR025647,geo_loc_name_country,Indonesia,Asia,1523,Homo sapiens,2005,diseased,sterile,
+ERR025657,ERR025657,geo_loc_name_country,Indonesia,Asia,1524,Homo sapiens,2005,diseased,urine,
+ERR025658,ERR025658,geo_loc_name_country,Indonesia,Asia,1764,Homo sapiens,2005,diseased,sterile,
+ERR025659,ERR025659,geo_loc_name_country,Indonesia,Asia,1765,Homo sapiens,2005,diseased,sterile,
+ERR025660,ERR025660,geo_loc_name_country,Indonesia,Asia,1789,Homo sapiens,2005,diseased,sterile,
+ERR025661,ERR025661,geo_loc_name_country,Indonesia,Asia,1555,Homo sapiens,2005,diseased,urine,
+ERR025662,ERR025662,geo_loc_name_country,Indonesia,Asia,1557,Homo sapiens,2005,diseased,urine,
+ERR025663,ERR025663,geo_loc_name_country,Indonesia,Asia,1576,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025664,ERR025664,geo_loc_name_country,Indonesia,Asia,1585,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025665,ERR025665,geo_loc_name_country,Indonesia,Asia,1586,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025667,ERR025667,geo_loc_name_country,Indonesia,Asia,1612,Homo sapiens,2005,diseased,sterile,
+ERR025668,ERR025668,geo_loc_name_country,Indonesia,Asia,1753,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025992,ERR025992,geo_loc_name_country,Indonesia,Asia,1824,Homo sapiens,2005,diseased,sterile,
+ERR025994,ERR025994,geo_loc_name_country,Indonesia,Asia,1884,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025995,ERR025995,geo_loc_name_country,Indonesia,Asia,1896,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025996,ERR025996,geo_loc_name_country,Indonesia,Asia,1897,Homo sapiens,2005,diseased,sterile,
+ERR025997,ERR025997,geo_loc_name_country,Indonesia,Asia,1993,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025998,ERR025998,geo_loc_name_country,Indonesia,Asia,2024,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR026000,ERR026000,geo_loc_name_country,Indonesia,Asia,2033,Homo sapiens,2005,diseased,urine,Klebsiella pneumoniae
+ERR026001,ERR026001,geo_loc_name_country,Indonesia,Asia,1522,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025527,ERR025527,geo_loc_name_country,Laos,Asia,U 12567,Homo sapiens,2008,diseased,urine,
+ERR025528,ERR025528,geo_loc_name_country,Laos,Asia,UI 4256,Homo sapiens,2003,diseased,sterile,
+ERR025529,ERR025529,geo_loc_name_country,Laos,Asia,UI 4650,Homo sapiens,1800/2014,diseased,sterile,
+ERR025531,ERR025531,geo_loc_name_country,Laos,Asia,U 13792/2,Homo sapiens,2009,diseased,urine,Klebsiella pneumoniae
+ERR025532,ERR025532,geo_loc_name_country,Laos,Asia,U 16821,Homo sapiens,2009,diseased,urine,
+ERR025534,ERR025534,geo_loc_name_country,Laos,Asia,UI 522,Homo sapiens,2000,diseased,sterile,
+ERR025535,ERR025535,geo_loc_name_country,Laos,Asia,UI 2213,Homo sapiens,2002,diseased,sterile,
+ERR025537,ERR025537,geo_loc_name_country,Laos,Asia,UI 2877,Homo sapiens,2002,diseased,sterile,
+ERR025538,ERR025538,geo_loc_name_country,Laos,Asia,UI 3324,Homo sapiens,2003,diseased,sterile,
+ERR025566,ERR025566,geo_loc_name_country,Laos,Asia,AF 3927,Homo sapiens,2006,diseased,intestinal,
+ERR025570,ERR025570,geo_loc_name_country,Laos,Asia,Pus 4878,Homo sapiens,2007,diseased,respiratory,Klebsiella pneumoniae
+ERR025571,ERR025571,geo_loc_name_country,Laos,Asia,Pus 9314/2,Homo sapiens,2008,diseased,,
+ERR025572,ERR025572,geo_loc_name_country,Laos,Asia,LF 7160,Homo sapiens,2007,diseased,respiratory,Klebsiella pneumoniae
+ERR025573,ERR025573,geo_loc_name_country,Laos,Asia,Pus 13542,Homo sapiens,2009,diseased,sterile,
+ERR025574,ERR025574,geo_loc_name_country,Laos,Asia,Pus 15007,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025576,ERR025576,geo_loc_name_country,Laos,Asia,Pus 15987,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025579,ERR025579,geo_loc_name_country,Laos,Asia,UI 6167,Homo sapiens,2005,diseased,sterile,
+ERR025581,ERR025581,geo_loc_name_country,Laos,Asia,UI 14245,Homo sapiens,,diseased,sterile,Klebsiella pneumoniae
+ERR025582,ERR025582,geo_loc_name_country,Laos,Asia,UI 15398,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025583,ERR025583,geo_loc_name_country,Laos,Asia,UI 6717,Homo sapiens,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025584,ERR025584,geo_loc_name_country,Laos,Asia,UI 7631,Homo sapiens,2006,diseased,sterile,Klebsiella quasipneumoniae
+ERR025585,ERR025585,geo_loc_name_country,Laos,Asia,UI 8601,Homo sapiens,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025586,ERR025586,geo_loc_name_country,Laos,Asia,UI 9552,Homo sapiens,2007,diseased,sterile,
+ERR025587,ERR025587,geo_loc_name_country,Laos,Asia,UI 10871,Homo sapiens,2007,diseased,sterile,Klebsiella pneumoniae
+ERR025589,ERR025589,geo_loc_name_country,Laos,Asia,ST 752,Homo sapiens,2008,diseased,sterile,
+ERR025590,ERR025590,geo_loc_name_country,Laos,Asia,UI 12780,Homo sapiens,2008,diseased,sterile,Klebsiella pneumoniae
+ERR025111,ERR025111,geo_loc_name_country,Singapore,Asia,DM16912/02,Homo sapiens,2002,diseased,liver,Klebsiella pneumoniae
+ERR025112,ERR025112,geo_loc_name_country,Singapore,Asia,DU46543/08,Homo sapiens,2008,diseased,urine,Klebsiella pneumoniae
+ERR025115,ERR025115,geo_loc_name_country,Singapore,Asia,DM17138/03,Homo sapiens,2003,diseased,,Klebsiella pneumoniae
+ERR025116,ERR025116,geo_loc_name_country,Singapore,Asia,DM17337/04,Homo sapiens,2004,diseased,respiratory,
+ERR025117,ERR025117,geo_loc_name_country,Singapore,Asia,DM11825/05,Homo sapiens,2005,diseased,liver,Klebsiella pneumoniae
+ERR025118,ERR025118,geo_loc_name_country,Singapore,Asia,DB270/04,Homo sapiens,2004,diseased,sterile,Klebsiella pneumoniae
+ERR025119,ERR025119,geo_loc_name_country,Singapore,Asia,DU8882/04,Homo sapiens,2004,diseased,urine,
+ERR025121,ERR025121,geo_loc_name_country,Singapore,Asia,DX259/08,Homo sapiens,2008,diseased,sterile,
+ERR025122,ERR025122,geo_loc_name_country,Singapore,Asia,DR85/08,Environmental,2008,,environment,
+ERR025540,ERR025540,geo_loc_name_country,Singapore,Asia,DM23092/04,Homo sapiens,2004,diseased,,Klebsiella pneumoniae
+ERR025541,ERR025541,geo_loc_name_country,Singapore,Asia,DU38032/05,Homo sapiens,2005,diseased,urine,
+ERR025542,ERR025542,geo_loc_name_country,Singapore,Asia,DM1159/01,Homo sapiens,2001,diseased,,
+ERR025543,ERR025543,geo_loc_name_country,Singapore,Asia,DR19891/02,Homo sapiens,2002,diseased,sterile,
+ERR025544,ERR025544,geo_loc_name_country,Singapore,Asia,DB44834/96,Homo sapiens,1996,diseased,sterile,
+ERR025545,ERR025545,geo_loc_name_country,Singapore,Asia,DU4033/04,Homo sapiens,2004,diseased,urine,Klebsiella pneumoniae
+ERR025546,ERR025546,geo_loc_name_country,Singapore,Asia,DB11802/05,Homo sapiens,2005,diseased,sterile,
+ERR025547,ERR025547,geo_loc_name_country,Singapore,Asia,DR5092/05,Homo sapiens,2005,healthy,intestinal,
+ERR025548,ERR025548,geo_loc_name_country,Singapore,Asia,DU10252/04,Homo sapiens,2004,diseased,urine,Klebsiella pneumoniae
+ERR025550,ERR025550,geo_loc_name_country,Singapore,Asia,DU33062/05,Homo sapiens,2005,healthy,urine,Klebsiella pneumoniae
+ERR025551,ERR025551,geo_loc_name_country,Singapore,Asia,DU35427/05,Homo sapiens,2005,diseased,urine,Klebsiella quasipneumoniae
+ERR025993,ERR025993,geo_loc_name_country,United Kingdom,Europe,TL125,Mouse,2009,healthy,intestinal,Klebsiella pneumoniae
+ERR025113,ERR025113,geo_loc_name_country,USA,North America,QMP B2-344,Bovine,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025114,ERR025114,geo_loc_name_country,USA,North America,QMP B2-481,Bovine,2006,healthy,intestinal,
+ERR025120,ERR025120,geo_loc_name_country,USA,North America,QMP B2-340,Bovine,2006,healthy,intestinal,
+ERR025124,ERR025124,geo_loc_name_country,USA,North America,QMP B2-483,Bovine,2006,healthy,intestinal,
+ERR025125,ERR025125,geo_loc_name_country,USA,North America,QMP M1-051,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025126,ERR025126,geo_loc_name_country,USA,North America,QMP M1-198,Bovine,2005,diseased,sterile,
+ERR025128,ERR025128,geo_loc_name_country,USA,North America,QMP B2-563,Bovine,2006,diseased,sterile,
+ERR025131,ERR025131,geo_loc_name_country,USA,North America,QMP M1-030,Bovine,2005,healthy,intestinal,
+ERR025132,ERR025132,geo_loc_name_country,USA,North America,QMP M1-031,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025133,ERR025133,geo_loc_name_country,USA,North America,QMP M1-042,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025134,ERR025134,geo_loc_name_country,USA,North America,QMP M1-043,Bovine,2005,healthy,intestinal,Klebsiella variicola
+ERR025135,ERR025135,geo_loc_name_country,USA,North America,QMP M1-044,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025137,ERR025137,geo_loc_name_country,USA,North America,QMP M1-557,Bovine,2005,diseased,sterile,
+ERR025138,ERR025138,geo_loc_name_country,USA,North America,QMP M1-765,Bovine,2006,healthy,intestinal,Klebsiella variicola
+ERR025139,ERR025139,geo_loc_name_country,USA,North America,QMP M1-766,Bovine,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025140,ERR025140,geo_loc_name_country,USA,North America,QMP M1-771,Homo sapiens,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025141,ERR025141,geo_loc_name_country,USA,North America,QMP M1-559,Bovine,2005,diseased,sterile,
+ERR025142,ERR025142,geo_loc_name_country,USA,North America,QMP M1-560,Bovine,2005,diseased,sterile,
+ERR025143,ERR025143,geo_loc_name_country,USA,North America,QMP M1-561,Bovine,2005,diseased,sterile,
+ERR025144,ERR025144,geo_loc_name_country,USA,North America,QMP M1-562,Bovine,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025145,ERR025145,geo_loc_name_country,USA,North America,QMP M1-726,Bovine,2006,diseased,sterile,
+ERR025146,ERR025146,geo_loc_name_country,USA,North America,QMP M1-728,Bovine,2006,diseased,sterile,
+ERR025147,ERR025147,geo_loc_name_country,USA,North America,QMP M1-761,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025148,ERR025148,geo_loc_name_country,USA,North America,QMP M1-763,Bovine,2006,healthy,intestinal,Klebsiella variicola
+ERR025150,ERR025150,geo_loc_name_country,USA,North America,QMP M1-200,Bovine,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025151,ERR025151,geo_loc_name_country,USA,North America,QMP M1-413,Environmental,2005,NA,environment,Klebsiella pneumoniae
+ERR025152,ERR025152,geo_loc_name_country,USA,North America,QMP M1-415,Environmental,2005,,environment,
+ERR025153,ERR025153,geo_loc_name_country,USA,North America,QMP M1-428,Bovine,2005,diseased,sterile,Klebsiella variicola
+ERR025154,ERR025154,geo_loc_name_country,USA,North America,QMP M1-217,Bovine,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025155,ERR025155,geo_loc_name_country,USA,North America,QMP M1-218,Bovine,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025156,ERR025156,geo_loc_name_country,USA,North America,QMP M1-220,Bovine,2005,diseased,sterile,Klebsiella pneumoniae
+ERR025157,ERR025157,geo_loc_name_country,USA,North America,QMP M1-222,Bovine,2005,diseased,sterile,
+ERR025158,ERR025158,geo_loc_name_country,USA,North America,QMP M1-375,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025159,ERR025159,geo_loc_name_country,USA,North America,QMP M1-376,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025160,ERR025160,geo_loc_name_country,USA,North America,QMP M1-378,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025161,ERR025161,geo_loc_name_country,USA,North America,QMP M1-406,Environmental,2005,NA,environment,Klebsiella pneumoniae
+ERR025471,ERR025471,geo_loc_name_country,USA,North America,QMP B2-170,Bovine,2006,diseased,sterile,
+ERR025484,ERR025484,geo_loc_name_country,USA,North America,QMP B2-176,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025510,ERR025510,geo_loc_name_country,USA,North America,QMP B2-223,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025515,ERR025515,geo_loc_name_country,USA,North America,Kp-Miami,Homo sapiens,2008,diseased,liver,Klebsiella pneumoniae
+ERR025516,ERR025516,geo_loc_name_country,USA,North America,812079,Sea mammal,2008,diseased,respiratory,Klebsiella pneumoniae
+ERR025517,ERR025517,geo_loc_name_country,USA,North America,85997,Sea mammal,2008,diseased,sterile,Klebsiella pneumoniae
+ERR025521,ERR025521,geo_loc_name_country,USA,North America,KpV513,Monkey,2006,diseased,,Klebsiella pneumoniae
+ERR025522,ERR025522,geo_loc_name_country,USA,North America,MM50237,Monkey,2008,healthy,respiratory,
+ERR025523,ERR025523,geo_loc_name_country,USA,North America,QMP B2-228,Bovine,2006,diseased,sterile,
+ERR025524,ERR025524,geo_loc_name_country,USA,North America,206535,Monkey,2008,healthy,intestinal,Klebsiella pneumoniae
+ERR025525,ERR025525,geo_loc_name_country,USA,North America,7085,Monkey,2009,healthy,intestinal,
+ERR025536,ERR025536,geo_loc_name_country,USA,North America,QMP B2-252,Bovine,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025549,ERR025549,geo_loc_name_country,USA,North America,QMP B2-288,Bovine,2006,healthy,intestinal,Klebsiella variicola
+ERR025562,ERR025562,geo_loc_name_country,USA,North America,QMP B2-211,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025575,ERR025575,geo_loc_name_country,USA,North America,QMP B2-248,Bovine,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025588,ERR025588,geo_loc_name_country,USA,North America,QMP B2-282,Bovine,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025592,ERR025592,geo_loc_name_country,USA,North America,QMP M1-889,Homo sapiens,2007,diseased,urine,
+ERR025593,ERR025593,geo_loc_name_country,USA,North America,QMP M1-967,Homo sapiens,2007,diseased,intestinal biopsy,Klebsiella pneumoniae
+ERR025594,ERR025594,geo_loc_name_country,USA,North America,QMP M1-968,Homo sapiens,2007,healthy,intestinal biopsy,Klebsiella pneumoniae
+ERR025595,ERR025595,geo_loc_name_country,USA,North America,QMP M1-970,Homo sapiens,2007,diseased,intestinal biopsy,Klebsiella pneumoniae
+ERR025596,ERR025596,geo_loc_name_country,USA,North America,QMP M1-891,Homo sapiens,2007,diseased,urine,Klebsiella pneumoniae
+ERR025597,ERR025597,geo_loc_name_country,USA,North America,QMP M1-892,Homo sapiens,2007,diseased,urine,Klebsiella pneumoniae
+ERR025598,ERR025598,geo_loc_name_country,USA,North America,QMP M1-893,Homo sapiens,2007,diseased,urine,Klebsiella variicola
+ERR025599,ERR025599,geo_loc_name_country,USA,North America,QMP M1-895,Homo sapiens,2007,diseased,urine,
+ERR025600,ERR025600,geo_loc_name_country,USA,North America,QMP M1-896,Homo sapiens,2007,diseased,urine,
+ERR025601,ERR025601,geo_loc_name_country,USA,North America,QMP M1-963,Homo sapiens,2007,healthy,intestinal biopsy,Klebsiella pneumoniae
+ERR025602,ERR025602,geo_loc_name_country,USA,North America,QMP M1-964,Homo sapiens,2007,diseased,intestinal biopsy,
+ERR025603,ERR025603,geo_loc_name_country,USA,North America,QMP M1-965,Homo sapiens,2007,diseased,intestinal biopsy,Klebsiella pneumoniae
+ERR025605,ERR025605,geo_loc_name_country,USA,North America,QMP M1-972,Homo sapiens,2007,diseased,intestinal biopsy,Klebsiella pneumoniae
+ERR025607,ERR025607,geo_loc_name_country,USA,North America,QMP M1-407,Environmental,2005,NA,environment,Klebsiella pneumoniae
+ERR025608,ERR025608,geo_loc_name_country,USA,North America,QMP M1-418,Environmental,2005,,environment,
+ERR025609,ERR025609,geo_loc_name_country,USA,North America,QMP M1-974,Homo sapiens,2007,healthy,intestinal biopsy,
+ERR025610,ERR025610,geo_loc_name_country,USA,North America,QMP M1-975,Homo sapiens,2007,healthy,intestinal biopsy,
+ERR025611,ERR025611,geo_loc_name_country,USA,North America,QMP M1-977,Homo sapiens,2007,healthy,intestinal biopsy,
+ERR025612,ERR025612,geo_loc_name_country,USA,North America,QMP M1-980,Homo sapiens,2007,diseased,intestinal biopsy,Klebsiella pneumoniae
+ERR025613,ERR025613,geo_loc_name_country,USA,North America,QMP M1-029,Bovine,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025614,ERR025614,geo_loc_name_country,USA,North America,QMP M1-414,Environmental,2005,,environment,
+ERR025615,ERR025615,geo_loc_name_country,USA,North America,QMP M2-389,Bovine,2007,healthy,intestinal,Klebsiella pneumoniae
+ERR025618,ERR025618,geo_loc_name_country,USA,North America,QMP M2-484,Bovine,2007,healthy,intestinal,
+ERR025620,ERR025620,geo_loc_name_country,USA,North America,QMP Z4-702,Bovine,2006,diseased,sterile,
+ERR025621,ERR025621,geo_loc_name_country,USA,North America,QMP Z4-724,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025622,ERR025622,geo_loc_name_country,USA,North America,QMP M2-488,Bovine,2007,healthy,intestinal,
+ERR025624,ERR025624,geo_loc_name_country,USA,North America,QMP M2-654,Bovine,2007,healthy,intestinal,Klebsiella pneumoniae
+ERR025625,ERR025625,geo_loc_name_country,USA,North America,QMP M1-776,Homo sapiens,2006,diseased,sterile,
+ERR025626,ERR025626,geo_loc_name_country,USA,North America,QMP M1-860,Homo sapiens,2006,diseased,urine,
+ERR025627,ERR025627,geo_loc_name_country,USA,North America,QMP M2-684,Bovine,2007,healthy,intestinal,Klebsiella pneumoniae
+ERR025628,ERR025628,geo_loc_name_country,USA,North America,QMP M1-862,Homo sapiens,2006,diseased,sterile,
+ERR025629,ERR025629,geo_loc_name_country,USA,North America,QMP M1-868,Homo sapiens,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025631,ERR025631,geo_loc_name_country,USA,North America,QMP Z4-726,Bovine,2006,diseased,sterile,Klebsiella quasipneumoniae
+ERR025640,ERR025640,geo_loc_name_country,USA,North America,QMP Z4-697,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025653,ERR025653,geo_loc_name_country,USA,North America,QMP Z4-709,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025666,ERR025666,geo_loc_name_country,USA,North America,QMP Z4-712,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025678,ERR025678,geo_loc_name_country,USA,North America,QMP B2-090,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025979,ERR025979,geo_loc_name_country,USA,North America,QMP M1-781,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025980,ERR025980,geo_loc_name_country,USA,North America,QMP M1-886,Homo sapiens,2007,diseased,urine,
+ERR025981,ERR025981,geo_loc_name_country,USA,North America,QMP M1-887,Homo sapiens,2007,diseased,urine,
+ERR025982,ERR025982,geo_loc_name_country,USA,North America,QMP M1-888,Homo sapiens,2007,diseased,urine,Klebsiella variicola
+ERR025983,ERR025983,geo_loc_name_country,USA,North America,QMP M1-821,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025984,ERR025984,geo_loc_name_country,USA,North America,QMP M1-822,Bovine,2006,diseased,sterile,Klebsiella pneumoniae
+ERR025985,ERR025985,geo_loc_name_country,USA,North America,QMP M1-826,Bovine,2006,diseased,sterile,
+ERR025986,ERR025986,geo_loc_name_country,USA,North America,QMP M1-861,Homo sapiens,2006,diseased,sterile,Klebsiella quasipneumoniae
+ERR025988,ERR025988,geo_loc_name_country,USA,North America,QMP M1-882,Homo sapiens,2007,diseased,urine,Klebsiella pneumoniae
+ERR025989,ERR025989,geo_loc_name_country,USA,North America,QMP M1-884,Homo sapiens,2007,diseased,urine,Klebsiella pneumoniae
+ERR025990,ERR025990,geo_loc_name_country,USA,North America,QMP M1-885,Homo sapiens,2007,diseased,urine,
+ERR025999,ERR025999,geo_loc_name_country,USA,North America,QMP Z4-716,Bovine,2006,diseased,sterile,
+ERR025462,ERR025462,geo_loc_name_country,Vietnam,Asia,59M,Homo sapiens,2008,diseased,liver,Klebsiella pneumoniae
+ERR025463,ERR025463,geo_loc_name_country,Vietnam,Asia,1892m,Homo sapiens,2008,diseased,sterile,Klebsiella variicola
+ERR025464,ERR025464,geo_loc_name_country,Vietnam,Asia,08-1177m,Homo sapiens,2008,diseased,sterile,
+ERR025465,ERR025465,geo_loc_name_country,Vietnam,Asia,UV937,Homo sapiens,2003,diseased,respiratory,
+ERR025468,ERR025468,geo_loc_name_country,Vietnam,Asia,07-0003m,Homo sapiens,2007,diseased,sterile,Klebsiella pneumoniae
+ERR025469,ERR025469,geo_loc_name_country,Vietnam,Asia,09-0079m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025470,ERR025470,geo_loc_name_country,Vietnam,Asia,07-2034m,Homo sapiens,2007,diseased,sterile,Klebsiella pneumoniae
+ERR025472,ERR025472,geo_loc_name_country,Vietnam,Asia,08-475T,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025473,ERR025473,geo_loc_name_country,Vietnam,Asia,08-058D,Homo sapiens,2008,diseased,respiratory,
+ERR025475,ERR025475,geo_loc_name_country,Vietnam,Asia,UV1172,Homo sapiens,2004,diseased,respiratory,Klebsiella pneumoniae
+ERR025476,ERR025476,geo_loc_name_country,Vietnam,Asia,K38An,Homo sapiens,2004,healthy,intestinal,Klebsiella quasipneumoniae
+ERR025477,ERR025477,geo_loc_name_country,Vietnam,Asia,K53N,Homo sapiens,2004,healthy,respiratory,Klebsiella pneumoniae
+ERR025478,ERR025478,geo_loc_name_country,Vietnam,Asia,K77An,Homo sapiens,2004,healthy,intestinal,
+ERR025479,ERR025479,geo_loc_name_country,Vietnam,Asia,NCSR101,Homo sapiens,2007,diseased,respiratory,
+ERR025480,ERR025480,geo_loc_name_country,Vietnam,Asia,NCSR130,Homo sapiens,2007,diseased,respiratory,Klebsiella quasipneumoniae
+ERR025481,ERR025481,geo_loc_name_country,Vietnam,Asia,BAL073,Homo sapiens,2009,diseased,respiratory,Klebsiella quasipneumoniae
+ERR025482,ERR025482,geo_loc_name_country,Vietnam,Asia,UV1625,Homo sapiens,2007,diseased,respiratory,Klebsiella pneumoniae
+ERR025483,ERR025483,geo_loc_name_country,Vietnam,Asia,UV1714,Homo sapiens,2007,diseased,respiratory,Klebsiella pneumoniae
+ERR025485,ERR025485,geo_loc_name_country,Vietnam,Asia,K21Sp,Homo sapiens,2004,healthy,respiratory,Klebsiella pneumoniae
+ERR025486,ERR025486,geo_loc_name_country,Vietnam,Asia,K35N,Homo sapiens,2004,healthy,respiratory,
+ERR025488,ERR025488,geo_loc_name_country,Vietnam,Asia,K268An,Homo sapiens,2005,healthy,intestinal,
+ERR025489,ERR025489,geo_loc_name_country,Vietnam,Asia,B-013-I-a-2,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025490,ERR025490,geo_loc_name_country,Vietnam,Asia,C-017-I-a-1,Homo sapiens,2005,healthy,intestinal,
+ERR025491,ERR025491,geo_loc_name_country,Vietnam,Asia,D-022-I-b-1,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025494,ERR025494,geo_loc_name_country,Vietnam,Asia,K280N,Homo sapiens,2005,healthy,respiratory,
+ERR025495,ERR025495,geo_loc_name_country,Vietnam,Asia,K282Ax,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025496,ERR025496,geo_loc_name_country,Vietnam,Asia,K290N,Homo sapiens,2005,healthy,respiratory,
+ERR025497,ERR025497,geo_loc_name_country,Vietnam,Asia,K296N,Homo sapiens,2005,healthy,respiratory,Klebsiella pneumoniae
+ERR025498,ERR025498,geo_loc_name_country,Vietnam,Asia,K307An,Homo sapiens,2005,healthy,intestinal,
+ERR025499,ERR025499,geo_loc_name_country,Vietnam,Asia,A-003-I-a-1,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025501,ERR025501,geo_loc_name_country,Vietnam,Asia,D-026-I-b-1,Homo sapiens,2005,healthy,intestinal,
+ERR025502,ERR025502,geo_loc_name_country,Vietnam,Asia,EW-29-R-MAG,Homo sapiens,2006,healthy,intestinal,
+ERR025503,ERR025503,geo_loc_name_country,Vietnam,Asia,EW-33-R-MAC-2,Homo sapiens,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025504,ERR025504,geo_loc_name_country,Vietnam,Asia,EW-44-R-MAG-1,Homo sapiens,2006,healthy,intestinal,
+ERR025505,ERR025505,geo_loc_name_country,Vietnam,Asia,015-CN-2,Homo sapiens,2007,healthy,intestinal,Klebsiella pneumoniae
+ERR025507,ERR025507,geo_loc_name_country,Vietnam,Asia,033-CAZ-1,Homo sapiens,2007,healthy,intestinal,
+ERR025509,ERR025509,geo_loc_name_country,Vietnam,Asia,073-CN-2,Homo sapiens,2007,healthy,intestinal,
+ERR025511,ERR025511,geo_loc_name_country,Vietnam,Asia,EW-20-R-MAG-1,Homo sapiens,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025512,ERR025512,geo_loc_name_country,Vietnam,Asia,EW-20-R-MAC-1,Homo sapiens,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025514,ERR025514,geo_loc_name_country,Vietnam,Asia,EW-60-R-MAG-2,Homo sapiens,2006,healthy,intestinal,Klebsiella quasipneumoniae
+ERR025518,ERR025518,geo_loc_name_country,Vietnam,Asia,EW-67-R-MAC,Homo sapiens,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025519,ERR025519,geo_loc_name_country,Vietnam,Asia,EW-68-R-MAC-1,Homo sapiens,2006,healthy,intestinal,Klebsiella pneumoniae
+ERR025520,ERR025520,geo_loc_name_country,Vietnam,Asia,EW-85-R-MAN,Homo sapiens,2006,healthy,intestinal,
+ERR025553,ERR025553,geo_loc_name_country,Vietnam,Asia,K86N,Homo sapiens,2004,healthy,respiratory,
+ERR025554,ERR025554,geo_loc_name_country,Vietnam,Asia,K261An,Homo sapiens,2005,healthy,intestinal,
+ERR025555,ERR025555,geo_loc_name_country,Vietnam,Asia,K262N,Homo sapiens,2005,healthy,respiratory,
+ERR025556,ERR025556,geo_loc_name_country,Vietnam,Asia,K263An,Homo sapiens,2005,healthy,intestinal,Klebsiella quasipneumoniae
+ERR025557,ERR025557,geo_loc_name_country,Vietnam,Asia,K102An,Homo sapiens,2004,healthy,intestinal,Klebsiella pneumoniae
+ERR025558,ERR025558,geo_loc_name_country,Vietnam,Asia,K113N,Homo sapiens,2004,healthy,respiratory,
+ERR025559,ERR025559,geo_loc_name_country,Vietnam,Asia,K215Ax,Homo sapiens,2005,healthy,intestinal,Klebsiella quasipneumoniae
+ERR025560,ERR025560,geo_loc_name_country,Vietnam,Asia,K222Ca,Homo sapiens,2005,healthy,,
+ERR025561,ERR025561,geo_loc_name_country,Vietnam,Asia,K228An,Homo sapiens,2005,healthy,intestinal,
+ERR025563,ERR025563,geo_loc_name_country,Vietnam,Asia,K231An,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025564,ERR025564,geo_loc_name_country,Vietnam,Asia,K242An,Homo sapiens,2005,healthy,intestinal,Klebsiella pneumoniae
+ERR025632,ERR025632,geo_loc_name_country,Vietnam,Asia,09-439B,Homo sapiens,2009,diseased,respiratory,Klebsiella quasipneumoniae
+ERR025633,ERR025633,geo_loc_name_country,Vietnam,Asia,09-332B,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025634,ERR025634,geo_loc_name_country,Vietnam,Asia,09-370B,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025635,ERR025635,geo_loc_name_country,Vietnam,Asia,09-2503m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025636,ERR025636,geo_loc_name_country,Vietnam,Asia,09-400B,Homo sapiens,2009,diseased,respiratory,
+ERR025637,ERR025637,geo_loc_name_country,Vietnam,Asia,09-406B,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025638,ERR025638,geo_loc_name_country,Vietnam,Asia,09-2006m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025639,ERR025639,geo_loc_name_country,Vietnam,Asia,09-309B,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025641,ERR025641,geo_loc_name_country,Vietnam,Asia,09-2072m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025644,ERR025644,geo_loc_name_country,Vietnam,Asia,09-2801m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025645,ERR025645,geo_loc_name_country,Vietnam,Asia,805m,Homo sapiens,2009,diseased,sterile,
+ERR025648,ERR025648,geo_loc_name_country,Vietnam,Asia,09-341B,Homo sapiens,2009,diseased,respiratory,Klebsiella pneumoniae
+ERR025649,ERR025649,geo_loc_name_country,Vietnam,Asia,09-2985m,Homo sapiens,2009,diseased,sterile,Klebsiella pneumoniae
+ERR025651,ERR025651,geo_loc_name_country,Vietnam,Asia,311G,Homo sapiens,2008,diseased,urine,Klebsiella pneumoniae
+ERR025652,ERR025652,geo_loc_name_country,Vietnam,Asia,620m,Homo sapiens,2009,diseased,sterile,
+ERR025654,ERR025654,geo_loc_name_country,Vietnam,Asia,2358m,Homo sapiens,2008,diseased,sterile,Klebsiella pneumoniae
+ERR025655,ERR025655,geo_loc_name_country,Vietnam,Asia,558m,Homo sapiens,2009,diseased,sterile,
+ERR025671,ERR025671,geo_loc_name_country,Vietnam,Asia,08-109P,Homo sapiens,2008,diseased,sterile,Klebsiella variicola
+ERR025673,ERR025673,geo_loc_name_country,Vietnam,Asia,08-049B,Homo sapiens,2008,diseased,respiratory,Klebsiella pneumoniae
+ERR025674,ERR025674,geo_loc_name_country,Vietnam,Asia,71M,Homo sapiens,2008,diseased,liver,Klebsiella pneumoniae
+ERR025675,ERR025675,geo_loc_name_country,Vietnam,Asia,08-0345m,Homo sapiens,2008,diseased,sterile,
+ERR025676,ERR025676,geo_loc_name_country,Vietnam,Asia,24m,Homo sapiens,2008,diseased,liver,
+ERR025677,ERR025677,geo_loc_name_country,Vietnam,Asia,08-0116m,Homo sapiens,2008,diseased,sterile,Klebsiella pneumoniae
+ERR025679,ERR025679,geo_loc_name_country,Vietnam,Asia,71B,Homo sapiens,2007,diseased,respiratory,Klebsiella pneumoniae
+ERR025680,ERR025680,geo_loc_name_country,Vietnam,Asia,09-286G,Homo sapiens,2009,diseased,urine,
