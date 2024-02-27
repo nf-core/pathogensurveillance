@@ -213,7 +213,7 @@ This section includes phylogenetic trees of samples with references sequences do
 ### Core gene phylogeny
 
 ```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-psminer::make_phylogeny(core_phylo_path, sample_data, ref_data, interactive = TRUE)
+psminer::make_phylogeny(core_phylo_path, sample_data, ref_data)
 ```
 
 ```{r, results='asis', eval = length(read_lines(core_phylo_path)) > 0}
@@ -252,29 +252,34 @@ These measurments are not as reliable as the methods used to create phylogenetic
 
 :::
 
-## Genetic diversity
+# Genetic diversity
 
-### SNP trees
+## SNP trees
 
 ```{r parse_snp_trees}
+# snp_tree_plots <- lapply(snp_trees, function(tree) {
+#     a_plot <- psminer::make_phylogeny(tree, sample_data, ref_data)
+#     if (knitr::is_html_output()) {
+#         return(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+#     } else {
+#         return(print(a_plot))
+#     }
+# })
 snp_trees <- parse_snp_trees(snp_tree_paths, group)
-snp_tree_js <- unlist(lapply(snp_trees, function(tree) {
-    as.character(htmltools::as.tags(psminer::make_phylogeny(tree, sample_data, ref_data, interactive = TRUE), standalone = TRUE))
-}))
 ```
 
 
 ```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0}
-cat(paste0(collapse = "\n",
-'
-::: panel-tabset
-',
-paste0('### ', names(snp_tree_js), '\n\n'),
-snp_tree_js,
-'
-:::
-'
-))
+for (i in seq_along(snp_trees)) {
+    cat(paste0('::: panel-tabset\n### ', names(snp_trees)[i], '\n\n'))
+    a_plot <- psminer::make_phylogeny(snp_trees[[i]], sample_data, ref_data)
+    if (knitr::is_html_output()) {
+        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+    } else {
+        print(a_plot)
+    }
+    cat('\n:::')
+}
 ```
 
 
@@ -284,7 +289,7 @@ More info will be added later.
 ```
 
 
-### Minimum spanning network
+## Minimum spanning network
 
 TODO
 
