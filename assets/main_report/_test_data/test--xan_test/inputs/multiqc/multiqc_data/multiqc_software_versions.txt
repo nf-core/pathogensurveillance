@@ -1,0 +1,2 @@
+Sample	FastQC
+FastQC	0.12.1

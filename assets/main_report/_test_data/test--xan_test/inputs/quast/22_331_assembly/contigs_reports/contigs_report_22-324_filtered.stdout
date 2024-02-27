@@ -1,0 +1,275 @@
+Aligning contigs to reference...
+	Aligning contigs to the reference
+Filtering alignments...
+Parsing coords...
+Loading reference...
+	Loaded [22-331_1]
+	Loaded [22-331_2]
+	Loaded [22-331_3]
+	Loaded [22-331_4]
+	Loaded [22-331_5]
+	Loaded [22-331_6]
+	Loaded [22-331_7]
+	Loaded [22-331_8]
+	Loaded [22-331_9]
+	Loaded [22-331_10]
+	Loaded [22-331_11]
+	Loaded [22-331_12]
+	Loaded [22-331_13]
+	Loaded [22-331_14]
+	Loaded [22-331_15]
+	Loaded [22-331_16]
+	Loaded [22-331_17]
+	Loaded [22-331_18]
+	Loaded [22-331_19]
+	Loaded [22-331_20]
+	Loaded [22-331_21]
+	Loaded [22-331_22]
+	Loaded [22-331_23]
+	Loaded [22-331_24]
+	Loaded [22-331_25]
+	Loaded [22-331_26]
+	Loaded [22-331_27]
+	Loaded [22-331_28]
+	Loaded [22-331_29]
+	Loaded [22-331_30]
+	Loaded [22-331_31]
+	Loaded [22-331_32]
+	Loaded [22-331_33]
+	Loaded [22-331_34]
+	Loaded [22-331_35]
+	Loaded [22-331_36]
+	Loaded [22-331_37]
+	Loaded [22-331_38]
+	Loaded [22-331_39]
+	Loaded [22-331_40]
+	Loaded [22-331_41]
+	Loaded [22-331_42]
+	Loaded [22-331_43]
+	Loaded [22-331_44]
+	Loaded [22-331_45]
+	Loaded [22-331_46]
+	Loaded [22-331_47]
+	Loaded [22-331_48]
+	Loaded [22-331_49]
+	Loaded [22-331_50]
+	Loaded [22-331_51]
+	Loaded [22-331_52]
+	Loaded [22-331_53]
+	Loaded [22-331_54]
+	Loaded [22-331_55]
+	Loaded [22-331_56]
+	Loaded [22-331_57]
+	Loaded [22-331_58]
+	Loaded [22-331_59]
+	Loaded [22-331_60]
+	Loaded [22-331_61]
+	Loaded [22-331_62]
+	Loaded [22-331_63]
+	Loaded [22-331_64]
+	Loaded [22-331_65]
+	Loaded [22-331_66]
+	Loaded [22-331_67]
+	Loaded [22-331_68]
+	Loaded [22-331_69]
+	Loaded [22-331_70]
+	Loaded [22-331_71]
+	Loaded [22-331_72]
+	Loaded [22-331_73]
+	Loaded [22-331_74]
+	Loaded [22-331_75]
+	Loaded [22-331_76]
+	Loaded [22-331_77]
+	Loaded [22-331_78]
+	Loaded [22-331_79]
+	Loaded [22-331_80]
+	Loaded [22-331_81]
+	Loaded [22-331_82]
+	Loaded [22-331_83]
+	Loaded [22-331_84]
+	Loaded [22-331_85]
+	Loaded [22-331_86]
+	Loaded [22-331_87]
+	Loaded [22-331_88]
+	Loaded [22-331_89]
+	Total Regions: 89
+	Total Region Length: 5230549
+Analyzing contigs...
+CONTIG: NODE_1_length_1780_cov_2.187500 (1780bp)
+Best alignment score: 615.0 (LEN: 617, IDY: 99.68), Total number of alignments: 2
+			Looking for the best set of alignments (out of 2 total alignments)
+			The best set is below. Score: 1004.0, number of alignments: 2, unaligned bases: 666
+		This contig is misassembled.
+		This contig is partially unaligned. (Aligned 1114 out of 1780 non-N bases (62.58%))
+			Real Alignment 1: 127152 127768 | 1 617 | 617 617 | 99.68 | 22-331_16 NODE_1_length_1780_cov_2.187500
+			  Extensive misassembly (translocation) between these two alignments
+			Real Alignment 2: 1 497 | 1284 1780 | 497 497 | 96.38 | 22-331_30 NODE_1_length_1780_cov_2.187500
+		Unaligned bases: 666
+
+CONTIG: NODE_2_length_1625_cov_1.192661 (1625bp)
+		This contig is unaligned. (1625 bp)
+		Unaligned bases: 1625 (number of Ns: 0)
+
+CONTIG: NODE_3_length_1534_cov_1.137979 (1534bp)
+Best alignment score: 1156.0 (LEN: 1192, IDY: 96.98), Total number of alignments: 4
+			Looking for the best set of alignments (out of 4 total alignments)
+			Skipping redundant alignments after choosing the best set of alignments
+		Skipping redundant alignment 1 707 | 1127 421 | 707 707 | 99.58 | 22-331_84 NODE_3_length_1534_cov_1.137979
+		Skipping redundant alignment 37649 37906 | 1534 1276 | 258 259 | 97.68 | 22-331_39 NODE_3_length_1534_cov_1.137979
+		This contig has several significant sets of alignments. [An ambiguously mapped contig]
+		Using only the very best set (option --ambiguity-usage is set to "one").
+			The best set is below. Score: 1158.9, number of alignments: 2, unaligned bases: 211
+		This contig is misassembled.
+			Excluding internal overlap of size 99 between Alignment 1 and 2: 1 230 | 322 93 | 230 230 --> 100 230 | 223 93 | 131 131
+			Real Alignment 1: 100 230 | 223 93 | 131 131 | 99.57 | 22-331_12 NODE_3_length_1534_cov_1.137979
+			  Extensive misassembly (translocation) between these two alignments
+			Real Alignment 2: 3378 4569 | 1415 224 | 1192 1192 | 96.98 | 22-331_38 NODE_3_length_1534_cov_1.137979
+
+CONTIG: NODE_5_length_1245_cov_2.208551 (1245bp)
+Best alignment score: 812.0 (LEN: 815, IDY: 99.63), Total number of alignments: 5
+			Looking for the best set of alignments (out of 5 total alignments)
+			Skipping redundant alignments after choosing the best set of alignments
+		Skipping redundant alignment 1 149 | 1081 1229 | 149 149 | 100.0 | 22-331_1 NODE_5_length_1245_cov_2.208551
+		Skipping redundant alignment 1 150 | 1081 1230 | 150 150 | 99.33 | 22-331_20 NODE_5_length_1245_cov_2.208551
+		Skipping redundant alignment 1 115 | 1131 1245 | 115 115 | 100.0 | 22-331_29 NODE_5_length_1245_cov_2.208551
+			The best set is below. Score: 1065.3, number of alignments: 2, unaligned bases: 66
+		This contig is misassembled.
+			Excluding internal overlap of size 79 between Alignment 1 and 2: 1126 1568 | 443 1 | 443 443 --> 1205 1568 | 364 1 | 364 364
+			Real Alignment 1: 1205 1568 | 364 1 | 364 364 | 97.74 | 22-331_64 NODE_5_length_1245_cov_2.208551
+			  Extensive misassembly (translocation) between these two alignments
+			Real Alignment 2: 1 815 | 365 1179 | 815 815 | 99.63 | 22-331_80 NODE_5_length_1245_cov_2.208551
+
+CONTIG: NODE_6_length_1222_cov_2.129118 (1222bp)
+Best alignment score: 271.0 (LEN: 271, IDY: 100.00), Total number of alignments: 4
+			Looking for the best set of alignments (out of 4 total alignments)
+			Skipping redundant alignments after choosing the best set of alignments
+		Skipping redundant alignment 9188 9324 | 137 273 | 137 137 | 99.27 | 22-331_54 NODE_6_length_1222_cov_2.129118
+			The best set is below. Score: 576.0, number of alignments: 3, unaligned bases: 520
+		This contig is misassembled.
+		This contig is partially unaligned. (Aligned 702 out of 1222 non-N bases (57.45%))
+			Real Alignment 1: 1 233 | 233 1 | 233 233 | 100.0 | 22-331_26 NODE_6_length_1222_cov_2.129118
+			  Extensive misassembly (translocation) between these two alignments
+			Excluding internal overlap of size 4 between Alignment 2 and 3: 184076 184277 | 955 754 | 202 202 --> 184080 184277 | 951 754 | 198 198
+			Real Alignment 2: 184080 184277 | 951 754 | 198 198 | 100.0 | 22-331_5 NODE_6_length_1222_cov_2.129118
+			  Extensive misassembly (translocation) between these two alignments
+			Real Alignment 3: 12321 12591 | 1222 952 | 271 271 | 100.0 | 22-331_46 NODE_6_length_1222_cov_2.129118
+		Unaligned bases: 520
+
+CONTIG: NODE_7_length_1147_cov_1.141221 (1147bp)
+Best alignment score: 1103.1 (LEN: 1147, IDY: 96.17), Total number of alignments: 1
+		One align captures most of this contig: 23348 24531 | 1147 1 | 1184 1147 | 96.17 | 22-331_37 NODE_7_length_1147_cov_1.141221
+
+CONTIG: NODE_28_length_718_cov_1.008078 (718bp)
+Best alignment score: 718.0 (LEN: 718, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 25211 25928 | 718 1 | 718 718 | 100.0 | 22-331_11 NODE_28_length_718_cov_1.008078
+
+CONTIG: NODE_33_length_704_cov_1.633058 (704bp)
+		This contig is unaligned. (704 bp)
+		Unaligned bases: 704 (number of Ns: 0)
+
+CONTIG: NODE_37_length_692_cov_1.139966 (692bp)
+Best alignment score: 692.0 (LEN: 692, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 3882 4573 | 1 692 | 692 692 | 100.0 | 22-331_22 NODE_37_length_692_cov_1.139966
+
+CONTIG: NODE_71_length_584_cov_1.179381 (584bp)
+Best alignment score: 584.0 (LEN: 584, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 39567 40150 | 1 584 | 584 584 | 100.0 | 22-331_6 NODE_71_length_584_cov_1.179381
+
+CONTIG: NODE_74_length_581_cov_1.078838 (581bp)
+Best alignment score: 581.0 (LEN: 581, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 110787 111367 | 581 1 | 581 581 | 100.0 | 22-331_18 NODE_74_length_581_cov_1.078838
+
+CONTIG: NODE_84_length_564_cov_1.178495 (564bp)
+Best alignment score: 563.0 (LEN: 564, IDY: 99.82), Total number of alignments: 1
+		One align captures most of this contig: 207831 208394 | 1 564 | 564 564 | 99.82 | 22-331_2 NODE_84_length_564_cov_1.178495
+
+CONTIG: NODE_98_length_544_cov_1.051685 (544bp)
+Best alignment score: 426.0 (LEN: 428, IDY: 99.53), Total number of alignments: 1
+			Looking for the best set of alignments (out of 1 total alignments)
+			The best set is below. Score: 426.0, number of alignments: 1, unaligned bases: 116
+		Alignment: 25948 26375 | 1 428 | 428 428 | 99.53 | 22-331_37 NODE_98_length_544_cov_1.051685
+
+CONTIG: NODE_101_length_540_cov_1.061224 (540bp)
+Best alignment score: 540.0 (LEN: 540, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 62539 63078 | 1 540 | 540 540 | 100.0 | 22-331_20 NODE_101_length_540_cov_1.061224
+
+CONTIG: NODE_121_length_515_cov_1.312500 (515bp)
+Best alignment score: 434.0 (LEN: 453, IDY: 95.81), Total number of alignments: 8
+			Looking for the best set of alignments (out of 8 total alignments)
+			Skipping redundant alignments after choosing the best set of alignments
+		Skipping redundant alignment 154178 154279 | 11 112 | 102 102 | 99.02 | 22-331_8 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 86014 86118 | 8 112 | 105 105 | 98.1 | 22-331_26 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 31695 31850 | 7 162 | 156 156 | 97.44 | 22-331_26 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 367496 367638 | 25 167 | 143 143 | 95.8 | 22-331_1 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 62176 62316 | 168 28 | 141 141 | 97.87 | 22-331_19 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 367868 367993 | 341 466 | 126 126 | 95.24 | 22-331_1 NODE_121_length_515_cov_1.312500
+		Skipping redundant alignment 9240 9623 | 131 515 | 384 385 | 97.92 | 22-331_27 NODE_121_length_515_cov_1.312500
+		This contig has several significant sets of alignments. [An ambiguously mapped contig]
+		Using only the very best set (option --ambiguity-usage is set to "one").
+			The best set is below. Score: 434.0, number of alignments: 1, unaligned bases: 62
+		Alignment: 9447 9898 | 23 475 | 452 453 | 95.81 | 22-331_27 NODE_121_length_515_cov_1.312500
+
+CONTIG: NODE_122_length_515_cov_1.125000 (515bp)
+Best alignment score: 515.0 (LEN: 515, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 60297 60811 | 1 515 | 515 515 | 100.0 | 22-331_22 NODE_122_length_515_cov_1.125000
+
+CONTIG: NODE_123_length_515_cov_1.125000 (515bp)
+Best alignment score: 514.0 (LEN: 515, IDY: 99.81), Total number of alignments: 1
+		One align captures most of this contig: 72501 73015 | 1 515 | 515 515 | 99.81 | 22-331_22 NODE_123_length_515_cov_1.125000
+
+CONTIG: NODE_131_length_507_cov_1.019608 (507bp)
+Best alignment score: 507.0 (LEN: 507, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 5011 5517 | 507 1 | 507 507 | 100.0 | 22-331_57 NODE_131_length_507_cov_1.019608
+
+CONTIG: NODE_132_length_506_cov_1.149877 (506bp)
+Best alignment score: 506.0 (LEN: 506, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 147046 147551 | 1 506 | 506 506 | 100.0 | 22-331_7 NODE_132_length_506_cov_1.149877
+
+CONTIG: NODE_134_length_501_cov_1.069652 (501bp)
+Best alignment score: 501.0 (LEN: 501, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 46840 47340 | 1 501 | 501 501 | 100.0 | 22-331_15 NODE_134_length_501_cov_1.069652
+
+CONTIG: NODE_135_length_501_cov_1.029851 (501bp)
+Best alignment score: 320.0 (LEN: 322, IDY: 99.38), Total number of alignments: 1
+			Looking for the best set of alignments (out of 1 total alignments)
+			The best set is below. Score: 320.0, number of alignments: 1, unaligned bases: 179
+		Alignment: 25569 25890 | 501 180 | 322 322 | 99.38 | 22-331_37 NODE_135_length_501_cov_1.029851
+
+CONTIG: NODE_137_length_500_cov_1.122195 (500bp)
+Best alignment score: 500.0 (LEN: 500, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 9562 10061 | 500 1 | 500 500 | 100.0 | 22-331_37 NODE_137_length_500_cov_1.122195
+
+Analyzing coverage...
+Writing SNPs into /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/9a/9c07b9b715d1b5fa3fa188fae031b8/22_331_assembly/contigs_reports/minimap_output/22-324_filtered.used_snps
+
+Analysis is finished!
+Founded SNPs were written into /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/9a/9c07b9b715d1b5fa3fa188fae031b8/22_331_assembly/contigs_reports/minimap_output/22-324_filtered.used_snps
+
+Results:
+	Local Misassemblies: 0
+	Misassemblies: 5
+		Relocations: 0
+		Translocations: 5
+		Inversions: 0
+	Scaffold gap extensive misassemblies: 0
+	Scaffold gap local misassemblies: 0
+	Misassembled Contigs: 4
+	Misassembled Contig Bases: 5781
+	Misassemblies Inter-Contig Overlap ("Extra" Aligned Bases): 0
+Unaligned Contigs: 2 + 2 part
+Half Unaligned Contigs with Misassemblies: 0
+Unaligned Bases in Fully and Partially Unaligned Contigs: 3515
+
+Ambiguously Mapped Contigs: 2
+Total Bases in Ambiguously Mapped Contigs: 2049
+"Extra" Aligned Bases in Ambiguously Mapped Contigs: 0
+Note that --allow-ambiguity option was set to "one" and only first alignment per each of these contigs was used (there is no "extra" aligned bases).
+
+	Covered Bases in Reference: 13427
+	Raw Aligned Bases in Assembly: 13387
+	Total Aligned Bases in Assembly (with "Extras"): 13387
+
+	SNPs: 101
+	Insertions: 1
+	Deletions: 37
+

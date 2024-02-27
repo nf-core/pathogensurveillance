@@ -10,7 +10,7 @@ execute:
 knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE, message = FALSE)
 ```
 
- 
+
 ```{r load_libraries, warning=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -38,7 +38,8 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-library(psminer) # Install with: devtools::install_github("grunwaldlab/psminer")
+library(psminer) # Install with:
+devtools::install_github("grunwaldlab/psminer")
 library(ggdendro)
 library(rcrossref)
 ```
@@ -48,7 +49,7 @@ group_path <- file.path(params$inputs, "inputs", "group_id.txt")
 sample_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
 ref_data_path <- file.path(params$inputs, "inputs", "ref_data")
 assigned_refs_path <- file.path(params$inputs, "inputs", "assigned_refs.csv")
- 
+
 group <- read_lines(group_path)
 sample_data <- psminer::parse_sample_meta(sample_data_path, assigned_refs_path, group)
 ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data_path, group)
@@ -90,9 +91,9 @@ version_data <- psminer::parse_software_meta(version_path)
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
-**Report group:** `r group`                           
-**Sample count:** `r nrow(sample_data)`                 
-**Last updated:** `r format(Sys.time(), '%B %d , %Y')`       
+**Report group:** `r group`
+**Sample count:** `r nrow(sample_data)`
+**Last updated:** `r format(Sys.time(), '%B %d , %Y')`
 **Pipeline version:** {{< var version >}}
 
 ## Status
@@ -138,7 +139,7 @@ psminer::print_sample_metadata(sample_data)
 
 ## Initial identification
 
-The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences. 
+The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
 These are intended to be preliminary identifications.
 For more robust identifications based on whole genome sequences, see the results of the core genome phylogeny below.
 
@@ -174,7 +175,7 @@ Clicking on the middle will undo the subset.
 n_samp <- nrow(top_hits)
 formatted_classification <- unique_tax %>%
     gsub(pattern = "[a-z]+:", replacement = "") %>%
-    gsub(pattern = ";", replacement = " > ") 
+    gsub(pattern = ";", replacement = " > ")
 cat(paste0(
 "Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
 " identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
@@ -202,7 +203,7 @@ Included metrics can provide insights into how each sample compares with referen
 * **Top Hit:** The name of the reference genome most similar to each sample based on the scoring criteria used.
 :::
 
-::: 
+:::
 
 ## Rigorous identification
 
@@ -223,7 +224,7 @@ cat('
 
 This a core gene phylogeny of samples with RefSeq genomes for context.
 A core gene phylogeny uses the sequences of all gene shared by all of the genomes included in the tree to infer evolutionary relationships.
-It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences. 
+It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences.
 :::
 ')
 ```
@@ -289,10 +290,18 @@ More info will be added later.
 ```
 
 
-## Minimum spanning network
+### Minimum spanning network
 
-TODO
-
+```{r make MSN}
+#TODO make parse snp align function
+#TODO make tabs for MSN? Currently default is to color nodes by factors in color_by, but this could be a lot of MSNs
+#TODO make interactive tree option
+#TODO add error warning if fewer than 3 samples and don't make MSN?
+#TODO add error if fewer than 3 samples because we cannot use cutoff_predictor function.
+#To avoid erroring out, should need to discuss whether to just set very low snp threshold to 1?
+#TODO add documentation
+psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE)
+```
 
 # References
 

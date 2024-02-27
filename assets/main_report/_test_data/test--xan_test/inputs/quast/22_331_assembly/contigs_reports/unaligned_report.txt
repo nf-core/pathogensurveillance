@@ -1,0 +1,8 @@
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+Assembly                       22-324_filtered  22-335_filtered  22-311_filtered
+# fully unaligned contigs      2                0                0              
+Fully unaligned length         2329             0                0              
+# partially unaligned contigs  2                2                2              
+Partially unaligned length     1186             1423             1374           
+# N's                          10               0                0              
