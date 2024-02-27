@@ -288,12 +288,13 @@ More info will be added later.
 ### Minimum spanning network
 ```{r make MSN}
 #TODO make parse snp align function
-#TODO make tabs for each population? 
+#TODO make tabs for MSN? Currently default is to color nodes by factors in color_by, but this could be a lot of MSNs
 #TODO make interactive tree option
-#TODO add error warning fewer 3 samples
+#TODO add error warning if fewer than 3 samples and don't make MSN? 
 #TODO add error if fewer than 3 samples because we cannot use cutoff_predictor function. 
-#To avoid erroring out, should then set very low snp threshold to 1?
-psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE, user_seed=1)
+#To avoid erroring out, should need to discuss whether to just set very low snp threshold to 1?
+#TODO add documentation
+psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE)
 ```
 
 # References
