@@ -38,7 +38,8 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-library(psminer) # Install with: devtools::install_github("grunwaldlab/psminer")
+library(psminer) # Install with: 
+devtools::install_github("grunwaldlab/psminer")
 library(ggdendro)
 library(rcrossref)
 ```
@@ -285,9 +286,15 @@ More info will be added later.
 
 
 ### Minimum spanning network
-
-TODO
-
+```{r make MSN}
+#TODO make parse snp align function
+#TODO make tabs for each population? 
+#TODO make interactive tree option
+#TODO add error warning fewer 3 samples
+#TODO add error if fewer than 3 samples because we cannot use cutoff_predictor function. 
+#To avoid erroring out, should then set very low snp threshold to 1?
+psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE, user_seed=1)
+```
 
 # References
 
