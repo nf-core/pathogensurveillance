@@ -8,13 +8,7 @@ process MAIN_REPORT {
         'docker.io/zacharyfoster/main-report-r-packages:0.5' }"
 
     input:
-    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(ref_data), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(assigned_refs)
-    path samp_data
-    path multiqc_data
-    path multiqc_plots
-    path multiqc_report
-    path versions
-    path messages
+    tuple val(group_meta), file(inputs)
     path template, stageAs: 'main_report_template'
 
     output:
@@ -32,59 +26,10 @@ process MAIN_REPORT {
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r --dereference main_report_template main_report
 
-    # Make directory for inputs so that a single path can be passed as parameters
-    mkdir inputs
-
-    # Put multiqc's output into a single folder for organization
-    mkdir inputs/multiqc
-    cp -r ${multiqc_data} inputs/multiqc/
-    cp -r ${multiqc_plots} inputs/multiqc/
-    cp -r ${multiqc_report} inputs/multiqc/
-
-    # Put quast's output into a single folder for organization
-    mkdir inputs/quast
-    if [ ! -z "${quast_dirs}" ]; then
-      cp -r ${quast_dirs} inputs/quast/
-    fi
-
-    # Put sendsketch's output into a single folder for organization
-    mkdir inputs/sendsketch
-    cp -r ${sendsketchs} inputs/sendsketch/
-
-    # Put variant data into a single folder for organization
-    mkdir inputs/variant_data
-    if [ ! -z "${snp_phylos}" ]; then
-         cp -r ${snp_phylos} inputs/variant_data/
-    fi
-    if [ ! -z "${vcfs}" ]; then
-        cp -r ${vcfs} inputs/variant_data/
-    fi
-    if [ ! -z "${snp_aligns}" ]; then
-        cp -r ${snp_aligns} inputs/variant_data/
-    fi
-
-    # Save report group name to file
-    echo "${group_meta.id}" > inputs/group_id.txt
-
-    # Move RefSeq reference data for each sample (for phylogenetic context) to their own directory
-    mkdir inputs/ref_data
-    cp -r ${ref_data} inputs/ref_data/
-
-    # Move other single-value paths to input directory
-    mkdir other_inputs
-    mv ${samp_data} inputs/samp_data.csv
-    mv ${ani_matrix} inputs/ani_matrix.csv
-    mv ${assigned_refs} inputs/assigned_refs.csv
-    if [ ! -z "${core_phylo}" ]; then
-        mv ${core_phylo} inputs/core_phylo.treefile
-    fi
-    mv ${versions} inputs/versions.yml
-    mv ${messages} inputs/messages.tsv
-
     # Render the report
     quarto render main_report \\
         --output-dir ${prefix}_report \\
-        -P inputs:..
+        -P inputs:../${inputs}
 
     # Rename outputs
     mv main_report/${prefix}_report/index.html ${prefix}_pathsurveil_report.html

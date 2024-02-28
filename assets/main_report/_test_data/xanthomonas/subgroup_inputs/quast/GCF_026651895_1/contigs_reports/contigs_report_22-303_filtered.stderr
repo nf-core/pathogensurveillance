@@ -1,0 +1,10 @@
+[M::mm_idx_gen::0.126*1.05] collected minimizers
+[M::mm_idx_gen::0.175*1.03] sorted minimizers
+[M::main::0.175*1.03] loaded/built the index for 3 target sequence(s)
+[M::mm_mapopt_update::0.182*1.03] mid_occ = 200
+[M::mm_idx_stat] kmer size: 19; skip: 19; is_hpc: 0; #seq: 3
+[M::mm_idx_stat::0.187*1.03] distinct minimizers: 547657 (98.59% are singletons); average occurrences: 1.045; average spacing: 10.005; total length: 5727465
+[M::worker_pipeline::1.704*1.00] mapped 97 sequences
+[M::main] Version: 2.26-r1175
+[M::main] CMD: /usr/local/bin/minimap2 -c -x asm10 -B5 -O4,16 --no-long-join -r 200 -N 50 -s 65 -z 200 --mask-level 0.9 --min-occ 200 -g 2500 --score-N 2 --cs -t 1 /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/46/c8b55f68bd2021865adca9369587da/GCF_026651895_1/quast_corrected_input/GCF_026651895_1_genomic.fna /media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/46/c8b55f68bd2021865adca9369587da/GCF_026651895_1/quast_corrected_input/22-303_filtered.fasta
+[M::main] Real time: 1.713 sec; CPU: 1.718 sec; Peak RSS: 0.169 GB

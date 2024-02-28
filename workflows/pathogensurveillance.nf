@@ -68,6 +68,7 @@ include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
+include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_input'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -261,15 +262,19 @@ workflow PATHOGENSURVEILLANCE {
             it[10]
          ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
 
-    MAIN_REPORT (
+    PREPARE_REPORT_INPUT (
         report_in,
         INPUT_CHECK.out.csv,
         MULTIQC.out.data,
         MULTIQC.out.plots,
         MULTIQC.out.report,
-        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml,
-        RECORD_MESSAGES.out.tsv,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true)
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first(), // .first converts it to a value channel so it can be reused for multiple reports.
+        RECORD_MESSAGES.out.tsv
+    )
+
+    MAIN_REPORT (
+        PREPARE_REPORT_INPUT.out.report_input,
+        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
 }

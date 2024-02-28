@@ -1,0 +1,6 @@
+Assembly	22-320_filtered	22-312_filtered	22-324_filtered	22-336_filtered	22-310_filtered	22-309_filtered	22-301_filtered	22-315_filtered	22-329B_filtered	22-333_filtered	22-318_filtered	22-302_filtered	22-330_filtered	22-304_filtered	22-299_filtered	22-329A_filtered	22-311_filtered	22-317_filtered	22-337_filtered	22-332_filtered	22-331_filtered	22-316_filtered	22-303_filtered	22-334_filtered	22-335_filtered	22-300_filtered	22-314_filtered	22-322_filtered	22-319_filtered
+# fully unaligned contigs	0	0	1	2	0	0	1	0	0	1	0	1	0	0	0	0	1	1	0	1	0	1	0	0	0	1	0	1	1
+Fully unaligned length	0	0	859	1180	0	0	589	0	0	733	0	589	0	0	0	0	589	589	0	589	0	945	0	0	0	790	0	34577	790
+# partially unaligned contigs	0	0	7	0	1	0	0	0	0	0	1	0	0	1	1	0	0	0	0	0	0	0	1	0	0	0	1	2	0
+Partially unaligned length	0	0	207017	0	850	0	0	0	0	0	1068	0	0	1268	1306	0	0	0	0	0	0	0	641	0	0	0	951	9265	0
+# N's	256	211	334	298	364	230	157	398	398	289	409	351	388	122	365	287	230	128	388	328	302	221	259	403	362	241	329	150	203
