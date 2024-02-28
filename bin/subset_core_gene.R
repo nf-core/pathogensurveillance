@@ -2,9 +2,9 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/e4/92e25d85a7c78b33ea238a17e2f95f/subgroup.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/b0/907fb505fc3f5f7154b6e963cb038c/subgroup_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/73/ef34ab175d331f52bfbbbec60ea8c2/samplesheet.valid.csv',
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/46/162125b6da0dd8f763c380610daba1/xan_test.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/86/1c0fdb32b4888fea2511953d3652fd/xan_test_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/11/8675699f82d64eb13d91a2079e8e28/samplesheet.valid.csv',
 #           '10', '0.8', '0.5', '100', 'subgroup_core_genes.tsv', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
@@ -100,7 +100,10 @@ read_fasta <- function(path) {
 
     # Format as character vector named by header
     seqs <- unlist(lapply(split_seqs, function(x) gsub(x[2], pattern = '\n', replacement = '')))
-    names(seqs) <- unlist(lapply(split_seqs, function(x) trimws(x[1])))
+    names(seqs) <- unlist(lapply(split_seqs, function(x) { # Some headers have tabs separated values and some just have the ID. Not sure if that's a bug in a previous step, but it is handled here anyway
+        trimws(strsplit(split = '\t', x[1])[[1]][1])
+    }))
+    names(seqs)[1] <- sub(names(seqs)[1], pattern = '^>', replacement = '')
 
     return(seqs)
 }
