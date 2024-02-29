@@ -67,6 +67,10 @@ snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.nam
 ani_matrix_path <- file.path(params$inputs, "ani_matrix.csv")
 ani_matrix <- psminer::parse_ani_matrix(ani_matrix_path)
 
+# Parse POCP matrix
+pocp_matrix_path <- file.path(params$inputs, "pocp.tsv")
+pocp_matrix <- psminer::parse_pocp_matrix(pocp_matrix_path)
+
 # Parse core gene phylogeny
 core_phylo_path <- file.path(params$inputs, "core_phylo.treefile")
 
@@ -136,6 +140,8 @@ psminer::print_sample_metadata(sample_data)
 
 # Identification
 
+
+
 ## Initial identification
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
@@ -204,7 +210,47 @@ Included metrics can provide insights into how each sample compares with referen
 
 :::
 
-## Rigorous identification
+
+
+## Most similar organisms
+
+::: panel-tabset
+### ANI
+
+
+```{r}
+psminer::print_best_match_table(ani_matrix * 100, sample_data, ref_data, metric_name = 'ANI (%)')
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Average Nucleotide Identity (ANI) between each sample and the 2 references most similar to it based on this measure.
+ANI is used to measure how similar the shared portion of two genomes are. 
+...
+:::
+
+
+### POCP
+
+```{r}
+# psminer::print_best_match_table(pocp_matrix  * 100, sample_data, ref_data, metric_name = 'POCP (%)')
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Percentage Of Conserved Proteins (POCP) between each sample and the 2 references most similar to it based on this measure.
+POCP is used to measure how the proportion of proteins shared between two genomes. 
+...
+:::
+
+:::
+
+
+
+
+## Phylogenetic context
 
 This section includes phylogenetic trees of samples with references sequences downloaded from RefSeq meant to provide a reliable identification using genome-scale data.
 
@@ -291,7 +337,7 @@ More info will be added later.
 
 ### Minimum spanning network
 
-```{r make MSN}
+```{r make MSN, eval = FALSE}
 #TODO make parse snp align function
 #TODO make tabs for MSN? Currently default is to color nodes by factors in color_by, but this could be a lot of MSNs
 #TODO make interactive tree option
