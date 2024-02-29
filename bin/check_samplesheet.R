@@ -52,7 +52,7 @@ known_extensions <- c(
 )
 
 # Regular expression for characters that cannot appear in IDs
-invalid_id_char_pattern <- '[\\/:*?"<>| .]+'
+invalid_id_char_pattern <- '[\\/:*?"<>| .-]+'
 
 # Name of default group if all samples do not have a group defined
 defualt_group_full <- 'all'
