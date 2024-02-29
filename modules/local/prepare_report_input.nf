@@ -8,7 +8,7 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(ref_data), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(assigned_refs)
+    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(ref_data), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(pocp), file(assigned_refs)
     path samp_data
     path multiqc_data
     path multiqc_plots
@@ -72,6 +72,7 @@ process PREPARE_REPORT_INPUT {
     if [ ! -z "${core_phylo}" ]; then
         mv ${core_phylo} ${prefix}_inputs/core_phylo.treefile
     fi
+    mv ${pocp} ${prefix}_inputs/pocp.tsv
     mv ${versions} ${prefix}_inputs/versions.yml
     mv ${messages} ${prefix}_inputs/messages.tsv
     """

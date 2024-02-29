@@ -241,13 +241,14 @@ workflow PATHOGENSURVEILLANCE {
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, core_phylo
-        .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, core_phylo, assigned_refs
+        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder:true) // group_meta, ani_matrix, core_phylo, popc
+        .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, core_phylo, pocp, assigned_refs
     report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
         .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
         .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
-        .map { it.size() == 15 ? it : it[0..11] + [[], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
-        .map { it[0..1] + it[5..7] + it[9..14] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, passigned_refs
+        .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
+        .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
         .map { [
             it[0],
             it[1].findAll{ it.id != null }.unique(),
@@ -259,8 +260,9 @@ workflow PATHOGENSURVEILLANCE {
             it[7].findAll{ it != null },
             it[8],
             it[9] == null ? [] : it[9],
-            it[10]
-         ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, assigned_refs
+            it[10],
+            it[11]
+         ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
 
     PREPARE_REPORT_INPUT (
         report_in,

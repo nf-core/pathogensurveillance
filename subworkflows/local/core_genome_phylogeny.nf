@@ -6,6 +6,7 @@ include { REFORMAT_PIRATE_RESULTS   } from '../../modules/local/reformat_pirate_
 include { ALIGN_FEATURE_SEQUENCES   } from '../../modules/local/align_feature_sequences'
 include { SUBSET_CORE_GENES         } from '../../modules/local/subset_core_genes'
 include { RENAME_CORE_GENE_HEADERS  } from '../../modules/local/rename_core_gene_headers'
+include { CALCULATE_POCP            } from '../../modules/local/calculate_pocp'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -36,6 +37,12 @@ workflow CORE_GENOME_PHYLOGENY {
 
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
     ch_versions = ch_versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
+
+
+    // Calculate POCP from presence/absence matrix of genes
+    CALCULATE_POCP (
+       REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
+    )
 
     // Extract sequences of all genes (does not align, contrary to current name)
     ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
@@ -72,9 +79,10 @@ workflow CORE_GENOME_PHYLOGENY {
 
 
     emit:
-    pirate_aln = pirate_aln  // group_meta, align_fasta
-    phylogeny  = phylogeny   // group_meta, tree
-    versions   = ch_versions // versions.yml
-    messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
+    pirate_aln = pirate_aln              // group_meta, align_fasta
+    phylogeny  = phylogeny               // group_meta, tree
+    pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
+    versions   = ch_versions             // versions.yml
+    messages   = messages                // meta, group_meta, ref_meta, workflow, level, message
 
 }
