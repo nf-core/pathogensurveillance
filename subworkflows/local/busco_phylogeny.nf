@@ -1,6 +1,7 @@
 include { BUSCO          } from '../../modules/nf-core/busco/main'
 include { BUSCO_DOWNLOAD } from '../../modules/local/busco_download'
 include { READ2TREE      } from '../../modules/local/read2tree/main'
+include { MY_MODULE      } from '../../modules/local/my_module'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -36,6 +37,9 @@ workflow BUSCO_PHYLOGENY {
         [] )
 
     // Create Read2tree database
+    MY_MODULE(
+        BUSCO.out.busco_dir.map{ it[1] }.collect()
+    )
 
     // Run Read2tree
     // READ2TREE ( )
