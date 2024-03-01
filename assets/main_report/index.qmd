@@ -7,7 +7,7 @@ execute:
 ---
 
 ```{r knitr_settings}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
 ```
 
 
@@ -94,10 +94,10 @@ version_data <- psminer::parse_software_meta(version_path)
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
-**Report group:** `r group`
-**Sample count:** `r nrow(sample_data)`
-**Last updated:** `r format(Sys.time(), '%B %d , %Y')`
-**Pipeline version:** {{< var version >}}
+* **Report group:** `r group`
+* **Sample count:** `r nrow(sample_data)`
+* **Last updated:** `r format(Sys.time(), '%B %d , %Y')`
+* **Pipeline version:** {{< var version >}}
 
 ## Status
 
@@ -215,35 +215,70 @@ Included metrics can provide insights into how each sample compares with referen
 ## Most similar organisms
 
 ::: panel-tabset
-### ANI
+### ANI top matches
 
 
 ```{r}
-psminer::print_best_match_table(ani_matrix * 100, sample_data, ref_data, metric_name = 'ANI (%)')
+psminer::print_ani_table(ani_matrix * 100, sample_data, ref_data)
 ```
 
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table shows the Average Nucleotide Identity (ANI) between each sample and the 2 references most similar to it based on this measure.
-ANI is used to measure how similar the shared portion of two genomes are. 
-...
+ANI is used to measure how similar the shared portion of two genomes are.
+Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
 :::
 
 
-### POCP
+### ANI heatmap
+
+```{r ani_heatmap, fig.height = 10}
+psminer::make_ani_heatmap(ani_matrix * 100, ref_data, sample_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the similarity of all samples and references to each other.
+These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
+These measurements are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
+:::
+
+
+### POCP top matches
 
 ```{r}
-# psminer::print_best_match_table(pocp_matrix  * 100, sample_data, ref_data, metric_name = 'POCP (%)')
+psminer::print_pocp_table(pocp_matrix, sample_data, ref_data)
 ```
 
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table shows the Percentage Of Conserved Proteins (POCP) between each sample and the 2 references most similar to it based on this measure.
-POCP is used to measure how the proportion of proteins shared between two genomes. 
-...
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
 :::
+
+
+### POCP heatmap
+
+```{r pocp_heatmap, fig.height = 10}
+psminer::make_ani_heatmap(pocp_matrix, ref_data, sample_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the protein content of all samples and references to each other.
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
+:::
+
 
 :::
 
@@ -252,13 +287,14 @@ POCP is used to measure how the proportion of proteins shared between two genome
 
 ## Phylogenetic context
 
-This section includes phylogenetic trees of samples with references sequences downloaded from RefSeq meant to provide a reliable identification using genome-scale data.
+This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
+The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identificaiton.
 
 ::: panel-tabset
 
 ### Core gene phylogeny
 
-```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
+```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0, fig.height = 8}
 psminer::make_phylogeny(core_phylo_path, sample_data, ref_data)
 ```
 
@@ -281,21 +317,6 @@ Could not generate core genome phylogeny.
 ```
 
 
-### ANI heatmap and dendrogram
-
-```{r ANI dendrogram, fig.height = 8, fig.width=8}
-psminer::make_ani_heatmap(ani_matrix, ref_data, sample_data)
-```
-
-::: {.callout-tip collapse="true"}
-## About this plot
-
-This plot shows the results of comparing the similarity of all samples and references to eachother.
-These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
-These measurments are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
-:::
-
-
 :::
 
 # Genetic diversity
@@ -315,7 +336,7 @@ snp_trees <- parse_snp_trees(snp_tree_paths, group)
 ```
 
 
-```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0}
+```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0, fig.height = 8}
 for (i in seq_along(snp_trees)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_trees)[i], '\n\n'))
     a_plot <- psminer::make_phylogeny(snp_trees[[i]], sample_data, ref_data)

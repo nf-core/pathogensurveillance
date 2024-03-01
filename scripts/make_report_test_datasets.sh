@@ -20,10 +20,9 @@ for PROFILE in ${PROFILES[@]}; do
     printf "\\n\\n============ Runnig profile $PROFILE ============\\n\\n"
     # Run nextfow for this profiles
     PROFILE_OUT_DIR="$OUTPUT_DIR/$PROFILE"
-    # nextflow run main.nf -profile "$PROFILE,$RUNTIME_PROFILE" -resume --outdir "$PROFILE_OUT_DIR" --bakta_db assets/bakta_db/db-light
+    nextflow run main.nf -profile "$PROFILE,$RUNTIME_PROFILE" -resume --outdir "$PROFILE_OUT_DIR" --bakta_db assets/bakta_db/db-light
     REPORT_INPUT_DEST="${REPORT_TEST_DIR}/${PROFILE}"
     printf "\\n\\n============ Saving report input for $PROFILE to $REPORT_INPUT_DEST ============\\n\\n"
-    ll ${PROFILE_OUT_DIR}/prepare_report_input/*
     mkdir -p $REPORT_INPUT_DEST
     rsync -av --delete --copy-links ${PROFILE_OUT_DIR}/prepare_report_input/* $REPORT_INPUT_DEST
 done
