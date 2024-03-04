@@ -2,7 +2,7 @@ process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
     maxForks 3
-    errorStrategy { return task.attempt > 3 ? 'finish' : 'retry' }
+    errorStrategy { return task.attempt > 3 ? 'finish' : 'ignore' }
     maxRetries 5
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0"
