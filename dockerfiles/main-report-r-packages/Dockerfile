@@ -19,6 +19,7 @@ apt-get update && apt install -y --no-install-recommends \
     texlive-base \
     texlive-xetex \
     lmodern \
+    texlive-plain-generic \
     texlive-fonts-recommended \
     texlive-fonts-extra
 rm -rf /var/lib/apt/lists/*
@@ -64,14 +65,19 @@ install.r \
 EOF
 
 RUN <<EOF
-install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer")'
-EOF
-
-RUN <<EOF
 curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb
 gdebi --non-interactive quarto-linux-amd64.deb
 EOF
 
+RUN <<EOF
+curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+apt-get install -y ./google-chrome-stable_current_amd64.deb
+rm google-chrome-stable_current_amd64.deb
+EOF
+
+RUN <<EOF
+install.r devtools
+Rscript -e 'devtools::install_github("grunwaldlab/psminer@4b72f43f14e25d05092e0c9fe0c7cc39b29b1c10")'
+EOF
 
 
