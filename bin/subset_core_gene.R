@@ -2,9 +2,9 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/subgroup.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/subgroup_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/samplesheet.valid.csv',
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/subgroup.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/subgroup_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/samplesheet.valid.csv',
 #           '10', '0.8', '0.5', '100', 'subgroup_core_genes.tsv', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
@@ -39,7 +39,7 @@ gene_data_subset <- gene_data
 current_sample_ids <- sample_ids
 current_ref_ids <- ref_ids
 get_n_core_single <- function(ids) {
-    rowSums(gene_data_subset[, ids] == 1)
+    rowSums(gene_data_subset[, ids, drop = FALSE] == 1)
 }
 current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                               get_n_core_single(current_ref_ids) == length(current_ref_ids))

@@ -105,7 +105,7 @@ Perhaps a table with a list of majors steps and a icon next to each for done/que
 
 ```{r generate-tables}
 # Generate the tables using the status_tables function
-tables <- status_tables(messages, interactive = TRUE)
+tables <- status_tables(messages)
 ```
 
 ::: {.panel-tabset}
