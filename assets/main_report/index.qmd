@@ -103,7 +103,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
 
-```{r generate-tables, eval=FALSE}
+```{r generate-tables}
 # Generate the tables using the status_tables function
 tables <- status_tables(messages, interactive = TRUE)
 ```
@@ -112,19 +112,19 @@ tables <- status_tables(messages, interactive = TRUE)
 
 ## Simple Summary Table
 
-```{r simple-table, eval=FALSE}
+```{r simple-table}
 tables$simpleTable
 ```
 
 ## Detailed Samples Table
 
-```{r detailed-samples-table, eval=FALSE}
+```{r detailed-samples-table}
 tables$detailedSamplesTable
 ```
 
 ## Detailed Groups Table
 
-```{r detailed-groups-table, eval=FALSE}
+```{r detailed-groups-table}
 tables$detailedGroupsTable
 ```
 
