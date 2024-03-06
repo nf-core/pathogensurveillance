@@ -16,6 +16,7 @@ apt-get update && apt install -y --no-install-recommends \
     pandoc-citeproc \
     curl \
     gdebi-core \
+    libuv1 \
     texlive-base \
     texlive-xetex \
     lmodern \
