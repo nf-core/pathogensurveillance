@@ -99,9 +99,9 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 * **Last updated:** `r format(Sys.time(), '%B %d , %Y')`
 * **Pipeline version:** {{< var version >}}
 
-## Status
+## Pipeline Status Report
 
-Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
+This section provides an overview of the pipeline execution status, including a summary table, detailed sample-specific issues, and group-level issues for further analysis.
 
 ```{r generate-tables}
 # Generate the tables using the status_tables function
@@ -110,22 +110,55 @@ tables <- status_tables(messages)
 
 ::: {.panel-tabset}
 
-## Simple Summary Table
+## Simple Summary
 
 ```{r simple-table}
 tables$simpleTable
 ```
 
-## Detailed Samples Table
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table provides a high-level overview of pipeline steps where issues were detected. This tables tells you how many groups or samples have issues that require your attention.
+
+:::
+')
+```
+
+## Group-Level Issues
+
+```{r detailed-groups-table}
+tables$detailedGroupsTable
+```
+
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table dives into the issues that impact entire report groups, providing a more granular view of problems not limited to individual samples but affecting the group as a whole. It helps in identifying systemic issues or errors in group-specific processes.
+
+:::
+')
+```
+
+## Sample-Level Issues
 
 ```{r detailed-samples-table}
 tables$detailedSamplesTable
 ```
 
-## Detailed Groups Table
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
 
-```{r detailed-groups-table}
-tables$detailedGroupsTable
+This table offers detailed insights into issues specific to individual samples. It is designed to help you pinpoint and address sample-specific problems, facilitating targeted troubleshooting and resolution efforts.
+
+:::
+')
 ```
 
 :::
