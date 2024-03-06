@@ -326,4 +326,4 @@ colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified
 metadata <- cbind(metadata, unmodified_data)
 
 # Write output metadata
-write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
+write.csv(metadata, file = args$output_path, row.names = FALSE, na = '')

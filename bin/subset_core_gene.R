@@ -2,14 +2,14 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/46/162125b6da0dd8f763c380610daba1/xan_test.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/86/1c0fdb32b4888fea2511953d3652fd/xan_test_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/11/8675699f82d64eb13d91a2079e8e28/samplesheet.valid.csv',
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/subgroup.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/subgroup_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/49/5e2bc832a64928c6a07ab4552e9340/samplesheet.valid.csv',
 #           '10', '0.8', '0.5', '100', 'subgroup_core_genes.tsv', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
-metadata <- read.csv(args$metadata, header = TRUE, sep = ',')
+metadata <- read.csv(args$metadata, header = TRUE, sep = ',', row.names = NULL, check.names = FALSE)
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
 min_core_samps <- as.integer(args$min_core_samps)
@@ -18,7 +18,7 @@ min_core_refs <- as.integer(args$min_core_refs)
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
 all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
-sample_ids <- all_ids[all_ids %in% gsub(pattern = '[-.]+', replacement = '_', metadata$sample)] #TODO: change this once sample IDs are standardized
+sample_ids <- all_ids[all_ids %in% metadata$sample_id]
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
 # Get minimum number of samples and references that is acceptable
