@@ -38,7 +38,9 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-library(psminer) # Install with: devtools::install_github("grunwaldlab/psminer")
+ # Install with: 
+devtools::install_github("grunwaldlab/psminer")
+library(psminer)
 library(ggdendro)
 library(rcrossref)
 ```
@@ -243,8 +245,6 @@ Included metrics can provide insights into how each sample compares with referen
 
 :::
 
-
-
 ## Most similar organisms
 
 ::: panel-tabset
@@ -315,9 +315,6 @@ Currently, POCP is only calculated for Prokaryotes.
 
 :::
 
-
-
-
 ## Phylogenetic context
 
 This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
@@ -381,14 +378,13 @@ for (i in seq_along(snp_trees)) {
 }
 ```
 
-
 ```{asis div_no_snp_phylo, echo = length(snp_trees) == 0}
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
 
-### Minimum spanning network
+## Minimum spanning network
 ```{r parse_snp_align}
 snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
@@ -396,7 +392,7 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8}
 for (i in seq_along(snp_alignments)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
-    a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data)
+    a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, show_MLG_table=TRUE, user_seed = 2, snp_threshold = 5)
     if (knitr::is_html_output()) {
         cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
     } else {
@@ -406,22 +402,10 @@ for (i in seq_along(snp_alignments)) {
 }
 ```
 
-```{r}
-# snp_aln.gi <- DNAbin2genind(snp_alignments[[i]])
-# snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
-# genind_names <- indNames(snp_aln.gi)
-
-# cleaned_names <- sub(".*assembly_", "", genind_names)
-# indNames(snp_aln.gi) <- cleaned_names
-
-# mat <- match(indNames(snp_aln.gi), sample_data$sample_id)
-#sample_data <- sample_data[mat, ]
-# snp_genclone <- as.genclone(snp_aln.gi)
-```
-
-```{asis div_no_msn, echo = length(snp_trees) >= 3}
-There is no MSN to draw, probably because there were too few samples.
-More info will be added later.
+```{asis div_no_snp_align, echo = length(snp_alignments) == 0}
+cat('
+Could not generate any minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+')
 ```
 
 # References
