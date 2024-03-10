@@ -355,7 +355,6 @@ Could not generate core genome phylogeny.
 # Genetic diversity
 
 ## SNP trees
-
 ```{r parse_snp_trees}
 # snp_tree_plots <- lapply(snp_trees, function(tree) {
 #     a_plot <- psminer::make_phylogeny(tree, sample_data, ref_data)
@@ -390,16 +389,39 @@ More info will be added later.
 
 
 ### Minimum spanning network
+```{r parse_snp_align}
+snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
+```
 
-```{r make MSN, eval = FALSE}
-#TODO make parse snp align function
-#TODO make tabs for MSN? Currently default is to color nodes by factors in color_by, but this could be a lot of MSNs
-#TODO make interactive tree option
-#TODO add error warning if fewer than 3 samples and don't make MSN?
-#TODO add error if fewer than 3 samples because we cannot use cutoff_predictor function.
-#To avoid erroring out, should need to discuss whether to just set very low snp threshold to 1?
-#TODO add documentation
-psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE)
+```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8}
+for (i in seq_along(snp_alignments)) {
+    cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+    a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data)
+    if (knitr::is_html_output()) {
+        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+    } else {
+        print(a_plot)
+    }
+    cat('\n:::')
+}
+```
+
+```{r}
+# snp_aln.gi <- DNAbin2genind(snp_alignments[[i]])
+# snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
+# genind_names <- indNames(snp_aln.gi)
+
+# cleaned_names <- sub(".*assembly_", "", genind_names)
+# indNames(snp_aln.gi) <- cleaned_names
+
+# mat <- match(indNames(snp_aln.gi), sample_data$sample_id)
+#sample_data <- sample_data[mat, ]
+# snp_genclone <- as.genclone(snp_aln.gi)
+```
+
+```{asis div_no_msn, echo = length(snp_trees) >= 3}
+There is no MSN to draw, probably because there were too few samples.
+More info will be added later.
 ```
 
 # References
