@@ -396,7 +396,7 @@ for (i in seq_along(snp_alignments)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
 
     for (threshold in threshold_options) {
-        cat(paste0('\n::: panel-tabset\n### SNP Diff Prop: ', threshold, '\n\n'))
+        cat(paste0('\n::: panel-tabset\n### Relative SNP difference: ', threshold, '\n\n'))
         a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
         if (knitr::is_html_output()) {
             cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
@@ -408,8 +408,6 @@ for (i in seq_along(snp_alignments)) {
 
     cat('\n:::')
 }
-
-
 ```
 
 
