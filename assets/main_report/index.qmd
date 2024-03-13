@@ -390,17 +390,28 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
 
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8}
+
+threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 for (i in seq_along(snp_alignments)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
-    a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, show_MLG_table=TRUE, user_seed = 2, snp_threshold = 5)
-    if (knitr::is_html_output()) {
-        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
-    } else {
-        print(a_plot)
+
+    for (threshold in threshold_options) {
+        cat(paste0('\n::: panel-tabset\n### SNP Diff Prop: ', threshold, '\n\n'))
+        a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
+        if (knitr::is_html_output()) {
+            cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+        } else {
+            print(a_plot)
+        }
+        cat('\n:::')
     }
+
     cat('\n:::')
 }
+
+
 ```
+
 
 ```{asis div_no_snp_align, echo = length(snp_alignments) == 0}
 cat('
