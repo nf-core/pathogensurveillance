@@ -38,7 +38,9 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-library(psminer) # Install with: devtools::install_github("grunwaldlab/psminer")
+ # Install with: 
+devtools::install_github("grunwaldlab/psminer")
+library(psminer)
 library(ggdendro)
 library(rcrossref)
 ```
@@ -243,8 +245,6 @@ Included metrics can provide insights into how each sample compares with referen
 
 :::
 
-
-
 ## Most similar organisms
 
 ::: panel-tabset
@@ -315,9 +315,6 @@ Currently, POCP is only calculated for Prokaryotes.
 
 :::
 
-
-
-
 ## Phylogenetic context
 
 This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
@@ -355,7 +352,6 @@ Could not generate core genome phylogeny.
 # Genetic diversity
 
 ## SNP trees
-
 ```{r parse_snp_trees}
 # snp_tree_plots <- lapply(snp_trees, function(tree) {
 #     a_plot <- psminer::make_phylogeny(tree, sample_data, ref_data)
@@ -382,24 +378,45 @@ for (i in seq_along(snp_trees)) {
 }
 ```
 
-
 ```{asis div_no_snp_phylo, echo = length(snp_trees) == 0}
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
 ```
 
 
-### Minimum spanning network
+## Minimum spanning network
+```{r parse_snp_align}
+snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
+```
 
-```{r make MSN, eval = FALSE}
-#TODO make parse snp align function
-#TODO make tabs for MSN? Currently default is to color nodes by factors in color_by, but this could be a lot of MSNs
-#TODO make interactive tree option
-#TODO add error warning if fewer than 3 samples and don't make MSN?
-#TODO add error if fewer than 3 samples because we cannot use cutoff_predictor function.
-#To avoid erroring out, should need to discuss whether to just set very low snp threshold to 1?
-#TODO add documentation
-psminer::make_MSN(snp_align_paths, sample_data, snp_threshold=1, show_MLG_table=TRUE)
+```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8}
+
+threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+for (i in seq_along(snp_alignments)) {
+    cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+
+    for (threshold in threshold_options) {
+        cat(paste0('\n::: panel-tabset\n### SNP Diff Prop: ', threshold, '\n\n'))
+        a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
+        if (knitr::is_html_output()) {
+            cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+        } else {
+            print(a_plot)
+        }
+        cat('\n:::')
+    }
+
+    cat('\n:::')
+}
+
+
+```
+
+
+```{asis div_no_snp_align, echo = length(snp_alignments) == 0}
+cat('
+Could not generate any minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+')
 ```
 
 # References
