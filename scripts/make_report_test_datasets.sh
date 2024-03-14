@@ -3,11 +3,11 @@
 # This script runs the pipeline for every profile and copies the main report input to into the direcory of test data (see variables below for specific paths used)
 
 # Configuration variables
-PROJECT_ROOT="pathogensurveillance"             # The name of the root directory for the project
-PROFILES=(xanthomonas)                          # The names of the profiles to be used
-RUNTIME_PROFILE="docker"                        # The name of the profile that supplies a way to run the pipeline (conda, docker, etc)
-OUTPUT_DIR="test/output"                        # Where the output is to be saved. The output for each profile will be put in a directory named by the profile
-REPORT_TEST_DIR="assets/main_report/_test_data" # Where this script will save a directory for each profile, with a subdirectory for each report group
+PROJECT_ROOT="pathogensurveillance"                    # The name of the root directory for the project
+PROFILES=(xanthomonas xanthomonas_small ramorum_small) # The names of the profiles to be used
+RUNTIME_PROFILE="docker"                               # The name of the profile that supplies a way to run the pipeline (conda, docker, etc)
+OUTPUT_DIR="test/output"                               # Where the output is to be saved. The output for each profile will be put in a directory named by the profile
+REPORT_TEST_DIR="assets/main_report/_test_data"        # Where this script will save a directory for each profile, with a subdirectory for each report group
 
 # Check if we are in the right directory
 if [[ "$(basename $PWD)" != "$PROJECT_ROOT" ]]; then
