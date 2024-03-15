@@ -4,7 +4,7 @@ ref="Phytophthora ramorum"  # get the choosed Reference Sequence
 
 CODEX=$(echo "$ref" | awk '{print toupper(substr($1,1,3))toupper(substr($2,1,2))}')
 
-grep '^>' *.fna > buscos.fof # list of names to modify
+grep '^>' *.f?a > buscos.fof # list of names to modify
 
 while IFS= read -r fastafile; do
 	#echo "Processing file $fastafile"
