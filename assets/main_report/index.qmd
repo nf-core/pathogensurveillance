@@ -406,6 +406,7 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
 
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+
 for (i in seq_along(snp_alignments)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
 
