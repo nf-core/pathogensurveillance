@@ -16,6 +16,7 @@ apt-get update && apt install -y --no-install-recommends \
     pandoc-citeproc \
     curl \
     gdebi-core \
+    libuv1 \
     texlive-base \
     texlive-xetex \
     lmodern \
@@ -77,7 +78,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer@4b72f43f14e25d05092e0c9fe0c7cc39b29b1c10")'
+Rscript -e 'devtools::install_github("grunwaldlab/psminer@b783a74b51a79a5d63299ccedaf971ee8da38ed0")'
 EOF
 
 
