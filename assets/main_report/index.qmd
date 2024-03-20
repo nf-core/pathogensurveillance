@@ -378,6 +378,20 @@ for (i in seq_along(snp_trees)) {
 }
 ```
 
+```{r, results='asis', eval = length(snp_trees) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This is a representation of a Single Nucleotide Polymorphism (SNP) tree, depicting the genetic relationships among samples in comparison to a reference assembly.
+
+The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together. 
+
+Question-does it make sense to be showing the reference within the tree? 
+:::
+')
+```
+
 ```{asis div_no_snp_phylo, echo = length(snp_trees) == 0}
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
@@ -389,14 +403,15 @@ More info will be added later.
 snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
 
-```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8}
+```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
 
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+
 for (i in seq_along(snp_alignments)) {
     cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
 
     for (threshold in threshold_options) {
-        cat(paste0('\n::: panel-tabset\n### SNP Diff Prop: ', threshold, '\n\n'))
+        cat(paste0('\n::: panel-tabset\n### Relative SNP difference: ', threshold, '\n\n'))
         a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
         if (knitr::is_html_output()) {
             cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
@@ -408,10 +423,22 @@ for (i in seq_along(snp_alignments)) {
 
     cat('\n:::')
 }
-
-
 ```
 
+```{r, results='asis', eval = length(snp_alignments) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This figure depicts a minimium spanning network (MSN). 
+The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the number of samples that share the same genotype.
+
+The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two. 
+
+Note: within these MSNs,edges lengths are not proportional to SNP differences.
+:::
+')
+```
 
 ```{asis div_no_snp_align, echo = length(snp_alignments) == 0}
 cat('
