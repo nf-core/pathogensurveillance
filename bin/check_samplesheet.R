@@ -319,6 +319,10 @@ if (all(!is_present(metadata$report_group))) {
     metadata$report_group[!is_present(metadata$report_group)] <- defualt_group_partial
 }
 
+# Remove whitespace in report group ids
+metadata$report_group <- trimws(metadata$report_group)
+metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:space:]]+', replacement = ';')
+
 # Add user-supplied data as columns with modified names
 cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
 unmodified_data <- metadata_original[, cols_to_add]
