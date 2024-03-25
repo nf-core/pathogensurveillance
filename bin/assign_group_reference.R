@@ -31,7 +31,7 @@ if (all(! is.na(samp_ref_pairs$reference))) {
 
     # Initialize empty data frame to hold the final assignments
     output <- data.frame(sample_id = character(0), reference = character(0))
-    
+
     # Function to assign references given a minimum ANI
     assign_ref <- function(min_ani, table) {
         output <- NULL  # Reinitialize output here
@@ -55,18 +55,18 @@ if (all(! is.na(samp_ref_pairs$reference))) {
         }
         return(output)
     }
-    
+
     # Main loop for assignment based on given min_ani
     min_ani <- start_min_ani
     while (nrow(sample_ani) > 0 & min_ani >= end_min_ani) {
-        print(paste("Number of remaining samples: ", nrow(sample_ani)))
+        # print(paste("Number of remaining samples: ", nrow(sample_ani)))
         rows_to_add <- assign_ref(min_ani, sample_ani)
         if (!is.null(rows_to_add) && nrow(rows_to_add) > 0) {
             sample_ani <- sample_ani[! rownames(sample_ani) %in% rows_to_add$sample_id, ]
             output <- rbind(output, rows_to_add)
         } else {
             min_ani <- min_ani - ani_interval
-            print(paste("Reducing min_ani to: ", min_ani))
+            # print(paste("Reducing min_ani to: ", min_ani))
         }
     }
 
