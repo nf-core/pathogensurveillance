@@ -50,8 +50,8 @@ while (current_core_genes < min_core_genes) {
     # print(paste0('core:     ', current_core_genes))
 
     # Find how many genes each sample are missing or multi-copy
-    n_bad_samp <- colSums(gene_data_subset[, current_sample_ids] != 1)
-    n_bad_ref <- colSums(gene_data_subset[, current_ref_ids] != 1)
+    n_bad_samp <- colSums(gene_data_subset[, current_sample_ids, drop = FALSE] != 1)
+    n_bad_ref <- colSums(gene_data_subset[, current_ref_ids, drop = FALSE] != 1)
 
     # Remove worst sample/ref if possible, preferring to remove references
     if (length(current_sample_ids) > min_core_samps && length(current_ref_ids) > min_core_refs) {
