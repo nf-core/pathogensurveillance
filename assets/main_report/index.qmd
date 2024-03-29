@@ -443,9 +443,9 @@ cat('
 This figure depicts a minimium spanning network (MSN). 
 The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the # number of samples that share the same genotype.
 
-The edges represent the SNP differences between two given genotypes, and the darker the # color of the edges, the fewer SNP differences between the two. 
+The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two. 
 
-Note: within these MSNs,edges lengths are not proportional to SNP differences.
+Note: within these MSNs, edge lengths are not proportional to SNP differences.
 :::
  ')
 ```
