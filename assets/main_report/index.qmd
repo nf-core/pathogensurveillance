@@ -409,11 +409,13 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 
 for (i in seq_along(snp_alignments)) {
-  cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+  cat(paste0('## ', names(snp_alignments)[i], '\n\n'))
   
   if (nrow(snp_alignments[[i]]) > 4) {
+    cat(':::: {.tabset}\n')
+    
     for (threshold in threshold_options) {
-      cat(paste0(':::: panel-tabset\n#### Relative SNP difference: ', threshold, '\n\n'))
+      cat(paste0('#### Relative SNP difference: ', threshold, '\n\n'))
       
       a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
       
@@ -423,13 +425,15 @@ for (i in seq_along(snp_alignments)) {
         print(a_plot)
       }
       
-      cat('\n::::')
+      cat('\n')
     }
+    
+    cat('::::\n')
   } else {
     cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n")
   }
   
-  cat('\n:::\n')
+  cat('\n')
 }
 
 ```
