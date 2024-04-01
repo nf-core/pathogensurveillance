@@ -82,7 +82,9 @@ def multiqc_report = []
 workflow PATHOGENSURVEILLANCE {
 
     ch_versions = Channel.empty()
-    messages = Channel.empty()
+    // Initalize messages channel with headers
+    //     Note that at least one value (this header) is needed so that modlues that require this are run
+    messages = Channel.fromList([[[id: 'sample_id'], [id: 'group_id'], [id: 'ref_id'], 'workflow', 'level', 'message']])
 
     // Read in samplesheet, validate and stage input files
     INPUT_CHECK (
