@@ -28,6 +28,12 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "temp_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The location to save temporary files for processes. This is only used for some processes that produce large temporary files such as PICARD_SORTSAM.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
