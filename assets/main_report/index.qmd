@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "~/pathogensurveillance/assets/main_report/_test_data/xanthomonas_small/xan_test_inputs"
 execute:
   echo: false
 ---
@@ -46,7 +46,7 @@ library(rcrossref)
 ```
 
 ```{r parse_inputs}
-group_path <- file.path(params$inputs, "group_id.txt")
+group_path <-file.path(params$inputs, "group_id.txt")
 sample_data_path <- file.path(params$inputs, "samp_data.csv")
 ref_data_path <- file.path(params$inputs, "ref_data")
 assigned_refs_path <- file.path(params$inputs, "assigned_refs.csv")
@@ -392,9 +392,11 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{asis div_no_snp_phylo, echo = length(snp_trees) == 0}
+```{asis div_no_snp_phylo, echo = length(snp_trees) <= 0}
+cat('
 There is no tree to draw, probably because there were too few samples.
 More info will be added later.
+')
 ```
 
 
@@ -404,45 +406,56 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
 
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
-
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 
+
 for (i in seq_along(snp_alignments)) {
-    cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
-
+   cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+  
+  if (nrow(snp_alignments[[i]]) > 4) {
     for (threshold in threshold_options) {
-        cat(paste0('\n::: panel-tabset\n### Relative SNP difference: ', threshold, '\n\n'))
-        a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
-        if (knitr::is_html_output()) {
-            cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
-        } else {
-            print(a_plot)
-        }
-        cat('\n:::')
+      cat(paste0('Relative SNP difference: ', threshold, '\n\n'))
+      
+      a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
+      
+      if (knitr::is_html_output()) {
+        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+      } else {
+        print(a_plot)
+      }
+      cat('\n')
+      
     }
-
-    cat('\n:::')
+  } else {
+    cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n")
+  }
+  
+   cat('\n')
 }
+
+cat('::::\n')
+
 ```
 
 ```{r, results='asis', eval = length(snp_alignments) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
+
 ## About this plot
 
 This figure depicts a minimium spanning network (MSN). 
-The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the number of samples that share the same genotype.
+The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the # number of samples that share the same genotype.
 
 The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two. 
 
-Note: within these MSNs,edges lengths are not proportional to SNP differences.
+Note: within these MSNs, edge lengths are not proportional to SNP differences.
 :::
-')
+ ')
 ```
 
-```{asis div_no_snp_align, echo = length(snp_alignments) == 0}
+```{asis div_no_snp_align, echo = length(snp_alignments) <= 0}
 cat('
-Could not generate any minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
 ')
 ```
 
