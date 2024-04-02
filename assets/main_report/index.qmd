@@ -406,18 +406,19 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
 
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
-threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 
+threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+total_alignments <- length(snp_alignments)
 
 for (i in seq_along(snp_alignments)) {
-   cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+  cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
+  cat(':::\n')
   
   if (nrow(snp_alignments[[i]]) > 4) {
-    for (threshold in threshold_options) {
-      cat(paste0('Relative SNP difference: ', threshold, '\n\n'))
-      
+    for (threshold_index in seq_along(threshold_options)) {
+      threshold <- threshold_options[threshold_index]
+      cat('\n')
       a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
-      
       if (knitr::is_html_output()) {
         cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
       } else {
@@ -425,15 +426,18 @@ for (i in seq_along(snp_alignments)) {
       }
       cat('\n')
       
+      if (threshold_index == length(threshold_options) && i < total_alignments) {
+        cat(':::\n')
+      }
     }
   } else {
-    cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n")
+    cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n\n")
+    if (i < total_alignments) {
+      cat(':::\n')
+    }
   }
-  
-   cat('\n')
 }
 
-cat('::::\n')
 
 ```
 
