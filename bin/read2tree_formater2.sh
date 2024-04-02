@@ -24,3 +24,27 @@ while IFS= read -r fastafile; do
 	echo "Processing file fasta $fasta with header $header"
         sed -i "s/$header/>$ID \| [$ref]/" "$fasta"
 done < buscos.fof
+
+cat *.fna > dna_ref.fa
+
+grep '^>' *.faa > buscas.fof # list of names to modify
+
+while IFS= read -r fastafile; do
+        #echo "Processing file $fastafile"
+
+        # Extracting file name
+        fasta=$(echo $fastafile | awk -F ':' '{print $1}')
+        #header=$(echo $fastafile | awk -F ':' '{print $2":"$3}')
+        header=$(grep '>' $fasta)
+
+        # Genearting a unique IDentifier
+        NUM=$(echo $fasta | cut -d 'a' -f1)
+        echo "NUM $NUM"
+        ID="$CODEX$NUM"
+        echo "Identifier: $ID"
+
+        # Replace the headers in the FASTA file
+        echo "Processing file fasta $fasta with header $header"
+        sed -i "s/$header/$ID \| [$ref]/" "$fasta"
+done < buscas.fof
+
