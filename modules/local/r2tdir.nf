@@ -8,14 +8,11 @@ process R2TDIR {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(ref_meta), path(busco_dir), path(ntFiles), path(aaFiles)
+    tuple val(ref_meta), path(busco_dir)
 
     output:
-    tuple val(ref_meta), path("${prefix}/buscos"), emit: markers
-    tuple val(ref_meta), path("${prefix}/dna_ref.fa"), emit: dna_ref
-    
-    //nfFiles = Channel.fromPath( '${busco_dir}/*ntformatted.fa')
-    //aaFiles = Channel.fromPath( '${busco_dir}/*aaformatted.fa')
+    tuple val(ref_meta), path("buscos"), emit: markers
+    tuple val(ref_meta), path("dna_ref.fa"), emit: dna_ref 
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,8 +20,8 @@ process R2TDIR {
     script:
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    mkdir -p ${prefix}/buscos
-    cat ${ntFiles.join(' ')} > ${prefix}/dna_ref.fa
-    cp ${aaFiles.join(' '} > ${prefix}/buscos/
+    mkdir -p ${busco_dir}/buscos
+    cat ${busco_dir}/ > ${busco_dir}/dna_ref.fa
+    cp ${busco_dir}/ > ${busco_dir}/buscos/
     """
 }

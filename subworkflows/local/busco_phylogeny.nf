@@ -12,8 +12,8 @@ workflow BUSCO_PHYLOGENY {
 
     main:
 
-    //ch_versions = Channel.empty()
-    //messages = Channel.empty()
+    ch_versions = Channel.empty()
+    messages = Channel.empty()
 
     // Only process Eukaryotic samples
     input_filtered = input
@@ -41,17 +41,10 @@ workflow BUSCO_PHYLOGENY {
     R2TF (
         BUSCO.out.busco_dir
 	)
-   
-    // Get all busco gene in nt and aa from busco_dir
-    ntFiles = Channel.fromPath( "${busco_dir}/*ntformatted.fa" )
-        .collect()
-    aaFiles = Channel.fromPath( "${busco_dir}/*aaformatted.fa" )
-        .collect()
 
     // Create directories for Read2Tree
     R2TDIR (
-        R2TF.out.nt.view()
-        //R2TF.out.aa.view()
+        R2TF.out.collect().view()
         )
     // Run Read2tree
     // READ2TREE ( )
