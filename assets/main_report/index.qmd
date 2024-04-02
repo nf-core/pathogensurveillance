@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "~/pathogensurveillance/assets/main_report/_test_data/xanthomonas_small/xan_test_inputs"
+  inputs: "~/pathogensurveillance/assets/main_report/_test_data/xanthomonas/xan_test_inputs"
 execute:
   echo: false
 ---
@@ -417,7 +417,9 @@ for (i in seq_along(snp_alignments)) {
   if (nrow(snp_alignments[[i]]) > 4) {
     for (threshold_index in seq_along(threshold_options)) {
       threshold <- threshold_options[threshold_index]
-      cat('\n')
+      
+      cat(paste0('\n#### Relative SNP difference: ', threshold, '\n\n'))
+      
       a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
       if (knitr::is_html_output()) {
         cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
