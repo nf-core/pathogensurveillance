@@ -61,6 +61,17 @@ workflow CORE_GENOME_PHYLOGENY {
         params.max_core_genes
     )
 
+    // Report any sample or references that have been removed from the analysis
+    removed_refs = SUBSET_CORE_GENES.out.removed_ref_ids
+        .splitText()
+        .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    removed_samps = SUBSET_CORE_GENES.out.removed_sample_ids
+        .splitText()
+        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(removed_refs)
+    messages = messages.mix(removed_samps)
+
+
     // Align each gene family with mafft
     MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())

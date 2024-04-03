@@ -79,6 +79,12 @@ while (current_core_genes < min_core_genes) {
 output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_sample_ids) &
                             get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
 
+# Save the IDs of any samples and references that were removed from the analysis
+removed_sample_ids <- sample_ids[! sample_ids %in% current_sample_ids]
+removed_ref_ids <- ref_ids[! ref_ids %in% current_ref_ids]
+writeLines(removed_sample_ids, con = 'removed_sample_ids.txt')
+writeLines(removed_ref_ids, con = 'removed_ref_ids.txt')
+
 # Remove excess genes if more than needed were found
 if (nrow(output) > max_core_genes) {
     output <- output[1:max_core_genes, ]
