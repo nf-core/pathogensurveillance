@@ -38,11 +38,9 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
- # Install with: 
-devtools::install_github("grunwaldlab/psminer")
-library(psminer)
 library(ggdendro)
 library(rcrossref)
+library(psminer)
 ```
 
 ```{r parse_inputs}
@@ -385,9 +383,9 @@ cat('
 
 This is a representation of a Single Nucleotide Polymorphism (SNP) tree, depicting the genetic relationships among samples in comparison to a reference assembly.
 
-The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together. 
+The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together.
 
-Question-does it make sense to be showing the reference within the tree? 
+Question-does it make sense to be showing the reference within the tree?
 :::
 ')
 ```
@@ -411,25 +409,25 @@ threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 
 for (i in seq_along(snp_alignments)) {
    cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
-  
+
   if (nrow(snp_alignments[[i]]) > 4) {
     for (threshold in threshold_options) {
       cat(paste0('Relative SNP difference: ', threshold, '\n\n'))
-      
+
       a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
-      
+
       if (knitr::is_html_output()) {
         cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
       } else {
         print(a_plot)
       }
       cat('\n')
-      
+
     }
   } else {
     cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n")
   }
-  
+
    cat('\n')
 }
 
@@ -443,10 +441,10 @@ cat('
 
 ## About this plot
 
-This figure depicts a minimium spanning network (MSN). 
+This figure depicts a minimium spanning network (MSN).
 The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the # number of samples that share the same genotype.
 
-The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two. 
+The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two.
 
 Note: within these MSNs, edge lengths are not proportional to SNP differences.
 :::
