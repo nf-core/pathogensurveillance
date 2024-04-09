@@ -66,7 +66,7 @@ user_column_name_prefix <- '__user_'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata_small.csv', 'test_out.csv')
+# args <- list('test/data/metadata/nanopore_test.csv', 'test_out.csv')
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -187,12 +187,16 @@ is_present <- function(x) {
     x != '' & ! is.na(x)
 }
 remove_shared <- function(x) {
-    present_x <- x[is_present(x)]
-    shared_start <- shared_char(present_x, end = FALSE)
-    shared_end <- shared_char(present_x, end = TRUE)
-    present_x <- sub(present_x, pattern = paste0('^', shared_start), replacement = '')
-    present_x <- sub(present_x, pattern = paste0(shared_end, '$'), replacement = '')
-    x[is_present(x)] <- present_x
+    if (length(x) > 1) {
+        present_x <- x[is_present(x)]
+        shared_start <- shared_char(present_x, end = FALSE)
+        shared_end <- shared_char(present_x, end = TRUE)
+        present_x <- sub(present_x, pattern = paste0('^', shared_start), replacement = '')
+        present_x <- sub(present_x, pattern = paste0(shared_end, '$'), replacement = '')
+        x[is_present(x)] <- present_x
+    } else {
+        x = basename(x)
+    }
     return(x)
 }
 remove_file_extensions <- function(x) {
@@ -325,7 +329,7 @@ metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:
 
 # Add user-supplied data as columns with modified names
 cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
-unmodified_data <- metadata_original[, cols_to_add]
+unmodified_data <- metadata_original[, cols_to_add, drop = FALSE]
 colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
 metadata <- cbind(metadata, unmodified_data)
 
