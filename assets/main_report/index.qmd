@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "~/pathogensurveillance/assets/main_report/_test_data/xanthomonas/xan_test_inputs"
+  inputs: "_test_data/xanthomonas/xan_test_inputs"
 execute:
   echo: false
 ---
@@ -403,42 +403,43 @@ More info will be added later.
 snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
 
-```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
 
+
+```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 total_alignments <- length(snp_alignments)
 
-for (i in seq_along(snp_alignments)) {
-  cat(paste0('::: panel-tabset\n### ', names(snp_alignments)[i], '\n\n'))
-  cat(':::\n')
-
-  if (nrow(snp_alignments[[i]]) > 4) {
-    for (threshold_index in seq_along(threshold_options)) {
-      threshold <- threshold_options[threshold_index]
-
-      cat(paste0('\n#### Relative SNP difference: ', threshold, '\n\n'))
-
-      a_plot <- psminer::make_MSN(snp_alignments[[i]], sample_data, user_seed = 2, snp_diff_prop = threshold)
-      if (knitr::is_html_output()) {
-        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
-      } else {
-        print(a_plot)
-      }
-      cat('\n')
-      if (threshold_index == length(threshold_options) && i < total_alignments) {
-        cat(':::\n')
-      }
-    }
-  } else {
-    cat("SNP alignment contains fewer than 4 samples, not including the reference. Skipping MSN plot generation.\n\n")
-    if (i < total_alignments) {
-      cat(':::\n')
-    }
-  }
+color_factors <- as.list(unique(unlist(strsplit(sample_data$color_by, split = ';'))))
+if (length(color_factors) == 0) {
+    color_factors <- list(NULL)
 }
 
+cat('::: panel-tabset\n')
 
+for (color_by in color_factors) {
+    
+    # Print title of tab
+    if (is.null(color_by)) {
+        title <- 'MSN'
+    } else {
+        title <- color_by
+    }
+    cat(paste0('### ', color_by, '\n\n'))
+    
+    # Plot for each reference
+    for (reference in names(snp_alignments)) {
+        if (nrow(snp_alignments[[i]]) > 4) {
+            plot_one <- function(threshold) {
+                psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
+            }
+            print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
+        }
+    }
+}
+
+cat(':::\n')
 ```
+
 
 ```{r, results='asis', eval = length(snp_alignments) > 0}
 cat('
@@ -461,6 +462,7 @@ cat('
 Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
 ')
 ```
+
 
 # References
 
