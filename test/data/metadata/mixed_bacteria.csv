@@ -1,4 +1,4 @@
-﻿sample_id,sra,color_by,species,organism_group,country_orgin
+sample_id,sra,color_by,species,organism_group,country_orgin
 SAMEA882278,ERR024824,species,k_pneumoniae,bacteria,Australia
 SAMEA882280,ERR024826,species,k_pneumoniae,bacteria,Australia
 SAMEA882273,ERR024827,species,k_pneumoniae,bacteria,Australia
@@ -13,10 +13,7 @@ SAMN11100996,SRR12574846,species,m_abscessus,bacteria,NA
 SAMN11100995,SRR12574847,species,m_abscessus,bacteria,NA
 SAMN11100994,SRR12574848,species,m_abscessus,bacteria,NA
 SAMN11100993,SRR12574849,species,m_abscessus,bacteria,NA
-SAMN11100974,SRR9213989,species,m_avium_comp,bacteria,NA
-SAMN11100972,SRR9213993,species,m_avium_comp,bacteria,NA
 SAMN11100937,SRR9213994,species,m_avium_comp,bacteria,NA
-SAMN11100944,SRR9213996,species,m_avium_comp,bacteria,NA
 SAMN11100940,SRR9213982,species,m_avium_comp,bacteria,NA
 SAMN11100967,SRR9213983,species,m_avium_comp,bacteria,NA
 SAMEA3880302,ERR1556258,species,n_meningitidis,bacteria,NA
