@@ -4,17 +4,17 @@ include { INITIAL_CLASSIFICATION } from '../../modules/local/initial_classificat
 workflow COARSE_SAMPLE_TAXONOMY {
 
     take:
-    ch_reads  // channel: [ val(meta), [ file(reads) ] ]
+    ch_reads  // meta, [shortread], nanopore, pacbio
 
     main:
     ch_versions = Channel.empty()
 
-    BBMAP_SENDSKETCH ( ch_reads )
+    BBMAP_SENDSKETCH ( ch_reads.map { [it[0], it[1..3].findAll{it != null}[0] ] } ) // NOTE: will not work correctly for hybrid assemblies
     ch_versions = ch_versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
     ch_depth = BBMAP_SENDSKETCH.out.hits
         .map { [it[0], it[2]] }
-    ch_hits = BBMAP_SENDSKETCH.out.hits                                        
-        .map { [it[0], it[1]] }                                                 
+    ch_hits = BBMAP_SENDSKETCH.out.hits
+        .map { [it[0], it[1]] }
 
     INITIAL_CLASSIFICATION ( ch_hits )
     ch_versions = ch_versions.mix(INITIAL_CLASSIFICATION.out.versions.toSortedList().map{it[0]})
