@@ -63,6 +63,7 @@ include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { SEQKIT_SLIDING              } from '../modules/nf-core/seqkit/sliding/main'
 
 include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
@@ -83,8 +84,8 @@ workflow PATHOGENSURVEILLANCE {
 
     ch_versions = Channel.empty()
     // Initalize messages channel with headers
-    //     Note that at least one value (this header) is needed so that modlues that require this are run
-    messages = Channel.fromList([[[id: 'sample_id'], [id: 'group_id'], [id: 'ref_id'], 'workflow', 'level', 'message']])
+    //     Note that at least one value is needed so that modlues that require this are run
+    messages = Channel.fromList([])
 
     // Read in samplesheet, validate and stage input files
     INPUT_CHECK (
@@ -108,11 +109,21 @@ workflow PATHOGENSURVEILLANCE {
         .combine( INPUT_CHECK.out.sample_data.map { [it[5], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
         .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
 
+    // Cutting up long reads
+    nanopore = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
+        .filter { it[2] != null }
+        .map { [it[0], it[2]] } // ref_meta, reference_refseq
+        .unique()
+
+    SEQKIT_SLIDING ( nanopore )
+
+
     // Replace NCBI SRAs/Assembly accessions with downloaded reads and references
     ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
         .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
         .join(ch_downloaded_refs, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
-        .map { [it[0], it[9] ?: it[1], it[5], it[10] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
+        .join(SEQKIT_SLIDING.out.fastx, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref, nanopore
+        .map { [it[0], [it[9], it[1], it[11]].findAll {it != null}, it[5], it[10] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
@@ -228,7 +239,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Save error/waring/message info
     RECORD_MESSAGES (
-        messages.collect(sort:true, flat:false)
+        messages.collect(flat:false)
     )
 
     // Create main summary report

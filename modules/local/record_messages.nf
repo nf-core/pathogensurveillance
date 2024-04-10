@@ -18,6 +18,7 @@ process RECORD_MESSAGES {
 
     script:
     def text = messages
+        .findAll { it != [] } // Remove placeholder item added so that this module is run even if there are no messages
         .collect { [it[0] == null ? "NA" : it[0].id, // replace full meta with just IDs
                 it[1] == null ? "NA" : it[1].id,
                 it[2] == null ? "NA" : it[2].id,
@@ -25,6 +26,7 @@ process RECORD_MESSAGES {
         .collect {it.join('\t')}
         .join('\n')
     """
+    echo -e "sample_id\tgroup_id\tref_id\tworkflow\tlevel\tmessage" >> messages.tsv
     echo "${text}" >> messages.tsv
     """
 }

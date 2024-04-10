@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/00/81d71bfa71e6e627ba660ca907b4ed/all_inputs"
 execute:
   echo: false
 ---
@@ -390,15 +390,13 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{asis div_no_snp_phylo, echo = length(snp_trees) <= 0}
-cat('
-There is no tree to draw, probably because there were too few samples.
-More info will be added later.
-')
+```{r div_no_snp_phylo, eval = length(snp_trees) <= 0}
+cat('There is no tree to draw. See staus messages at the start of the report for details.')
 ```
 
 
 ## Minimum spanning network
+
 ```{r parse_snp_align}
 snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 ```
@@ -409,7 +407,8 @@ snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 total_alignments <- length(snp_alignments)
 
-color_factors <- as.list(unique(unlist(strsplit(sample_data$color_by, split = ';'))))
+color_col <- as.character(sample_data$color_by[!is.na(sample_data$color_by)])
+color_factors <- as.list(unique(unlist(strsplit(color_col, split = ';'))))
 if (length(color_factors) == 0) {
     color_factors <- list(NULL)
 }
@@ -424,15 +423,17 @@ for (color_by in color_factors) {
     } else {
         title <- color_by
     }
-    cat(paste0('### ', color_by, '\n\n'))
+    cat(paste0('### ', title, '\n\n'))
     
     # Plot for each reference
     for (reference in names(snp_alignments)) {
-        if (nrow(snp_alignments[[i]]) > 4) {
+        if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
             plot_one <- function(threshold) {
                 psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
             }
             print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
+        } else {
+            cat('There is no MSN to draw. See staus messages at the start of the report for details.\n\n')
         }
     }
 }
