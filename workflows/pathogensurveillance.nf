@@ -112,7 +112,7 @@ workflow PATHOGENSURVEILLANCE {
     // Cutting up long reads
     nanopore = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
         .filter { it[2] != null }
-        .map { [it[0], it[2]] } // ref_meta, reference_refseq
+        .map { [it[0], it[2]] } // meta, nanopore
         .unique()
 
     SEQKIT_SLIDING ( nanopore )

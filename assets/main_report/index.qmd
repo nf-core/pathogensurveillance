@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/00/81d71bfa71e6e627ba660ca907b4ed/all_inputs"
+  inputs: "_test_data/xanthomonas/xan_test_inputs"
 execute:
   echo: false
 ---
@@ -433,12 +433,12 @@ for (color_by in color_factors) {
             }
             print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
         } else {
-            cat('There is no MSN to draw. See staus messages at the start of the report for details.\n\n')
+            cat('There is no MSN to draw. See staus messages at the start of the report for details.\n')
         }
     }
 }
 
-cat(':::\n')
+cat('\n:::\n')
 ```
 
 
