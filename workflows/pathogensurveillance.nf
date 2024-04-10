@@ -123,7 +123,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
         .join(ch_downloaded_refs, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
         .join(SEQKIT_SLIDING.out.fastx, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref, nanopore
-        .map { [it[0], [it[9], it[1], it[11]].findAll {it != null}, it[5], it[10] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
+        .map { [it[0], [it[9], it[1], it[11]].findAll {it != null}[0], it[5], it[10] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
 
     ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
         .map { it[0..1] }
