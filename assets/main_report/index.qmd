@@ -427,6 +427,7 @@ for (color_by in color_factors) {
     
     # Plot for each reference
     for (reference in names(snp_alignments)) {
+         cat(paste0('#### **', nrow(snp_alignments[[reference]]), ' samples aligned to "', reference, '":** \n\n'))
         if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
             plot_one <- function(threshold) {
                 psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
