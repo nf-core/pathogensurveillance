@@ -44,8 +44,11 @@ workflow BUSCO_PHYLOGENY {
 
     // Create directories for Read2Tree
     R2TDIR (
-        R2TF.out.collect().view()
+        R2TF.out.output
+            .map {it[1]}
+            .collect()
         )
+
     // Run Read2tree
     // READ2TREE ( )
 
