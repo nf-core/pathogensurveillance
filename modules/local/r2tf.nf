@@ -32,7 +32,8 @@ process R2TF {
 
         # Extracting file name
         fasta=\$(echo \$fastafile | awk -F ':' '{print \$1}')
-        header=\$(grep '>' \$fasta)
+        buscoid=\$(basename \$fasta .fna)
+	header=\$(grep '>' \$fasta)
             
         # Genearting a unique IDentifier
         #NUM=\$(echo \$fasta | cut -d 'a' -f1)
@@ -43,7 +44,7 @@ process R2TF {
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$fasta \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_ntformatted.fa
+        sed "s/\$header/>\$buscoid \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_ntformatted.fa
     done <<< \$fna
 
 
@@ -54,6 +55,7 @@ process R2TF {
 
         # Extracting file name
         fasta=\$(echo \$fastafile | awk -F ':' '{print \$1}')
+	buscoid=\$(basename \$fasta .faa)
         header=\$(grep '>' \$fasta)
 
         # Genearting a unique IDentifier
@@ -65,7 +67,7 @@ process R2TF {
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$fasta \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_aaformatted.fa
+        sed "s/\$header/>\$buscoid \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_aaformatted.fa
     done <<< \$faa
     """
 }
