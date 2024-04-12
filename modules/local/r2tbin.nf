@@ -1,5 +1,5 @@
 process R2TBIN {
-    tag "all"
+    tag "$markers"
     label 'process_single'
 
     conda "conda-forge::coreutils=9.1"
@@ -11,7 +11,7 @@ process R2TBIN {
     path markers
 
     output:
-    path "r2t_markers", emit: busco_markers 
+    path "busco_markers", emit: busco_markers 
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,5 +20,6 @@ process R2TBIN {
     """
     mkdir busco_markers
     python r2tbinder.py
+    mv *.fasta busco_markers/
     """
 }
