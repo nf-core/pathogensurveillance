@@ -11,17 +11,19 @@ process R2TF {
     tuple val(ref_meta), path(busco_dir)
 
     output:
-    tuple val(ref_meta), path("*ntformatted.fa"), emit: nt
-    tuple val(ref_meta), path("*aaformatted.fa"), emit: aa
+    tuple val(ref_meta), path("${outdir}"), emit: output
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
+    outdir = "${prefix}_r2tf_out"
     """
     # Defining codex
     CODEX=${ref_meta.id}
+
+    mkdir ${outdir}
 
     fna=\$(grep '^>' ${busco_dir}/\${CODEX}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
 
@@ -41,7 +43,7 @@ process R2TF {
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$ID \\| [\$CODEX]/" "\$fasta" >> \${CODEX}_ntformatted.fa
+        sed "s/\$header/>\$fasta \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_ntformatted.fa
     done <<< \$fna
 
 
@@ -63,7 +65,7 @@ process R2TF {
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$ID \\| [\$CODEX]/" "\$fasta" >> \${CODEX}_aaformatted.fa
+        sed "s/\$header/>\$fasta \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_aaformatted.fa
     done <<< \$faa
     """
 }
