@@ -40,7 +40,6 @@ library(webshot2)
 library(metacoder)
 library(ggdendro)
 library(rcrossref)
-devtools::load_all("~/psminer")
 library(psminer)
 ```
 
