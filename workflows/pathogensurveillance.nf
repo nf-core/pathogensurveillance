@@ -175,11 +175,11 @@ workflow PATHOGENSURVEILLANCE {
         .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(ref_meta), val(meta), file(gff) ]
         .map { it[1..2] } // [ val(meta), file(gff) ]
         .groupTuple() // [ val(meta), [file(gff)] ]
-    gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
-        .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
-        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]
+    gff_and_group = ASSIGN_REFERENCES.out.sample_data // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
+        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, gff
+        .combine(ref_gffs, by: 0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, gff, ref_gff
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, gff, ref_gff, depth
+        .map { [it[0], it[7], it[6], it[8], it[9]] } // meta, gff, group_meta, [ref_gff], depth
     CORE_GENOME_PHYLOGENY (
         gff_and_group,
         INPUT_CHECK.out.csv
@@ -191,11 +191,11 @@ workflow PATHOGENSURVEILLANCE {
     ref_metas = DOWNLOAD_REFERENCES.out.assem_samp_combos // val(ref_meta), val(meta)
         .map { [it[1], it[0]] } // val(meta), val(ref_meta)
         .groupTuple() // val(meta), [val(ref_meta)]
-    busco_input = ASSIGN_REFERENCES.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
-        .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)]
-        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
-        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
-        .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
+    busco_input = ASSIGN_REFERENCES.out.sample_data // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
+        .combine(ref_metas, by: 0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, ref_meta
+        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, ref_meta, kingdom
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, ref_meta, kingdom, depth
+        .map { it[0..3] + it[6..9] } // meta, [shortread], nanopore, pacbio, group_meta, ref_meta, kingdom, depth
     //BUSCO_PHYLOGENY (
     //    busco_input,
     //    DOWNLOAD_REFERENCES.out.sequence
@@ -235,25 +235,25 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Create main summary report
-    report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
-        .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
-        .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch, ref_stats
-        .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats
-        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats, quast
-        .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, ref_stats, quast
-        .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
+    report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
+        .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, sendsketch
+        .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta, sendsketch, ref_stats
+        .map { [it[4]] + it[0..3] + it[5..8] } // ref_meta, meta, [shortread], nanopore, pacbio, reference, group_meta, sendsketch, ref_stats
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, [shortread], nanopore, pacbio, reference, group_meta, sendsketch, ref_stats, quast
+        .map { [it[6]] + it[0..5] + it[7..9]} // group_meta, ref_meta, meta, [shortread], nanopore, pacbio, reference, sendsketch, ref_stats, quast
+        .groupTuple() // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast]
     report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, core_phylo
         .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder:true) // group_meta, ani_matrix, core_phylo, popc
         .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, core_phylo, pocp, assigned_refs
-    report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
-        .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-        .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, passigned_refs
-        .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
-        .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
+    report_in = report_samp_data // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast]
+        .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
+        .map { it.size() == 14 ? it : it[0..9] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, passigned_refs
+        .map { it.size() == 18 ? it : it[0..13] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [shortread], [nanopore], [pacbio], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
+        .map { it[0..1] + it[7..9] + it[11..17] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
         .map { [
             it[0],
             it[1].findAll{ it.id != null }.unique(),
