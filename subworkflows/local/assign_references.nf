@@ -95,7 +95,8 @@ workflow ASSIGN_REFERENCES {
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_GROUP_REFERENCES (
-        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs)
+        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
+        params.min_ref_ani
     )
 
     // Convert CSV output back to nextflow channels
