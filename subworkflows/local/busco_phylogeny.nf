@@ -3,6 +3,7 @@ include { BUSCO_DOWNLOAD } from '../../modules/local/busco_download'
 include { READ2TREE      } from '../../modules/local/read2tree/main'
 include { R2TF           } from '../../modules/local/r2tf'
 include { R2TDIR         } from '../../modules/local/r2tdir'
+include { R2TBIN         } from '../../modules/local/r2tbin'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -48,7 +49,10 @@ workflow BUSCO_PHYLOGENY {
             .map {it[1]}
             .collect()
         )
-
+    // Bin busco files by genes
+    R2TBIN (
+        R2TDIR.out.markers
+    )
     // Run Read2tree
     // READ2TREE ( )
 

@@ -37,4 +37,4 @@ def bin_fasta_files(fasta_files_pattern):
                 file.write(f"{header}\n")
                 file.write('\n'.join(seq_lines) + '\n')
 # Example usage
-bin_fasta_files("./aa_sequences/*.fa")
+bin_fasta_files("./markers/*.fa")
