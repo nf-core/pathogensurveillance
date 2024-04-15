@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python
 
 import glob
 from collections import defaultdict
@@ -37,4 +37,4 @@ def bin_fasta_files(fasta_files_pattern):
                 file.write(f"{header}\n")
                 file.write('\n'.join(seq_lines) + '\n')
 # Example usage
-bin_fasta_files("*.fa")
+bin_fasta_files("r2t_markers/*.fa")

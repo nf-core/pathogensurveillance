@@ -1,11 +1,11 @@
 process R2TBIN {
-    tag "$markers"
+    tag "markers"
     label 'process_single'
 
-    conda "conda-forge::coreutils=9.1"
+    conda (params.enable_conda ? "conda-forge::biopython=1.78" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-        'nf-core/ubuntu:20.04' }"
+        'https://depot.galaxyproject.org/singularity/biopython:1.78' :
+        'biocontainers/biopython:1.78' }"
 
     input:
     path markers
@@ -19,7 +19,6 @@ process R2TBIN {
     script:
     """
     mkdir busco_markers
-    python r2tbinder.py
-    mv *.fasta busco_markers/
+    r2tbinder.py
     """
 }
