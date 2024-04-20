@@ -9,25 +9,24 @@ include { SEQKIT_SLIDING         } from '../../modules/nf-core/seqkit/sliding/ma
 workflow VARIANT_ANALYSIS {
 
     take:
-    input // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-    ch_samplesheet // channel: path
+    input // meta, [reads], ref_meta, reference, group_meta
+    ch_samplesheet // path
 
     main:
     ch_versions = Channel.empty()
     messages = Channel.empty()
 
     // Cutting up long reads
-    longreads = input // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-        .filter { it[2] != null || it[3] != null } // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-    SEQKIT_SLIDING ( longreads.map { [it[0], it[2] ?: it[3]] } )
+    longreads = input // meta, [reads], ref_meta, reference, group_meta
+        .filter { it[0].reads_type != "illumina" }
+    SEQKIT_SLIDING ( longreads.map { it[0..1] } )
 
-    chopped_reads = SEQKIT_SLIDING.out.fastx // meta, fastqs
-        .join(longreads) // meta, fastqs, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-        .map { it[0..1] + it[5..7] } // meta, [fastqs], ref_meta, reference, group_meta
+    chopped_reads = SEQKIT_SLIDING.out.fastx // meta, [chopped_reads]
+        .join(longreads) // meta, [chopped_reads], [reads], ref_meta, reference, group_meta
+        .map { it[0..1] + it[3..5] } // meta, [fastqs], ref_meta, reference, group_meta
 
     sample_data = input
-        .filter { it[1] != null }
-        .map { it[0..1] + it[4..6] } // meta, [fastqs], ref_meta, reference, group_meta
+        .filter { it[0].reads_type == "illumina" }
         .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, group_meta
 
     // Remove any samples that do not have reference information

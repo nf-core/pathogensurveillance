@@ -12,11 +12,10 @@
 known_columns <- c(
     'sample_id',
     'sample_name',
-    'shortread_1',
-    'shortread_2',
-    'nanopore',
-    'pacbio',
-    'sra',
+    'reads_1',
+    'reads_2',
+    'reads_sra',
+    'reads_type',
     'reference_id',
     'reference_name',
     'reference',
@@ -28,14 +27,15 @@ known_columns <- c(
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
 required_input_columns <- list(
-    c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra')
+    c('reads_1', 'reads_2', 'reads_sra'),
+    c('reads_type')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
 # If a regular expression matches multiple columns, then both matches can have a value
 mutually_exclusive_columns <- list(
     c('reference', 'reference_refseq'),
-    c('shortread_[12]', 'nanopore', 'sra', 'pacbio')
+    c('reads_[12]', 'reads_sra')
 )
 
 # These are file extensions that are expected in the input data.
@@ -49,6 +49,14 @@ known_extensions <- c(
     '.fasta.gz',
     '.fa',
     '.fa.gz'
+)
+
+# Types of sequencing supported by the pipeline.
+# This is case insensitive
+known_read_types <- c(
+    'illumina',
+    'nanopore',
+    'pacbio'
 )
 
 # Regular expression for characters that cannot appear in IDs
@@ -66,7 +74,7 @@ user_column_name_prefix <- '__user_'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata/nanopore_test.csv', 'test_out.csv')
+# args <- list('test/data/metadata/wagner_2023.csv', 'test_out.csv')
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -204,20 +212,20 @@ remove_file_extensions <- function(x) {
     all_ext_pattern <- gsub(all_ext_pattern, pattern = '.', replacement = '\\.', fixed = TRUE)
     return(gsub(x, pattern = all_ext_pattern, replacement = ''))
 }
-shortread_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
-    shortread_1 <- basename(metadata$shortread_1[row_index])
-    shortread_2 <- basename(metadata$shortread_2[row_index])
-    if (is_present(shortread_1) && is_present(shortread_2)) {
+reads_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
+    reads_1 <- basename(metadata$reads_1[row_index])
+    reads_2 <- basename(metadata$reads_2[row_index])
+    if (is_present(reads_1) && is_present(reads_2)) {
         remove_different_parts <- function(a, b) {
-            a_split <- strsplit(shortread_1, split = '')[[1]]
-            b_split <- strsplit(shortread_2, split = '')[[1]]
+            a_split <- strsplit(reads_1, split = '')[[1]]
+            b_split <- strsplit(reads_2, split = '')[[1]]
             paste0(a_split[a_split == b_split], collapse = '')
         }
-        shortread <- remove_different_parts(shortread_1, shortread_2)
-    } else if (is_present(shortread_1)) {
-        shortread <- shortread_1
-    } else if (is_present(shortread_2)) {
-        shortread <- shortread_2
+        shortread <- remove_different_parts(reads_1, reads_2)
+    } else if (is_present(reads_1)) {
+        shortread <- reads_1
+    } else if (is_present(reads_2)) {
+        shortread <- reads_2
     } else {
         shortread <- ''
     }
@@ -225,10 +233,8 @@ shortread_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
 id_sources <- list( # These are all possible sources of IDs, ordered by preference
     metadata$sample_id,
     metadata$sample_name,
-    metadata$sra,
-    remove_file_extensions(remove_shared(metadata$nanopore)),
-    remove_file_extensions(remove_shared(metadata$pacbio)),
-    remove_file_extensions(remove_shared(shortread_ids))
+    metadata$reads_sra,
+    remove_file_extensions(remove_shared(reads_ids))
 )
 metadata$sample_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
     ids <- unlist(lapply(id_sources, `[`, row_index))
@@ -272,7 +278,7 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)
 }
-metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra'))
+metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('reads_1', 'reads_2', 'reads_sra'))
 
 # Ensure reference IDs are present
 ref_id_sources <- list( # These are all possible sources of IDs, ordered by preference
@@ -326,6 +332,28 @@ if (all(!is_present(metadata$report_group))) {
 # Remove whitespace in report group ids
 metadata$report_group <- trimws(metadata$report_group)
 metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:space:]]+', replacement = ';')
+
+# Validate reads_type column
+metadata$reads_type <- unlist(lapply(seq_along(metadata$reads_type), function(index) {
+    is_seq_type <- unlist(lapply(known_read_types, function(type) {
+        grepl(metadata$reads_type[index], pattern = type, ignore.case = TRUE)
+    }))
+    if (sum(is_seq_type) == 0) {
+        stop(call. = FALSE, paste0(
+            'The value in the "reads_type" column on row ', index, ' does not contain a known sequence type. ',
+            'One of the following words must appear (case insensitive):\n',
+            paste0('"', known_read_types, '"', collapse = ', '), '\n'
+        ))
+    }
+    if (sum(is_seq_type) > 1) {
+        stop(call. = FALSE, paste0(
+            'The value in the "reads_type" column on row ', index, ' contains the names of multiple sequencing types. ',
+            'Exactly one of the following words must appear (case insensitive):\n',
+            paste0('"', known_read_types, '"', collapse = ', '), '\n'
+        ))
+    }
+    return(known_read_types[is_seq_type])
+}))
 
 # Add user-supplied data as columns with modified names
 cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]

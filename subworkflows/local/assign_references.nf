@@ -8,22 +8,19 @@ include { SUBSET_READS                                } from '../../modules/loca
 workflow ASSIGN_REFERENCES {
 
     take:
-    sample_data  // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-    assem_samp_combos // [val(ref_meta), val(meta)] for each unique combination
-    sequence // [val(ref_meta), file(fna)] for each assembly
-    signatures // [val(ref_meta), file(sig)] for each assembly
-    depth // [val(meta), val(depth)] for each sample
+    sample_data // meta, [reads], ref_meta, reference, group_meta
+    assem_samp_combos // ref_meta, meta, for each unique combination
+    sequence // ref_meta, fna, for each assembly
+    signatures // ref_meta, sig, for each assembly
+    depth // meta, depth, for each sample
 
     main:
     ch_versions = Channel.empty()
     messages = Channel.empty()
 
-    parsed_sample_data = sample_data
-        .map { [it[0], it[1..3].findAll{it != null}[0]] + it[4..6] } // meta, [fastqs], ref_meta, reference, group_meta
-
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        parsed_sample_data // meta, [fastqs], ref_meta, reference, group_meta
+        sample_data // meta, [fastqs], ref_meta, reference, group_meta
             .map { it[0..1] } // meta, [fastqs]
             .combine(depth, by:0) // meta, [fastq], depth (possibly duplicated)
             .unique(),
@@ -44,7 +41,7 @@ workflow ASSIGN_REFERENCES {
     ch_versions = ch_versions.mix(SOURMASH_SKETCH_READS.out.versions)
 
     // Create signature for each user-defined reference genome
-    user_refs = parsed_sample_data
+    user_refs = sample_data
         .filter { it[3] != null }
         .map { it[2..3] } // val(ref_meta), file(ref)
         .unique()
@@ -54,7 +51,7 @@ workflow ASSIGN_REFERENCES {
     ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions)
 
     // Make list of user-defined reference signatures for each group
-    user_sigs = parsed_sample_data
+    user_sigs = sample_data
         .map { [it[2], it[4]] } // ref_meta, group_meta
         .combine(SOURMASH_SKETCH_GENOME.out.signatures, by: 0) // ref_meta, group_meta, sig
         .map { it[1..2] }  // [group_meta, sig], possibly duplicated
@@ -62,7 +59,7 @@ workflow ASSIGN_REFERENCES {
         .groupTuple() // group_meta, [sig]
 
     // Make list of sample signatures for each group
-    sample_sigs = parsed_sample_data
+    sample_sigs = sample_data
         .combine(SOURMASH_SKETCH_READS.out.signatures, by: 0)
         .map { [it[4], it[5]] }
         .groupTuple() // group_meta, [sig]
@@ -71,7 +68,7 @@ workflow ASSIGN_REFERENCES {
     assem_sigs = assem_samp_combos
         .combine(signatures, by: 0)
         .map { [it[1], it[0], it[2]] } // meta, assem, sig
-        .combine(parsed_sample_data, by: 0) // meta, assem, sig, fastq, ref_meta, ref, group_meta
+        .combine(sample_data, by: 0) // meta, assem, sig, fastq, ref_meta, ref, group_meta
         .map { [it[6], it[2]] } // group_meta, sig
         .groupTuple() // group_meta, [sig]
         .map { [it[0], it[1].unique()] }
@@ -92,7 +89,7 @@ workflow ASSIGN_REFERENCES {
     ch_versions = ch_versions.mix(SOURMASH_COMPARE.out.versions)
 
     // Make file with smaple IDs and user-defined references or NA for each group
-    samp_ref_pairs = parsed_sample_data
+    samp_ref_pairs = sample_data
         .collectFile() { item -> [ "${item[4].id}.csv", "${item[0].id},${item[2].id ?: 'NA'}\n" ] }
         .map {[[id: it.getSimpleName()], it]} // TODO this recreates the group_meta, but if other feilds besids "id" are added this will not preserve those
 
@@ -109,14 +106,14 @@ workflow ASSIGN_REFERENCES {
         .map { [it[0].id] + it[1] } // [val(sample_id), val(group_id), val(reference_id)]
 
     // Convert IDs back into full meta
-    id_meta_key = parsed_sample_data
+    id_meta_key = sample_data
         .map { [it[4].id, it[0].id, it[4], it[0]] }
     assigned_refs = assigned_refs_ids
         .combine(id_meta_key, by: 0..1)
         .map { [it[4], it[3], it[2]] } // [val(meta), val(group_meta), val(ref_id)]
 
     // Add reference file based on ref_meta
-    user_refs = parsed_sample_data
+    user_refs = sample_data
         .filter { it[3] != null }
         .map { [it[2].id, it[2], it[3]] }
         .unique() // [val(ref_id), val(ref_meta), file(reference)]
@@ -131,22 +128,22 @@ workflow ASSIGN_REFERENCES {
         .map { it[1..4] }  // [val(meta), val(group_meta), val(ref_meta), file(reference)]
 
     // Recreate sample data with new references picked
-    new_parsed_sample_data = sample_data  // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-        .map { [it[0], it[6]] + it[1..3] } // meta, group_meta, [shortread], nanopore, pacbio
-        .combine ( assigned_refs_with_seq, by: 0..1 )// meta, group_meta, [shortread], nanopore, pacbio, ref_meta, reference
-        .map { [it[0]] + it[2..6] + [it[1]] } // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
+    new_sample_data = sample_data  // meta, [reads], ref_meta, reference, group_meta
+        .map { [it[0], it[4], it[1]] } // meta, group_meta, [reads]
+        .combine ( assigned_refs_with_seq, by: 0..1 ) // meta, group_meta, [reads], ref_meta, reference
+        .map { [it[0]] + it[2..4] + [it[1]] } // meta, [reads], ref_meta, reference, group_meta
 
     // Report any samples that could not be assigned a reference
-    no_ref_warnings = new_parsed_sample_data // meta, [shortread], nanopore, pacbio, ref_meta, reference, group_meta
-        .filter { it[5] == null }
-        .map { [it[0], it[6], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
+    no_ref_warnings = new_sample_data // meta, [reads], ref_meta, reference, group_meta
+        .filter { it[3] == null }
+        .map { [it[0], it[4], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
 
 
     emit:
-    sample_data   = new_parsed_sample_data                            // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    ani_matrix    = SOURMASH_COMPARE.out.csv                   // [val(group_meta), val(csv)]
-    assigned_refs = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs // [val(group_meta), val(csv)]
-    versions      = ch_versions                                // channel: [ versions.yml ]
+    sample_data   = new_sample_data                            // meta, [reads], ref_meta, reference, group_meta
+    ani_matrix    = SOURMASH_COMPARE.out.csv                   // group_meta, csv
+    assigned_refs = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs // group_meta, csv
+    versions      = ch_versions                                // versions
     messages      = messages                                   // meta, group_meta, ref_meta, workflow, level, message
 }
