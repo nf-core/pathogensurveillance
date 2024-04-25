@@ -48,13 +48,42 @@ workflow BUSCO_PHYLOGENY {
         R2TF.out.output
             .map {it[1]}
             .collect()
-        )
+    )
+
     // Bin busco files by genes
     R2TBIN (
         R2TDIR.out.markers
     )
+
+    // group samples
+    paired_end = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+        //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
+        .filter { it[1].size() == 2 }
+        .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
+        .map { [it[2], it[1].collect{it[0]}, it[1].collect{it[1]}] } // group_meta, pair_1, pair_2
+
+    single_end = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+        //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
+        .filter { it[1].size() == 1 }
+        .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
+        .map { [it[2], it[1]] } // group_meta, single_end
+
+    longread = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+        .filter { it[0].reads_type == "nanopore" || it[0].reads_type == "pacbio" }
+        .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
+        .map { [it[2], it[1]] } // group_meta, longread
+
+    rt2_input = paired_end
+        .join(single_end, remainder:true) // group_meta, pair_1, pair_2, single_end
+        .join(longread, remainder:true) // group_meta, pair_1, pair_2, single_end, longread
+        .map { [it[0], it[1] ?: [], it[2] ?: [], it[3] ?: [], it[4] ?: []] } // replace nulls with []
+
+    rt2_db = R2TBIN.out.busco_markers.map { [[id: 'r2t_db'], it] }
+        .join( R2TDIR.out.dna_ref.map { [[id: 'r2t_db'], it] } )
+
+
     // Run Read2tree
-    // READ2TREE ( )
+    READ2TREE ( rt2_input, rt2_db )
 
 
     emit:

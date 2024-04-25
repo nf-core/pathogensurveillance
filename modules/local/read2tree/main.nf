@@ -8,9 +8,8 @@ process READ2TREE {
         'biocontainers/read2tree:0.1.5--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta),  path(fastq1, stageAs: 'read1_??.fa')
-    tuple val(meta2), path(fastq2, stageAs: 'read2_??.fa')
-    tuple val(meta3), path(markers) // directory with marker database
+    tuple val(meta),  path(paired_1, stageAs: 'paired_1_??.fa'), path(paired_2, stageAs: 'paired_2_??.fa'), path(single), path(long_reads)
+    tuple val(db_meta), path(markers), path(dna_ref) // directory with marker database
 
     output:
     tuple val(meta), path("${prefix}_read2tree"), emit: out
@@ -21,44 +20,64 @@ process READ2TREE {
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"   
-    // If the process detects only 1 species
-    if (fastq1.size() == 1) { 
+    prefix = task.ext.prefix ?: "${meta.id}"
+    def sample_count = paired_1.size() + single.size() + long_reads.size()
+    if (sample_count == 1) { // If the process detects only 1 species
         """
         read2tree \\
         --${args} \\
         --tree \\
-        --reads ${fastq1} ${fastq2} \\
+        --reads ${paired_1} ${paired_2} ${single} ${long_reads} \\
         --standlone_path ${markers} \\
         --output_path ${prefix}_read2tree
-        
+
         cat <<-END_VERSIONS > versions.yml
     	"${task.process}":
         	read2tree: \$(echo \$(read2tree --version))
     	END_VERSIONS
-        """   
-    // Otherwise, use multiple species mode
-    } else {
+        """
+    } else { // Otherwise, use multiple species mode
     	"""
     	# This creates the reference folder
-    	read2tree --standalone_path ${markers}/ --output_path ${prefix}_read2tree --reference  
-    
-    	# Add each sample
-    	for R1 in ${fastq1}; do
-        	R2=\$(echo \$R1 | sed 's/^read1_/read2_/')
+    	read2tree --standalone_path ${markers}/ --dna_reference ${dna_ref} --output_path ${prefix}_read2tree --reference
+
+    	# Add each paired end shortread sample
+    	for R1 in ${paired_1}; do
+        	R2=\$(echo \$R1 | sed 's/^paired_1_/paired_2_/')
         	read2tree \\
         	--standalone_path ${markers}/ \\
+            --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
         	--reads \$R1 \$R2
     	done
-    
-    	# Build tree          
+
+    	# Add each single end shortread sample
+    	for R1 in ${single}; do
+        	read2tree \\
+        	--standalone_path ${markers}/ \\
+            --dna_reference ${dna_ref} \\
+        	--output_path ${prefix}_read2tree \\
+        	--reads \$R1
+    	done
+
+    	# Add each long read sample
+    	for R1 in ${long_reads}; do
+        	read2tree \\
+        	--standalone_path ${markers}/ \\
+            --dna_reference ${dna_ref} \\
+        	--output_path ${prefix}_read2tree \\
+            --read_type long
+        	--reads \$R1
+    	done
+
+    	# Build tree
     	read2tree \\
     	--standalone_path ${markers}/ \\
+        --dna_reference ${dna_ref} \\
     	--output_path ${prefix}_read2tree -\\
     	-merge_all_mappings \\
     	--tree
-    
+
     	cat <<-END_VERSIONS > versions.yml
     	"${task.process}":
         	read2tree: \$(echo \$(read2tree --version))

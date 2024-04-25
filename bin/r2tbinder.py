@@ -20,18 +20,18 @@ def read_fasta(file_path):
 def bin_fasta_files(fasta_files_pattern):
     """Bins sequences from multiple FASTA files based on their common identifier in the headers."""
     all_sequences = defaultdict(list)
-    
+
     # Read all fasta files and accumulate sequences by header's common identifier
     for fasta_file in glob.glob(fasta_files_pattern):
         sequences = read_fasta(fasta_file)
         for header, sequence_lines in sequences.items():
             identifier = header.split('|')[0].strip()  # Extract the common identifier
             all_sequences[identifier].append((header, sequence_lines))
-    
+
     # Write binned sequences to separate files, each sequence retains its original header
     for identifier, headers_and_sequences in all_sequences.items():
         safe_identifier = identifier.replace(">", "").replace("|", "_").replace(" ", "_")[:20]  # Create a file-safe identifier
-        file_name = f"{safe_identifier}.fasta"
+        file_name = f"busco_markers/{safe_identifier}.fasta"
         with open(file_name, 'w') as file:
             for header, seq_lines in headers_and_sequences:
                 file.write(f"{header}\n")
