@@ -85,7 +85,7 @@ workflow PATHOGENSURVEILLANCE {
     ch_versions = Channel.empty()
     // Initalize messages channel with headers
     //     Note that at least one value is needed so that modlues that require this are run
-    messages = Channel.fromList([])
+    messages = Channel.fromList([[]])
 
     // Read in samplesheet, validate and stage input files
     INPUT_CHECK (

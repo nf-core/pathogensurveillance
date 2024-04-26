@@ -44,7 +44,7 @@ library(psminer)
 ```
 
 ```{r parse_inputs}
-group_path <-file.path(params$inputs, "group_id.txt")
+group_path <- file.path(params$inputs, "group_id.txt")
 sample_data_path <- file.path(params$inputs, "samp_data.csv")
 ref_data_path <- file.path(params$inputs, "ref_data")
 assigned_refs_path <- file.path(params$inputs, "assigned_refs.csv")
