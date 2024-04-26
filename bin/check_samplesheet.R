@@ -80,6 +80,21 @@ if (nrow(metadata_original) == 0) {
 colnames(metadata_original) <- trimws(colnames(metadata_original))
 metadata_original[] <- lapply(metadata_original, trimws)
 
+# Preserve original column names
+unmodified_data <- metadata_original
+
+# Replace capital letters with lowercase in colnames
+colnames(metadata_original) <- tolower(colnames(metadata_original))
+
+# Replace spaces with underscores in colnames
+colnames(metadata_original) <- gsub(' ', '_', colnames(metadata_original))
+
+# Add underscores in common missed locations
+underscore_replace_key <- known_columns
+names(underscore_replace_key) <- gsub ('_', '', known_columns)
+colnames_to_replace <- underscore_replace_key[colnames(metadata_original)]
+colnames(metadata_original)[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
+
 # Replace NAs with empty stings
 metadata_original[] <- lapply(metadata_original, function(x) {
     x[is.na(x)] <- ''
@@ -329,7 +344,10 @@ metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:
 
 # Add user-supplied data as columns with modified names
 cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
-unmodified_data <- metadata_original[, cols_to_add, drop = FALSE]
+
+#since metadata_original may have been modified, using its column numbers as index for original user input
+unmodified_data <- unmodified_data[, colnames(metadata_original) %in% known_columns, drop= FALSE]
+
 colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
 metadata <- cbind(metadata, unmodified_data)
 
