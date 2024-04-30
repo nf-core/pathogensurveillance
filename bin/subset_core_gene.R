@@ -12,8 +12,8 @@ raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.n
 metadata <- read.csv(args$metadata, header = TRUE, sep = ',', row.names = NULL, check.names = FALSE)
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
-min_core_samps <- as.integer(args$min_core_samps)
-min_core_refs <- as.integer(args$min_core_refs)
+min_core_samps <- as.numeric(args$min_core_samps) #
+min_core_refs <- as.numeric(args$min_core_refs) #
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
