@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "/home/fosterz/Downloads/all_inputs"
 execute:
   echo: false
 ---
@@ -316,7 +316,7 @@ Currently, POCP is only calculated for Prokaryotes.
 ## Phylogenetic context
 
 This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
-The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identificaiton.
+The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
 
 ::: panel-tabset
 
@@ -349,24 +349,25 @@ Could not generate core genome phylogeny.
 
 # Genetic diversity
 
-## SNP trees
-```{r parse_snp_trees}
-# snp_tree_plots <- lapply(snp_trees, function(tree) {
-#     a_plot <- psminer::make_phylogeny(tree, sample_data, ref_data)
-#     if (knitr::is_html_output()) {
-#         return(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
-#     } else {
-#         return(print(a_plot))
-#     }
-# })
-snp_trees <- parse_snp_trees(snp_tree_paths, group)
+```{r parse_snp_align}
+snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
+n_variants <- unlist(lapply(snp_alignments, ncol))
+snp_ref_names <- unlist(lapply(names(snp_alignments), function(id) ref_data$reference_name[! is.na(ref_data$reference_name) & ref_data$reference_id == id]))
+names(snp_ref_names) <- names(snp_alignments)
 ```
 
+```{r parse_snp_trees}
+snp_trees <- parse_snp_trees(snp_tree_paths, group)
+n_samples <- unlist(lapply(snp_trees, function(tree) length(tree$tip.label) - 1))
+```
+
+## SNP trees
 
 ```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0, fig.height = 8}
-for (i in seq_along(snp_trees)) {
-    cat(paste0('::: panel-tabset\n### ', names(snp_trees)[i], '\n\n'))
-    a_plot <- psminer::make_phylogeny(snp_trees[[i]], sample_data, ref_data)
+for (id in names(snp_trees)) {
+    cat(paste0('::: panel-tabset\n### ', id, '\n\n'))
+    cat(paste0('#### **', n_samples[id], ' samples with ', n_variants[id], ' variants aligned to reference "', snp_ref_names[id], '":** \n\n'))
+    a_plot <- psminer::make_phylogeny(snp_trees[[id]], sample_data, ref_data)
     if (knitr::is_html_output()) {
         cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
     } else {
@@ -397,11 +398,6 @@ cat('There is no tree to draw. See staus messages at the start of the report for
 
 ## Minimum spanning network
 
-```{r parse_snp_align}
-snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
-```
-
-
 
 ```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
@@ -427,14 +423,14 @@ for (color_by in color_factors) {
     
     # Plot for each reference
     for (reference in names(snp_alignments)) {
-         cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
+        cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
         if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
             plot_one <- function(threshold) {
                 psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
             }
             print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
         } else {
-            cat('There is no MSN to draw. See staus messages at the start of the report for details.\n')
+            cat('There is no MSN to draw. See status messages at the start of the report for details.\n')
         }
     }
 }
