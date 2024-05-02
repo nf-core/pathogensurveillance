@@ -7,6 +7,7 @@ include { ALIGN_FEATURE_SEQUENCES   } from '../../modules/local/align_feature_se
 include { SUBSET_CORE_GENES         } from '../../modules/local/subset_core_genes'
 include { RENAME_CORE_GENE_HEADERS  } from '../../modules/local/rename_core_gene_headers'
 include { CALCULATE_POCP            } from '../../modules/local/calculate_pocp'
+include { FILES_IN_DIR              } from '../../modules/local/files_in_dir.nf'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -73,7 +74,8 @@ workflow CORE_GENOME_PHYLOGENY {
 
 
     // Align each gene family with mafft
-    MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    FILES_IN_DIR ( SUBSET_CORE_GENES.out.feat_seq.transpose() ) // group_meta, [genes]
+    MAFFT_SMALL ( FILES_IN_DIR.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes

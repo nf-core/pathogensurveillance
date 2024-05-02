@@ -1,4 +1,4 @@
-process CALCULATE_DEPTH {
+process FILES_IN_DIR {
     tag "$meta.id"
     label 'process_single'
 
@@ -8,22 +8,15 @@ process CALCULATE_DEPTH {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(fastqs), path(ref)
+    tuple val(meta), path(dir)
 
     output:
-    tuple val(meta), env(DEPTH), emit: depth
+    tuple val(meta), paste("${dir}/*"), emit: files
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    prefix = task.ext.prefix ?: "${meta.id}"
-    def args = task.ext.args ?: ''
     """
-    REF_WC=\$(zgrep -v '^>' ${ref} | wc -m)
-    READ_COUNT=\$(zgrep -c '@' ${fastqs[0]})
-    READ_LEN=\$(zgrep -m 1 '^[^@+#]' ${fastqs[0]} | wc -m)
-    DEPTH=\$((\$READ_COUNT * \$READ_LEN / \$REF_WC))
     """
 }
-
