@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bakta/bakta": {
                         "branch": "master",
-                        "git_sha": "bacae7f0c22948c6e34fa001be4481985851282f",
+                        "git_sha": "9d0f89b445e1f5b2fb30476f4be9a8b519c07846",
                         "installed_by": [
                             "modules"
                         ]

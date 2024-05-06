@@ -46,7 +46,7 @@ workflow GENOME_ASSEMBLY {
     ch_versions = ch_versions.mix(SPADES.out.versions.first())
 
     nanopore = subset_reads
-        .filter {it[0].id == "nanopore"}
+        .filter {it[0].reads_type == "nanopore"}
         .map { it[0..1] }
     FLYE_NANOPORE (
         nanopore,
@@ -54,7 +54,7 @@ workflow GENOME_ASSEMBLY {
     )
 
     pacbio = subset_reads
-        .filter {it[0].id == "pacbio"}
+        .filter {it[0].reads_type == "pacbio"}
         .map { it[0..1] }
     FLYE_PACBIO (
         pacbio,
