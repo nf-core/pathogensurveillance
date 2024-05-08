@@ -259,7 +259,7 @@ workflow PATHOGENSURVEILLANCE {
     report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
         .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
         .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, passigned_refs
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
         .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
         .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, core_phylo, pocp, assigned_refs
         .map { [
