@@ -2,18 +2,17 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/subgroup.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/subgroup_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/05/742d105a2c32516298767879e33bb4/samplesheet.valid.csv',
-#           '10', '0.8', '0.5', '100', 'subgroup_core_genes.tsv', 'subgroup_feat_seqs')
-names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes", "min_core_samps", "min_core_refs", "max_core_genes", "csv_output_path", "fasta_output_path")
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/samplesheet.valid.csv',
+#           '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = TRUE, sep = ',', row.names = NULL, check.names = FALSE)
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
-min_core_samps <- as.numeric(args$min_core_samps) #
-min_core_refs <- as.numeric(args$min_core_refs) #
+raw_gene_data1 <- raw_gene_data
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
@@ -21,77 +20,125 @@ all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
 sample_ids <- all_ids[all_ids %in% metadata$sample_id]
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
-# Get minimum number of samples and references that is acceptable
-min_core_samps <- ceiling(min_core_samps * length(sample_ids))
-min_core_refs <- ceiling(min_core_refs * length(ref_ids))
-
-# Remove rows that cannot meet the minimum number of genomes
-raw_gene_data <- raw_gene_data[raw_gene_data$number_genomes >= min_core_samps + min_core_refs, ]
-
-# Replace gene name columns for each sample/ref with number of genes found
-gene_data <- raw_gene_data
-gene_data[, all_ids] <- lapply(raw_gene_data[, all_ids], function(column) {
-    unlist(lapply(strsplit(column, split = '[;:]'), length))
+# Create matrix with number of genes for each gene in each sample
+cluster_data <- raw_gene_data1[, 23:ncol(raw_gene_data1)]
+cluster_data[, all_ids] <- lapply(cluster_data[, all_ids], function(column) {
+  unlist(lapply(strsplit(column, split = '[;:]'), length))
 })
 
-# Remove samples until a core genome is found
-gene_data_subset <- gene_data
-current_sample_ids <- sample_ids
-current_ref_ids <- ref_ids
-get_n_core_single <- function(ids) {
-    rowSums(gene_data_subset[, ids, drop = FALSE] == 1)
-}
-current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) &
-                              get_n_core_single(current_ref_ids) == length(current_ref_ids))
-while (current_core_genes < min_core_genes) {
-    # Temporary debugging output TODO: delete when done
-    # print(paste0('samples:  ', length(current_sample_ids)))
-    # print(paste0('refs:     ', length(current_ref_ids)))
-    # print(paste0('core:     ', current_core_genes))
-
-    # Find how many genes each sample are missing or multi-copy
-    n_bad_samp <- colSums(gene_data_subset[, current_sample_ids, drop = FALSE] != 1)
-    n_bad_ref <- colSums(gene_data_subset[, current_ref_ids, drop = FALSE] != 1)
-
-    # Remove worst sample/ref if possible, preferring to remove references
-    if (length(current_sample_ids) > min_core_samps && length(current_ref_ids) > min_core_refs) {
-        worst_id <- names(which.max(c(n_bad_samp, n_bad_ref)))
-    } else if (length(current_ref_ids) > min_core_refs) {
-        worst_id <- names(which.max(n_bad_ref))
-    } else if (length(current_sample_ids) > min_core_samps) {
-        worst_id <- names(which.max(n_bad_samp))
-    } else {
-        worst_id <- NULL
-        break
+# Create pairwise matrix of number of shared genes between all samples and references
+count_shared_genes <- function(data, sample_1, sample_2) {
+    if (length(sample_1) != length(sample_2)) {
+        stop("Arguments must be of same length.")
     }
+    unlist(lapply(seq_along(sample_1), function(i) {
+        if (sample_1[i] == sample_2[i]) {
+            return(NA_integer_)
+        } else {
+            return(sum(data[[sample_1[i]]] == 1 & data[[sample_2[i]]] == 1))
+        }
+    }))
+}
+calc_shared_gene_matrix <- function(data, sample_ids) {
+    names(sample_ids) <- sample_ids
+    outer(sample_ids, sample_ids, function(a, b) count_shared_genes(data, a, b))
+}
+shared_genes <- calc_shared_gene_matrix(cluster_data, all_ids)
 
-    # Remove worst sample/reference
-    gene_data_subset <- gene_data_subset[, colnames(gene_data_subset) != worst_id]
-    current_sample_ids <- current_sample_ids[current_sample_ids != worst_id]
-    current_ref_ids <- current_ref_ids[current_ref_ids != worst_id]
+# Initialize "clusters" with one sample each
+clustered_samples <- as.list(sample_ids)
+names(clustered_samples) <- sample_ids # Sample IDs are also used for the initial cluster IDs
 
-    current_core_genes <- sum(get_n_core_single(current_sample_ids) == length(current_sample_ids) &
-                                  get_n_core_single(current_ref_ids) == length(current_ref_ids))
+# Add the reference with the largest number of genes shared with each sample
+#  This insures that at least 1 reference is included in each cluster
+clustered_samples <- lapply(clustered_samples, function(id) {
+    ref_id <- names(which.max(shared_genes[id, ]))
+    n_shared <- shared_genes[id, ref_id]
+    if (n_shared >= min_core_genes) {
+        return(c(id, ref_id))
+    } else {
+        return(id)
+    }
+})
+
+# Initialize shared gene matrix for clusters
+present_and_single <- as.data.frame(lapply(cluster_data, function(x) x == 1), check.names = FALSE)
+
+# Keep combining clusters until no more can be combined
+# NOTE: there probably is a more efficient way of doing this.
+#   This way was quick to code, but recalculates the shared genes between everything
+#   each time clusters are combined even though most of the matrix does not change or is not used.
+#   It would be faster to maintain and update a single table of shared gene counts for the clusters.
+get_cluster_tf <- function(clusters) {
+    as.data.frame(lapply(clusters, function(ids) {
+        apply(present_and_single[, ids, drop = FALSE], 1, all)
+    }), check.names = FALSE)
+}
+get_next_combination <- function(clusters, must_include = NULL) {
+    cluster_tf <- get_cluster_tf(clusters)
+    cluster_shared_genes <- calc_shared_gene_matrix(cluster_tf, names(clusters))
+    if (!is.null(must_include)) {
+        cluster_shared_genes <- cluster_shared_genes[must_include, , drop = FALSE]
+    }
+    max_shared <- max(cluster_shared_genes, na.rm = TRUE)
+    max_shared_index <- which(cluster_shared_genes == max_shared, arr.ind = TRUE)
+    to_combine <- c(rownames(cluster_shared_genes)[max_shared_index[1, "row"]],
+                    colnames(cluster_shared_genes)[max_shared_index[1, "col"]])
+    if (max_shared >= min_core_genes) {
+        return(to_combine)
+    } else {
+        return(NULL)
+    }
+}
+while (length(clustered_samples) > 1 && ! is.null(to_combine <- get_next_combination(clustered_samples))) {
+    clustered_samples[[to_combine[1]]] <- unique(unlist(clustered_samples[to_combine]))
+    clustered_samples[to_combine[2]] <- NULL
 }
 
+# Add as many references as possible to each cluster
+# NOTE: there probably is a more efficient way of doing this.
+#   This way was quick to code, but recalculates the shared genes between everything
+#   each time clusters are combined even though most of the matrix does not change or is not used.
+#   It would be faster to maintain and update a single table of shared gene counts for the clusters.
+clustered_samples <- lapply(names(clustered_samples), function(cluster_id) {
+    cluster_and_refs <- c(clustered_samples[cluster_id], setNames(ref_ids, ref_ids))
+    while (length(cluster_and_refs) > 1 && ! is.null(to_combine <- get_next_combination(cluster_and_refs, must_include = cluster_id))) {
+        cluster_and_refs[[to_combine[1]]] <- unique(unlist(cluster_and_refs[to_combine]))
+        cluster_and_refs[to_combine[2]] <- NULL
+    }
+    return(cluster_and_refs[[1]])
+})
 
-# Filter out non-core genes
-output <- raw_gene_data[get_n_core_single(current_sample_ids) == length(current_sample_ids) &
-                            get_n_core_single(current_ref_ids) == length(current_ref_ids), ]
+# Determine which cluster have both samples and references
+has_ref_and_samp <- unlist(lapply(clustered_samples, function(ids) {
+    any(ids %in% ref_ids) && any(ids %in% sample_ids)
+}))
+
+# Make subset Pirate output for clusters with both samples and references
+output_clusters <- lapply(clustered_samples[has_ref_and_samp], function(ids) {
+    is_core_gene <- rowSums(present_and_single[, ids]) == length(ids)
+    output <- raw_gene_data[is_core_gene, c(colnames(raw_gene_data)[1:22], ids)]
+    if (nrow(output) > max_core_genes) {
+        output <- output[1:max_core_genes, ]
+    }
+    return(output)
+})
+dir.create(args$csv_output_path, showWarnings = FALSE)
+for (index in seq_along(output_clusters)) {
+    out_path <- file.path(args$csv_output_path, paste0('cluster_', index, '.tsv'))
+    write.table(output_clusters[[index]], file = out_path, row.names = FALSE, sep = '\t', quote = FALSE)
+}
 
 # Save the IDs of any samples and references that were removed from the analysis
-removed_sample_ids <- sample_ids[! sample_ids %in% current_sample_ids]
-removed_ref_ids <- ref_ids[! ref_ids %in% current_ref_ids]
+if (any(!has_ref_and_samp)) {
+    removed_ids <- unlist(clustered_samples[! has_ref_and_samp])
+} else {
+    removed_ids <- character()
+}
+removed_sample_ids <- removed_ids[removed_ids %in% sample_ids]
+removed_ref_ids <- removed_ids[removed_ids %in% ref_ids]
 writeLines(removed_sample_ids, con = 'removed_sample_ids.txt')
 writeLines(removed_ref_ids, con = 'removed_ref_ids.txt')
-
-# Remove excess genes if more than needed were found
-if (nrow(output) > max_core_genes) {
-    output <- output[1:max_core_genes, ]
-}
-
-# Write filtered output table
-write.table(output, file = args$csv_output_path, row.names = FALSE, sep = '\t', quote = FALSE)
 
 # Copy sequences for selected genes and samples and put in new folder
 read_fasta <- function(path) {
@@ -119,14 +166,22 @@ write_fasta <- function(seqs, path) {
     writeLines(output, path)
 }
 
+# Make directory to store subdirectories with each cluster's gene sequences
 dir.create(args$fasta_output_path, showWarnings = FALSE)
-passing_sample_ids <- c(current_sample_ids, current_ref_ids)
-for (gene_id in output$gene_family) {
-    in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))
-    out_path <- file.path(args$fasta_output_path, paste0(gene_id, '.fasta'))
-    seqs <- read_fasta(in_path)
-    seqs <- seqs[passing_sample_ids]
-    seqs <- seqs[!is.na(seqs)]
-    write_fasta(seqs, out_path)
+
+# Save gene sequences for each cluster
+for (index in seq_along(output_clusters)) {
+    out_dir_path <- file.path(args$fasta_output_path, paste0('cluster_', index))
+    dir.create(out_dir_path, showWarnings = FALSE)
+    for (gene_id in output_clusters[[index]]$gene_family) {
+        in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))
+        out_path <- file.path(out_dir_path, paste0(gene_id, '.fasta'))
+        seqs <- read_fasta(in_path)
+        seqs <- seqs[c(sample_ids, ref_ids)]
+        seqs <- seqs[!is.na(seqs)]
+        write_fasta(seqs, out_path)
+        paste(seqs, out_path)
+    }
 }
+
 

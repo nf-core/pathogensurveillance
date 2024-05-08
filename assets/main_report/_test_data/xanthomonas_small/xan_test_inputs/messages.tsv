@@ -1,5 +1,2 @@
-22_311	NA	xan_test	CORE_GENOME_PHYLOGENY	WARNING	Sample removed from core gene phylogeny in order to find enough core genes.
-22_335	NA	xan_test	CORE_GENOME_PHYLOGENY	WARNING	Sample removed from core gene phylogeny in order to find enough core genes.
-22_335	NA	subgroup	CORE_GENOME_PHYLOGENY	WARNING	Sample removed from core gene phylogeny in order to find enough core genes.
-NA	subgroup	GCA_905123925_1	VARIANT_ANALYSIS	WARNING	Not enough samples to build a SNP tree.
 sample_id	group_id	ref_id	workflow	level	message
+NA	subgroup	GCF_026651895_1	VARIANT_ANALYSIS	WARNING	Not enough samples to build a SNP tree.
