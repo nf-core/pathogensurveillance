@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/4f/b7f47de6034f16c175489b9a990526/xan_test_inputs"
 execute:
   echo: false
 ---
@@ -72,7 +72,8 @@ pocp_matrix_path <- file.path(params$inputs, "pocp.tsv")
 pocp_matrix <- psminer::parse_pocp_matrix(pocp_matrix_path)
 
 # Parse core gene phylogeny
-core_phylo_path <- file.path(params$inputs, "core_phylo.treefile")
+core_phylo_dir_path <- file.path(params$inputs, "core_phylo")
+core_phylo_paths <- list.files(core_phylo_dir_path, pattern = "\\.treefile$", full.names = TRUE)
 
 # Parse quality control data (currently not used)
 multiqc_path <- file.path(params$inputs, "multiqc")
@@ -316,17 +317,24 @@ Currently, POCP is only calculated for Prokaryotes.
 ## Phylogenetic context
 
 This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
-The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identificaiton.
+The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
 
-::: panel-tabset
 
 ### Core gene phylogeny
 
-```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0, fig.height = 8}
-psminer::make_phylogeny(core_phylo_path, sample_data, ref_data)
+```{r id_core_phylo, eval = length(core_phylo_paths) > 0, fig.height = 8}
+core_plots <- lapply(core_phylo_paths, function(path) {
+    psminer::make_phylogeny(path, sample_data, ref_data)
+})
+if (knitr::is_html_output()) {
+    htmltools::tagList(setNames(core_plots, NULL))
+} else {
+    print(core_plots)
+}
 ```
 
-```{r, results='asis', eval = length(read_lines(core_phylo_path)) > 0}
+
+```{r, results='asis', eval = length(core_phylo_paths) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -338,14 +346,12 @@ It is the most robust identification provided by this pipeline, but its precisio
 ')
 ```
 
-```{r, results='asis', eval = length(read_lines(core_phylo_path)) == 0}
+```{r, results='asis', eval = length(core_phylo_paths) == 0}
 cat('
 Could not generate core genome phylogeny.
 ')
 ```
 
-
-:::
 
 # Genetic diversity
 
@@ -427,7 +433,7 @@ for (color_by in color_factors) {
     
     # Plot for each reference
     for (reference in names(snp_alignments)) {
-         cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
+        cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
         if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
             plot_one <- function(threshold) {
                 psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)

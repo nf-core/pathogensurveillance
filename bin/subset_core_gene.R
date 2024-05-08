@@ -2,10 +2,10 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/2c/1b29f55ab50c5b8b16a6d19c9d2b52/subgroup.tsv',
-          '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/2c/1b29f55ab50c5b8b16a6d19c9d2b52/subgroup_feat_seqs_renamed',
-          '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/2c/1b29f55ab50c5b8b16a6d19c9d2b52/samplesheet.valid.csv',
-          '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/samplesheet.valid.csv',
+#           '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
@@ -26,7 +26,7 @@ cluster_data[, all_ids] <- lapply(cluster_data[, all_ids], function(column) {
   unlist(lapply(strsplit(column, split = '[;:]'), length))
 })
 
-# Create pairwise matrix of number of shared genes between all smaples and references
+# Create pairwise matrix of number of shared genes between all samples and references
 count_shared_genes <- function(data, sample_1, sample_2) {
     if (length(sample_1) != length(sample_2)) {
         stop("Arguments must be of same length.")
@@ -173,7 +173,7 @@ dir.create(args$fasta_output_path, showWarnings = FALSE)
 for (index in seq_along(output_clusters)) {
     out_dir_path <- file.path(args$fasta_output_path, paste0('cluster_', index))
     dir.create(out_dir_path, showWarnings = FALSE)
-    for (gene_id in output_clusters[[index$gene_family) {
+    for (gene_id in output_clusters[[index]]$gene_family) {
         in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))
         out_path <- file.path(out_dir_path, paste0(gene_id, '.fasta'))
         seqs <- read_fasta(in_path)

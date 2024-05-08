@@ -74,7 +74,7 @@ workflow CORE_GENOME_PHYLOGENY {
     // Align each gene family with mafft
     core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
         .transpose() // group_meta, gene_dir
-        .map { [[id: "${it[0].id}_${it[1].basename}", group_id: id[0]], it[1]] }.view() // subset_meta, gene_dir
+        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
     MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())

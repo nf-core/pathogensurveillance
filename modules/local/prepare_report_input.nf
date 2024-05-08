@@ -64,14 +64,17 @@ process PREPARE_REPORT_INPUT {
     mkdir ${prefix}_inputs/ref_data
     cp -r ${ref_data} ${prefix}_inputs/ref_data/
 
+    # Put core gene phylogenies in a single folder for organization
+    mkdir ${prefix}_inputs/core_phylo
+    if [ ! -z "${core_phylo}" ]; then
+        cp -r ${core_phylo} ${prefix}_inputs/core_phylo/
+    fi
+
     # Move other single-value paths to input directory
     mkdir other_${prefix}_inputs
     mv ${samp_data} ${prefix}_inputs/samp_data.csv
     mv ${ani_matrix} ${prefix}_inputs/ani_matrix.csv
     mv ${assigned_refs} ${prefix}_inputs/assigned_refs.csv
-    if [ ! -z "${core_phylo}" ]; then
-        cp -r ${core_phylo} ${prefix}_inputs/core_phylo/
-    fi
     mv ${pocp} ${prefix}_inputs/pocp.tsv
     mv ${versions} ${prefix}_inputs/versions.yml
     mv ${messages} ${prefix}_inputs/messages.tsv
