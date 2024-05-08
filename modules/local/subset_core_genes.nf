@@ -26,6 +26,6 @@ process SUBSET_CORE_GENES {
     script:
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    subset_core_gene.R $gene_fam $feat_seqs $sample_data $min_core_genes $max_core_genes ${prefix}_core_genes.tsv ${prefix}_feat_seqs
+    subset_core_gene.R $gene_fam $feat_seqs $sample_data $min_core_genes $max_core_genes ${prefix}_core_genes ${prefix}_feat_seqs
     """
 }

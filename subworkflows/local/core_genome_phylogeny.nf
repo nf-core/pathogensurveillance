@@ -57,8 +57,6 @@ workflow CORE_GENOME_PHYLOGENY {
         REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs),
         ch_samplesheet,
         params.min_core_genes,
-        params.min_core_samps,
-        params.min_core_refs,
         params.max_core_genes
     )
 
@@ -74,13 +72,20 @@ workflow CORE_GENOME_PHYLOGENY {
 
 
     // Align each gene family with mafft
-    FILES_IN_DIR ( SUBSET_CORE_GENES.out.feat_seq.transpose() ) // group_meta, [genes]
-    MAFFT_SMALL ( FILES_IN_DIR.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
+        .transpose() // group_meta, gene_dir
+        .map { [[id: "${it[0].id}_${it[1].basename}", group_id: id[0]], it[1]] }.view() // subset_meta, gene_dir
+    FILES_IN_DIR ( core_genes )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
     ch_versions = ch_versions.mix(IQTREE2_CORE.out.versions.first())
+    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .groupTuple() // group_meta, [trees]
+
 
     // Mix in null placeholders for failed groups
     pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
@@ -88,12 +93,12 @@ workflow CORE_GENOME_PHYLOGENY {
          .mix(PIRATE.out.aln) // group_meta, align_fasta
     phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
          .map { [it[1], null] }
-         .mix(IQTREE2_CORE.out.phylogeny) // group_meta, align_fasta
+         .mix(trees) // group_meta, [trees]
 
 
     emit:
     pirate_aln = pirate_aln              // group_meta, align_fasta
-    phylogeny  = phylogeny               // group_meta, tree
+    phylogeny  = phylogeny               // group_meta, [trees]
     pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
     versions   = ch_versions             // versions.yml
     messages   = messages                // meta, group_meta, ref_meta, workflow, level, message

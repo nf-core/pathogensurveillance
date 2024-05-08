@@ -11,7 +11,7 @@ process FILES_IN_DIR {
     tuple val(meta), path(dir)
 
     output:
-    tuple val(meta), paste("${dir}/*"), emit: files
+    tuple val(meta), path("${dir}/*"), emit: files
 
     when:
     task.ext.when == null || task.ext.when

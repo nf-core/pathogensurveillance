@@ -70,7 +70,7 @@ process PREPARE_REPORT_INPUT {
     mv ${ani_matrix} ${prefix}_inputs/ani_matrix.csv
     mv ${assigned_refs} ${prefix}_inputs/assigned_refs.csv
     if [ ! -z "${core_phylo}" ]; then
-        mv ${core_phylo} ${prefix}_inputs/core_phylo.treefile
+        cp -r ${core_phylo} ${prefix}_inputs/core_phylo/
     fi
     mv ${pocp} ${prefix}_inputs/pocp.tsv
     mv ${versions} ${prefix}_inputs/versions.yml
