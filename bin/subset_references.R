@@ -1,5 +1,10 @@
 #!/usr/bin/env Rscript
 
+# This script attempts to find a minimal subset of references that have a range of similarity to each sample.
+# This is done by making a list (data.frame) of "bins" representing a range of scaled ANI values for each sample,
+# calculating which references can satisfy each bin, and selecting the references that satisfy the most bins
+# until all bins are satisfied.
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- c('test/output/mycobacteroides_small/sourmash_compare/all_comp.csv', '...', '3', '5')
@@ -49,7 +54,7 @@ filter_bins <- function(data, selected) {
 }
 bin_data <- filter_bins(bin_data, selected_refs)
 
-# Select reference that works for the most remaining bins and repeat until all bins are filled
+# Select reference that works for the most remaining bins and repeat until no bins are left
 while (nrow(bin_data) > 0) {
     bin_counts <- table(unlist(bin_data$refs))
     best_ref <- names(bin_counts)[which.max(bin_counts)]
