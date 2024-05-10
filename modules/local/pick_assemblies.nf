@@ -27,7 +27,7 @@ process PICK_ASSEMBLIES {
     """
     pick_assemblies.R ${families} ${genera} ${species} ${refseq_download_num} ${prefix}.tsv ${assem_data_tsvs}
 
-    tail -n +2 ${prefix}.tsv | cut -f1,3 > ${prefix}_ids.txt
+    tail -n +2 ${prefix}.tsv | cut -f1,3,6 > ${prefix}_ids.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

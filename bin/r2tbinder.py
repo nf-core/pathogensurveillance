@@ -25,7 +25,7 @@ def bin_fasta_files(fasta_files_pattern):
     for fasta_file in glob.glob(fasta_files_pattern):
         sequences = read_fasta(fasta_file)
         for header, sequence_lines in sequences.items():
-            identifier = header.split('|')[0].strip()  # Extract the common identifier
+            identifier = header.split('|')[1].strip()  # Extract the common identifier
             all_sequences[identifier].append((header, sequence_lines))
 
     # Write binned sequences to separate files, each sequence retains its original header
@@ -35,6 +35,6 @@ def bin_fasta_files(fasta_files_pattern):
         with open(file_name, 'w') as file:
             for header, seq_lines in headers_and_sequences:
                 file.write(f"{header}\n")
-                file.write('\n'.join(seq_lines) + '\n')
+                file.write('\n'.join(seq_lines) + '\n\n')
 # Example usage
 bin_fasta_files("r2t_markers/*.fa")

@@ -41,6 +41,7 @@ workflow BUSCO_PHYLOGENY {
     // Create Read2tree database
     R2TF (
         BUSCO.out.busco_dir
+            .unique { "${it[0].name.substring(0,3)}${it[0].name.split(' ')[1].substring(0, 2)}".toUpperCase() }
 	)
 
     // Create directories for Read2Tree
@@ -56,19 +57,19 @@ workflow BUSCO_PHYLOGENY {
     )
 
     // group samples
-    paired_end = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+    paired_end = input_filtered // meta, [fastq], group_meta, [ref_meta], kingdom, depth
         //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
         .filter { it[1].size() == 2 }
         .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
         .map { [it[2], it[1].collect{it[0]}, it[1].collect{it[1]}] } // group_meta, pair_1, pair_2
 
-    single_end = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+    single_end = input_filtered // meta, [fastq], group_meta, [ref_meta], kingdom, depth
         //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
         .filter { it[1].size() == 1 }
         .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
         .map { [it[2], it[1]] } // group_meta, single_end
 
-    longread = input // meta, [fastq], group_meta, [ref_meta], kingdom, depth
+    longread = input_filtered // meta, [fastq], group_meta, [ref_meta], kingdom, depth
         .filter { it[0].reads_type == "nanopore" || it[0].reads_type == "pacbio" }
         .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
         .map { [it[2], it[1]] } // group_meta, longread
@@ -80,6 +81,7 @@ workflow BUSCO_PHYLOGENY {
 
     rt2_db = R2TBIN.out.busco_markers.map { [[id: 'r2t_db'], it] }
         .join( R2TDIR.out.dna_ref.map { [[id: 'r2t_db'], it] } )
+        .first() // first converts it to a value channel so it can be resuesd
 
 
     // Run Read2tree

@@ -149,31 +149,31 @@ workflow PATHOGENSURVEILLANCE {
     messages = messages.mix(ASSIGN_REFERENCES.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_ANALYSIS (
-        ASSIGN_REFERENCES.out.sample_data,
-        INPUT_CHECK.out.csv
-    )
-    ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
-    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    //VARIANT_ANALYSIS (
+    //    ASSIGN_REFERENCES.out.sample_data,
+    //    INPUT_CHECK.out.csv
+    //)
+    //ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
+    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
-    // Assemble and annotate bacterial genomes
-    GENOME_ASSEMBLY (
-        ASSIGN_REFERENCES.out.sample_data
-            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
-            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
-    )
-    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
+    //// Assemble and annotate bacterial genomes
+    //GENOME_ASSEMBLY (
+    //    ASSIGN_REFERENCES.out.sample_data
+    //        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
+    //        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
+    //)
+    //ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
 
-    // Create core gene phylogeny for bacterial samples
-    ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
-        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(ref_meta), val(meta), file(gff) ]
-        .map { it[1..2] } // [ val(meta), file(gff) ]
-        .groupTuple() // [ val(meta), [file(gff)] ]
-    gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
-        .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
-        .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]
+    //// Create core gene phylogeny for bacterial samples
+    //ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
+    //    .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(ref_meta), val(meta), file(gff) ]
+    //    .map { it[1..2] } // [ val(meta), file(gff) ]
+    //    .groupTuple() // [ val(meta), [file(gff)] ]
+    //gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    //    .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
+    //    .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
+    //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
+    //    .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]
     //CORE_GENOME_PHYLOGENY (
     //    gff_and_group,
     //    INPUT_CHECK.out.csv

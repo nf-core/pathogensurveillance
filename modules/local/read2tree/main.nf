@@ -1,6 +1,6 @@
 process READ2TREE {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_medium'
 
     conda "bioconda::read2tree=0.1.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -25,7 +25,8 @@ process READ2TREE {
     if (sample_count == 1) { // If the process detects only 1 species
         """
         read2tree \\
-        --${args} \\
+        ${args} \\
+        --threads $task.cpus \\
         --tree \\
         --reads ${paired_1} ${paired_2} ${single} ${long_reads} \\
         --standlone_path ${markers} \\
@@ -45,6 +46,8 @@ process READ2TREE {
     	for R1 in ${paired_1}; do
         	R2=\$(echo \$R1 | sed 's/^paired_1_/paired_2_/')
         	read2tree \\
+            ${args} \\
+            --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
@@ -54,6 +57,8 @@ process READ2TREE {
     	# Add each single end shortread sample
     	for R1 in ${single}; do
         	read2tree \\
+            ${args} \\
+            --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
@@ -63,6 +68,8 @@ process READ2TREE {
     	# Add each long read sample
     	for R1 in ${long_reads}; do
         	read2tree \\
+            ${args} \\
+            --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
@@ -72,6 +79,8 @@ process READ2TREE {
 
     	# Build tree
     	read2tree \\
+        ${args} \\
+        --threads $task.cpus \\
     	--standalone_path ${markers}/ \\
         --dna_reference ${dna_ref} \\
     	--output_path ${prefix}_read2tree -\\

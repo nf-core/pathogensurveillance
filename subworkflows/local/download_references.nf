@@ -51,7 +51,7 @@ workflow DOWNLOAD_REFERENCES {
         .map { it.replace('\n', '') }
         .filter { it != '' }
         .map { it.split('\t') }
-        .map { [[id: it[0]], it[1]] }
+        .map { [[id: it[0], name: it[2]], it[1]] }
         .unique()
         .join(user_acc_list, by:1, remainder: true) // this is used to provide something for the following filter to work
         .filter {it[2] == null} // remove any user-defined accession numbers that have already been downloaded
@@ -71,7 +71,7 @@ workflow DOWNLOAD_REFERENCES {
 
     genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
-        .map { [[id: it[1].replace('\n', '').split('\t')[0]], it[0]] } // [ val(ref_meta), val(meta) ]
+        .map { [[id: it[1].replace('\n', '').split('\t')[0], name: it[1].replace('\n', '').split('\t')[2]], it[0]] } // [ val(ref_meta), val(meta) ]
 
     emit:
     assem_samp_combos = genome_ids                        // [ val(ref_meta), val(meta) ] for each assembly/sample combination

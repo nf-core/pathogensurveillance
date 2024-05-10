@@ -21,11 +21,10 @@ process R2TF {
     outdir = "${prefix}_r2tf_out"
     """
     # Defining codex
-    CODEX=${ref_meta.id}
-
+    CODEX=\$(echo "${ref_meta.name}" | awk '{print toupper(substr(\$1,1,3))toupper(substr(\$2,1,2))}')
     mkdir ${outdir}
 
-    fna=\$(grep '^>' ${busco_dir}/\${CODEX}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
+    fna=\$(grep '^>' ${busco_dir}/${prefix}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
 
     while IFS= read -r fastafile; do
         echo "Processing file \$fastafile"
@@ -33,41 +32,44 @@ process R2TF {
         # Extracting file name
         fasta=\$(echo \$fastafile | awk -F ':' '{print \$1}')
         buscoid=\$(basename \$fasta .fna)
-	header=\$(grep '>' \$fasta)
-            
+        geneid="\${CODEX}-\${buscoid}"
+    	header=\$(grep '>' \$fasta)
+
         # Genearting a unique IDentifier
         #NUM=\$(echo \$fasta | cut -d 'a' -f1)
         NUM=\$(echo \$header | awk -F '>' '{print \$2}' | awk -F ':' '{print \$1}')
-	echo "NUM \$NUM" 
+	    echo "NUM \$NUM"
         ID="\$CODEX \$NUM"
         echo "Identifier: \$ID"
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$buscoid \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_ntformatted.fa
+        sed "s/\$header/>\$geneid \\| \$buscoid \\| \$geneid \\| [${ref_meta.name} ${ref_meta.id}]/" "\$fasta" | sed -e 's/\\(.*\\)/\\U\\1/'  >> ${outdir}/${prefix}_ntformatted.fa
+        #printf "TAG\\n\\n" >> ${outdir}/${prefix}_ntformatted.fa
     done <<< \$fna
 
 
-    faa=\$(grep '^>' ${busco_dir}/\${CODEX}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.faa) 
+    faa=\$(grep '^>' ${busco_dir}/${ref_meta.id}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.faa)
 
     while IFS= read -r fastafile; do
         #echo "Processing file \$fastafile"
 
         # Extracting file name
         fasta=\$(echo \$fastafile | awk -F ':' '{print \$1}')
-	buscoid=\$(basename \$fasta .faa)
+	    buscoid=\$(basename \$fasta .faa)
+        geneid="\${CODEX}-\${buscoid}"
         header=\$(grep '>' \$fasta)
 
         # Genearting a unique IDentifier
         #NUM=\$(echo \$fasta | cut -d 'a' -f1)
         NUM=\$(echo \$header | awk -F '>' '{print \$2}' | awk -F ':' '{print \$1}')
-	echo "NUM \$NUM"
+    	echo "NUM \$NUM"
         ID="\$CODEX \$NUM"
         echo "Identifier: \$ID"
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
-        sed "s/\$header/>\$buscoid \\| [\$CODEX]/" "\$fasta" >> ${outdir}/\${CODEX}_aaformatted.fa
+        sed "s/\$header/>\$geneid \\| \$buscoid \\| \$geneid \\| [${ref_meta.name} ${ref_meta.id}]/" "\$fasta" | sed -e 's/\\(.*\\)/\\U\\1/' >> ${outdir}/${prefix}_aaformatted.fa
     done <<< \$faa
     """
 }
