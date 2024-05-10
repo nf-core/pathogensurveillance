@@ -8,14 +8,15 @@ min_coverage <- 30
 
 # Parse taxonomomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c("/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_families.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_genera.txt",
-#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/pram2_species.txt",
-#           "5",
-#           "pram2.tsv",
-#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Pythiaceae.tsv", 
-#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Peronosporaceae.tsv",
-#           "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/19/3605531c3e2e0947176ca194bde6fd/Xanthomonadaceae.tsv")
+args <- c("/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_families.txt",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_genera.txt",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_species.txt",
+          "5",
+          "pram2.tsv",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Peronosporaceae.tsv",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Saprolegniaceae.tsv",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Tissierellaceae.tsv",
+          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Xanthomonadaceae.tsv")
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -25,7 +26,12 @@ out_path <- args[[5]]
 
 # Parse input TSVs 
 tsv_paths <- unlist(args[6:length(args)])
-tsv_data <- lapply(tsv_paths, read.csv, sep = '\t')
+tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE) 
+tsv_data <- lapply(seq_along(tsv_paths), function(index) {
+    output <- read.csv(path[index], sep = '\t')
+    output$family <- tsv_families[index]
+    return(output)
+})
 assem_data <- do.call(rbind, tsv_data)
 assem_data$Coverage <- as.numeric(assem_data$Coverage)
 assem_data$ScaffoldN50 <- as.numeric(assem_data$ScaffoldN50)
@@ -61,18 +67,20 @@ sp_stats <- lapply(split(sp_stats, sp_stats$SpeciesName), function(per_sp_data) 
 })
 if (length(sp_stats) != 0 ) {
   sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
+  rownames(sp_stats) <- NULL
   sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats)], ]
 }
 
 # Pick representatives for each genus
 gn_stats <- assem_data[assem_data$genus %in% genera, , drop = FALSE]
-gn_stats <- lapply(split(gn_stats, gn_stats$genus), function(per_sp_data) {
-  lapply(split(per_sp_data, per_sp_data$SpeciesName), function(per_org_data) {
+gn_stats <- lapply(split(gn_stats, gn_stats$genus), function(per_gn_data) {
+  lapply(split(per_gn_data, per_gn_data$SpeciesName), function(per_org_data) {
     per_org_data[which.max(per_org_data$ScaffoldN50), ]
   })
 })
 if (length(gn_stats) != 0 ) {
   gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
+  rownames(gn_stats) <- NULL
   gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
   gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats)], ]
 }
@@ -86,6 +94,7 @@ fa_stats <- lapply(split(fa_stats, fa_stats$Family), function(per_fm_data) {
 })
 if (length(fa_stats) != 0 ) {
   fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
+  rownames(fa_stats) <- NULL
   fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
   fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats)], ]
 }
