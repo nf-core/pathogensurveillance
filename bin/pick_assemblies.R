@@ -28,7 +28,7 @@ out_path <- args[[5]]
 tsv_paths <- unlist(args[6:length(args)])
 tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE) 
 tsv_data <- lapply(seq_along(tsv_paths), function(index) {
-    output <- read.csv(path[index], sep = '\t')
+    output <- read.csv(tsv_paths[index], sep = '\t')
     output$family <- tsv_families[index]
     return(output)
 })
@@ -86,8 +86,8 @@ if (length(gn_stats) != 0 ) {
 }
 
 # Pick representatives for each family
-fa_stats <- assem_data[assem_data$Family %in% families, , drop = FALSE]
-fa_stats <- lapply(split(fa_stats, fa_stats$Family), function(per_fm_data) {
+fa_stats <- assem_data[assem_data$family %in% families, , drop = FALSE]
+fa_stats <- lapply(split(fa_stats, fa_stats$family), function(per_fm_data) {
   lapply(split(per_fm_data, per_fm_data$genus), function(per_gn_data) {
     per_gn_data[which.max(per_gn_data$ScaffoldN50), ]
   })
