@@ -1,11 +1,11 @@
 process RENAME_CORE_GENE_HEADERS {
     tag "$ref_meta.id"
     label 'process_single'
-                                                                                
-    conda "conda-forge::coreutils=9.1"                                          
+
+    conda "conda-forge::coreutils=9.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :            
-        'nf-core/ubuntu:20.04' }"                                                       
+        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+        'nf-core/ubuntu:20.04' }"
 
     input:
     tuple val(ref_meta), path(feat_seqs)

@@ -6,6 +6,8 @@ include { REFORMAT_PIRATE_RESULTS   } from '../../modules/local/reformat_pirate_
 include { ALIGN_FEATURE_SEQUENCES   } from '../../modules/local/align_feature_sequences'
 include { SUBSET_CORE_GENES         } from '../../modules/local/subset_core_genes'
 include { RENAME_CORE_GENE_HEADERS  } from '../../modules/local/rename_core_gene_headers'
+include { CALCULATE_POCP            } from '../../modules/local/calculate_pocp'
+include { FILES_IN_DIR              } from '../../modules/local/files_in_dir.nf'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -37,6 +39,12 @@ workflow CORE_GENOME_PHYLOGENY {
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
     ch_versions = ch_versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
 
+
+    // Calculate POCP from presence/absence matrix of genes
+    CALCULATE_POCP (
+       REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
+    )
+
     // Extract sequences of all genes (does not align, contrary to current name)
     ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
     ch_versions = ch_versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
@@ -49,18 +57,35 @@ workflow CORE_GENOME_PHYLOGENY {
         REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs),
         ch_samplesheet,
         params.min_core_genes,
-        params.min_core_samps,
-        params.min_core_refs,
         params.max_core_genes
     )
 
+    // Report any sample or references that have been removed from the analysis
+    removed_refs = SUBSET_CORE_GENES.out.removed_ref_ids
+        .splitText()
+        .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    removed_samps = SUBSET_CORE_GENES.out.removed_sample_ids
+        .splitText()
+        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(removed_refs)
+    messages = messages.mix(removed_samps)
+
+
     // Align each gene family with mafft
-    MAFFT_SMALL ( SUBSET_CORE_GENES.out.feat_seq.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
+        .transpose() // group_meta, gene_dir
+        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
+    FILES_IN_DIR ( core_genes )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
     ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
     ch_versions = ch_versions.mix(IQTREE2_CORE.out.versions.first())
+    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .groupTuple() // group_meta, [trees]
+
 
     // Mix in null placeholders for failed groups
     pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
@@ -68,13 +93,14 @@ workflow CORE_GENOME_PHYLOGENY {
          .mix(PIRATE.out.aln) // group_meta, align_fasta
     phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
          .map { [it[1], null] }
-         .mix(IQTREE2_CORE.out.phylogeny) // group_meta, align_fasta
+         .mix(trees) // group_meta, [trees]
 
 
     emit:
-    pirate_aln = pirate_aln  // group_meta, align_fasta
-    phylogeny  = phylogeny   // group_meta, tree
-    versions   = ch_versions // versions.yml
-    messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
+    pirate_aln = pirate_aln              // group_meta, align_fasta
+    phylogeny  = phylogeny               // group_meta, [trees]
+    pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
+    versions   = ch_versions             // versions.yml
+    messages   = messages                // meta, group_meta, ref_meta, workflow, level, message
 
 }

@@ -28,6 +28,12 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "temp_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The location to save temporary files for processes. This is only used for some processes that produce large temporary files such as PICARD_SORTSAM.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -78,7 +84,7 @@
                 },
                 "refseq_download_num": {
                     "type": "number",
-                    "default": 5,
+                    "default": 10,
                     "description": "The maximum number of RefSeq sequences to select and download for each sample at each taxonomic level (species, genus, and family). The total number will vary based on the diversity of samples.",
                     "fa_icon": "fas fa-download"
                 },
@@ -104,6 +110,12 @@
                     "type": "number",
                     "default": 100,
                     "description": "The maximum number of genes used to conduct a core gene phylogeny.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "min_ref_ani": {
+                    "type": "number",
+                    "default": 0.9,
+                    "description": "The minimum ANI between a sample and potential reference for that reference to be used for variant calling with that sample. To force all the samples in a report group to use the same reference, set this value very low.",
                     "fa_icon": "fas fa-align-center"
                 }
             }

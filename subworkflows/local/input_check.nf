@@ -12,9 +12,9 @@ workflow INPUT_CHECK {
     SAMPLESHEET_CHECK ( samplesheet )
     SAMPLESHEET_CHECK.out.csv
         .splitCsv ( header:true, sep:',', quote:'"')
-        .map { create_reads_ref_channel(it) } // meta, [shortread], nanopore, sra, ref_meta, reference, reference_refseq, groups
-        .transpose ( by: 7 ) // Duplicate rows for each group when there are multiple groups per sample
-        .map { it[0..6] + [[id: it[7]]] }
+        .map { create_reads_ref_channel(it) } // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, groups
+        .transpose ( by: 8 ) // Duplicate rows for each group when there are multiple groups per sample
+        .map { it[0..7] + [[id: it[8]]] }
         .set { sample_data }
 
     emit:
@@ -55,12 +55,13 @@ def create_reads_ref_channel(LinkedHashMap row) {
 
     // Format paths to single files
     def nanopore = row.nanopore ? file(row.nanopore): null
+    def pacbio = row.pacbio ? file(row.pacbio): null
     def sra = row.sra ?: null
     def reference = row.reference ? file(row.reference): null
     def reference_refseq = row.reference_refseq ?: null
     def groups = row.report_group.split(";") as ArrayList
 
-    return [meta, shortread, nanopore, sra, ref_meta, reference, reference_refseq, groups]
+    return [meta, shortread, nanopore, pacbio, sra, ref_meta, reference, reference_refseq, groups]
 }
 
 

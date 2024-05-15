@@ -1,0 +1,85 @@
+ALIGN_FEATURE_SEQUENCES:
+  mafft: '7.520'
+BAKTA_BAKTA:
+  bakta: 1.9.2
+BAKTA_BAKTADBDOWNLOAD:
+  bakta: 1.9.2
+BBMAP_SENDSKETCH:
+  bbmap: '39.01'
+BGZIP_MAKE_GZIP:
+  tabix: '1.12'
+BWA_INDEX:
+  bwa: 0.7.17-r1188
+BWA_MEM:
+  bwa: 0.7.17-r1188
+  samtools: '1.18'
+CUSTOM_DUMPSOFTWAREVERSIONS:
+  python: 3.12.0
+  yaml: 6.0.1
+DOWNLOAD_ASSEMBLIES:
+  datasets: 16.0.0
+FASTP:
+  fastp: 0.23.4
+FASTQC:
+  fastqc: 0.12.1
+FILTER_ASSEMBLY:
+  python: 3.9.1
+FIND_ASSEMBLIES:
+  xtract: '16.2'
+GATK4_VARIANTFILTRATION:
+  gatk4: 4.3.0.0
+GRAPHTYPER_GENOTYPE:
+  graphtyper: 2.7.2
+GRAPHTYPER_VCFCONCATENATE:
+  graphtyper: 2.7.2
+INITIAL_CLASSIFICATION:
+  r-base: 4.2.1
+IQTREE2_CORE:
+  iqtree: 2.1.4-beta
+IQTREE2_SNP:
+  iqtree: 2.1.4-beta
+KHMER_TRIMLOWABUND:
+  khmer: 3.0.0a3
+MAFFT_SMALL:
+  mafft: '7.520'
+PICARD_ADDORREPLACEREADGROUPS:
+  picard: 3.1.1
+PICARD_CREATESEQUENCEDICTIONARY:
+  picard: 3.1.1
+PICARD_MARKDUPLICATES:
+  picard: 3.1.1
+PICARD_SORTSAM_1:
+  picard: 3.1.1
+PIRATE:
+  pirate: 1.0.5
+QUAST:
+  quast: 5.2.0
+REFORMAT_PIRATE_RESULTS:
+  pirate: 1.0.5
+SAMPLESHEET_CHECK:
+  r-base: 4.2.1
+SAMTOOLS_FAIDX:
+  samtools: '1.18'
+SAMTOOLS_INDEX:
+  samtools: '1.18'
+SOURMASH_COMPARE:
+  sourmash: 4.6.1
+SOURMASH_SKETCH_GENOME:
+  sourmash: 4.8.4
+SOURMASH_SKETCH_READS:
+  sourmash: 4.8.4
+SPADES:
+  spades: 3.15.5
+SUBSET_READS:
+  seqkit: 2.2.0
+TABIX_TABIX:
+  tabix: '1.12'
+VCFLIB_VCFFILTER:
+  vcflib: 1.0.3
+VCF_TO_SNPALN:
+  perl: 5.32.1 built for x86_64-linux-thread-multi
+VCF_TO_TAB:
+  vcftools: 0.1.16
+Workflow:
+  Nextflow: 23.10.1
+  nf-core/plantpathsurveil: 1.0dev

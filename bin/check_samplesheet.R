@@ -15,6 +15,7 @@ known_columns <- c(
     'shortread_1',
     'shortread_2',
     'nanopore',
+    'pacbio',
     'sra',
     'reference_id',
     'reference_name',
@@ -27,14 +28,14 @@ known_columns <- c(
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
 required_input_columns <- list(
-    c('shortread_1', 'shortread_2', 'nanopore', 'sra')
+    c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
 # If a regular expression matches multiple columns, then both matches can have a value
 mutually_exclusive_columns <- list(
     c('reference', 'reference_refseq'),
-    c('shortread_[12]', 'nanopore', 'sra')
+    c('shortread_[12]', 'nanopore', 'sra', 'pacbio')
 )
 
 # These are file extensions that are expected in the input data.
@@ -51,7 +52,7 @@ known_extensions <- c(
 )
 
 # Regular expression for characters that cannot appear in IDs
-invalid_id_char_pattern <- '[\\/:*?"<>| .]+'
+invalid_id_char_pattern <- '[\\/:*?"<>| .-]+'
 
 # Name of default group if all samples do not have a group defined
 defualt_group_full <- 'all'
@@ -65,7 +66,7 @@ user_column_name_prefix <- '__user_'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata_small.csv', 'test_out.csv')
+# args <- list('test/data/metadata/nanopore_test.csv', 'test_out.csv')
 names(args) <- c('input_path', 'output_path')
 metadata_original <- read.csv(args$input_path, check.names = FALSE)
 
@@ -78,6 +79,21 @@ if (nrow(metadata_original) == 0) {
 # Remove all whitespace
 colnames(metadata_original) <- trimws(colnames(metadata_original))
 metadata_original[] <- lapply(metadata_original, trimws)
+
+# Preserve original column names
+unmodified_data <- metadata_original
+
+# Replace capital letters with lowercase in colnames
+colnames(metadata_original) <- tolower(colnames(metadata_original))
+
+# Replace spaces with underscores in colnames
+colnames(metadata_original) <- gsub(' ', '_', colnames(metadata_original))
+
+# Add underscores in common missed locations
+underscore_replace_key <- known_columns
+names(underscore_replace_key) <- gsub ('_', '', known_columns)
+colnames_to_replace <- underscore_replace_key[colnames(metadata_original)]
+colnames(metadata_original)[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
 
 # Replace NAs with empty stings
 metadata_original[] <- lapply(metadata_original, function(x) {
@@ -186,12 +202,16 @@ is_present <- function(x) {
     x != '' & ! is.na(x)
 }
 remove_shared <- function(x) {
-    present_x <- x[is_present(x)]
-    shared_start <- shared_char(present_x, end = FALSE)
-    shared_end <- shared_char(present_x, end = TRUE)
-    present_x <- sub(present_x, pattern = paste0('^', shared_start), replacement = '')
-    present_x <- sub(present_x, pattern = paste0(shared_end, '$'), replacement = '')
-    x[is_present(x)] <- present_x
+    if (length(x) > 1) {
+        present_x <- x[is_present(x)]
+        shared_start <- shared_char(present_x, end = FALSE)
+        shared_end <- shared_char(present_x, end = TRUE)
+        present_x <- sub(present_x, pattern = paste0('^', shared_start), replacement = '')
+        present_x <- sub(present_x, pattern = paste0(shared_end, '$'), replacement = '')
+        x[is_present(x)] <- present_x
+    } else {
+        x = basename(x)
+    }
     return(x)
 }
 remove_file_extensions <- function(x) {
@@ -222,6 +242,7 @@ id_sources <- list( # These are all possible sources of IDs, ordered by preferen
     metadata$sample_name,
     metadata$sra,
     remove_file_extensions(remove_shared(metadata$nanopore)),
+    remove_file_extensions(remove_shared(metadata$pacbio)),
     remove_file_extensions(remove_shared(shortread_ids))
 )
 metadata$sample_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
@@ -266,7 +287,7 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)
 }
-metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'sra'))
+metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('shortread_1', 'shortread_2', 'nanopore', 'pacbio', 'sra'))
 
 # Ensure reference IDs are present
 ref_id_sources <- list( # These are all possible sources of IDs, ordered by preference
@@ -317,11 +338,18 @@ if (all(!is_present(metadata$report_group))) {
     metadata$report_group[!is_present(metadata$report_group)] <- defualt_group_partial
 }
 
+# Remove whitespace in report group ids
+metadata$report_group <- trimws(metadata$report_group)
+metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:space:]]+', replacement = ';')
+
 # Add user-supplied data as columns with modified names
 cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
-unmodified_data <- metadata_original[, cols_to_add]
+
+#since metadata_original may have been modified, using its column numbers as index for original user input
+unmodified_data <- unmodified_data[, colnames(metadata_original) %in% known_columns, drop= FALSE]
+
 colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
 metadata <- cbind(metadata, unmodified_data)
 
 # Write output metadata
-write.csv(metadata, file = args$output_path, row.names = FALSE, quote = FALSE, na = '')
+write.csv(metadata, file = args$output_path, row.names = FALSE, na = '')

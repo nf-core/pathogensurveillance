@@ -95,7 +95,8 @@ workflow ASSIGN_REFERENCES {
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_GROUP_REFERENCES (
-        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs)
+        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
+        params.min_ref_ani
     )
 
     // Convert CSV output back to nextflow channels
@@ -135,6 +136,7 @@ workflow ASSIGN_REFERENCES {
 
     // Report any samples that could not be assigned a reference
     no_ref_warnings = new_sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+        .filter { it[3] == null }
         .map { [it[0], it[4], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
 

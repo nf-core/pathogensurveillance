@@ -1,14 +1,13 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/1"
+  inputs: "_test_data/xanthomonas_small/subgroup_inputs"
 execute:
   echo: false
 ---
 
 ```{r knitr_settings}
-knitr::opts_chunk$set(echo = FALSE, fig.width = 10, warning = FALSE)
-options(bspm.sudo = TRUE) # Something needed when running in containers (not sure why)
+knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
 ```
 
 
@@ -17,7 +16,6 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 library(knitr)
-library(readr)
 library(purrr)
 library(yaml)
 library(phylocanvas)
@@ -40,55 +38,56 @@ library(kableExtra)
 library(plotly)
 library(webshot2)
 library(metacoder)
-#devtools::install_github("grunwaldlab/psminer")
-library(psminer)
 library(ggdendro)
 library(rcrossref)
+library(psminer)
 ```
 
 ```{r parse_inputs}
-group_path <- file.path(params$inputs, "inputs", "group_id.txt")
-group <- read_lines(group_path)
-samp_data_path <- file.path(params$inputs, "inputs", "samp_data.csv")
-samp_data <- psminer::parse_sample_meta(samp_data_path, group)
+group_path <- file.path(params$inputs, "group_id.txt")
+sample_data_path <- file.path(params$inputs, "samp_data.csv")
+ref_data_path <- file.path(params$inputs, "ref_data")
+assigned_refs_path <- file.path(params$inputs, "assigned_refs.csv")
 
-ref_data_path <- file.path(params$inputs, "inputs", "ref_data.tsv")
-ref_ids_path <- file.path(params$inputs, "inputs", "ref_ids.txt")
-ref_data <- psminer::parse_ref_meta(ref_data_path, ref_ids_path, samp_data)
+group <- read_lines(group_path)
+sample_data <- psminer::parse_sample_meta(sample_data_path, assigned_refs_path, group)
+ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data_path, group)
 
 # Parse sendsketch data
-sendsketch_paths <- list.files(file.path(params$inputs, "inputs", "sendsketch"), full.names = T)
+sendsketch_paths <- list.files(file.path(params$inputs, "sendsketch"), full.names = T)
 sketch_data <- psminer::parse_sendsketch(sendsketch_paths)
 
 # Parse variant data
-variant_data_path <- file.path(params$inputs, "inputs", "variant_data")
+variant_data_path <- file.path(params$inputs, "variant_data")
 snp_tree_paths <- list.files(variant_data_path, pattern = "\\.treefile$", full.names = TRUE)
 vcf_paths <- list.files(variant_data_path, pattern = "\\.vcf\\.gz$", full.names = TRUE)
 snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.names = TRUE)
 
 # Parse ANI matrix
-ani_matrix_path <- file.path(params$inputs, "inputs", "ani_matrix.csv")
-ani_matrix <- read.csv(ani_matrix_path, check.names = FALSE)
-ani_matrix_reformatted <- psminer::parse_ani_matrix_names(ani_matrix)
+ani_matrix_path <- file.path(params$inputs, "ani_matrix.csv")
+ani_matrix <- psminer::parse_ani_matrix(ani_matrix_path)
+
+# Parse POCP matrix
+pocp_matrix_path <- file.path(params$inputs, "pocp.tsv")
+pocp_matrix <- psminer::parse_pocp_matrix(pocp_matrix_path)
 
 # Parse core gene phylogeny
-core_phylo_path <- file.path(params$inputs, "inputs", "core_phylo.treefile")
+core_phylo_dir_path <- file.path(params$inputs, "core_phylo")
+core_phylo_paths <- list.files(core_phylo_dir_path, pattern = "\\.treefile$", full.names = TRUE)
 
 # Parse quality control data (currently not used)
-multiqc_path <- file.path(params$inputs, "inputs", "multiqc")
+multiqc_path <- file.path(params$inputs, "multiqc")
 multiqc_report_path <- file.path(multiqc_path, 'multiqc_report.html')
-quast_path <- file.path(params$inputs, "inputs", "quast")
+quast_path <- file.path(params$inputs, "quast")
 quast_ref_names <- list.files(quast_path)
 quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
 
 # Parse messages
-messages_path <- file.path(params$inputs, "inputs", "messages.tsv")
+messages_path <- file.path(params$inputs, "messages.tsv")
 messages <- readr::read_tsv(messages_path)
-messages <- messages %>%
-  separate(message, into = c("message_level", "message_text"), sep = "\t")
 
 # Parse version data
-version_path <- file.path(params$inputs, "inputs", "versions.yml")
+version_path <- file.path(params$inputs, "versions.yml")
 version_data <- psminer::parse_software_meta(version_path)
 ```
 
@@ -96,38 +95,71 @@ version_data <- psminer::parse_software_meta(version_path)
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
-**Report group:** `r group`                           
-**Sample count:** `r nrow(samp_data)`                 
-**Last updated:** `r format(Sys.time(), '%B %d , %Y')`       
-**Pipeline version:** {{< var version >}}
+* **Report group:** `r group`
+* **Sample count:** `r nrow(sample_data)`
+* **Last updated:** `r format(Sys.time(), '%B %d , %Y')`
+* **Pipeline version:** {{< var version >}}
 
-## Status
+## Pipeline Status Report
 
-Perhaps a table with a list of majors steps and a icon next to each for done/queued/failed.
+This section provides an overview of the pipeline execution status, including a summary table, detailed sample-specific issues, and group-level issues for further analysis.
 
-```{r generate-tables, echo=FALSE}
+```{r generate-tables}
 # Generate the tables using the status_tables function
-tables <- status_tables(messages, interactive = TRUE)
+tables <- status_tables(messages)
 ```
 
 ::: {.panel-tabset}
 
-## Simple Summary Table
+## Simple Summary
 
-```{r simple-table, echo=FALSE}
+```{r simple-table}
 tables$simpleTable
 ```
 
-## Detailed Samples Table
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
 
-```{r detailed-samples-table, echo=FALSE}
+This table provides a high-level overview of pipeline steps where issues were detected. This tables tells you how many groups or samples have issues that require your attention.
+
+:::
+')
+```
+
+## Group-Level Issues
+
+```{r detailed-groups-table}
+tables$detailedGroupsTable
+```
+
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table dives into the issues that impact entire report groups, providing a more granular view of problems not limited to individual samples but affecting the group as a whole. It helps in identifying systemic issues or errors in group-specific processes.
+
+:::
+')
+```
+
+## Sample-Level Issues
+
+```{r detailed-samples-table}
 tables$detailedSamplesTable
 ```
 
-## Detailed Groups Table
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
 
-```{r detailed-groups-table, echo=FALSE}
-tables$detailedGroupsTable
+This table offers detailed insights into issues specific to individual samples. It is designed to help you pinpoint and address sample-specific problems, facilitating targeted troubleshooting and resolution efforts.
+
+:::
+')
 ```
 
 :::
@@ -136,15 +168,17 @@ tables$detailedGroupsTable
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-psminer::print_sample_metadata(samp_data)
+psminer::print_sample_metadata(sample_data)
 ```
 
 
 # Identification
 
+
+
 ## Initial identification
 
-The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences. 
+The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
 These are intended to be preliminary identifications.
 For more robust identifications based on whole genome sequences, see the results of the core genome phylogeny below.
 
@@ -153,7 +187,7 @@ For more robust identifications based on whole genome sequences, see the results
 
 ```{r}
 top_hits <- psminer::best_sendsketch_hits(sketch_data)
-unique_tax <- unique(top_hits$taxonomy)
+unique_tax <- unique(sub(top_hits$taxonomy, pattern = ';s:(.+);.+$', replacement = ';s:\\1')) # ignore below species level information
 is_single_taxon <- length(unique_tax) == 1
 ```
 
@@ -180,7 +214,7 @@ Clicking on the middle will undo the subset.
 n_samp <- nrow(top_hits)
 formatted_classification <- unique_tax %>%
     gsub(pattern = "[a-z]+:", replacement = "") %>%
-    gsub(pattern = ";", replacement = " > ") 
+    gsub(pattern = ";", replacement = " > ")
 cat(paste0(
 "Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
 " identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
@@ -208,323 +242,231 @@ Included metrics can provide insights into how each sample compares with referen
 * **Top Hit:** The name of the reference genome most similar to each sample based on the scoring criteria used.
 :::
 
-::: 
+:::
 
-## Rigorous identification
-
-This section includes phylogenetic trees of samples with references sequences downloaded from RefSeq meant to provide a reliable identification using genome-scale data.
+## Most similar organisms
 
 ::: panel-tabset
+### ANI top matches
+
+
+```{r}
+psminer::print_ani_table(ani_matrix * 100, sample_data, ref_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Average Nucleotide Identity (ANI) between each sample and the 2 references most similar to it based on this measure.
+ANI is used to measure how similar the shared portion of two genomes are.
+Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
+:::
+
+
+### ANI heatmap
+
+```{r ani_heatmap, fig.height = 10}
+psminer::make_ani_heatmap(ani_matrix * 100, ref_data, sample_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the similarity of all samples and references to each other.
+These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
+These measurements are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
+:::
+
+
+### POCP top matches
+
+```{r}
+psminer::print_pocp_table(pocp_matrix, sample_data, ref_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Percentage Of Conserved Proteins (POCP) between each sample and the 2 references most similar to it based on this measure.
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
+:::
+
+
+### POCP heatmap
+
+```{r pocp_heatmap, fig.height = 10}
+psminer::make_ani_heatmap(pocp_matrix, ref_data, sample_data)
+```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the protein content of all samples and references to each other.
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
+:::
+
+
+:::
+
+## Phylogenetic context
+
+This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
+The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
+
 
 ### Core gene phylogeny
 
-```{r id_core_phylo, eval = length(read_lines(core_phylo_path)) > 0}
-psminer::make_phylogeny(core_phylo_path, samp_data, ani_matrix_reformatted, ref_data, interactive=TRUE)
+```{r id_core_phylo, eval = length(core_phylo_paths) > 0, fig.height = 8}
+core_plots <- lapply(core_phylo_paths, function(path) {
+    psminer::make_phylogeny(path, sample_data, ref_data)
+})
+if (knitr::is_html_output()) {
+    htmltools::tagList(setNames(core_plots, NULL))
+} else {
+    print(core_plots)
+}
 ```
 
-```{r, results='asis', eval = length(read_lines(core_phylo_path)) > 0}
+
+```{r, results='asis', eval = length(core_phylo_paths) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
 This a core gene phylogeny of samples with RefSeq genomes for context.
 A core gene phylogeny uses the sequences of all gene shared by all of the genomes included in the tree to infer evolutionary relationships.
-It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences. 
+It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences.
 :::
 ')
 ```
 
-```{r, results='asis', eval = length(read_lines(core_phylo_path)) == 0}
+```{r, results='asis', eval = length(core_phylo_paths) == 0}
 cat('
 Could not generate core genome phylogeny.
 ')
 ```
 
 
-### ANI heatmap and dendrogram
+# Genetic diversity
 
-```{r ANI dendrogram, fig.height = 8, fig.width=8}
-psminer::make_ani_heatmap(ani_matrix_reformatted, ref_data, samp_data, interactive = knitr::is_html_output())
+```{r parse_snp_align}
+snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
+n_variants <- unlist(lapply(snp_alignments, ncol))
+snp_ref_names <- unlist(lapply(names(snp_alignments), function(id) ref_data$reference_name[! is.na(ref_data$reference_name) & ref_data$reference_id == id]))
+names(snp_ref_names) <- names(snp_alignments)
 ```
 
+```{r parse_snp_trees}
+snp_trees <- parse_snp_trees(snp_tree_paths, group)
+n_samples <- unlist(lapply(snp_trees, function(tree) length(tree$tip.label) - 1))
+```
+
+## SNP trees
+
+```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0, fig.height = 8}
+for (id in names(snp_trees)) {
+    cat(paste0('::: panel-tabset\n### ', id, '\n\n'))
+    cat(paste0('#### **', n_samples[id], ' samples with ', n_variants[id], ' variants aligned to reference "', snp_ref_names[id], '":** \n\n'))
+    a_plot <- psminer::make_phylogeny(snp_trees[[id]], sample_data, ref_data)
+    if (knitr::is_html_output()) {
+        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
+    } else {
+        print(a_plot)
+    }
+    cat('\n:::')
+}
+```
+
+```{r, results='asis', eval = length(snp_trees) > 0}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This plot shows the results of comparing the similarity of all samples and references to eachother.
-These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
-These measurments are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
+This is a representation of a Single Nucleotide Polymorphism (SNP) tree, depicting the genetic relationships among samples in comparison to a reference assembly.
+
+The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together.
+
+Question-does it make sense to be showing the reference within the tree?
 :::
-
-
-:::
-
-# Genetic diversity
-
-*Things to address:*
-
-1.  There are lots of NAs in metadata. I ran into issues when trying run poppr. I was trying to select a specific factor to color nodes by. As a quick workaround, changed these to 'unknown', but what is a better solution?
-2.  The assembly prefix in sample names present in SNP aln output and treefile need to be discussed. In initial tool testing stage, I (Martha) have provided some quick workarounds, but this should be addressed at a larger level.
-3.  Need to clarify whether to use REF in the SNP tree or else rename
-
-```{r div_parse_inputs}
-snp_trees <- ape::read.tree(snp_tree_paths)
-snp_alignment <- ape::read.dna(snp_align_paths, format =  "fasta")
-#Rename sample names so they don't have prefixes-may be better way
+')
 ```
 
-## Genetic diversity in sample
-
-::: panel-tabset
-### SNP tree
-
-**Phylocanvas option**
-
-TODO-fix how trees are rooted, so consistent with how core gene phylogeny is
-TODO-may need to fix fundamental logic since only tested on two small datasets
-TODO-with new data parsing functions much of the below code can be revised.
-
-```{r snp_tree_config, include=TRUE}
-#NOTE-Will tidy up code once we finalize which tree program to use and input format of files. There are many lines of code that deal with renaming samples, and these can be revised .  
-
-#Rename tree tip labels
-oldtips<-snp_trees$tip.label
-
-#TODO generalize for any prefix
-#Right now we assume REF is always in first position
-#After we finalize what characters aren't allowed, 
-newtips<- gsub("^[^_]+(?:_[^_]+)*_", "", oldtips)
-
-#SNP output now has new prefix-is there a better way to deal with this, and will it be changing again? 
-snp_trees$tip.label<-newtips
-
-# Root tree
-#option1
-snp_trees_rootref <- root(snp_trees, "REF")
-#option2
-snp_trees_midpoint<-midpoint(snp_trees)
-
-ani_matrix_format <-as.matrix(ani_matrix)
-assembly_entries <- rownames(ani_matrix_format)[grepl("_assembly$", rownames(ani_matrix_format))]
-
-
-name_key <- c(
-  setNames(ref_data$Organism, ref_data$LastMajorReleaseAccession),
-  setNames(samp_data$modified_id, samp_data$modified_id),
-  setNames(assembly_entries, assembly_entries)
-)
-
-sample_ids <- snp_trees_midpoint$tip.label[snp_trees_midpoint$tip.label %in% samp_data$modified_id]
-
-#For phycanvas version-much simpler code-but have a ggtree and ggploty version below
-phycanv_snp <- phylocanvas(snp_trees_midpoint, treetype = "rectangular", alignlabels = T, showscalebar = T, width = "100%")
-for (x in name_key[sample_ids]) {
-  phycanv_snp <- style_node(phycanv_snp, x, labelcolor = "#24B064", labeltextsize = 30)
-}
-    
-phycanv_snp
+```{r div_no_snp_phylo, eval = length(snp_trees) <= 0}
+cat('There is no tree to draw. See staus messages at the start of the report for details.')
 ```
 
-**gtree and ggplotly option**
-
-We need to decide on best tree package. Here I experimented with ggtree and ggplotly. Requires many more lines of code than Phylocanvas. If we use ggtree alone, we lose interactivity, but may look nicer.
-
-```{r ggtree, height=10, width=8, include=TRUE}
-#One way to parse metadata file so we can color tips in a descriptive way
-
-#add REF to metadata-only provide accession info (and maybe genus and species)
-#This part can be simplified
-samp_data<-samp_data
-new_row <- data.frame(matrix(ncol = ncol(samp_data), nrow = 1))
-colnames(new_row) <- colnames(samp_data)
-
-new_row$sample <- "REF"
-
-# Didn't want to mess with original data frame but this could be revised or simplified-depending on if we want to use ggtree or phylocanvas. Not an elegant solution either way. 
-samp_data <- rbind(samp_data, new_row)
-samp_data <- samp_data[match(snp_trees_midpoint$tip.label, samp_data$sample), ]
-
-# We can revise, but one way to color the samples as one color, the ref as another
-samp_data$text_color <- ifelse(samp_data$sample == "REF", "black", "#24B064")
-
-# Couldn't use some of ggtree functions with plotly, so here is a workaround
-snp_tree1 <- fortify(snp_trees_midpoint)
-
-# Merge it with your samp_data for color information
-snp_tree1 <- merge(snp_tree1, samp_data, by.x="label", by.y="sample")
-
-# Using theme_minimal for a cleaner background
-ggtree_snptree <- ggtree(snp_trees_midpoint, size=0.5) + 
-  geom_segment(data=snp_tree1, aes(xend = x + 0.35, yend = y, x = x, y = y), xend = snp_tree1$x + 0.35, color = "lightgray") +
-  geom_point(data=snp_tree1, aes(x=x, y=y, color="black"), show.legend = FALSE, size=3) +
-  geom_text(data=snp_tree1, aes(x = x + 0.44 + 0.03, y = y, label = label, color=text_color), size=3, hjust=0, vjust=0.5, fontface="bold") +
-  scale_color_identity() +
-  theme(legend.position = "none")
-
-
-# Converting to more interactive tree. Work on adjusting what is shown when cursor is on sample. 
-ggtree_interactive <- ggplotly(ggtree_snptree)
-ggtree_interactive
-
-# How interactive plots can be made to work with PDF
-#Perhaps adjust with if/else statement rendering as pdf vs. html, also changes interactivity of html document
-
-#htmlwidgets::saveWidget(widget = ggtree_interactive, file = "ggtree_interactive.html")
-#webshot(url = "ggtree_interactive.html", file = "ggtree_interactive.png", delay = 1, zoom = 4, vheight = 500)
-```
-
-
-```{asis div_no_snp_phylo, echo = is.null(snp_trees)}
-There is no tree to draw, probably because there were too few samples.
-More info will be added later.
-```
-:::
 
 ## Minimum spanning network
 
-### *Questions to address*
 
-TODO-fix nodes to black
+```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
+threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+total_alignments <- length(snp_alignments)
 
-```{r poppr_config}
-snp_trees <- ape::read.tree(snp_tree_paths)
+color_col <- as.character(sample_data$color_by[!is.na(sample_data$color_by)])
+color_factors <- as.list(unique(unlist(strsplit(color_col, split = ';'))))
+if (length(color_factors) == 0) {
+    color_factors <- list(NULL)
+}
 
-#Specific to output from perl script vcftosnpaln, so need to extract REF from genind (ref remains after using)
-snp_aln.gi <- DNAbin2genind(snp_alignment)
-snp_aln.gi <- snp_aln.gi[indNames(snp_aln.gi) != "REF"]
+cat('::: panel-tabset\n')
 
-#Need to rename samples so no longer have prefix (may be better way)
-genind_names<-indNames(snp_aln.gi)
-cleaned_names <- gsub("^[^_]+(?:_[^_]+)*_", "", genind_names)
-indNames(snp_aln.gi) <- cleaned_names
-```
+for (color_by in color_factors) {
+    
+    # Print title of tab
+    if (is.null(color_by)) {
+        title <- 'MSN'
+    } else {
+        title <- color_by
+    }
+    cat(paste0('### ', title, '\n\n'))
+    
+    # Plot for each reference
+    for (reference in names(snp_alignments)) {
+        cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
+        if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
+            plot_one <- function(threshold) {
+                psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
+            }
+            print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
+        } else {
+            cat('There is no MSN to draw. See status messages at the start of the report for details.\n')
+        }
+    }
+}
 
-### Experimenting with less subjective ways to provide SNP cutoff-this may be a viable option but requires review
-
-```{r mlg_config_test, eval = FALSE}
-
-#Experimenting with less subjective approach to identifying good threshold for considering if two samples have the same genotype
-# Convert to genclone
-
-#mat <-match(indNames(snp_aln.gi), samp_data$sample)
-#samp_data <- samp_data[mat, ]
-
-#snp_genclone <- as.genclone(snp_aln.gi)
-#snpdist_stats <- filter_stats(snp_genclone)
-
-#if (length(snpdist_stats$farthest$THRESHOLDS) == 1) {
-    #farthest_thresh <- snpdist_stats$farthest$THRESHOLDS
-    #print(farthest_thresh)
-#} else {
-    #farthest_thresh <- cutoff_predictor(snpdist_stats$farthest$THRESHOLDS)
-    #print(farthest_thresh)
-#}
-
-
-#mlg.filter(snp_genclone, distance = bitwise.dist) <- farthest_thresh
-
-#idlist2<-mlg.id(snp_genclone)
-
-#mlglist2<-data.frame("MLG","strain")
-
-#colnames(mlglist2) <- c("V1","V2")
-
-#for (name in names(idlist2)) {
-#  newframe<-as.data.frame(cbind(paste0("MLG","_",name),idlist2[[name]]))
-# mlglist2<-rbind(mlglist2,newframe)
-#}
-
-#colnames(mlglist2)<-c("MLG","strain")
-#mlglist2<-mlglist2[mlglist2$strain != "strain",]
-
-#make a prettier table
-#mlglist2
+cat('\n:::\n')
 ```
 
 
-### Visnetwork minimum spanning network
+```{r, results='asis', eval = length(snp_alignments) > 0}
+cat('
+::: {.callout-tip collapse="true"}
 
-**Just started, but needs some work to make a comparable MSN to the one above-including legends. Hard to color nodes like in poppr as pie chart. Need to remove sample names from nodes**
+## About this plot
 
-**Attempting to make Visnetwork plot more useful. If you hover, you now see all samples that group together and have the same genotype**
-```{r visnetwork_setup_testing, eval = nrow(samp_data) > 2}
-# # Given a node ID (MLG), this function will return a string containing all sample names associated with that MLG
-# # Work on simplifying code 
-# get_MLG <- function(sample_name) {
-#   mlg_list <- mlg.id(snp_genclone)
-#   mlg <- names(mlg_list)[which(sapply(mlg_list, function(samples) sample_name %in% samples))]
-#   return(mlg)
-# }
-# 
-# # Returns a string with all samples for a given MLG
-# generate_tooltip <- function(mlg) {
-#   samples_with_mlg <- unlist(mlg.id(snp_genclone)[mlg])
-#   return(paste(samples_with_mlg, collapse = ", "))
-# }
-# 
-# node_data <- data.frame(
-#   id = V(ms.loc$graph)$name,
-#   label = sapply(V(ms.loc$graph)$name, get_MLG),  # Get MLG for each sample
-#   group = V(ms.loc$graph)$color,
-#   size = V(ms.loc$graph)$size
-# )
-# node_data$value <- node_data$size.Freq
-# 
-# # Apply the tooltip function to all nodes
-# node_data$title <- sapply(node_data$label, generate_tooltip)  # Tooltip uses the MLG label
-# 
-# node_data$color <- ms.loc$colors[node_data$group]
-# node_groups <- lapply(names(ms.loc$colors), function(group_name) {
-#   list(color = list(background = ms.loc$colors[group_name], border = 'black'))
-# })
-# names(node_groups) <- names(ms.loc$colors)
-# edges_data <- get.data.frame(ms.loc$graph, what="edges")
-# edges_data$title <- paste("Distance:", edges_data$weight)
-# edges_data$arrows <- NA
-# 
-# 
-# visNetwork(node_data, edges_data) %>%
-#   visGroups(groupname = node_groups) %>%
-#   visNodes(shape = "dot", color = node_data$color, title = node_data$title) %>%
-#   visInteraction(dragNodes = TRUE, dragView = TRUE, hideEdgesOnDrag = FALSE) %>%
-#   visPhysics(stabilization = FALSE) %>%
-#   visOptions(nodesIdSelection = TRUE)
+This figure depicts a minimium spanning network (MSN).
+The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the # number of samples that share the same genotype.
 
+The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two.
+
+Note: within these MSNs, edge lengths are not proportional to SNP differences.
+:::
+ ')
 ```
 
-# Quality control
+```{asis div_no_snp_align, echo = length(snp_alignments) <= 0}
+cat('
+Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+')
+```
 
-
-## Input data quality
-
--   multiqc link
-
-## Downloaded references
-
--   quast
--   table with rows for each sample with info on references chosen
-    -   sample id
-    -   reference id
-    -   ANI between sample and reference
--   table with one row per reference (taxon id, GSA id, classification, link to ncbi)
--   sourmash output (tree?)
-
-## Assembly and annotation
-
--   depth of coverage
--   quast link
--   BUSCO gene content?
--   bakta output?
-
-## Variant calling?
-
--   vcfr for plots
--   iqtree model selection, number of informative sites, indels
-
-## Core genome phylogeny
-
--   core gene info (how many genes, length, paralogs)
--   outlier samples causing few genes to be chosen
--   iqtree model selection, number of informative sites, indels
 
 # References
 

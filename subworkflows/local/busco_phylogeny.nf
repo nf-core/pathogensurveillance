@@ -58,13 +58,13 @@ workflow BUSCO_PHYLOGENY {
 
     // group samples
     paired_end = input_filtered // meta, [fastq], group_meta, [ref_meta], kingdom, depth
-        //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
+        .filter { it[0].reads_type == "illumina" }
         .filter { it[1].size() == 2 }
         .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
         .map { [it[2], it[1].collect{it[0]}, it[1].collect{it[1]}] } // group_meta, pair_1, pair_2
 
     single_end = input_filtered // meta, [fastq], group_meta, [ref_meta], kingdom, depth
-        //.filter { it[0].reads_type == "illumina" } //TODO: uncommnet after merge
+        .filter { it[0].reads_type == "illumina" }
         .filter { it[1].size() == 1 }
         .groupTuple(by: 2) // [meta], [[fastq]], group_meta, [[ref_meta]], [kingdom], [depth]
         .map { [it[2], it[1]] } // group_meta, single_end
