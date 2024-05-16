@@ -2,7 +2,7 @@ process ALIGN_FEATURE_SEQUENCES {
     tag "$ref_meta.id"                                                          
     label 'process_single'                                                      
                                                                                 
-    conda "bioconda::mafft=7.520 bioconda::perl-bioperl=1.7.8 conda-forge::parallel=20230522"
+    conda "conda-forge::mafft=7.526 bioconda::perl-bioperl=1.7.8 conda-forge::parallel=20230522"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mafft:7.508--hec16e2b_0':
         'zachary-foster/mafft-perl' }"
