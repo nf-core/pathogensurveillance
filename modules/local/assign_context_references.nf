@@ -1,4 +1,4 @@
-process ASSIGN_GROUP_REFERENCES {
+process ASSIGN_CONTEXT_REFERENCES {
     tag "$group_meta.id"
     label 'process_single'
 
@@ -9,11 +9,12 @@ process ASSIGN_GROUP_REFERENCES {
 
     input:
     tuple val(group_meta), path(ani_matrix), path(samp_ref_pairs)
-    val min_ref_ani
+    val n_ref_closest
+    val n_ref_context
 
     output:
-    tuple val(group_meta), path("${prefix}_reassigned.csv"), emit: samp_ref_pairs
-    path "versions.yml"                                    , emit: versions
+    tuple val(group_meta), path("${prefix}_context_refs.csv"), emit: samp_ref_pairs
+    path "versions.yml"                                      , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +23,7 @@ process ASSIGN_GROUP_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_group_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.csv ${min_ref_ani}
+    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_context} ${prefix}_context_refs.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

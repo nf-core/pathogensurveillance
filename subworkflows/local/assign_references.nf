@@ -1,5 +1,6 @@
 include { KHMER_TRIMLOWABUND                          } from '../../modules/local/khmer_trimlowabund'
-include { ASSIGN_GROUP_REFERENCES                     } from '../../modules/local/assign_group_references'
+include { ASSIGN_MAPPING_REFERENCE                    } from '../../modules/local/assign_mapping_reference'
+include { ASSIGN_CONTEXT_REFERENCES                   } from '../../modules/local/assign_context_references'
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_READS    } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_GENOME   } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_COMPARE                            } from '../../modules/local/sourmash_compare'
@@ -94,13 +95,20 @@ workflow ASSIGN_REFERENCES {
         .map {[[id: it.getSimpleName()], it]} // TODO this recreates the group_meta, but if other feilds besids "id" are added this will not preserve those
 
     // For each group, assign references for variant calling if not user-defined
-    ASSIGN_GROUP_REFERENCES (
+    ASSIGN_MAPPING_REFERENCE (
         SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
-        params.min_ref_ani
+        params.ref_min_ani
+    )
+
+    // Assign referneces to groups for context in phylogenetic analyses
+    ASSIGN_CONTEXT_REFERENCES (
+        SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
+        params.n_ref_closest,
+        params.n_ref_context
     )
 
     // Convert CSV output back to nextflow channels
-    assigned_refs_ids = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs
+    assigned_refs_ids = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1 )
@@ -142,9 +150,9 @@ workflow ASSIGN_REFERENCES {
 
 
     emit:
-    sample_data   = new_sample_data                            // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    ani_matrix    = SOURMASH_COMPARE.out.csv                   // [val(group_meta), val(csv)]
-    assigned_refs = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs // [val(group_meta), val(csv)]
-    versions      = ch_versions                                // channel: [ versions.yml ]
-    messages      = messages                                   // meta, group_meta, ref_meta, workflow, level, message
+    sample_data   = new_sample_data                             // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    ani_matrix    = SOURMASH_COMPARE.out.csv                    // [val(group_meta), val(csv)]
+    mapping_ref   = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // [val(group_meta), val(csv)]
+    versions      = ch_versions                                 // channel: [ versions.yml ]
+    messages      = messages                                    // meta, group_meta, ref_meta, workflow, level, message
 }

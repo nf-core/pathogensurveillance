@@ -8,25 +8,18 @@ min_coverage <- 30
 
 # Parse taxonomomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c("/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_families.txt",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_genera.txt",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/22-330_species.txt",
-          "5",
-          "pram2.tsv",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Peronosporaceae.tsv",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Saprolegniaceae.tsv",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Tissierellaceae.tsv",
-          "/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/eb/49b6f8dcf08edc4f26d6d7c0d9016e/Xanthomonadaceae.tsv")
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
 species <- readLines(args[[3]])
-count <- args[[4]]
-out_path <- args[[5]]
+n_ref_strains <- args[[4]]
+n_ref_species <- args[[5]]
+n_ref_genera <- args[[6]]
+out_path <- args[[7]]
 
-# Parse input TSVs 
-tsv_paths <- unlist(args[6:length(args)])
-tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE) 
+# Parse input TSVs
+tsv_paths <- unlist(args[8:length(args)])
+tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE)
 tsv_data <- lapply(seq_along(tsv_paths), function(index) {
     output <- read.csv(tsv_paths[index], sep = '\t')
     output$family <- tsv_families[index]
@@ -42,18 +35,17 @@ modified_id <- gsub(assem_data$LastMajorReleaseAccession, pattern = '[\\/:*?"<>|
 assem_data <- cbind(reference_id = modified_id, assem_data)
 
 # Parse "count" arguments which can be a number or a percentage
-if (grepl(count, pattern = "%$")) {
-  get_count <- function(table) {
-    prop <- as.numeric(sub(count, pattern = "%", replacement = "")) / 100
-    count <- ceiling(nrow(table) * prop)
-    return(min(c(nrow(table), count)))
-  }
-} else {
-  get_count <- function(table) {
-    count <- as.numeric(count)
-    return(min(c(nrow(table), count)))
-  }
+get_count <- function(table, count) {
+  if (grepl(count, pattern = "%$")) {
+     prop <- as.numeric(sub(count, pattern = "%", replacement = "")) / 100
+     count <- ceiling(nrow(table) * prop)
+     return(min(c(nrow(table), count)))
+   } else {
+     count <- as.numeric(count)
+     return(min(c(nrow(table), count)))
+   }
 }
+
 
 # Quality control
 assem_data <- assem_data[assem_data$Coverage >= min_coverage, ]
@@ -68,7 +60,7 @@ sp_stats <- lapply(split(sp_stats, sp_stats$SpeciesName), function(per_sp_data) 
 if (length(sp_stats) != 0 ) {
   sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
   rownames(sp_stats) <- NULL
-  sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats)], ]
+  sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats, n_ref_strains)], ]
 }
 
 # Pick representatives for each genus
@@ -82,7 +74,7 @@ if (length(gn_stats) != 0 ) {
   gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
   rownames(gn_stats) <- NULL
   gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
-  gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats)], ]
+  gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats, n_ref_species)], ]
 }
 
 # Pick representatives for each family
@@ -96,7 +88,7 @@ if (length(fa_stats) != 0 ) {
   fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
   rownames(fa_stats) <- NULL
   fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
-  fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats)], ]
+  fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats, n_ref_genera)], ]
 }
 
 # Combine results

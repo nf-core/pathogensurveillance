@@ -163,37 +163,37 @@ workflow PATHOGENSURVEILLANCE {
     messages = messages.mix(ASSIGN_REFERENCES.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    //VARIANT_ANALYSIS (
-    //    ASSIGN_REFERENCES.out.sample_data,
-    //    INPUT_CHECK.out.csv
-    //)
-    //ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
-    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    VARIANT_ANALYSIS (
+        ASSIGN_REFERENCES.out.sample_data,
+        INPUT_CHECK.out.csv
+    )
+    ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
-    //// Assemble and annotate bacterial genomes
-    //GENOME_ASSEMBLY (
-    //    ASSIGN_REFERENCES.out.sample_data
-    //        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
-    //        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
-    //)
-    //ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
+    // Assemble and annotate bacterial genomes
+    GENOME_ASSEMBLY (
+        ASSIGN_REFERENCES.out.sample_data
+            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
+            .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
+    )
+    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
 
-    //// Create core gene phylogeny for bacterial samples
-    //ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
-    //    .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(ref_meta), val(meta), file(gff) ]
-    //    .map { it[1..2] } // [ val(meta), file(gff) ]
-    //    .groupTuple() // [ val(meta), [file(gff)] ]
-    //gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    //    .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
-    //    .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-    //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)], val(depth)]
-    //    .map { [it[0], it[5], it[4], it[6], it[7]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)], val(depth) ]
-    //CORE_GENOME_PHYLOGENY (
-    //    gff_and_group,
-    //    INPUT_CHECK.out.csv
-    //)
-    //ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
-    //messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+    // Create core gene phylogeny for bacterial samples
+    ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
+        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // ref_meta, meta, gff
+        .map { it[1..2] } // meta, gff
+        .groupTuple() // meta, [gff]
+    gff_and_group = ASSIGN_REFERENCES.out.sample_data  // meta, [fastq], ref_meta, reference, group_meta
+        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff
+        .combine(ref_gffs, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff]
+        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff], depth
+        .map { [it[0], it[5], it[4], it[6], it[7]] } // meta, gff, group_meta, [ref_gff], depth
+    CORE_GENOME_PHYLOGENY (
+        gff_and_group,
+        INPUT_CHECK.out.csv
+    )
+    ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     // Read2tree BUSCO phylogeny for eukaryotes
     ref_metas = DOWNLOAD_REFERENCES.out.assem_samp_combos // val(ref_meta), val(meta)
@@ -255,13 +255,13 @@ workflow PATHOGENSURVEILLANCE {
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, [core_phylo]
         .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder:true) // group_meta, ani_matrix, [core_phylo], popc
-        .join(ASSIGN_REFERENCES.out.assigned_refs, remainder:true) // group_meta, ani_matrix, [core_phylo], pocp, assigned_refs
+        .join(ASSIGN_REFERENCES.out.mapping_ref, remainder:true) // group_meta, ani_matrix, [core_phylo], pocp, mapping_ref
     report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
         .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
         .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, assigned_refs
-        .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, assigned_refs
-        .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, assigned_refs
+        .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
+        .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
+        .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
         .map { [
             it[0],
             it[1].findAll{ it.id != null }.unique(),
@@ -275,7 +275,7 @@ workflow PATHOGENSURVEILLANCE {
             it[9] == null ? [] : it[9],
             it[10],
             it[11]
-         ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, assigned_refs
+         ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
 
     PREPARE_REPORT_INPUT (
         report_in,

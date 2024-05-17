@@ -7,23 +7,32 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c('test/output/mycobacteroides_small/sourmash_compare/all_comp.csv', '...', '3', '5')
-names(args) <- c('ani_matrix', 'metadata', 'n_refs_closest', 'n_refs_contextual')
+# args <- c(
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/95/2b6877fb33c7402333bfbfef786241/all_comp.csv', 
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/95/2b6877fb33c7402333bfbfef786241/all.csv',
+#     '3', 
+#     '5',
+#     'all_context_refs.csv'
+# )
+names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
 ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
 rownames(ani_matrix) <- colnames(ani_matrix)
 n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
 
-
-sample_ids <- rownames(ani_matrix)[1:3] # TODO: base on input files
-ref_ids <- rownames(ani_matrix)[4:23]
+# Read sample data with user-defined references
+sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references'))
+sample_ids <- sample_data$sample_id
+ref_ids <- rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids]
 
 # Scale ANI values for each sample
 rescale <- function(x) {
-    (x - min(x)) / (max(x) - min(x))
+    (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
 }
-ani_scaled <- apply(ani_matrix[ref_ids, sample_ids], 2, rescale)
+ani_ref_v_smaples <- ani_matrix[ref_ids, sample_ids]
+ani_ref_v_smaples[ani_ref_v_smaples == 0] <- NA
+ani_scaled <- apply(ani_ref_v_smaples, 2, rescale)
 
 # Initialize list of selected references with closest references
 selected_refs <- unique(unlist(lapply(sample_ids, function(id) {
@@ -38,8 +47,8 @@ bin_data <- data.frame(
     to = rep(bins[2:length(bins)], length(sample_ids))
 )
 bin_data$refs <- lapply(1:nrow(bin_data), function(i) {
-    is_in_bin <- between(ani_scaled[, bin_data$sample_id[i]], bin_data$from[i], bin_data$to[i])
-    rownames(ani_scaled)[is_in_bin]
+    is_in_bin <- ani_scaled[, bin_data$sample_id[i]] > bin_data$from[i] & ani_scaled[, bin_data$sample_id[i]] <= bin_data$to[i]
+    rownames(ani_scaled)[! is.na(is_in_bin) & is_in_bin]
 })
 
 # Remove bins that have no references that can work
@@ -62,3 +71,5 @@ while (nrow(bin_data) > 0) {
     bin_data <- filter_bins(bin_data, selected_refs)
 }
 
+# Write selected references to output file with one reference ID per line
+writeLines(selected_refs, args$output_path)

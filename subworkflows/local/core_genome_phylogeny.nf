@@ -56,8 +56,8 @@ workflow CORE_GENOME_PHYLOGENY {
     SUBSET_CORE_GENES (
         REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs),
         ch_samplesheet,
-        params.min_core_genes,
-        params.max_core_genes
+        params.phylo_min_genes,
+        params.phylo_max_genes
     )
 
     // Report any sample or references that have been removed from the analysis

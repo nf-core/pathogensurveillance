@@ -38,7 +38,9 @@ workflow DOWNLOAD_REFERENCES {
         FIND_ASSEMBLIES.out.stats
             .map { it[1] }
             .toSortedList(),
-        params.refseq_download_num
+        params.n_ref_strains,
+        params.n_ref_species,
+        params.n_ref_genera
     )
 
     // Make channel with all unique assembly IDs
