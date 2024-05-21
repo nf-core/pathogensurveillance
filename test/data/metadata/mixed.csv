@@ -1,7 +1,7 @@
 ﻿sample_id,sra,color_by,organism_group,kingdom,report
-PHW726_fox_matthiolae,SRR10432277,organism_group,fungi,fungi,mixed;fungi
-RKN_Menterolobii,ERR3842626,organism_group,nematode,metazoa,mixed;nematode
-BDM_Pbelbahrii,ERR1578941,organism_group,oomycete,sar,mixed;oomycete
-HoneyBee_Adorsata,SRR1564144,organism_group,insect,metazoa,mixed;insect
-Rsol_Rsolanacearum,SRR19621834,organism_group,bacteria,bacteria,mixed;bacteria
-PpalZOC03_Ppalmivora,SRR10483368,organism_group,oomycete,sar,mixed;oomycete
+Foxysporum,SRR28814797,organism_group,fungi,fungi,mixed;fungi
+Mjavanica,ERR11210402,organism_group,nematode,metazoa,mixed;nematode
+Peffusa,SRR10319712,organism_group,oomycete,sar,mixed;oomycete
+Adorsata,SRR1564144,organism_group,insect,metazoa,mixed;insect
+Rsolanacearum,SRR19621834,organism_group,bacteria,bacteria,mixed;bacteria
+Ppalmivora,SRR10319712,organism_group,oomycete,sar,mixed;oomycete
