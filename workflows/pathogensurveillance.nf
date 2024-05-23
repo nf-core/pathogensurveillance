@@ -179,10 +179,14 @@ workflow PATHOGENSURVEILLANCE {
     ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
 
     // Create core gene phylogeny for bacterial samples
-    ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
-        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // ref_meta, meta, gff
-        .map { it[1..2] } // meta, gff
-        .groupTuple() // meta, [gff]
+    ref_gffs = ASSIGN_REFERENCES.out.context_refs
+        .transpose() // group_meta, ref_meta
+        .map { group_meta, ref_meta -> [ref_meta, group_meta] }
+        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // ref_meta, group_meta, gff
+        .map { ref_meta, group_meta, gff -> [group_meta, gff] }
+        .groupTuple() // group_meta, [gff]
+        .combine(ASSIGN_REFERENCES.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
+        .map { group_meta, gff_list, meta -> [meta, gff_list] }
     gff_and_group = ASSIGN_REFERENCES.out.sample_data  // meta, [fastq], ref_meta, reference, group_meta
         .combine(GENOME_ASSEMBLY.out.gff, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff
         .combine(ref_gffs, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff]
@@ -196,9 +200,9 @@ workflow PATHOGENSURVEILLANCE {
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     // Read2tree BUSCO phylogeny for eukaryotes
-    ref_metas = DOWNLOAD_REFERENCES.out.assem_samp_combos // val(ref_meta), val(meta)
-        .map { [it[1], it[0]] } // val(meta), val(ref_meta)
-        .groupTuple() // val(meta), [val(ref_meta)]
+    ref_metas = ASSIGN_REFERENCES.out.context_refs // group_meta, [ref_meta]
+        .combine(ASSIGN_REFERENCES.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
+        .map { group_meta, ref_meta_list, meta -> [meta, ref_meta_list] }
     busco_input = ASSIGN_REFERENCES.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
         .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)]
         .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
@@ -287,10 +291,10 @@ workflow PATHOGENSURVEILLANCE {
         RECORD_MESSAGES.out.tsv
     )
 
-    MAIN_REPORT (
-        PREPARE_REPORT_INPUT.out.report_input,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
-    )
+    //MAIN_REPORT (
+    //    PREPARE_REPORT_INPUT.out.report_input,
+    //    Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+    //)
 
 }
 
