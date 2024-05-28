@@ -63,7 +63,6 @@ include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { SEQKIT_SLIDING              } from '../modules/nf-core/seqkit/sliding/main'
 
 include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
@@ -91,52 +90,45 @@ workflow PATHOGENSURVEILLANCE {
     INPUT_CHECK (
         ch_input
     )
+    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     // Download FASTQ files if SRA accessions is provided
-    ch_sra = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
-        .map { [it[0], it[4]] } // meta, sra
-        .filter { it[1] != null }
+    ch_sra = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
+        .filter { it[2] != null }
+        .map { [it[0], it[2]] } // meta, sra
         .unique()
     SRATOOLS_FASTERQDUMP ( ch_sra )
 
     // Download reference files if an accession is provided instead of a file
-    ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
-        .filter { it[7] != null }
-        .map { [it[5], it[7]] } // ref_meta, reference_refseq
+    ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
+        .filter { it[5] != null }
+        .map { [it[3], it[5]] } // ref_meta, reference_refseq
         .unique()
     DOWNLOAD_ASSEMBLIES ( ch_ref_accessions )
     ch_downloaded_refs = DOWNLOAD_ASSEMBLIES.out.sequence // val(ref_meta), file(downloaded_ref)
-        .combine( INPUT_CHECK.out.sample_data.map { [it[5], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
+        .combine( INPUT_CHECK.out.sample_data.map { [it[3], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
         .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
 
-    // Cutting up long reads
-    nanopore = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
-        .filter { it[2] != null }
-        .map { [it[0], it[2]] } // meta, nanopore
-        .unique()
-
-    SEQKIT_SLIDING ( nanopore )
-
-
     // Replace NCBI SRAs/Assembly accessions with downloaded reads and references
-    ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
-        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
-        .join(ch_downloaded_refs, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
-        .join(SEQKIT_SLIDING.out.fastx, remainder:true) // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref, nanopore
-        .map { [it[0], [it[9], it[1], it[11]].findAll {it != null}[0], it[5], it[10] ?: it[6], it[8]] } // meta, [fastq], ref_meta, reference, group_meta
-
-    ch_reads = ch_input_parsed // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        .map { it[0..1] }
-        .unique()
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
+        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [reads], sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
+        .join(ch_downloaded_refs, remainder:true) // meta, [reads], sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
+        .map { [it[0], it[7] ?: it[1], it[3], it[8] ?: it[4], it[6]] } // meta, [reads], ref_meta, reference, group_meta
 
     // Run FastQC
+    ch_shortreads = ch_input_parsed  // meta, [reads], ref_meta, reference, group_meta
+        .filter { it[0].reads_type == "illumina" }
+        .map { it[0..1] } // meta, [reads]
+        .unique()
     FASTQC (
-        ch_reads
+        ch_shortreads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
 
     // Make initial taxonomic classification to decide how to treat sample
+    ch_reads = ch_input_parsed  // meta, [reads], ref_meta, reference, group_meta
+        .map { it[0..1] }
+        .unique()
     COARSE_SAMPLE_TAXONOMY (
         ch_reads
     )
@@ -164,7 +156,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Call variants and create SNP-tree and minimum spanning nextwork
     VARIANT_ANALYSIS (
-        ASSIGN_REFERENCES.out.sample_data,
+        ASSIGN_REFERENCES.out.sample_data, // meta, [reads], ref_meta, reference, group_meta
         INPUT_CHECK.out.csv
     )
     ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
@@ -247,13 +239,13 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // Create main summary report
-    report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, fastq, ref_meta, reference, group_meta
-        .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch
-        .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, fastq, ref_meta, reference, group_meta, sendsketch, ref_stats
-        .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats
-        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, fastq, reference, group_meta, sendsketch, ref_stats, quast
-        .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, fastq, reference, sendsketch, ref_stats, quast
-        .groupTuple() // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
+    report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, [reads], ref_meta, reference, group_meta
+        .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch
+        .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch, ref_stats
+        .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats
+        .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats, quast
+        .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, [reads], reference, sendsketch, ref_stats, quast
+        .groupTuple() // group_meta, [ref_meta], [meta], [reads], [reference], [sendsketch], [ref_stats], [quast]
     report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
         .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
     report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix

@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bakta/bakta": {
                         "branch": "master",
-                        "git_sha": "bacae7f0c22948c6e34fa001be4481985851282f",
+                        "git_sha": "9d0f89b445e1f5b2fb30476f4be9a8b519c07846",
                         "installed_by": [
                             "modules"
                         ]
@@ -57,6 +57,13 @@
                     "fastqc": {
                         "branch": "master",
                         "git_sha": "65ad3e0b9a4099592e1102e92e10455dc661cf53",
+                        "installed_by": [
+                            "modules"
+                        ]
+                    },
+                    "flye": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": [
                             "modules"
                         ]

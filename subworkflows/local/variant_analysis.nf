@@ -4,38 +4,52 @@ include { CALL_VARIANTS          } from './call_variants'
 include { IQTREE2 as IQTREE2_SNP } from '../../modules/local/iqtree2'
 include { VCF_TO_TAB             } from '../../modules/local/vcf_to_tab'
 include { VCF_TO_SNPALN          } from '../../modules/local/vcf_to_snpaln'
+include { SEQKIT_SLIDING         } from '../../modules/nf-core/seqkit/sliding/main'
 
 workflow VARIANT_ANALYSIS {
 
     take:
-    input // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    ch_samplesheet // channel: path
+    input // meta, [reads], ref_meta, reference, group_meta
+    ch_samplesheet // path
 
     main:
     ch_versions = Channel.empty()
     messages = Channel.empty()
 
+    // Cutting up long reads
+    longreads = input // meta, [reads], ref_meta, reference, group_meta
+        .filter { it[0].reads_type != "illumina" }
+    SEQKIT_SLIDING ( longreads.map { it[0..1] } )
+
+    chopped_reads = SEQKIT_SLIDING.out.fastx // meta, [chopped_reads]
+        .join(longreads) // meta, [chopped_reads], [reads], ref_meta, reference, group_meta
+        .map { it[0..1] + it[3..5] } // meta, [fastqs], ref_meta, reference, group_meta
+
+    sample_data = input
+        .filter { it[0].reads_type == "illumina" }
+        .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, group_meta
+
     // Remove any samples that do not have reference information
-    input
+    sample_data
         .branch {
             filtered: it[3] != null
             no_ref: it[3] == null
         }
-        .set { parsed_input }
+        .set { parsed_sample_data }
 
     // Report samples that do not have reference information
-    no_ref_warnings = parsed_input.no_ref
+    no_ref_warnings = parsed_sample_data.no_ref
         .map { [it[0], it[4], null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
 
-    ch_ref = parsed_input.filtered
+    ch_ref = parsed_sample_data.filtered
         .map { it[2..3] }
         .groupTuple()
         .map { [it[0], it[1].sort()[0]] }
-    REFERENCE_INDEX ( parsed_input.filtered.map { it[2..3] }.unique() )
+    REFERENCE_INDEX ( parsed_sample_data.filtered.map { it[2..3] }.unique() )
     ch_versions = ch_versions.mix(REFERENCE_INDEX.out.versions)
 
-    input_with_indexes = parsed_input.filtered
+    input_with_indexes = parsed_sample_data.filtered
         .map { [it[2], it[0], it[1], it[3], it[4]] } // [val(ref_meta), val(meta), [file(fastq)], file(reference), val(group_meta)]
         .combine(REFERENCE_INDEX.out.samtools_fai, by: 0)
         .combine(REFERENCE_INDEX.out.bwa_index, by: 0)

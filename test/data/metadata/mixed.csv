@@ -1,5 +1,5 @@
-sample_id,sra,color_by,organism_group,kingdom,report
-PHW726_fox_matthiolae,SRR10432277,organism_group,fungi,fungi,mixed;fungi
-BDM_Pbelbahrii,ERR1578941,organism_group,oomycete,sar,mixed;oomycete
-HoneyBee_Adorsata,SRR1564144,organism_group,insect,metazoa,mixed;insect
-Rsol_Rsolanacearum,SRR19621834,organism_group,bacteria,bacteria,mixed;bacteria
+sample_id,reads_sra,reads_type,color_by,organism_group,kingdom,report_group
+PHW726_fox_matthiolae,SRR10432277,illumina,organism_group,fungi,fungi,mixed;fungi
+BDM_Pbelbahrii,ERR1578941,illumina,organism_group,oomycete,sar,mixed;oomycete
+HoneyBee_Adorsata,SRR1564144,illumina,organism_group,insect,metazoa,mixed;insect
+Rsol_Rsolanacearum,SRR19621834,illumina,organism_group,bacteria,bacteria,mixed;bacteria

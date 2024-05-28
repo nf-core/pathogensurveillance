@@ -9,11 +9,11 @@ include { SUBSET_READS                                } from '../../modules/loca
 workflow ASSIGN_REFERENCES {
 
     take:
-    sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    assem_samp_combos // [val(ref_meta), val(meta)] for each unique combination
-    sequence // [val(ref_meta), file(fna)] for each assembly
-    signatures // [val(ref_meta), file(sig)] for each assembly
-    depth // [val(meta), val(depth)] for each sample
+    sample_data // meta, [reads], ref_meta, reference, group_meta
+    assem_samp_combos // ref_meta, meta, for each unique combination
+    sequence // ref_meta, fna, for each assembly
+    signatures // ref_meta, sig, for each assembly
+    depth // meta, depth, for each sample
 
     main:
     ch_versions = Channel.empty()
@@ -21,10 +21,10 @@ workflow ASSIGN_REFERENCES {
 
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        sample_data
-            .map { it[0..1] } // [val(meta), [file(fastq)]], possibly duplicated
-            .combine(depth, by:0) // [val(meta), [file(fastq)], depth], possibly duplicated
-            .unique(), // [val(meta), [file(fastq)], depth], one per sample
+        sample_data // meta, [fastqs], ref_meta, reference, group_meta
+            .map { it[0..1] } // meta, [fastqs]
+            .combine(depth, by:0) // meta, [fastq], depth (possibly duplicated)
+            .unique(),
         params.sketch_max_depth
     )
     ch_versions = ch_versions.mix(SUBSET_READS.out.versions.toSortedList().map{it[0]})
@@ -150,23 +150,23 @@ workflow ASSIGN_REFERENCES {
         .map { it[1..4] }  // [val(meta), val(group_meta), val(ref_meta), file(reference)]
 
     // Recreate sample data with new references picked
-    new_sample_data = sample_data
-        .map { [it[0], it[4], it[1]] } // [val(meta), val(group_meta), [file(fastq)] ]
-        .combine ( mapping_refs_with_seq, by: 0..1 )// [val(meta), val(group_meta), [file(fastq)], val(ref_meta), file(reference)]
-        .map { [it[0], it[2], it[3], it[4], it[1]] } // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    new_sample_data = sample_data  // meta, [reads], ref_meta, reference, group_meta
+        .map { [it[0], it[4], it[1]] } // meta, group_meta, [reads]
+        .combine ( assigned_refs_with_seq, by: 0..1 ) // meta, group_meta, [reads], ref_meta, reference
+        .map { [it[0]] + it[2..4] + [it[1]] } // meta, [reads], ref_meta, reference, group_meta
 
     // Report any samples that could not be assigned a reference
-    no_ref_warnings = new_sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
+    no_ref_warnings = new_sample_data // meta, [reads], ref_meta, reference, group_meta
         .filter { it[3] == null }
         .map { [it[0], it[4], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(no_ref_warnings)
 
 
     emit:
-    sample_data            = new_sample_data                             // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-    ani_matrix             = SOURMASH_COMPARE.out.csv                    // [val(group_meta), val(csv)]
-    mapping_ref            = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // [val(group_meta), val(csv)]
+    sample_data   = new_sample_data                            // meta, [reads], ref_meta, reference, group_meta
+    ani_matrix    = SOURMASH_COMPARE.out.csv                   // group_meta, csv
+    assigned_refs = ASSIGN_GROUP_REFERENCES.out.samp_ref_pairs // group_meta, csv
     context_refs           = context_refs                                // group_meta, [ref_meta]
-    versions               = ch_versions                                 // channel: [ versions.yml ]
-    messages               = messages                                    // meta, group_meta, ref_meta, workflow, level, message
+    versions      = ch_versions                                // versions
+    messages      = messages                                   // meta, group_meta, ref_meta, workflow, level, message
 }

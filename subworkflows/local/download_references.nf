@@ -9,10 +9,10 @@ include { KHMER_TRIMLOWABUND                        } from '../../modules/local/
 workflow DOWNLOAD_REFERENCES {
 
     take:
-    ch_species  // channel: [val(meta), file(taxa)]
-    ch_genera  // channel: [val(meta), file(taxa)]
-    ch_families  // channel: [val(meta), file(taxa)]
-    ch_input // meta, [shortread], nanopore, pacbio, sra, ref_meta, reference, reference_refseq, group
+    ch_species  // meta, taxa
+    ch_genera  // meta, taxa
+    ch_families  // meta, taxa
+    ch_input // meta, [reads], sra, ref_meta, reference, reference_refseq, group
 
     main:
     ch_versions = Channel.empty()
@@ -45,8 +45,8 @@ workflow DOWNLOAD_REFERENCES {
 
     // Make channel with all unique assembly IDs
     user_acc_list = ch_input
-        .map { [it[5], it[7]] } // ref_meta, ref_acc
-        .distinct()
+        .map { [it[3], it[5]] } // ref_meta, reference_refseq
+        .unique()
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
         .map {it[1]}
         .splitText()
@@ -76,11 +76,11 @@ workflow DOWNLOAD_REFERENCES {
         .map { [[id: it[1].replace('\n', '').split('\t')[0], name: it[1].replace('\n', '').split('\t')[2]], it[0]] } // [ val(ref_meta), val(meta) ]
 
     emit:
-    assem_samp_combos = genome_ids                        // [ val(ref_meta), val(meta) ] for each assembly/sample combination
-    sequence   = DOWNLOAD_ASSEMBLIES.out.sequence         // [ val(ref_meta), file(fna) ] for each assembly
-    gff        = MAKE_GFF_WITH_FASTA.out.gff              // [ val(ref_meta), file(gff) ] for each assembly
-    signatures = SOURMASH_SKETCH_GENOME.out.signatures    // [ val(ref_meta), file(signature) ] for each assembly
-    stats      = PICK_ASSEMBLIES.out.stats                // [ file(stats) ] for each sample
-    stats_all  = PICK_ASSEMBLIES.out.merged_stats.first() // file(merged_stats)
-    versions   = ch_versions                              // [ versions.yml ]
+    assem_samp_combos = genome_ids                        // ref_meta, meta for each assembly/sample combination
+    sequence   = DOWNLOAD_ASSEMBLIES.out.sequence         // ref_meta, fna for each assembly
+    gff        = MAKE_GFF_WITH_FASTA.out.gff              // ref_meta, gff for each assembly
+    signatures = SOURMASH_SKETCH_GENOME.out.signatures    // ref_meta, signature for each assembly
+    stats      = PICK_ASSEMBLIES.out.stats                // stats for each sample
+    stats_all  = PICK_ASSEMBLIES.out.merged_stats.first() // merged_stats
+    versions   = ch_versions                              // versions.yml
 }
