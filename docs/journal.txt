@@ -2,7 +2,7 @@
 The goal is to allow users to specify multiple references per sample to be used for both variant calling and phylogenetic analyses.
 
 A new input spreadsheet with one row per referene and the following columns:
-* id: unique identifier for the refernece input (path, accession, etc). The sample ID / reference ID combination must be unique, but this can be repeated to use the same reference for multiple samples. If not supplied, an ID will be automatically generated from the `name` or input path/accession/query.
+* refernce_id: unique identifier for the refernece input (path, accession, etc). The sample ID / reference ID combination must be unique, but this can be repeated to use the same reference for multiple samples. If not supplied, an ID will be automatically generated from the `name` or input path/accession/query.
 * name: Short human-readable label, ideally starting with a latin binomial species name, used in figures and tables in the pipeline output. If not supplied, the sample ID will be used.
 * description: Longer label for the reference, used in figures and tables in the pipeline output. If this is not supplied, the value of `name` will be used.
 * group_id: The group the reference is a part of. This ID is used in the sample data spreadsheet to identify a group of references. References can be assigned to more than one group by seperating group IDs with semicolons (;). The id of the reference is always added automatically as a group ID, so individual referneces can also be referred to in the sample data spreadsheet.
@@ -23,7 +23,7 @@ The definations of the values of the `*_usage` columns:
 
 
 This will also result in changes to the sample data spreadsheet:
-* id: The unique identifier for each sample. This will be used in file names to distinguish samples in the output. Each sample ID must correspond to a single set of sequence data (The `path`, `ncbi_accession`, and `ncbi_query` columns), although the same sequence data can be used by multiple different IDs. Any values that correspond to multiple different sets of sequence data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the names of input data.
+* sample_id: The unique identifier for each sample. This will be used in file names to distinguish samples in the output. Each sample ID must correspond to a single set of sequence data (The `path`, `ncbi_accession`, and `ncbi_query` columns), although the same sequence data can be used by multiple different IDs. Any values that correspond to multiple different sets of sequence data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the names of input data.
 * name: A human-readable label for the sample that is used in plots and tables. If not supplied, it will be inferred from the names of `sample_id`.
 * description: A longer human-readable label used in plots and tables. If not supplied, it will be equal to the `name` value
 * path: Path to a local file or a URL. For paired-end data, like that produced by Illumina sequencers, supply the forward read path here and the revese in the `path_2` column. If this is supplied, the `ncbi_accession` and `ncbi_query` columns must be empty.
@@ -32,9 +32,10 @@ This will also result in changes to the sample data spreadsheet:
 * ncbi_query: The NCBI search query to use to automatically find and download reads. If supplied, the `ncbi_accession` and `path` columns must be empty.
 * type: The type of sequencing supplied in the `path`, `ncbi_accession`, or `ncbi_query` column. One of "ilumina", "pacbio", or "nanopore".
 * reference_id: The unique identifier for each user-defined reference genome or group of genomes. This must be values that occur in the `id` or `group_id` columns in the reference input spreadsheet.
-* group: How to group samples into reports. For every unique value in this column a report will be generated. Samples can be assigned to multiple reports by separating group IDs by `;`. For example `all;subset` will put the sample in both `all` and `subset` report groups. If not included, all samples will be
+* group_ids: How to group samples into reports. For every unique value in this column a report will be generated. Samples can be assigned to multiple reports by separating group IDs by `;`. For example `all;subset` will put the sample in both `all` and `subset` report groups. If not included, all samples will be
 * color_by: The names of user-specific columns (not usually any of the ones described here) containing variables to base the color of some plots by (e.g. the minimum spanning network). If not include, plots will not be colored.
 * enabled: TRUE/FALSE. Whether or not to use this sample. This can be used to prevent a sample to be used without deleting its data from the spreadsheet.
+* ploidy: The ploidy of the sample, specified as the number of copies. Defualts to 1.
 
 [2024-05-28 02:27:30 PM] Working on combining branches
 I am trying to combine the branches with long read support and read2tree support with the master branch, along with changes to how references will be supplied to the pipeline.

@@ -15,7 +15,11 @@ def checkPathParamList = [ params.input, params.multiqc_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified.' }
+if (params.input) {
+    ch_input = file(params.input)
+} else {
+    exit 1, 'Input samplesheet not specified.'
+}
 if (!params.bakta_db && !params.download_bakta_db ) {
     exit 1, "No bakta database specified. Use either '--bakta_db' to point to a local bakta database or use '--download_bakta_db true' to download the Bakta database."
 }

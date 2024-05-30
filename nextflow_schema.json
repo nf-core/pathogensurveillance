@@ -12,20 +12,30 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": ["input", "outdir"],
             "properties": {
-                "input": {
+                "sample_data": {
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.[ct]sv$",
                     "schema": "assets/schema_input.json",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row. See [usage docs](https://nf-co.re/plantpathsurveil/usage#samplesheet-input).",
+                    "description": "Path to comma-separated file containing information about samples.",
+                    "help_text": "This CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
-                "outdir": {
+                "reference_data": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.[ct]sv$",
+                    "schema": "assets/schema_input.json",
+                    "description": "Path to comma-separated file containing information about samples.",
+                    "help_text": "This CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "out_dir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage if running on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "temp_dir": {
