@@ -1,4 +1,4 @@
-sample_id,path,Path   2,type,NAME, description ,random_column,ncbi accession,NCBI_query,,reference_ids,group_ids,color_by,enabled,user_factor_1,user factor 2,…,_,ploidy
+sample_id,path,Path   2,sequence_type,NAME, description ,random_column,ncbi accession,NCBI_query,,reference_ids,group_ids,color_by,enabled,user_factor_1,user factor 2,…,_,ploidy
 Xan_1,test/data/reads/22-299_R1.fastq.gz,test/data/reads/22-299_R2.fastq.gz,ILLUMINA,Xan 1,The best Xanthomonas; its number 1,just,,,,xan_refs,all;xanthemonas,,,,,,,1
 ,test/data/reads/22-300_R1.fastq.gz,test/data/reads/22-300_R2.fastq.gz,illumina,Xan 2,,some,,,,xan_refs,all;xanthemonas,,TRUE,,,,,1
 Xan 3,test/data/reads/22-301_R1.fastq.gz,test/data/reads/22-301_R2.fastq.gz, Illumina,,,random,,,,xan_refs,all;xanthemonas,,FALSE,,,,,1

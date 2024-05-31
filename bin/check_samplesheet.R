@@ -1,41 +1,118 @@
 #!/usr/bin/env Rscript
 
-# This script takes 2 arguments:
-#   1. The path to the CSV input to the pipeline supplied by the user
-#   2. The path to the reformatted version of the CSV output by this script
+get_ncbi_sra_runs <- function(query) {
+    search_result <- rentrez::entrez_search(db = 'sra', query)
+    summary_result <- entrez_summary(db = 'sra', search_result$ids)
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    run_ids <- unlist(lapply(summary_result, function(x) {
+        if (length(x$runs) > 1) {
+            warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
+        }
+        run_xml <- x$runs[1]
+        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+    }))
+    sequence_instrument <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\1')
+    }))
+    sequence_type <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\2')
+    }))
+    output <- data.frame(
+        run_id = run_ids,
+        instrument = sequence_instrument,
+        type = sequence_type
+    )
+    rownames(output) <- NULL
+    return(output)
+}
+
+get_ncbi_genomes <- function(query) {
+    search_result <- rentrez::entrez_search(db = 'assembly', query)
+    summary_result <- entrez_summary(db = 'assembly', search_result$ids)
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    acc_ids <- unlist(lapply(summary_result, function(x) {
+        if (length(x$assemblyaccession) > 1) {
+            warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
+        }
+        run_xml <- x$assemblyaccession[1]
+        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+    }))
+    return(acc_ids)
+}
+
+
+# This script takes 4 arguments:
+#   1. The path to the per-sample CSV input to the pipeline supplied by the user
+#   2. The path to the per-reference CSV input to the pipeline supplied by the user
+#   3. The path to the reformatted version of the CSV per-sample output by this script
+#   4. The path to the reformatted version of the CSV per-sample output by this script
 #
 # The first part of this script defines constants that might need to be changed in the future.
 
 # Column names that can be used by the pipeline
 # These will always be present and in this order in the output
 # See the README.md for descriptions of each column
-known_columns <- c(
+known_columns_samp <- c(
     'sample_id',
-    'sample_name',
-    'reads_1',
-    'reads_2',
-    'reads_sra',
-    'reads_type',
-    'reference_id',
-    'reference_name',
-    'reference',
-    'reference_refseq',
-    'report_group',
-    'color_by'
+    'name',
+    'description',
+    'path',
+    'path_2',
+    'ncbi_accession',
+    'ncbi_query',
+    'sequence_type',
+    'group_ids',
+    'color_by',
+    'enabled',
+    'ploidy',
+    'ref_id',
+    'ref_name',
+    'ref_description',
+    'ref_group_ids',
+    'ref_path',
+    'ref_ncbi_accession',
+    'ref_ncbi_query',
+    'ref_primary_usage',
+    'ref_contextual_usage',
+    'ref_color_by',
+    'ref_enabled'
+)
+known_columns_ref <- c(
+    'ref_id',
+    'ref_name',
+    'ref_description',
+    'ref_group_ids',
+    'ref_path',
+    'ref_ncbi_accession',
+    'ref_ncbi_query',
+    'ref_primary_usage',
+    'ref_contextual_usage',
+    'ref_color_by',
+    'ref_enabled'
 )
 
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
-required_input_columns <- list(
-    c('reads_1', 'reads_2', 'reads_sra'),
-    c('reads_type')
+required_input_columns_samp <- list(
+    c('path', 'path_2', 'ncbi_accession', 'ncbi_query'),
+    c('sequence_type')
+)
+required_input_columns_ref <- list(
+    c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
 # If a regular expression matches multiple columns, then both matches can have a value
-mutually_exclusive_columns <- list(
-    c('reference', 'reference_refseq'),
-    c('reads_[12]', 'reads_sra')
+mutually_exclusive_columns_samp <- list(
+    c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query'),
+    c('reads_?2?', 'ncbi_accession', 'ncbi_query')
+)
+mutually_exclusive_columns_ref <- list(
+    c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
 )
 
 # These are file extensions that are expected in the input data.
@@ -63,10 +140,10 @@ known_read_types <- c(
 invalid_id_char_pattern <- '[\\/:*?"<>| .-]+'
 
 # Name of default group if all samples do not have a group defined
-defualt_group_full <- 'all'
+default_group_full <- 'all'
 
 # Name of default group if some samples do not have a group defined
-defualt_group_partial <- '__other__'
+default_group_partial <- '__other__'
 
 # Prefix added to column names to distinguish modified columns from user-supplied columns
 user_column_name_prefix <- '__user_'
@@ -74,109 +151,166 @@ user_column_name_prefix <- '__user_'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata/wagner_2023.csv', 'test_out.csv')
-names(args) <- c('input_path', 'output_path')
-metadata_original <- read.csv(args$input_path, check.names = FALSE)
+args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv', 'test_out_samp.csv',  'test_out_ref.csv')
+names(args) <- c('input_path_samp', 'input_path_ref', 'output_path_samp', 'output_path_ref')
+metadata_original_samp <- read.csv(args$input_path_samp, check.names = FALSE)
+metadata_original_ref <- read.csv(args$input_path_ref, check.names = FALSE)
+
+# Remove empty rows
+remove_empty_rows <- function(metadata) {
+    is_empty <- apply(metadata, MARGIN = 1, function(row) all(is.na(row) | row == ''))
+    metadata[! is_empty, ]
+}
+metadata_original_samp <- remove_empty_rows(metadata_original_samp)
+metadata_original_ref <- remove_empty_rows(metadata_original_ref)
+
+# Remove empty columns
+remove_empty_cols <- function(metadata) {
+    is_empty <- apply(metadata, MARGIN = 2, function(row) all(is.na(row) | row == ''))
+    metadata[, ! is_empty]
+}
+metadata_original_samp <- remove_empty_cols(metadata_original_samp)
+metadata_original_ref <- remove_empty_cols(metadata_original_ref)
 
 # Check that there is data
-if (nrow(metadata_original) == 0) {
+if (nrow(metadata_original_samp) == 0) {
     stop(call. = FALSE,
          'There are no rows in the input samplesheet.')
 }
 
 # Remove all whitespace
-colnames(metadata_original) <- trimws(colnames(metadata_original))
-metadata_original[] <- lapply(metadata_original, trimws)
+remove_whitespace <- function(metadata) {
+    colnames(metadata) <- trimws(colnames(metadata))
+    metadata[] <- lapply(metadata, trimws)
+    return(metadata)
+}
+metadata_original_samp <- remove_whitespace(metadata_original_samp)
+metadata_original_ref <- remove_whitespace(metadata_original_ref)
 
 # Preserve original column names
-unmodified_data <- metadata_original
+unmodified_data_samp <- metadata_original_samp
+unmodified_data_ref <- metadata_original_ref
 
 # Replace capital letters with lowercase in colnames
-colnames(metadata_original) <- tolower(colnames(metadata_original))
+colnames(metadata_original_samp) <- tolower(colnames(metadata_original_samp))
+colnames(metadata_original_ref) <- tolower(colnames(metadata_original_ref))
 
 # Replace spaces with underscores in colnames
-colnames(metadata_original) <- gsub(' ', '_', colnames(metadata_original))
+colnames(metadata_original_samp) <- gsub(' +', '_', colnames(metadata_original_samp))
+colnames(metadata_original_ref) <- gsub(' +', '_', colnames(metadata_original_ref))
 
 # Add underscores in common missed locations
-underscore_replace_key <- known_columns
-names(underscore_replace_key) <- gsub ('_', '', known_columns)
-colnames_to_replace <- underscore_replace_key[colnames(metadata_original)]
-colnames(metadata_original)[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
+add_underscores <- function(metadata, known_columns) {
+    underscore_replace_key <- known_columns
+    names(underscore_replace_key) <- gsub ('_+', '', known_columns)
+    colnames_to_replace <- underscore_replace_key[colnames(metadata)]
+    colnames(metadata)[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
+    return(metadata)
+}
+metadata_original_samp <- add_underscores(metadata_original_samp, known_columns_samp)
+metadata_original_ref <- add_underscores(metadata_original_ref, known_columns_ref)
 
 # Replace NAs with empty stings
-metadata_original[] <- lapply(metadata_original, function(x) {
+metadata_original_samp[] <- lapply(metadata_original_samp, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+metadata_original_ref[] <- lapply(metadata_original_ref, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
 
 # Check that required input columns are present
-for (columns in required_input_columns) {
-    if (! any(columns %in% colnames(metadata_original))) {
+check_required_cols <- function(metadata, required_cols, csv_name) {
+    for (columns in required_cols) {
+        if (! any(columns %in% colnames(metadata))) {
+            stop(call. = FALSE,
+                 'At least one of the following columns must be present in the ', csv_name, ' CSV: ',
+                 paste0('"', columns, '"', collapse = ', ')
+            )
+        }
+    }
+}
+check_required_cols(metadata_original_samp, required_input_columns_samp, 'sample data')
+check_required_cols(metadata_original_ref, required_input_columns_ref, 'reference data')
+
+# Check for duplicated columns
+check_duplicated_cols <- function(metadata, known_cols, csv_name) {
+    present_known_cols <- colnames(metadata)[colnames(metadata) %in% known_cols]
+    duplicated_cols <- unique(present_known_cols[duplicated(present_known_cols)])
+    if (length(duplicated_cols) > 0) {
         stop(call. = FALSE,
-             'At least one of the following columns must be present in the input CSV: ',
-             paste0('"', columns, '"', collapse = ', ')
+             'The following columns occur more than once in the ', csv_name, ' CSV: ',
+             paste0('"', duplicated_cols, '"', collapse = ', ')
         )
     }
 }
-
-# Check for duplicated columns
-present_known_cols <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
-duplicated_cols <- unique(present_known_cols[duplicated(present_known_cols)])
-if (length(duplicated_cols) > 0) {
-    stop(call. = FALSE,
-         'The following columns occur more than once in the input CSV: ',
-         paste0('"', duplicated_cols, '"', collapse = ', ')
-    )
-}
+check_duplicated_cols(metadata_original_samp,  known_columns_samp, 'sample data')
+check_duplicated_cols(metadata_original_ref,  known_columns_ref, 'reference data')
 
 # Reorder columns and add any missing columns
-empty_columns <- lapply(known_columns, function(column) {
-    rep('', nrow(metadata_original))
-})
-names(empty_columns) <- known_columns
-metadata <- as.data.frame(empty_columns)
-metadata[colnames(metadata_original)] <- metadata_original
+reorder_and_add_cols <- function(metadata, known_columns) {
+    empty_columns <- lapply(known_columns, function(column) {
+        rep('', nrow(metadata))
+    })
+    names(empty_columns) <- known_columns
+    output <- as.data.frame(empty_columns)
+    output[colnames(metadata)] <- metadata
+    return(output)
+}
+metadata_original_samp <- reorder_and_add_cols(metadata_original_samp, known_columns_samp)
+metadata_original_ref <- reorder_and_add_cols(metadata_original_ref, known_columns_ref)
+
 
 # Check that required input columns have at least one value for each row
-validate_required_input <- function(row_index, columns) {
-    values <- unlist(metadata[row_index, columns])
-    if (all(values == '' | is.na(values))) {
-        stop(call. = FALSE, paste0(
-            'At least one of the following columns in the input CSV must have a value on row ', row_index, ': ',
-            paste0('"', columns, '"', collapse = ', ')
-        ))
+validate_required_input <- function(metadata, required_input_columns, csv_name) {
+    validate_required_input_cols <- function(row_index, columns) {
+        values <- unlist(metadata[row_index, columns])
+        if (all(values == '' | is.na(values))) {
+            stop(call. = FALSE, paste0(
+                'At least one of the following columns in the ', csv_name, ' CSV must have a value on row ', row_index, ': ',
+                paste0('"', columns, '"', collapse = ', ')
+            ))
+        }
+    }
+    for (row_index in 1:nrow(metadata)) {
+        for (columns in required_input_columns) {
+            validate_required_input_cols(row_index, columns)
+        }
     }
 }
-for (row_index in 1:nrow(metadata)) {
-    for (columns in required_input_columns) {
-        validate_required_input(row_index, columns)
-    }
-}
+validate_required_input(metadata_original_samp, required_input_columns_samp, 'sample data')
+validate_required_input(metadata_original_ref, required_input_columns_ref, 'reference data')
 
 # Validate mutually exclusive columns
-validate_mutually_exclusive <- function(row_index, columns) {
-    has_value <- unlist(lapply(columns, function(column) {
-        col_pattern <- paste0('^', column, '$')
-        matching_columns <- grep(colnames(metadata), pattern = col_pattern, value = TRUE)
-        values <- metadata[row_index, matching_columns]
-        return(any(values != '' & !is.na(values)))
-    }))
-    if (sum(has_value) > 1) {
-        problem_columns <- columns[has_value]
-        stop(call. = FALSE, paste0(
-            'The following mutually exclusive columns in the input CSV all have values on row ', row_index, ': ',
-            paste0('"', problem_columns, '"', collapse = ', '), '\n',
-            'For this group of columns, only a single column type can have a value for each sample.'
-        ))
+validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, csv_name) {
+    validate_mutually_exclusive_cols <- function(row_index, columns) {
+        has_value <- unlist(lapply(columns, function(column) {
+            col_pattern <- paste0('^', column, '$')
+            matching_columns <- grep(colnames(metadata), pattern = col_pattern, value = TRUE)
+            values <- metadata[row_index, matching_columns]
+            return(any(values != '' & !is.na(values)))
+        }))
+        if (sum(has_value) > 1) {
+            problem_columns <- columns[has_value]
+            stop(call. = FALSE, paste0(
+                'The following mutually exclusive columns in the ', csv_name, ' CSV all have values on row ', row_index, ': ',
+                paste0('"', problem_columns, '"', collapse = ', '), '\n',
+                'For this group of columns, only a single column type can have a value for each sample.'
+            ))
+        }
     }
-}
-for (row_index in 1:nrow(metadata)) {
-    for (columns in mutually_exclusive_columns) {
-        validate_mutually_exclusive(row_index, columns)
+    for (row_index in 1:nrow(metadata)) {
+        for (columns in mutually_exclusive_columns_samp) {
+            validate_mutually_exclusive(row_index, columns)
+        }
     }
+    return(metadata)
 }
+validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
+validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Ensure sample IDs are present
+# Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
     col[col == ''] <- NA_character_
     reverse_char <- function(x) {
@@ -227,6 +361,7 @@ remove_file_extensions <- function(x) {
     all_ext_pattern <- gsub(all_ext_pattern, pattern = '.', replacement = '\\.', fixed = TRUE)
     return(gsub(x, pattern = all_ext_pattern, replacement = ''))
 }
+
 reads_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
     reads_1 <- basename(metadata$reads_1[row_index])
     reads_2 <- basename(metadata$reads_2[row_index])
@@ -339,9 +474,9 @@ metadata$reference_id[is_shared] <- paste0(metadata$reference_id[is_shared], '_r
 
 # Add a default group for samples without a group defined
 if (all(!is_present(metadata$report_group))) {
-    metadata$report_group <- defualt_group_full
+    metadata$report_group <- default_group_full
 } else {
-    metadata$report_group[!is_present(metadata$report_group)] <- defualt_group_partial
+    metadata$report_group[!is_present(metadata$report_group)] <- default_group_partial
 }
 
 # Remove whitespace in report group ids
@@ -371,13 +506,13 @@ metadata$reads_type <- unlist(lapply(seq_along(metadata$reads_type), function(in
 }))
 
 # Add user-supplied data as columns with modified names
-cols_to_add <- colnames(metadata_original)[colnames(metadata_original) %in% known_columns]
+cols_to_add <- colnames(metadata_original_samp)[colnames(metadata_original_samp) %in% known_columns_samp]
 
-#since metadata_original may have been modified, using its column numbers as index for original user input
-unmodified_data <- unmodified_data[, colnames(metadata_original) %in% known_columns, drop= FALSE]
+#since metadata_original_samp may have been modified, using its column numbers as index for original user input
+unmodified_data <- unmodified_data[, colnames(metadata_original_samp) %in% known_columns_samp, drop= FALSE]
 
 colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
 metadata <- cbind(metadata, unmodified_data)
 
 # Write output metadata
-write.csv(metadata, file = args$output_path, row.names = FALSE, na = '')
+write.csv(metadata, file = args$output_path_samp, row.names = FALSE, na = '')
