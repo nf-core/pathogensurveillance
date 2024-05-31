@@ -1,4 +1,4 @@
-sample_id,path,Path   2,sequence_type,NAME, description ,random_column,ncbi accession,NCBI_query,,reference_ids,group_ids,color_by,enabled,user_factor_1,user factor 2,…,_,ploidy
+sample_id,path,Path   2,sequence_type,NAME, description ,random_column,ncbi accession,NCBI_query,,ref_group_ids,report_group_ids,color_by,enabled,user_factor_1,user factor 2,…,_,ploidy
 Xan_1,test/data/reads/22-299_R1.fastq.gz,test/data/reads/22-299_R2.fastq.gz,ILLUMINA,Xan 1,The best Xanthomonas; its number 1,just,,,,xan_refs,all;xanthemonas,,,,,,,1
 ,test/data/reads/22-300_R1.fastq.gz,test/data/reads/22-300_R2.fastq.gz,illumina,Xan 2,,some,,,,xan_refs,all;xanthemonas,,TRUE,,,,,1
 Xan 3,test/data/reads/22-301_R1.fastq.gz,test/data/reads/22-301_R2.fastq.gz, Illumina,,,random,,,,xan_refs,all;xanthemonas,,FALSE,,,,,1
@@ -12,6 +12,6 @@ pram1,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/r
 pram2,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R1_001.fastq.gz,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R2_001.fastq.gz, Illumina,,Phytophthora ramoum (sudden oak death),,,,,p_ram_refs,all;p_ram,,,,,,,
 Bp-511283_SE,,,nanopore,,,,SRR19894741,,,,all;other,,,,,,,
 Bp-804855_SE,,,nanopore,,,,SRR19894742,,,,all;other,,,,,,,
-ing_agg_,,,pacbio,,,,ERR12074698,,,,all;other,,,,,,,
-,,,,,,,,Ignisphaera aggregans SZUA ,,,all;other,,,,,,,
+,,,pacbio,,,,ERR12074698,,,,all;other,,,,,,,
+ing_agg_,,,,,,,,Ignisphaera aggregans SZUA ,,,all;other,,,,,,,
 ,,,,S. marinus,,,,"SpSt AND ""Staphylothermus marinus""[orgn:__txid2280] ",,,all;other,,,,,,,

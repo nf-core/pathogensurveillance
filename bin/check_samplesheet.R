@@ -327,9 +327,9 @@ get_ncbi_genomes <- function(query) {
     }))
     output <- data.frame(
         ref_id = unlist(lapply(summary_result, function(x) x$assemblyaccession)),
-        ref_name = unlist(lapply(summary_result, function(x) paste0(x$speciesname, x$assemblyname))),
+        ref_name = unlist(lapply(summary_result, function(x) paste0(x$speciesname, ' ', x$assemblyname))),
         ref_description = unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')'))),
-        ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
+        ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
     )
     rownames(output) <- NULL
     return(output)
@@ -342,11 +342,16 @@ names(ncbi_result) <- unique_queries
 
 new_ref_data <- do.call(rbind, lapply(which(metadata_ref$ref_ncbi_query != ""), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
-    query_data$sample_id <- paste0(metadata_ref$sample_id[index], query_data$ncbi_accession)
-    query_data$name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
-    query_data$description <- paste0(metadata_ref$ref_description[index], query_data$ref_description)
+    query_data$ref_id <- paste0(metadata_ref$ref_id[index], query_data$ref_ncbi_accession)
+    query_data$ref_name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
+    query_data$ref_description <- paste0(metadata_ref$ref_description[index], query_data$ref_description)
     query_data
 }))
+
+metadata_ref <- rbind(
+    metadata_ref[metadata_ref$ref_ncbi_query == '', ], 
+    format_new_data_as_old(new_ref_data, metadata_ref)
+)
 
 
 # Check that required input columns have at least one value for each row
