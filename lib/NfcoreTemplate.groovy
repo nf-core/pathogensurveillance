@@ -207,12 +207,12 @@ class NfcoreTemplate {
         Map colors = logColours(params.monochrome_logs)
         if (workflow.success) {
             if (workflow.stats.ignoredCount == 0) {
-                log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} Pipeline completed successfully${colors.reset}-"
+                log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} Pipeline completed successfully${colors.reset} \n\n To clean the cache, enter the command: \n nextflow clean ${workflow.runName} -f \n"
             } else {
-                log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} Pipeline completed successfully, but with errored process(es) ${colors.reset}-"
+                log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} Pipeline completed successfully, but with errored process(es) ${colors.reset}- \n\n To clean the cache, run the command: \n nextflow clean ${workflow.runName} -f \n"
             }
         } else {
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} Pipeline completed with errors${colors.reset}-"
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} Pipeline completed with errors${colors.reset} \n\n To clean the cache, run the command: \n nextflow clean ${workflow.runName} -f \n"
         }
     }
 
