@@ -1,50 +1,5 @@
 #!/usr/bin/env Rscript
 
-get_ncbi_sra_runs <- function(query) {
-    search_result <- rentrez::entrez_search(db = 'sra', query)
-    summary_result <- entrez_summary(db = 'sra', search_result$ids)
-    if (length(search_result$ids) == 1) {
-        summary_result <- list(summary_result)
-    }
-    run_ids <- unlist(lapply(summary_result, function(x) {
-        if (length(x$runs) > 1) {
-            warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
-        }
-        run_xml <- x$runs[1]
-        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
-    }))
-    sequence_instrument <- unlist(lapply(summary_result, function(x) {
-        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\1')
-    }))
-    sequence_type <- unlist(lapply(summary_result, function(x) {
-        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\2')
-    }))
-    output <- data.frame(
-        run_id = run_ids,
-        instrument = sequence_instrument,
-        type = sequence_type
-    )
-    rownames(output) <- NULL
-    return(output)
-}
-
-get_ncbi_genomes <- function(query) {
-    search_result <- rentrez::entrez_search(db = 'assembly', query)
-    summary_result <- entrez_summary(db = 'assembly', search_result$ids)
-    if (length(search_result$ids) == 1) {
-        summary_result <- list(summary_result)
-    }
-    acc_ids <- unlist(lapply(summary_result, function(x) {
-        if (length(x$assemblyaccession) > 1) {
-            warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
-        }
-        run_xml <- x$assemblyaccession[1]
-        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
-    }))
-    return(acc_ids)
-}
-
-
 # This script takes 4 arguments:
 #   1. The path to the per-sample CSV input to the pipeline supplied by the user
 #   2. The path to the per-reference CSV input to the pipeline supplied by the user
@@ -65,7 +20,7 @@ known_columns_samp <- c(
     'ncbi_accession',
     'ncbi_query',
     'sequence_type',
-    'group_ids',
+    'report_group_ids',
     'color_by',
     'enabled',
     'ploidy',
@@ -125,7 +80,9 @@ known_extensions <- c(
     '.fasta',
     '.fasta.gz',
     '.fa',
-    '.fa.gz'
+    '.fa.gz',
+    '.fq',
+    '.fq.gz'
 )
 
 # Types of sequencing supported by the pipeline.
@@ -258,8 +215,138 @@ reorder_and_add_cols <- function(metadata, known_columns) {
     output[colnames(metadata)] <- metadata
     return(output)
 }
-metadata_original_samp <- reorder_and_add_cols(metadata_original_samp, known_columns_samp)
-metadata_original_ref <- reorder_and_add_cols(metadata_original_ref, known_columns_ref)
+metadata_samp <- reorder_and_add_cols(metadata_original_samp, known_columns_samp)
+metadata_ref <- reorder_and_add_cols(metadata_original_ref, known_columns_ref)
+
+# Validate mutually exclusive columns
+validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, csv_name) {
+    validate_mutually_exclusive_cols <- function(row_index, columns) {
+        has_value <- unlist(lapply(columns, function(column) {
+            col_pattern <- paste0('^', column, '$')
+            matching_columns <- grep(colnames(metadata), pattern = col_pattern, value = TRUE)
+            values <- metadata[row_index, matching_columns]
+            return(any(values != '' & !is.na(values)))
+        }))
+        if (sum(has_value) > 1) {
+            problem_columns <- columns[has_value]
+            stop(call. = FALSE, paste0(
+                'The following mutually exclusive columns in the ', csv_name, ' CSV all have values on row ', row_index, ': ',
+                paste0('"', problem_columns, '"', collapse = ', '), '\n',
+                'For this group of columns, only a single column type can have a value for each sample.'
+            ))
+        }
+    }
+    for (row_index in 1:nrow(metadata)) {
+        for (columns in mutually_exclusive_columns_samp) {
+            validate_mutually_exclusive_cols(row_index, columns)
+        }
+    }
+}
+validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
+validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
+
+# Convert NCBI sample queries to a list of SRA run accessions
+get_ncbi_sra_runs <- function(query) {
+    if (query == '') {
+        return(NULL)
+    }
+    search_result <- rentrez::entrez_search(db = 'sra', query)
+    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    run_ids <- unlist(lapply(summary_result, function(x) {
+        if (length(x$runs) > 1) {
+            warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
+        }
+        run_xml <- x$runs[1]
+        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+    }))
+    sequence_instrument <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\1')
+    }))
+    sequence_type <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\2')
+    }))
+    name <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+ ScientificName="(.+?)"/>.+', replacement = '\\1')
+    }))
+    description <- unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+<Title>(.+?)</Title>.+', replacement = '\\1')
+    }))
+    output <- data.frame(
+        ncbi_accession = run_ids,
+        sequence_type = sequence_type,
+        name = name,
+        description = paste0(description, ' (', run_ids, ')')
+    )
+    rownames(output) <- NULL
+    return(output)
+}
+
+unique_queries <- unique(metadata_samp$ncbi_query)
+unique_queries <- unique_queries[unique_queries != '']
+ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
+names(ncbi_result) <- unique_queries
+
+new_sample_data <- do.call(rbind, lapply(which(metadata_samp$ncbi_query != ""), function(index) {
+    query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
+    query_data$sample_id <- paste0(metadata_samp$sample_id[index], query_data$ncbi_accession)
+    query_data$name <- paste0(metadata_samp$name[index], query_data$name)
+    query_data$description <- paste0(metadata_samp$description[index], query_data$description)
+    query_data
+}))
+
+format_new_data_as_old <- function(new_metadata, old_metadata) {
+    empty_columns <- lapply(colnames(old_metadata), function(column) {
+        rep('', nrow(new_metadata))
+    })
+    names(empty_columns) <- colnames(old_metadata)
+    output <- as.data.frame(empty_columns)
+    output[colnames(new_metadata)] <- new_metadata
+    return(output)
+}
+
+metadata_samp <- rbind(
+    metadata_samp[metadata_samp$ncbi_query == '', ], 
+    format_new_data_as_old(new_sample_data, metadata_samp)
+)
+
+
+
+# Convert NCBI reference queries to a list of assembly accessions
+get_ncbi_genomes <- function(query) {
+    search_result <- rentrez::entrez_search(db = 'assembly', query)
+    summary_result <- rentrez::entrez_summary(db = 'assembly', search_result$ids)
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    acc_ids <- unlist(lapply(summary_result, function(x) {
+        run_xml <- x$assemblyaccession[1]
+        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+    }))
+    output <- data.frame(
+        ref_id = unlist(lapply(summary_result, function(x) x$assemblyaccession)),
+        ref_name = unlist(lapply(summary_result, function(x) paste0(x$speciesname, x$assemblyname))),
+        ref_description = unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')'))),
+        ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
+    )
+    rownames(output) <- NULL
+    return(output)
+}
+
+unique_queries <- unique(metadata_ref$ref_ncbi_query)
+unique_queries <- unique_queries[unique_queries != '']
+ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
+names(ncbi_result) <- unique_queries
+
+new_ref_data <- do.call(rbind, lapply(which(metadata_ref$ref_ncbi_query != ""), function(index) {
+    query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+    query_data$sample_id <- paste0(metadata_ref$sample_id[index], query_data$ncbi_accession)
+    query_data$name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
+    query_data$description <- paste0(metadata_ref$ref_description[index], query_data$ref_description)
+    query_data
+}))
 
 
 # Check that required input columns have at least one value for each row
@@ -282,33 +369,6 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
 validate_required_input(metadata_original_samp, required_input_columns_samp, 'sample data')
 validate_required_input(metadata_original_ref, required_input_columns_ref, 'reference data')
 
-# Validate mutually exclusive columns
-validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, csv_name) {
-    validate_mutually_exclusive_cols <- function(row_index, columns) {
-        has_value <- unlist(lapply(columns, function(column) {
-            col_pattern <- paste0('^', column, '$')
-            matching_columns <- grep(colnames(metadata), pattern = col_pattern, value = TRUE)
-            values <- metadata[row_index, matching_columns]
-            return(any(values != '' & !is.na(values)))
-        }))
-        if (sum(has_value) > 1) {
-            problem_columns <- columns[has_value]
-            stop(call. = FALSE, paste0(
-                'The following mutually exclusive columns in the ', csv_name, ' CSV all have values on row ', row_index, ': ',
-                paste0('"', problem_columns, '"', collapse = ', '), '\n',
-                'For this group of columns, only a single column type can have a value for each sample.'
-            ))
-        }
-    }
-    for (row_index in 1:nrow(metadata)) {
-        for (columns in mutually_exclusive_columns_samp) {
-            validate_mutually_exclusive(row_index, columns)
-        }
-    }
-    return(metadata)
-}
-validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
-validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
 # Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
