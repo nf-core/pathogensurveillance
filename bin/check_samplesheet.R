@@ -104,6 +104,16 @@ default_group_partial <- '_no_group_defined_'
 # Prefix added to column names to distinguish modified columns from user-supplied columns
 user_column_name_prefix <- '__user_'
 
+# Settings for how references can be used
+valid_ref_usage_types <- c(
+    'optional',
+    'required',
+    'excluded',
+    'exclusive'
+)
+ref_primary_usage_default <- 'optional'
+ref_contextual_usage_default <- 'optional'
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
@@ -251,6 +261,26 @@ ref_data_addition <- ref_in_samp_data[has_ref_data, ]
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- rbind(metadata_ref, ref_data_addition)
 
+# Validate usage columns and add a default when needed
+validate_usage_col <- function(metadata, col, default) {
+    unlist(lapply(1:nrow(metadata), function(index) {
+        value <- metadata[[col]][index]
+        if (!is_present(value)) {
+            value <- default
+        }
+        value <- tolower(trimws(value))
+        if (! value %in% valid_ref_usage_types) {
+            stop(call. = FALSE, paste0(
+                'The value "', value, '" on row ', index, ' column "', col, '" is not valid. It must be one of "',
+                paste0(valid_ref_usage_types, collapse = '", "'), '"'
+            ))
+        }
+        return(value)
+    }))
+ }
+metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage', ref_primary_usage_default)
+metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage', ref_contextual_usage_default)
+
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
     if (query == '') {
@@ -289,36 +319,25 @@ get_ncbi_sra_runs <- function(query) {
     rownames(output) <- NULL
     return(output)
 }
-
 unique_queries <- unique(metadata_samp$ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
 names(ncbi_result) <- unique_queries
-
-new_sample_data <- do.call(rbind, lapply(which(metadata_samp$ncbi_query != ""), function(index) {
+new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_query)), function(index) {
     query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
-    query_data$sample_id <- paste0(metadata_samp$sample_id[index], query_data$ncbi_accession)
-    query_data$name <- paste0(metadata_samp$name[index], query_data$name)
-    query_data$description <- paste0(metadata_samp$description[index], query_data$description)
-    query_data
+    output <- metadata_samp[rep(index, nrow(query_data)), ]
+    output$sample_id <- paste0(metadata_samp$sample_id[index], query_data$ncbi_accession)
+    output$name <- paste0(metadata_samp$name[index], query_data$name)
+    output$description <- paste0(metadata_samp$description[index], query_data$description)
+    output$ncbi_accession <- query_data$ncbi_accession
+    output$sequence_type <- query_data$sequence_type
+    rownames(output) <- NULL
+    output
 }))
-
-format_new_data_as_old <- function(new_metadata, old_metadata) {
-    empty_columns <- lapply(colnames(old_metadata), function(column) {
-        rep('', nrow(new_metadata))
-    })
-    names(empty_columns) <- colnames(old_metadata)
-    output <- as.data.frame(empty_columns)
-    output[colnames(new_metadata)] <- new_metadata
-    return(output)
-}
-
 metadata_samp <- rbind(
-    metadata_samp[metadata_samp$ncbi_query == '', ], 
-    format_new_data_as_old(new_sample_data, metadata_samp)
+    metadata_samp[! is_present(metadata_samp$ncbi_query), ], 
+    new_sample_data
 )
-
-
 
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
@@ -340,25 +359,24 @@ get_ncbi_genomes <- function(query) {
     rownames(output) <- NULL
     return(output)
 }
-
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
-
-new_ref_data <- do.call(rbind, lapply(which(metadata_ref$ref_ncbi_query != ""), function(index) {
+new_ref_data <- do.call(rbind, lapply(which(is_present(metadata_ref$ref_ncbi_query)), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
-    query_data$ref_id <- paste0(metadata_ref$ref_id[index], query_data$ref_ncbi_accession)
-    query_data$ref_name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
-    query_data$ref_description <- paste0(metadata_ref$ref_description[index], query_data$ref_description)
-    query_data
+    output <- metadata_ref[rep(index, nrow(query_data)), ]
+    output$ref_id <- paste0(metadata_ref$ref_id[index], query_data$ref_ncbi_accession)
+    output$ref_name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
+    output$ref_description <- paste0(metadata_ref$ref_description[index], query_data$ref_description)
+    output$ref_ncbi_accession <- query_data$ref_ncbi_accession
+    rownames(output) <- NULL
+    return(output)
 }))
-
 metadata_ref <- rbind(
-    metadata_ref[metadata_ref$ref_ncbi_query == '', ], 
-    format_new_data_as_old(new_ref_data, metadata_ref)
+    metadata_ref[! is_present(metadata_ref$ref_ncbi_query), ], 
+    new_ref_data
 )
-
 
 # Check that required input columns have at least one value for each row
 validate_required_input <- function(metadata, required_input_columns, csv_name) {
@@ -379,7 +397,6 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
 }
 validate_required_input(metadata_samp, required_input_columns_samp, 'sample data')
 validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
-
 
 # Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
@@ -474,7 +491,6 @@ metadata_ref$ref_id <- unlist(lapply(1:nrow(metadata_ref), function(row_index) {
     return(ids[is_present(ids)][1])
 }))
 
-
 # Ensure sample/reference names and descriptions are present
 ensure_sample_names <- function(names, ids) {
     unlist(lapply(1:length(names), function(index) {
@@ -489,7 +505,6 @@ metadata_samp$name <- ensure_sample_names(metadata_samp$name, metadata_samp$samp
 metadata_ref$ref_name <- ensure_sample_names(metadata_ref$ref_name, metadata_ref$ref_id)
 metadata_samp$description <- ensure_sample_names(metadata_samp$description, metadata_samp$name)
 metadata_ref$ref_description <- ensure_sample_names(metadata_ref$ref_description, metadata_ref$ref_name)
-
 
 # Replace any characters in IDs that cannot be present in file names
 make_ids_ok_for_file_names <- function(ids) {
