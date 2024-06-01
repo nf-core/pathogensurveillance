@@ -4,14 +4,14 @@ Xan_1,test/data/reads/22-299_R1.fastq.gz,test/data/reads/22-299_R2.fastq.gz,ILLU
 Xan 3,test/data/reads/22-301_R1.fastq.gz,test/data/reads/22-301_R2.fastq.gz, Illumina,,,random,,,,xan_refs,all;xanthemonas,,FALSE,,,,,1
 Xan 4,test/data/reads/22-302_R1.fastq.gz,test/data/reads/22-302_R2.fastq.gz, Illumina,,,user,,,,xan_refs,all;xanthemonas,,TRUE,,,,,1
 ,,, Illumina,,,stuff,SRR10432277,,,,mixed,,TRUE,,,,,2
-BDM_Pbelbahrii,,, Illumina,,,that,ERR1578941,,,,mixed,,,,,,,
+BDM_Pbelbahrii,,,,,,that,ERR1578941,,,,mixed,,,,,,,
 HoneyBee (Adorsata),,, Illumina,honey bee,,might,SRR1564144,,,,mixed,,,,,,,2
 Rsol_Rsolanacearum,,, Illumina,,,cause,SRR19621834,,,,mixed,,,,,,,1
 pram1,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s013-indexRPI27-ATTCCT-7612-C7_S13_L006_R1_001.fastq.gz,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s013-indexRPI27-ATTCCT-7612-C7_S13_L006_R2_001.fastq.gz, Illumina,,Phytophthora ramoum (sudden oak death),problems,,,,p_ram_refs,all;p_ram,,,,,,,
 ,,,,,,,,,,,,,,,,,,
 pram2,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R1_001.fastq.gz,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R2_001.fastq.gz, Illumina,,Phytophthora ramoum (sudden oak death),,,,,p_ram_refs,all;p_ram,,,,,,,
-Bp-511283_SE,,,nanopore,,,,SRR19894741,,,,all;other,,,,,,,
+Bp-511283_SE,,,,,,,SRR19894741,,,,all;other,,,,,,,
 Bp-804855_SE,,,nanopore,,,,SRR19894742,,,,all;other,,,,,,,
-,,,pacbio,,,,ERR12074698,,,,all;other,,,,,,,
+,,,,,,,ERR12074698,,,,all;other,,,,,,,
 ing_agg_,,,,,,,,Ignisphaera aggregans SZUA ,,,all;other,,,,,,,
 ,,,,S. marinus,,,,"SpSt AND ""Staphylothermus marinus""[orgn:__txid2280] ",,,all;other,,,,,,,

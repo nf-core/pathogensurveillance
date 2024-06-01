@@ -53,8 +53,7 @@ known_columns_ref <- c(
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
 required_input_columns_samp <- list(
-    c('path', 'path_2', 'ncbi_accession', 'ncbi_query'),
-    c('sequence_type')
+    c('path', 'path_2', 'ncbi_accession', 'ncbi_query')
 )
 required_input_columns_ref <- list(
     c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
@@ -99,8 +98,8 @@ invalid_id_char_pattern <- '[\\/:*?"<>| .-]+'
 # Name of default group if all samples do not have a group defined
 default_group_full <- 'all'
 
-# Name of default group if some samples do not have a group defined
-default_group_partial <- '__other__'
+# Name of default report group if some samples do not have a group defined
+default_group_partial <- '_no_group_defined_'
 
 # Prefix added to column names to distinguish modified columns from user-supplied columns
 user_column_name_prefix <- '__user_'
@@ -267,13 +266,13 @@ get_ncbi_sra_runs <- function(query) {
             warning('The SRA accession ', x$uid, ' has multiple runs associated with it. Only the first will be used.')
         }
         run_xml <- x$runs[1]
-        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+        gsub(run_xml, pattern = '.+ acc="(.+?)" .+', replacement = '\\1')
     }))
     sequence_instrument <- unlist(lapply(summary_result, function(x) {
-        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\1')
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\1')
     }))
     sequence_type <- unlist(lapply(summary_result, function(x) {
-        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="([a-zA-Z0-9. ]+)">([a-zA-Z0-9.]+)</Platform>.+', replacement = '\\2')
+        gsub(x$expxml[1], pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2')
     }))
     name <- unlist(lapply(summary_result, function(x) {
         gsub(x$expxml[1], pattern = '.+ ScientificName="(.+?)"/>.+', replacement = '\\1')
@@ -330,7 +329,7 @@ get_ncbi_genomes <- function(query) {
     }
     acc_ids <- unlist(lapply(summary_result, function(x) {
         run_xml <- x$assemblyaccession[1]
-        gsub(run_xml, pattern = '.+ acc="([a-zA-Z0-9.]+)" .+', replacement = '\\1')
+        gsub(run_xml, pattern = '.+ acc="(.+?)" .+', replacement = '\\1')
     }))
     output <- data.frame(
         ref_id = unlist(lapply(summary_result, function(x) x$assemblyaccession)),
@@ -476,7 +475,7 @@ metadata_ref$ref_id <- unlist(lapply(1:nrow(metadata_ref), function(row_index) {
 }))
 
 
-# Ensure sample names are present
+# Ensure sample/reference names and descriptions are present
 ensure_sample_names <- function(names, ids) {
     unlist(lapply(1:length(names), function(index) {
         if (is_present(names[index])) {
@@ -488,10 +487,13 @@ ensure_sample_names <- function(names, ids) {
 }
 metadata_samp$name <- ensure_sample_names(metadata_samp$name, metadata_samp$sample_id)
 metadata_ref$ref_name <- ensure_sample_names(metadata_ref$ref_name, metadata_ref$ref_id)
+metadata_samp$description <- ensure_sample_names(metadata_samp$description, metadata_samp$name)
+metadata_ref$ref_description <- ensure_sample_names(metadata_ref$ref_description, metadata_ref$ref_name)
+
 
 # Replace any characters in IDs that cannot be present in file names
 make_ids_ok_for_file_names <- function(ids) {
-    gsub(ids, pattern = invalid_id_char_pattern, replacement = '_')
+    trimws(gsub(ids, pattern = invalid_id_char_pattern, replacement = '_'))
 }
 metadata_samp$sample_id <- make_ids_ok_for_file_names(metadata_samp$sample_id)
 metadata_ref$ref_id <- make_ids_ok_for_file_names(metadata_ref$ref_id)
@@ -526,21 +528,65 @@ metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c(
 is_shared <- metadata_ref$ref_id %in% metadata_samp$sample_id
 metadata_ref$ref_id[is_shared] <- paste0(metadata_ref$ref_id[is_shared], '_ref')
 
-# Add a default group for samples without a group defined
+# Add a default report group for samples without a group defined
 if (all(!is_present(metadata_samp$report_group_ids))) {
     metadata_samp$report_group_ids <- default_group_full
 } else {
     metadata_samp$report_group_ids[!is_present(metadata_samp$report_group_ids)] <- default_group_partial
 }
 
-# Remove whitespace in report group ids
-remove_group_id_whitespace <- function(ids, sep = ';') {
-    gsub(trimws(ids), pattern = '[[:space:]]+;[[:space:]]+', replacement = sep)
-}
-metadata_samp$report_group_ids <- remove_group_id_whitespace(metadata_samp$report_group_ids)
-metadata_ref$ref_group_ids <- remove_group_id_whitespace(metadata_ref$ref_group_ids)
+# Add reference id to the reference group ids, so that references can be referred to by id even if a group id is not defined.
+metadata_ref$ref_group_ids <- ifelse(
+    metadata_ref$ref_group_ids == '',
+    metadata_ref$ref_id,
+    paste(metadata_ref$ref_group_ids, metadata_ref$ref_id, sep = ';')
+)
 
-# Validate reads_type column
+# Make report/reference group ids usable as file names
+make_group_ids_ok_for_file_names <- function(group_ids, sep = ';') {
+    unlist(lapply(group_ids, function(ids) {
+        split_ids <- strsplit(ids, split = sep)[[1]]
+        split_ids <- make_ids_ok_for_file_names(split_ids)
+        paste(split_ids, collapse = sep)
+    }))
+}
+metadata_samp$report_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$report_group_ids)
+metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
+metadata_samp$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$ref_group_ids)
+
+# Check that reference groups in sample metadata are present in the reference metadata
+all_ref_group_ids <- unique(unlist(strsplit(metadata_ref$ref_group_ids, split = ';')))
+for (index in 1:nrow(metadata_samp)) {
+    split_ids <- strsplit(metadata_samp$ref_group_ids[index], split = ';')[[1]]
+    invalid_ids <- split_ids[! split_ids %in% all_ref_group_ids]
+    if (length(invalid_ids) > 0) {
+        stop(call. = FALSE, paste0(
+            'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
+            ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
+            ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
+            ' metadata CSV.'
+        ))
+    }
+}
+
+# Look up sequence type for NCBI accessions without a sequence type defined
+lookup_sequence_type <- function(id) {
+    search_result <- rentrez::entrez_search(db = 'sra', id)
+    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
+    if (length(search_result$ids) != 1) {
+        stop(call. = FALSE, paste0(
+            'Could not look up sequence type for id "', id, '". Specify it in the sample metadata CSV.'
+        ))
+    }
+    gsub(summary_result$expxml, pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2')
+}
+undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadata_samp$sequence_type)])
+type_replace_key <- lapply(undefined_accessions, lookup_sequence_type)
+names(type_replace_key) <- undefined_accessions
+is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
+metadata_samp$sequence_type[is_undefined] <- type_replace_key[metadata_samp$ncbi_accession[is_undefined]]
+
+# Validate sequence_type column
 metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_type), function(index) {
     is_seq_type <- unlist(lapply(known_read_types, function(type) {
         grepl(metadata_samp$sequence_type[index], pattern = type, ignore.case = TRUE)
@@ -561,6 +607,20 @@ metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_ty
     }
     return(known_read_types[is_seq_type])
 }))
+
+# Add row for each group for samples/references with multiple groups
+duplicate_rows_by_id_list <- function(metadata, id_col) {
+    group_ids <- strsplit(metadata[[id_col]], split = ';')
+    n_group_ids <- unlist(lapply(group_ids, length))
+    group_ids[n_group_ids == 0] <- ''
+    n_group_ids <- unlist(lapply(group_ids, length))
+    metadata <- metadata[rep(1:nrow(metadata), n_group_ids), ]
+    metadata[[id_col]] <- unlist(group_ids)
+    rownames(metadata) <- NULL
+    return(metadata)
+}
+metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
+metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
 
 # Add user-supplied data as columns with modified names
 add_user_defined_cols <- function(metadata, unmodified_data, known_columns) {
