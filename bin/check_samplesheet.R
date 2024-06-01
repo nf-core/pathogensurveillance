@@ -114,6 +114,9 @@ valid_ref_usage_types <- c(
 ref_primary_usage_default <- 'optional'
 ref_contextual_usage_default <- 'optional'
 
+# Default for ploidy column
+ploidy_default <- '1'
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
@@ -280,6 +283,17 @@ validate_usage_col <- function(metadata, col, default) {
  }
 metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage', ref_primary_usage_default)
 metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage', ref_contextual_usage_default)
+
+# Validate ploidy column
+metadata_samp$ploidy[!is_present(metadata_samp$ploidy)] <- ploidy_default
+for (index in 1:nrow(metadata_samp)) {
+    if (! grepl(metadata_samp$ploidy[index], pattern = '^[0-9]+$')) {
+        stop(call. = FALSE, paste0(
+            'The value for the ploidy column "', metadata_samp$ploidy[index], 
+            '" of the sample metadata CSV on row ', index, ' is not numeric.'
+        ))
+    }
+}
 
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
