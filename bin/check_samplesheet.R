@@ -245,6 +245,13 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
+# Move reference data from the sample metadata to the reference metadata
+ref_in_samp_data <- metadata_samp[, known_columns_ref]
+has_ref_data <- apply(ref_in_samp_data[, unlist(required_input_columns_ref)], MARGIN = 1, function(x) any(is_present(x)))
+ref_data_addition <- ref_in_samp_data[has_ref_data, ]
+ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
+metadata_ref <- rbind(metadata_ref, ref_data_addition)
+
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
     if (query == '') {
@@ -371,8 +378,8 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
         }
     }
 }
-validate_required_input(metadata_original_samp, required_input_columns_samp, 'sample data')
-validate_required_input(metadata_original_ref, required_input_columns_ref, 'reference data')
+validate_required_input(metadata_samp, required_input_columns_samp, 'sample data')
+validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
 
 
 # Ensure sample/reference IDs are present
@@ -427,9 +434,9 @@ remove_file_extensions <- function(x) {
     return(gsub(x, pattern = all_ext_pattern, replacement = ''))
 }
 
-reads_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
-    reads_1 <- basename(metadata$reads_1[row_index])
-    reads_2 <- basename(metadata$reads_2[row_index])
+reads_ids <- unlist(lapply(1:nrow(metadata_samp), function(row_index) {
+    reads_1 <- basename(metadata_samp$path[row_index])
+    reads_2 <- basename(metadata_samp$path_2[row_index])
     if (is_present(reads_1) && is_present(reads_2)) {
         remove_different_parts <- function(a, b) {
             a_split <- strsplit(reads_1, split = '')[[1]]
@@ -445,30 +452,49 @@ reads_ids <- unlist(lapply(1:nrow(metadata), function(row_index) {
         shortread <- ''
     }
 }))
-id_sources <- list( # These are all possible sources of IDs, ordered by preference
-    metadata$sample_id,
-    metadata$sample_name,
-    metadata$reads_sra,
+
+id_sources_samp <- list( # These are all possible sources of IDs, ordered by preference
+    metadata_samp$sample_id,
+    metadata_samp$sample_name,
+    metadata_samp$ncbi_accession,
     remove_file_extensions(remove_shared(reads_ids))
 )
-metadata$sample_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
-    ids <- unlist(lapply(id_sources, `[`, row_index))
+metadata_samp$sample_id <- unlist(lapply(1:nrow(metadata_samp), function(row_index) { # Pick one replacement ID for each sample
+    ids <- unlist(lapply(id_sources_samp, `[`, row_index))
     return(ids[is_present(ids)][1])
 }))
 
-# Ensure sample names are present
-metadata$sample_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
-    name <- metadata$sample_name[row_index]
-    id <- metadata$sample_id[row_index]
-    if (is_present(name)) {
-        return(name)
-    } else {
-        return(id)
-    }
+id_sources_ref <- list( # These are all possible sources of IDs, ordered by preference
+    metadata_ref$ref_id,
+    metadata_ref$ref_name,
+    metadata_ref$ref_ncbi_accession,
+    metadata_ref$ref_path
+)
+metadata_ref$ref_id <- unlist(lapply(1:nrow(metadata_ref), function(row_index) { # Pick one replacement ID for each sample
+    ids <- unlist(lapply(id_sources_ref, `[`, row_index))
+    return(ids[is_present(ids)][1])
 }))
 
-# Replace any characters in sample IDs that cannot be present in file names
-metadata$sample_id <- gsub(metadata$sample_id, pattern = invalid_id_char_pattern, replacement = '_')
+
+# Ensure sample names are present
+ensure_sample_names <- function(names, ids) {
+    unlist(lapply(1:length(names), function(index) {
+        if (is_present(names[index])) {
+            return(names[index])
+        } else {
+            return(ids[index])
+        }
+    }))
+}
+metadata_samp$name <- ensure_sample_names(metadata_samp$name, metadata_samp$sample_id)
+metadata_ref$ref_name <- ensure_sample_names(metadata_ref$ref_name, metadata_ref$ref_id)
+
+# Replace any characters in IDs that cannot be present in file names
+make_ids_ok_for_file_names <- function(ids) {
+    gsub(ids, pattern = invalid_id_char_pattern, replacement = '_')
+}
+metadata_samp$sample_id <- make_ids_ok_for_file_names(metadata_samp$sample_id)
+metadata_ref$ref_id <- make_ids_ok_for_file_names(metadata_ref$ref_id)
 
 # Ensure that the same sample ID is not used for different sets of data
 make_ids_unique <- function(metadata, id_col, other_cols) {
@@ -493,76 +519,42 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)
 }
-metadata <- make_ids_unique(metadata, id_col = 'sample_id', other_cols = c('reads_1', 'reads_2', 'reads_sra'))
-
-# Ensure reference IDs are present
-ref_id_sources <- list( # These are all possible sources of IDs, ordered by preference
-    metadata$reference_id,
-    metadata$reference_name,
-    metadata$reference_refseq,
-    remove_file_extensions(remove_shared(metadata$reference))
-)
-metadata$reference_id <- unlist(lapply(1:nrow(metadata), function(row_index) { # Pick one replacement ID for each sample
-    ids <- unlist(lapply(ref_id_sources, `[`, row_index))
-    id <- ids[is_present(ids)][1]
-    if (is.na(id)) {
-        id <- ''
-    }
-    return(id)
-}))
-
-# Ensure reference names are present
-metadata$reference_name <- unlist(lapply(1:nrow(metadata), function(row_index) {
-    name <- metadata$reference_name[row_index]
-    id <- metadata$reference_id[row_index]
-    if (is_present(name)) {
-        return(name)
-    } else {
-        return(id)
-    }
-}))
-
-# Remove reference names and IDs for samples that have no reference specified
-no_reference_data <- ! is_present(metadata$reference) & ! is_present(metadata$reference_refseq)
-metadata$reference_id[no_reference_data] <- ''
-metadata$reference_name[no_reference_data] <- ''
-
-# Replace any characters in reference IDs that cannot be present in file names
-metadata$reference_id <- gsub(metadata$reference_id, pattern = invalid_id_char_pattern, replacement = '_')
-
-# Ensure that the same reference ID is not used for different sets of data
-metadata <- make_ids_unique(metadata, id_col = 'reference_id', other_cols = c('reference', 'reference_refseq'))
+metadata_samp <- make_ids_unique(metadata_samp, id_col = 'sample_id', other_cols = c('path', 'path_2', 'ncbi_accession'))
+metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c('ref_path', 'ref_ncbi_accession'))
 
 # Ensure references and samples do not share ids
-is_shared <- metadata$reference_id %in% metadata$sample_id
-metadata$reference_id[is_shared] <- paste0(metadata$reference_id[is_shared], '_ref')
+is_shared <- metadata_ref$ref_id %in% metadata_samp$sample_id
+metadata_ref$ref_id[is_shared] <- paste0(metadata_ref$ref_id[is_shared], '_ref')
 
 # Add a default group for samples without a group defined
-if (all(!is_present(metadata$report_group))) {
-    metadata$report_group <- default_group_full
+if (all(!is_present(metadata_samp$report_group_ids))) {
+    metadata_samp$report_group_ids <- default_group_full
 } else {
-    metadata$report_group[!is_present(metadata$report_group)] <- default_group_partial
+    metadata_samp$report_group_ids[!is_present(metadata_samp$report_group_ids)] <- default_group_partial
 }
 
 # Remove whitespace in report group ids
-metadata$report_group <- trimws(metadata$report_group)
-metadata$report_group <- gsub(metadata$report_group, pattern = '[[:space:]]+;[[:space:]]+', replacement = ';')
+remove_group_id_whitespace <- function(ids, sep = ';') {
+    gsub(trimws(ids), pattern = '[[:space:]]+;[[:space:]]+', replacement = sep)
+}
+metadata_samp$report_group_ids <- remove_group_id_whitespace(metadata_samp$report_group_ids)
+metadata_ref$ref_group_ids <- remove_group_id_whitespace(metadata_ref$ref_group_ids)
 
 # Validate reads_type column
-metadata$reads_type <- unlist(lapply(seq_along(metadata$reads_type), function(index) {
+metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_type), function(index) {
     is_seq_type <- unlist(lapply(known_read_types, function(type) {
-        grepl(metadata$reads_type[index], pattern = type, ignore.case = TRUE)
+        grepl(metadata_samp$sequence_type[index], pattern = type, ignore.case = TRUE)
     }))
     if (sum(is_seq_type) == 0) {
         stop(call. = FALSE, paste0(
-            'The value in the "reads_type" column on row ', index, ' does not contain a known sequence type. ',
+            'The value in the "sequence_type" column on row ', index, ' does not contain a known sequence type. ',
             'One of the following words must appear (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
     }
     if (sum(is_seq_type) > 1) {
         stop(call. = FALSE, paste0(
-            'The value in the "reads_type" column on row ', index, ' contains the names of multiple sequencing types. ',
+            'The value in the "sequence_type" column on row ', index, ' contains the names of multiple sequencing types. ',
             'Exactly one of the following words must appear (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
@@ -571,13 +563,13 @@ metadata$reads_type <- unlist(lapply(seq_along(metadata$reads_type), function(in
 }))
 
 # Add user-supplied data as columns with modified names
-cols_to_add <- colnames(metadata_original_samp)[colnames(metadata_original_samp) %in% known_columns_samp]
-
-#since metadata_original_samp may have been modified, using its column numbers as index for original user input
-unmodified_data <- unmodified_data[, colnames(metadata_original_samp) %in% known_columns_samp, drop= FALSE]
-
-colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
-metadata <- cbind(metadata, unmodified_data)
+add_user_defined_cols <- function(metadata, unmodified_data, known_columns) {
+    cols_to_add <- colnames(metadata)[colnames(metadata) %in% known_columns]
+    unmodified_data <- unmodified_data[, colnames(metadata) %in% known_columns, drop= FALSE]
+    colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
+    cbind(metadata, unmodified_data)
+}
+metadata_samp <- add_user_defined_cols(metadata_samp, unmodified_data_samp, known_columns_samp)
 
 # Write output metadata
 write.csv(metadata, file = args$output_path_samp, row.names = FALSE, na = '')
