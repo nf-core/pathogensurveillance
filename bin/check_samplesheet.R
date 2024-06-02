@@ -19,6 +19,7 @@ known_columns_samp <- c(
     'path_2',
     'ncbi_accession',
     'ncbi_query',
+    'ncbi_query_max',
     'sequence_type',
     'report_group_ids',
     'color_by',
@@ -31,6 +32,7 @@ known_columns_samp <- c(
     'ref_path',
     'ref_ncbi_accession',
     'ref_ncbi_query',
+    'ref_ncbi_query_max',
     'ref_primary_usage',
     'ref_contextual_usage',
     'ref_color_by',
@@ -44,6 +46,7 @@ known_columns_ref <- c(
     'ref_path',
     'ref_ncbi_accession',
     'ref_ncbi_query',
+    'ref_ncbi_query_max',
     'ref_primary_usage',
     'ref_contextual_usage',
     'ref_color_by',
@@ -51,18 +54,21 @@ known_columns_ref <- c(
 )
 
 # Default values for columns
-defaults_samp <- c(
-    report_group_ids = '_no_group_defined_',
-    enabled = TRUE,
-    ploidy = '1',
+defaults_ref <- c(
+    ref_ncbi_query_max = '30',
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_enabled = TRUE
 )
-defaults_ref <- c(
-    ref_primary_usage = 'optional',
-    ref_contextual_usage = 'optional',
-    ref_enabled = TRUE
+defaults_samp <- c(
+    report_group_ids = '_no_group_defined_',
+    enabled = TRUE,
+    ploidy = '1',
+    ncbi_query_max = '10',
+    ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
+    ref_primary_usage = defaults_ref['ref_primary_usage'],
+    ref_contextual_usage = defaults_ref['ref_contextual_usage'],
+    ref_enabled = defaults_ref['ref_enabled']
 )
 
 # Columns that must have a valid value in the input of this script
@@ -108,7 +114,7 @@ known_read_types <- c(
 )
 
 # Regular expression for characters that cannot appear in IDs
-invalid_id_char_pattern <- '[\\/:*?"<>| .-]+'
+invalid_id_char_pattern <- '[\\/:*?"<>| .()-]+'
 
 # Name of default group if all samples do not have a group defined
 default_group_full <- 'all'
@@ -123,9 +129,6 @@ valid_ref_usage_types <- c(
     'excluded',
     'exclusive'
 )
-
-# Default for ploidy column
-ploidy_default <- '1'
 
 # Generally useful functions
 is_present <- function(x) {
@@ -315,7 +318,7 @@ ref_data_addition <- ref_in_samp_data[has_ref_data, ]
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- rbind(metadata_ref, ref_data_addition)
 
-# Validate usage columns and add a default when needed
+# Validate usage columns 
 validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
         value <- tolower(trimws(metadata[[col]][index]))
@@ -332,7 +335,6 @@ metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_
 metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
 
 # Validate ploidy column
-metadata_samp$ploidy[!is_present(metadata_samp$ploidy)] <- ploidy_default
 for (index in 1:nrow(metadata_samp)) {
     if (! grepl(metadata_samp$ploidy[index], pattern = '^[0-9]+$')) {
         stop(call. = FALSE, paste0(
@@ -386,6 +388,14 @@ ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
 names(ncbi_result) <- unique_queries
 new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_query)), function(index) {
     query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
+    query_max <- metadata_samp$ncbi_query_max[index]
+    if (endsWith(query_max, '%')) {
+        query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
+        query_max <- max(c(1, nrow(query_data) * query_max_prop))
+    } else {
+        query_max <- min(c(nrow(query_data), as.numeric(query_max)))
+    }
+    query_data <- query_data[sample(1:nrow(query_data), query_max), ]
     output <- metadata_samp[rep(index, nrow(query_data)), ]
     output$sample_id <- paste0(metadata_samp$sample_id[index], query_data$ncbi_accession)
     output$name <- paste0(metadata_samp$name[index], query_data$name)
@@ -426,6 +436,14 @@ ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
 new_ref_data <- do.call(rbind, lapply(which(is_present(metadata_ref$ref_ncbi_query)), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+    query_max <- metadata_ref$ref_ncbi_query_max[index]
+    if (endsWith(query_max, '%')) {
+        query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
+        query_max <- max(c(1, nrow(query_data) * query_max_prop))
+    } else {
+        query_max <- min(c(nrow(query_data), as.numeric(query_max)))
+    }
+    query_data <- query_data[sample(1:nrow(query_data), query_max), ]
     output <- metadata_ref[rep(index, nrow(query_data)), ]
     output$ref_id <- paste0(metadata_ref$ref_id[index], query_data$ref_ncbi_accession)
     output$ref_name <- paste0(metadata_ref$ref_name[index], query_data$ref_name)
