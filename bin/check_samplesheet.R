@@ -50,6 +50,21 @@ known_columns_ref <- c(
     'ref_enabled'
 )
 
+# Default values for columns
+defaults_samp <- c(
+    report_group_ids = '_no_group_defined_',
+    enabled = TRUE,
+    ploidy = '1',
+    ref_primary_usage = 'optional',
+    ref_contextual_usage = 'optional',
+    ref_enabled = TRUE
+)
+defaults_ref <- c(
+    ref_primary_usage = 'optional',
+    ref_contextual_usage = 'optional',
+    ref_enabled = TRUE
+)
+
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
 required_input_columns_samp <- list(
@@ -101,9 +116,6 @@ default_group_full <- 'all'
 # Name of default report group if some samples do not have a group defined
 default_group_partial <- '_no_group_defined_'
 
-# Prefix added to column names to distinguish modified columns from user-supplied columns
-user_column_name_prefix <- '__user_'
-
 # Settings for how references can be used
 valid_ref_usage_types <- c(
     'optional',
@@ -111,11 +123,14 @@ valid_ref_usage_types <- c(
     'excluded',
     'exclusive'
 )
-ref_primary_usage_default <- 'optional'
-ref_contextual_usage_default <- 'optional'
 
 # Default for ploidy column
 ploidy_default <- '1'
+
+# Generally useful functions
+is_present <- function(x) {
+    x != '' & ! is.na(x)
+}
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
@@ -124,67 +139,72 @@ args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_r
 names(args) <- c('input_path_samp', 'input_path_ref', 'output_path_samp', 'output_path_ref')
 metadata_original_samp <- read.csv(args$input_path_samp, check.names = FALSE)
 metadata_original_ref <- read.csv(args$input_path_ref, check.names = FALSE)
+metadata_samp <- metadata_original_samp
+metadata_ref <- metadata_original_ref
 
 # Remove empty rows
 remove_empty_rows <- function(metadata) {
-    is_empty <- apply(metadata, MARGIN = 1, function(row) all(is.na(row) | row == ''))
+    is_empty <- apply(metadata, MARGIN = 1, function(row) all(! is_present(row)))
     metadata[! is_empty, ]
 }
-metadata_original_samp <- remove_empty_rows(metadata_original_samp)
-metadata_original_ref <- remove_empty_rows(metadata_original_ref)
-
-# Remove empty columns
-remove_empty_cols <- function(metadata) {
-    is_empty <- apply(metadata, MARGIN = 2, function(row) all(is.na(row) | row == ''))
-    metadata[, ! is_empty]
-}
-metadata_original_samp <- remove_empty_cols(metadata_original_samp)
-metadata_original_ref <- remove_empty_cols(metadata_original_ref)
+metadata_samp <- remove_empty_rows(metadata_samp)
+metadata_ref <- remove_empty_rows(metadata_ref)
 
 # Check that there is data
-if (nrow(metadata_original_samp) == 0) {
+if (nrow(metadata_samp) == 0) {
     stop(call. = FALSE,
          'There are no rows in the input samplesheet.')
 }
 
+# Validate column names
+validate_col_names <- function(cols, known_columns) {
+    # Trim whitespace
+    modified_names <- trimws(cols)
+    # Replace capital letters with lowercase 
+    modified_names <- tolower(modified_names)
+    # Replace spaces with underscores
+    modified_names <- gsub(' +', '_', modified_names)
+    # Add underscores in common missed locations
+    underscore_replace_key <- known_columns
+    names(underscore_replace_key) <- gsub ('_+', '', known_columns)
+    colnames_to_replace <- underscore_replace_key[modified_names]
+    modified_names[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
+    # Apply changes to just known names
+    cols[modified_names %in% known_columns] <- modified_names[modified_names %in% known_columns]
+    return(cols)
+}
+colnames(metadata_samp) <- validate_col_names(colnames(metadata_samp), known_columns_samp)
+colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
+
+# Remove empty columns
+remove_empty_cols <- function(metadata, csv_name) {
+    is_empty <- apply(metadata, MARGIN = 2, function(col) all(! is_present(col)))
+    is_headerless <- ! is_present(colnames(metadata))
+    if (any(is_headerless & ! is_empty)) {
+        stop(call. = FALSE, paste0(
+            'The following columns in the ', csv_name, ' input CSV have values but no header: ',
+            paste0(which(is_headerless & ! is_empty), collapse = ', ')
+        ))
+    }
+    metadata[, ! is_headerless]
+}
+metadata_samp <- remove_empty_cols(metadata_samp)
+metadata_ref <- remove_empty_cols(metadata_ref)
+
 # Remove all whitespace
 remove_whitespace <- function(metadata) {
-    colnames(metadata) <- trimws(colnames(metadata))
     metadata[] <- lapply(metadata, trimws)
     return(metadata)
 }
-metadata_original_samp <- remove_whitespace(metadata_original_samp)
-metadata_original_ref <- remove_whitespace(metadata_original_ref)
-
-# Preserve original column names
-unmodified_data_samp <- metadata_original_samp
-unmodified_data_ref <- metadata_original_ref
-
-# Replace capital letters with lowercase in colnames
-colnames(metadata_original_samp) <- tolower(colnames(metadata_original_samp))
-colnames(metadata_original_ref) <- tolower(colnames(metadata_original_ref))
-
-# Replace spaces with underscores in colnames
-colnames(metadata_original_samp) <- gsub(' +', '_', colnames(metadata_original_samp))
-colnames(metadata_original_ref) <- gsub(' +', '_', colnames(metadata_original_ref))
-
-# Add underscores in common missed locations
-add_underscores <- function(metadata, known_columns) {
-    underscore_replace_key <- known_columns
-    names(underscore_replace_key) <- gsub ('_+', '', known_columns)
-    colnames_to_replace <- underscore_replace_key[colnames(metadata)]
-    colnames(metadata)[!is.na(colnames_to_replace)] <- colnames_to_replace[! is.na(colnames_to_replace)]
-    return(metadata)
-}
-metadata_original_samp <- add_underscores(metadata_original_samp, known_columns_samp)
-metadata_original_ref <- add_underscores(metadata_original_ref, known_columns_ref)
+metadata_samp <- remove_whitespace(metadata_samp)
+metadata_ref <- remove_whitespace(metadata_ref)
 
 # Replace NAs with empty stings
-metadata_original_samp[] <- lapply(metadata_original_samp, function(x) {
+metadata_samp[] <- lapply(metadata_samp, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
-metadata_original_ref[] <- lapply(metadata_original_ref, function(x) {
+metadata_ref[] <- lapply(metadata_ref, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
@@ -200,8 +220,8 @@ check_required_cols <- function(metadata, required_cols, csv_name) {
         }
     }
 }
-check_required_cols(metadata_original_samp, required_input_columns_samp, 'sample data')
-check_required_cols(metadata_original_ref, required_input_columns_ref, 'reference data')
+check_required_cols(metadata_samp, required_input_columns_samp, 'sample data')
+check_required_cols(metadata_ref, required_input_columns_ref, 'reference data')
 
 # Check for duplicated columns
 check_duplicated_cols <- function(metadata, known_cols, csv_name) {
@@ -214,8 +234,8 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
         )
     }
 }
-check_duplicated_cols(metadata_original_samp,  known_columns_samp, 'sample data')
-check_duplicated_cols(metadata_original_ref,  known_columns_ref, 'reference data')
+check_duplicated_cols(metadata_samp,  known_columns_samp, 'sample data')
+check_duplicated_cols(metadata_ref,  known_columns_ref, 'reference data')
 
 # Reorder columns and add any missing columns
 reorder_and_add_cols <- function(metadata, known_columns) {
@@ -227,8 +247,18 @@ reorder_and_add_cols <- function(metadata, known_columns) {
     output[colnames(metadata)] <- metadata
     return(output)
 }
-metadata_samp <- reorder_and_add_cols(metadata_original_samp, known_columns_samp)
-metadata_ref <- reorder_and_add_cols(metadata_original_ref, known_columns_ref)
+metadata_samp <- reorder_and_add_cols(metadata_samp, known_columns_samp)
+metadata_ref <- reorder_and_add_cols(metadata_ref, known_columns_ref)
+
+# Add default values for some columns
+apply_defaults <- function(metadata, defaults) {
+    metadata[names(defaults)] <- lapply(names(defaults), function(col) {
+        ifelse(is_present(metadata[[col]]), metadata[[col]], defaults[col])
+    })
+    return(metadata)
+}
+metadata_samp <- apply_defaults(metadata_samp, defaults_samp)
+metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
 
 # Validate mutually exclusive columns
 validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, csv_name) {
@@ -257,6 +287,27 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
+# Remove any disabled rows
+metadata_samp <- metadata_samp[as.logical(metadata_samp$enabled), ]
+metadata_ref <- metadata_ref[as.logical(metadata_ref$ref_enabled), ]
+
+# Validate color_by column and add back any original user-defined columns used
+validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
+    split_color_by <- strsplit(metadata[[color_by_col]], split = sep)
+    split_color_by <- lapply(split_color_by, trimws)
+    all_color_by_cols <- unique(unlist(split_color_by))
+    missing_cols <- all_color_by_cols[! all_color_by_cols %in% colnames(metadata)]
+    if (length(missing_cols) > 0) {
+        stop(call. = FALSE, paste0(
+            'The following columns in the ', csv_name, ' CSV referenced by the "', color_by_col, 
+            '" column do not exist: ', paste0('"', missing_cols, '"', collapse = ', '), '\n'
+        ))
+    }
+    return(unlist(lapply(split_color_by, paste0, collapse = sep)))
+}
+metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', known_columns_samp, 'sample data')
+metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
 has_ref_data <- apply(ref_in_samp_data[, unlist(required_input_columns_ref)], MARGIN = 1, function(x) any(is_present(x)))
@@ -265,13 +316,9 @@ ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- rbind(metadata_ref, ref_data_addition)
 
 # Validate usage columns and add a default when needed
-validate_usage_col <- function(metadata, col, default) {
+validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
-        value <- metadata[[col]][index]
-        if (!is_present(value)) {
-            value <- default
-        }
-        value <- tolower(trimws(value))
+        value <- tolower(trimws(metadata[[col]][index]))
         if (! value %in% valid_ref_usage_types) {
             stop(call. = FALSE, paste0(
                 'The value "', value, '" on row ', index, ' column "', col, '" is not valid. It must be one of "',
@@ -281,8 +328,8 @@ validate_usage_col <- function(metadata, col, default) {
         return(value)
     }))
  }
-metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage', ref_primary_usage_default)
-metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage', ref_contextual_usage_default)
+metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage')
+metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
 
 # Validate ploidy column
 metadata_samp$ploidy[!is_present(metadata_samp$ploidy)] <- ploidy_default
@@ -442,9 +489,7 @@ shared_char <- function(col, end = FALSE) {
     }
     return(result)
 }
-is_present <- function(x) {
-    x != '' & ! is.na(x)
-}
+
 remove_shared <- function(x) {
     if (length(x) > 1) {
         present_x <- x[is_present(x)]
@@ -535,7 +580,6 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     unique_ids <- unique(subset[[id_col]])
     unique_ids <- unique_ids[is_present(unique_ids)]
     id_key <- lapply(unique_ids, function(id) {
-        print(id)
         same_id_rows <- subset[subset[[id_col]] == id, ]
         split_by_other <- split(same_id_rows, apply(same_id_rows[, other_cols], 1, paste0, collapse = ''))
         names(split_by_other) <- make.unique(rep(id, length(split_by_other)), sep = '_')
@@ -651,14 +695,10 @@ duplicate_rows_by_id_list <- function(metadata, id_col) {
 metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
 
-# Add user-supplied data as columns with modified names
-add_user_defined_cols <- function(metadata, unmodified_data, known_columns) {
-    cols_to_add <- colnames(metadata)[colnames(metadata) %in% known_columns]
-    unmodified_data <- unmodified_data[, colnames(metadata) %in% known_columns, drop= FALSE]
-    colnames(unmodified_data) <- paste0(user_column_name_prefix, colnames(unmodified_data))
-    cbind(metadata, unmodified_data)
-}
-metadata_samp <- add_user_defined_cols(metadata_samp, unmodified_data_samp, known_columns_samp)
+# Make rows unique
+metadata_samp <- unique(metadata_samp)
+metadata_ref <- unique(metadata_ref)
 
 # Write output metadata
-write.csv(metadata, file = args$output_path_samp, row.names = FALSE, na = '')
+write.csv(metadata_samp, file = args$output_path_samp, row.names = FALSE, na = '')
+write.csv(metadata_ref, file = args$output_path_ref, row.names = FALSE, na = '')
