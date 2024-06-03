@@ -23,12 +23,12 @@ known_columns_samp <- c(
     'sequence_type',
     'report_group_ids',
     'color_by',
-    'enabled',
     'ploidy',
+    'enabled',
+    'ref_group_ids',
     'ref_id',
     'ref_name',
     'ref_description',
-    'ref_group_ids',
     'ref_path',
     'ref_ncbi_accession',
     'ref_ncbi_query',
@@ -39,10 +39,10 @@ known_columns_samp <- c(
     'ref_enabled'
 )
 known_columns_ref <- c(
+    'ref_group_ids',
     'ref_id',
     'ref_name',
     'ref_description',
-    'ref_group_ids',
     'ref_path',
     'ref_ncbi_accession',
     'ref_ncbi_query',
