@@ -138,7 +138,7 @@ is_present <- function(x) {
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv', 'test_out_samp.csv',  'test_out_ref.csv')
+# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv', 'test_out_samp.csv',  'test_out_ref.csv')
 names(args) <- c('input_path_samp', 'input_path_ref', 'output_path_samp', 'output_path_ref')
 metadata_original_samp <- read.csv(args$input_path_samp, check.names = FALSE)
 metadata_original_ref <- read.csv(args$input_path_ref, check.names = FALSE)
