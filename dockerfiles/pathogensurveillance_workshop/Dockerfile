@@ -4,21 +4,25 @@ FROM continuumio/miniconda3
 
 ################## METADATA #######################
 
-LABEL about.summary="A test environment to generate the output report for pathogensurveillance."
-LABEL about.author="Zachary S.L. Foster"
+LABEL about.summary="Docker image for running the pathogensurveillance pipeline in workshops."
+LABEL about.author="Zachary S.L. Foster, Camilo H. Parada Rojas"
 MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 ################## BUILD ######################
 
-RUN <<EOFV
+RUN <<EOF
 apt update
-apt install less vim
+apt install --yes less vim
 EOF
 
-RUN <<EOFV
+RUN <<EOF
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
 conda create --yes --name nf-core python=3.12 nf-core nextflow
 EOF
 
-RUN <<EOFV
-nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile conda --input https://raw.githubusercontent.com/grunwaldlab/pathogensurveillance/master/test/data/metadata/xanthomonas_small.csv --outdir test_out --download_bakta_db -resume -latest
-EOF
+#RUN <<EOF
+#nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile conda,aps --outdir test_out -resume -latest
+#EOF
