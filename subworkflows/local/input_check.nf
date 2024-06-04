@@ -4,22 +4,21 @@
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
-workflow INPUT_CHECK {
+workflow PREPARE_INPUT {
     take:
     sample_data_csv
     reference_data_csv
 
     main:
 
+    // Parse input CSVs
     SAMPLESHEET_CHECK ( sample_data_csv, reference_data_csv )
-
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_sample_metadata_channel(it) }
     reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_reference_metadata_channel(it) }
-
     sample_data = sample_data
         .transpose(by: 3)
         .combine(reference_data, by: 3)
@@ -28,9 +27,42 @@ workflow INPUT_CHECK {
         }
         .groupTuple(by: 0..3)
 
+    // Download FASTQ files if an NCBI accession is provided
+    ncbi_acc = sample_data
+        .filter { sample_meta, sample_paths, ncbi_accession, report_group_id, ref_meta ->
+            ncbi_accession != null
+        }
+        .map { sample_meta, sample_paths, ncbi_accession, report_group_id, ref_meta ->
+            [sample_meta, ncbi_accession]
+        }
+        .unique()
+    SRATOOLS_FASTERQDUMP ( ncbi_acc )
+    sample_data = sample_data
+        .join(SRATOOLS_FASTERQDUMP.out.reads, remainder: true)
+        .map { sample_meta, sample_paths, ncbi_accession, report_group_id, ref_meta, downloaded ->
+            [sample_meta, downloaded ?: sample_paths, report_group_id, ref_meta]
+        }
+
+    // Download reference files if an accession is provided
+    ref_ncbi_acc = reference_data
+        .filter { ref_meta, path, ncbi_accession, ref_group_id ->
+            ncbi_accession != null
+        }
+        .map { ref_meta, path, ncbi_accession, ref_group_id ->
+            [ref_meta, ncbi_accession]
+        }
+        .unique()
+    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
+    reference_data = reference_data
+        .join(DOWNLOAD_ASSEMBLIES.out.sequence, remainder: true)
+        .map { ref_meta, path, ncbi_accession, ref_group_id, assembly ->
+            [ref_meta, assembly ?: path]
+        }
+
+
     emit:
-    sample_data       // sammple_meta, [paths], ncbi_accession, report_meta, [ref_meta]
-    reference_data    // ref_meta, path, ncbi_accession, ref_group_id
+    sample_data       // sample_meta, [read_paths], report_meta, [ref_meta]
+    reference_data    // ref_meta, path
     sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
     reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data
     versions = SAMPLESHEET_CHECK.out.versions

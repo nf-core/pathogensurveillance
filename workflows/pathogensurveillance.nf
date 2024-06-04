@@ -55,7 +55,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK              } from '../subworkflows/local/input_check'
+include { PREPARE_INPUT            } from '../subworkflows/local/prepare_input'
 include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
 include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
 include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysis'
@@ -95,68 +95,45 @@ def multiqc_report = []
 
 workflow PATHOGENSURVEILLANCE {
 
-    ch_versions = Channel.empty()
+    // Initalize channel to accumulate information about software versions used
+    version_data = Channel.empty()
     // Initalize messages channel with an empty list
     //     Note that at least one value is needed so that modlues that require this are run
     messages = Channel.fromList([[]])
 
     // Read in samplesheet, validate and stage input files
-    INPUT_CHECK (
-        sample_data_csv,
-        reference_data_csv
+    PREPARE_INPUT ( sample_data_csv, reference_data_csv )
+    version_data = version_data.mix(PREPARE_INPUT.out.versions)
+
+    // Run FastQC
+    shortreads = PREPARE_INPUT.out.sample_data
+        .filter { sample_meta, read_paths, report_meta, ref_metas ->
+            sample_meta.reads_type == "illumina"
+        }
+        .map { sample_meta, read_paths, report_meta, ref_metas ->
+            [sample_data, read_paths]
+        }
+        .unique()
+    FASTQC ( shortreads )
+    version_data = version_data.mix(FASTQC.out.versions.toSortedList().map{it[0]})
+
+    // Make initial taxonomic classification to decide how to treat sample
+    reads = PREPARE_INPUT.out.sample_data
+        .map { sample_meta, read_paths, report_meta, ref_metas ->
+            [sample_data, read_paths]
+        }
+        .unique()
+    COARSE_SAMPLE_TAXONOMY ( reads )
+    version_data = version_data.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
+
+    // Search for and download reference assemblies for all samples
+    DOWNLOAD_REFERENCES (
+        COARSE_SAMPLE_TAXONOMY.out.species,
+        COARSE_SAMPLE_TAXONOMY.out.genera,
+        COARSE_SAMPLE_TAXONOMY.out.families,
+        PREPARE_INPUT.out.sample_data
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-
-    //// Download FASTQ files if SRA accessions is provided
-    //ch_sra = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
-    //    .filter { it[2] != null }
-    //    .map { [it[0], it[2]] } // meta, sra
-    //    .unique()
-    //SRATOOLS_FASTERQDUMP ( ch_sra )
-
-    //// Download reference files if an accession is provided instead of a file
-    //ch_ref_accessions = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
-    //    .filter { it[5] != null }
-    //    .map { [it[3], it[5]] } // ref_meta, reference_refseq
-    //    .unique()
-    //DOWNLOAD_ASSEMBLIES ( ch_ref_accessions )
-    //ch_downloaded_refs = DOWNLOAD_ASSEMBLIES.out.sequence // val(ref_meta), file(downloaded_ref)
-    //    .combine( INPUT_CHECK.out.sample_data.map { [it[3], it[0]] }, by: 0) // val(ref_meta), file(downloaded_ref), val(meta)
-    //    .map { [it[2], it[1]] } // val(meta), file(downloaded_ref)
-
-    //// Replace NCBI SRAs/Assembly accessions with downloaded reads and references
-    //ch_input_parsed = INPUT_CHECK.out.sample_data // meta, [reads], sra, ref_meta, reference, reference_refseq, group
-    //    .join(SRATOOLS_FASTERQDUMP.out.reads, remainder:true) // meta, [reads], sra, ref_meta, reference, reference_refseq, group, [sra_fastq]
-    //    .join(ch_downloaded_refs, remainder:true) // meta, [reads], sra, ref_meta, reference, reference_refseq, group, [sra_fastq], downloaded_ref
-    //    .map { [it[0], it[7] ?: it[1], it[3], it[8] ?: it[4], it[6]] } // meta, [reads], ref_meta, reference, group_meta
-
-    //// Run FastQC
-    //ch_shortreads = ch_input_parsed  // meta, [reads], ref_meta, reference, group_meta
-    //    .filter { it[0].reads_type == "illumina" }
-    //    .map { it[0..1] } // meta, [reads]
-    //    .unique()
-    //FASTQC (
-    //    ch_shortreads
-    //)
-    //ch_versions = ch_versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
-
-    //// Make initial taxonomic classification to decide how to treat sample
-    //ch_reads = ch_input_parsed  // meta, [reads], ref_meta, reference, group_meta
-    //    .map { it[0..1] }
-    //    .unique()
-    //COARSE_SAMPLE_TAXONOMY (
-    //    ch_reads
-    //)
-    //ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
-
-    //// Search for and download reference assemblies for all samples
-    //DOWNLOAD_REFERENCES (
-    //    COARSE_SAMPLE_TAXONOMY.out.species,
-    //    COARSE_SAMPLE_TAXONOMY.out.genera,
-    //    COARSE_SAMPLE_TAXONOMY.out.families,
-    //    INPUT_CHECK.out.sample_data
-    //)
-    //ch_versions = ch_versions.mix(DOWNLOAD_REFERENCES.out.versions)
+    version_data = version_data.mix(DOWNLOAD_REFERENCES.out.versions)
 
     //// Assign closest reference for samples without a user-assigned reference
     //ASSIGN_REFERENCES (
@@ -166,15 +143,15 @@ workflow PATHOGENSURVEILLANCE {
     //    DOWNLOAD_REFERENCES.out.signatures,
     //    COARSE_SAMPLE_TAXONOMY.out.depth
     //)
-    //ch_versions = ch_versions.mix(ASSIGN_REFERENCES.out.versions)
+    //version_data = version_data.mix(ASSIGN_REFERENCES.out.versions)
     //messages = messages.mix(ASSIGN_REFERENCES.out.messages)
 
     //// Call variants and create SNP-tree and minimum spanning nextwork
     //VARIANT_ANALYSIS (
     //    ASSIGN_REFERENCES.out.sample_data, // meta, [reads], ref_meta, reference, group_meta
-    //    INPUT_CHECK.out.csv
+    //    PREPARE_INPUT.out.csv
     //)
-    //ch_versions = ch_versions.mix(VARIANT_ANALYSIS.out.versions)
+    //version_data = version_data.mix(VARIANT_ANALYSIS.out.versions)
     //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     //// Assemble and annotate bacterial genomes
@@ -183,7 +160,7 @@ workflow PATHOGENSURVEILLANCE {
     //        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
     //        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
     //)
-    //ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)
+    //version_data = version_data.mix(GENOME_ASSEMBLY.out.versions)
 
     //// Create core gene phylogeny for bacterial samples
     //ref_gffs = ASSIGN_REFERENCES.out.context_refs
@@ -201,9 +178,9 @@ workflow PATHOGENSURVEILLANCE {
     //    .map { [it[0], it[5], it[4], it[6], it[7]] } // meta, gff, group_meta, [ref_gff], depth
     //CORE_GENOME_PHYLOGENY (
     //    gff_and_group,
-    //    INPUT_CHECK.out.csv
+    //    PREPARE_INPUT.out.csv
     //)
-    //ch_versions = ch_versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    //version_data = version_data.mix(CORE_GENOME_PHYLOGENY.out.versions)
     //messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     //// Read2tree BUSCO phylogeny for eukaryotes
@@ -222,7 +199,7 @@ workflow PATHOGENSURVEILLANCE {
 
     //// Save version info
     //CUSTOM_DUMPSOFTWAREVERSIONS (
-    //    ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    //    version_data.unique().collectFile(name: 'collated_versions.yml')
     //)
 
 
@@ -246,7 +223,7 @@ workflow PATHOGENSURVEILLANCE {
     //    ch_multiqc_logo.collect().ifEmpty([])
     //)
     //multiqc_report = MULTIQC.out.report.toList()
-    //ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    //version_data    = version_data.mix(MULTIQC.out.versions)
 
     //// Save error/waring/message info
     //RECORD_MESSAGES (
@@ -290,7 +267,7 @@ workflow PATHOGENSURVEILLANCE {
 
     //PREPARE_REPORT_INPUT (
     //    report_in,
-    //    INPUT_CHECK.out.csv,
+    //    PREPARE_INPUT.out.csv,
     //    MULTIQC.out.data,
     //    MULTIQC.out.plots,
     //    MULTIQC.out.report,

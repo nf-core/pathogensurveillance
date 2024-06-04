@@ -9,16 +9,26 @@ include { KHMER_TRIMLOWABUND                        } from '../../modules/local/
 workflow DOWNLOAD_REFERENCES {
 
     take:
-    ch_species  // meta, taxa
-    ch_genera  // meta, taxa
-    ch_families  // meta, taxa
-    ch_input // meta, [reads], sra, ref_meta, reference, reference_refseq, group
+
+    ch_species  // sample_meta, taxa
+    ch_genera   // sample_meta, taxa
+    ch_families // sample_meta, taxa
+    sample_data // sample_meta, [read_paths], report_meta, [ref_metas]
 
     main:
-    ch_versions = Channel.empty()
 
-    ch_all_families = ch_families
-        .map {it[1]}
+    // Initalize channel to accumulate information about software versions used
+    versions = Channel.empty()
+
+    // Get list of families for all samples without exclusive references defined by the user
+    all_families = sample_data
+        .filter { sample_meta, read_paths, report_meta, ref_metas ->
+            ! ref_metas.map{it.id}.contains('exclusive')
+        }
+        .join(ch_families)
+        .map { sample_meta, read_paths, report_meta, ref_metas, families ->
+            [families]
+        }
         .splitText()
         .map { it.replace('\n', '') }
         .collect()
@@ -27,8 +37,8 @@ workflow DOWNLOAD_REFERENCES {
         .unique()
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
-    FIND_ASSEMBLIES ( ch_all_families )
-    ch_versions = ch_versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
+    FIND_ASSEMBLIES ( all_families )
+    versions = versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
     // Choose reference sequences to provide context for each sample
     PICK_ASSEMBLIES (
@@ -44,7 +54,7 @@ workflow DOWNLOAD_REFERENCES {
     )
 
     // Make channel with all unique assembly IDs
-    user_acc_list = ch_input
+    user_acc_list = sample_data
         .map { [it[3], it[5]] } // ref_meta, reference_refseq
         .unique()
     ch_assembly_ids = PICK_ASSEMBLIES.out.id_list
@@ -60,7 +70,7 @@ workflow DOWNLOAD_REFERENCES {
         .map { it[1..0] }
         .unique()
     DOWNLOAD_ASSEMBLIES ( ch_assembly_ids )
-    ch_versions = ch_versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
     // Add sequence to the gff
     MAKE_GFF_WITH_FASTA (
@@ -69,7 +79,7 @@ workflow DOWNLOAD_REFERENCES {
     )
 
     SOURMASH_SKETCH_GENOME ( DOWNLOAD_ASSEMBLIES.out.sequence )
-    ch_versions = ch_versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(SOURMASH_SKETCH_GENOME.out.versions.toSortedList().map{it[0]})
 
     genome_ids = PICK_ASSEMBLIES.out.id_list
         .splitText(elem: 1)
@@ -82,5 +92,5 @@ workflow DOWNLOAD_REFERENCES {
     signatures = SOURMASH_SKETCH_GENOME.out.signatures    // ref_meta, signature for each assembly
     stats      = PICK_ASSEMBLIES.out.stats                // stats for each sample
     stats_all  = PICK_ASSEMBLIES.out.merged_stats.first() // merged_stats
-    versions   = ch_versions                              // versions.yml
+    versions   = versions                              // versions.yml
 }
