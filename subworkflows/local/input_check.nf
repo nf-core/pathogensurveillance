@@ -6,24 +6,34 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
 workflow INPUT_CHECK {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
+    sample_data_csv
+    reference_data_csv
 
     main:
-    
-    SAMPLESHEET_CHECK ( samplesheet )
-    
-    sample_metadata = SAMPLESHEET_CHECK.out.sample_metadata
+
+    SAMPLESHEET_CHECK ( sample_data_csv, reference_data_csv )
+
+    sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_sample_metadata_channel(it) }
-    reference_metadata = SAMPLESHEET_CHECK.out.reference_metadata
+    reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_reference_metadata_channel(it) }
 
+    sample_data = sample_data
+        .transpose(by: 3)
+        .combine(reference_data, by: 3)
+        .map { ref_group_id, sample_meta, sample_paths, ncbi_accession, report_group_id, ref_meta, ref_path, ref_ncbi_accession ->
+             [sample_meta, sample_paths, ncbi_accession, report_group_id, ref_meta]
+        }
+        .groupTuple(by: 0..3)
+
     emit:
-    sample_metadata                           // sammple_meta, [paths], ncbi_accession, [ref_group_ids], report_group_id
-    reference_metadata                        // ref_meta, path, ncbi_accession, ref_group_id
-    csv      = SAMPLESHEET_CHECK.out.csv      // modified csv of metadata
-    versions = SAMPLESHEET_CHECK.out.versions // versions.yml
+    sample_data       // sammple_meta, [paths], ncbi_accession, report_meta, [ref_meta]
+    reference_data    // ref_meta, path, ncbi_accession, ref_group_id
+    sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
+    reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data
+    versions = SAMPLESHEET_CHECK.out.versions
 }
 
 def create_sample_metadata_channel(LinkedHashMap row) {

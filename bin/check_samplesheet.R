@@ -66,9 +66,9 @@ defaults_samp <- c(
     ploidy = '1',
     ncbi_query_max = '10',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
-    ref_primary_usage = defaults_ref['ref_primary_usage'],
-    ref_contextual_usage = defaults_ref['ref_contextual_usage'],
-    ref_enabled = defaults_ref['ref_enabled']
+    ref_primary_usage = defaults_ref[['ref_primary_usage']],
+    ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
+    ref_enabled = defaults_ref[['ref_enabled']]
 )
 
 # Columns that must have a valid value in the input of this script
@@ -138,20 +138,29 @@ is_present <- function(x) {
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv', 'test_out_samp.csv',  'test_out_ref.csv')
-names(args) <- c('input_path_samp', 'input_path_ref', 'output_path_samp', 'output_path_ref')
-metadata_original_samp <- read.csv(args$input_path_samp, check.names = FALSE)
-metadata_original_ref <- read.csv(args$input_path_ref, check.names = FALSE)
+# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
+# args <- list('test/data/metadata/chaos_samples.csv')
+metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
+if (length(args) > 1) {
+    metadata_original_ref <- read.csv(args[[2]], check.names = FALSE)
+} else {
+    metadata_original_ref <- data.frame(ref_path = character(0))
+}
 metadata_samp <- metadata_original_samp
 metadata_ref <- metadata_original_ref
 
 # Remove empty rows
 remove_empty_rows <- function(metadata) {
+    if (nrow(metadata) == 0) {
+        return(metadata)
+    }
     is_empty <- apply(metadata, MARGIN = 1, function(row) all(! is_present(row)))
     metadata[! is_empty, ]
 }
 metadata_samp <- remove_empty_rows(metadata_samp)
-metadata_ref <- remove_empty_rows(metadata_ref)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- remove_empty_rows(metadata_ref)
+}
 
 # Check that there is data
 if (nrow(metadata_samp) == 0) {
@@ -177,10 +186,15 @@ validate_col_names <- function(cols, known_columns) {
     return(cols)
 }
 colnames(metadata_samp) <- validate_col_names(colnames(metadata_samp), known_columns_samp)
-colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
+if (nrow(metadata_ref) > 0) {
+    colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
+}
 
 # Remove empty columns
 remove_empty_cols <- function(metadata, csv_name) {
+    if (nrow(metadata) == 0) {
+        return(metadata)
+    }
     is_empty <- apply(metadata, MARGIN = 2, function(col) all(! is_present(col)))
     is_headerless <- ! is_present(colnames(metadata))
     if (any(is_headerless & ! is_empty)) {
@@ -192,7 +206,9 @@ remove_empty_cols <- function(metadata, csv_name) {
     metadata[, ! is_headerless]
 }
 metadata_samp <- remove_empty_cols(metadata_samp)
-metadata_ref <- remove_empty_cols(metadata_ref)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- remove_empty_cols(metadata_ref)
+}
 
 # Remove all whitespace
 remove_whitespace <- function(metadata) {
@@ -200,7 +216,9 @@ remove_whitespace <- function(metadata) {
     return(metadata)
 }
 metadata_samp <- remove_whitespace(metadata_samp)
-metadata_ref <- remove_whitespace(metadata_ref)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- remove_whitespace(metadata_ref)
+}
 
 # Replace NAs with empty stings
 metadata_samp[] <- lapply(metadata_samp, function(x) {
@@ -261,7 +279,9 @@ apply_defaults <- function(metadata, defaults) {
     return(metadata)
 }
 metadata_samp <- apply_defaults(metadata_samp, defaults_samp)
-metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
+}
 
 # Validate mutually exclusive columns
 validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, csv_name) {
@@ -292,7 +312,9 @@ validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'refer
 
 # Remove any disabled rows
 metadata_samp <- metadata_samp[as.logical(metadata_samp$enabled), ]
-metadata_ref <- metadata_ref[as.logical(metadata_ref$ref_enabled), ]
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- metadata_ref[as.logical(metadata_ref$ref_enabled), ]
+}
 
 # Validate color_by column and add back any original user-defined columns used
 validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
@@ -309,7 +331,9 @@ validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep 
     return(unlist(lapply(split_color_by, paste0, collapse = sep)))
 }
 metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', known_columns_samp, 'sample data')
-metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+}
 
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
@@ -331,8 +355,10 @@ validate_usage_col <- function(metadata, col) {
         return(value)
     }))
  }
-metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage')
-metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage')
+    metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
+}
 
 # Validate ploidy column
 for (index in 1:nrow(metadata_samp)) {
@@ -468,14 +494,16 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
             ))
         }
     }
-    for (row_index in 1:nrow(metadata)) {
+    for (row_index in seq_along(rownames(metadata))) {
         for (columns in required_input_columns) {
             validate_required_input_cols(row_index, columns)
         }
     }
 }
 validate_required_input(metadata_samp, required_input_columns_samp, 'sample data')
-validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
+if (nrow(metadata_ref) > 0) {
+    validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
+}
 
 # Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
@@ -563,14 +591,16 @@ id_sources_ref <- list( # These are all possible sources of IDs, ordered by pref
     metadata_ref$ref_ncbi_accession,
     metadata_ref$ref_path
 )
-metadata_ref$ref_id <- unlist(lapply(1:nrow(metadata_ref), function(row_index) { # Pick one replacement ID for each sample
-    ids <- unlist(lapply(id_sources_ref, `[`, row_index))
-    return(ids[is_present(ids)][1])
-}))
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_id <- unlist(lapply(1:nrow(metadata_ref), function(row_index) { # Pick one replacement ID for each sample
+        ids <- unlist(lapply(id_sources_ref, `[`, row_index))
+        return(ids[is_present(ids)][1])
+    }))
+}
 
 # Ensure sample/reference names and descriptions are present
 ensure_sample_names <- function(names, ids) {
-    unlist(lapply(1:length(names), function(index) {
+    unlist(lapply(seq_along(names), function(index) {
         if (is_present(names[index])) {
             return(names[index])
         } else {
@@ -579,22 +609,28 @@ ensure_sample_names <- function(names, ids) {
     }))
 }
 metadata_samp$name <- ensure_sample_names(metadata_samp$name, metadata_samp$sample_id)
-metadata_ref$ref_name <- ensure_sample_names(metadata_ref$ref_name, metadata_ref$ref_id)
 metadata_samp$description <- ensure_sample_names(metadata_samp$description, metadata_samp$name)
-metadata_ref$ref_description <- ensure_sample_names(metadata_ref$ref_description, metadata_ref$ref_name)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_name <- ensure_sample_names(metadata_ref$ref_name, metadata_ref$ref_id)
+}
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_description <- ensure_sample_names(metadata_ref$ref_description, metadata_ref$ref_name)
+}
 
 # Replace any characters in IDs that cannot be present in file names
 make_ids_ok_for_file_names <- function(ids) {
     trimws(gsub(ids, pattern = invalid_id_char_pattern, replacement = '_'))
 }
 metadata_samp$sample_id <- make_ids_ok_for_file_names(metadata_samp$sample_id)
-metadata_ref$ref_id <- make_ids_ok_for_file_names(metadata_ref$ref_id)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_id <- make_ids_ok_for_file_names(metadata_ref$ref_id)
+}
 
 # Ensure that the same sample ID is not used for different sets of data
 make_ids_unique <- function(metadata, id_col, other_cols) {
     # Find which IDs need to be changed
     subset <- metadata[, c(id_col, other_cols)]
-    subset$row_num <- 1:nrow(subset)
+    subset$row_num <- seq_along(rownames(subset))
     unique_ids <- unique(subset[[id_col]])
     unique_ids <- unique_ids[is_present(unique_ids)]
     id_key <- lapply(unique_ids, function(id) {
@@ -613,7 +649,9 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
     return(metadata)
 }
 metadata_samp <- make_ids_unique(metadata_samp, id_col = 'sample_id', other_cols = c('path', 'path_2', 'ncbi_accession'))
-metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c('ref_path', 'ref_ncbi_accession'))
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c('ref_path', 'ref_ncbi_accession'))
+}
 
 # Ensure references and samples do not share ids
 is_shared <- metadata_ref$ref_id %in% metadata_samp$sample_id
@@ -642,21 +680,25 @@ make_group_ids_ok_for_file_names <- function(group_ids, sep = ';') {
     }))
 }
 metadata_samp$report_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$report_group_ids)
-metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
 metadata_samp$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$ref_group_ids)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
+}
 
 # Check that reference groups in sample metadata are present in the reference metadata
-all_ref_group_ids <- unique(unlist(strsplit(metadata_ref$ref_group_ids, split = ';')))
-for (index in 1:nrow(metadata_samp)) {
-    split_ids <- strsplit(metadata_samp$ref_group_ids[index], split = ';')[[1]]
-    invalid_ids <- split_ids[! split_ids %in% all_ref_group_ids]
-    if (length(invalid_ids) > 0) {
-        stop(call. = FALSE, paste0(
-            'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
-            ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
-            ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
-            ' metadata CSV.'
-        ))
+if (nrow(metadata_ref)) {
+    all_ref_group_ids <- unique(unlist(strsplit(metadata_ref$ref_group_ids, split = ';')))
+    for (index in 1:nrow(metadata_samp)) {
+        split_ids <- strsplit(metadata_samp$ref_group_ids[index], split = ';')[[1]]
+        invalid_ids <- split_ids[! split_ids %in% all_ref_group_ids]
+        if (length(invalid_ids) > 0) {
+            stop(call. = FALSE, paste0(
+                'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
+                ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
+                ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
+                ' metadata CSV.'
+            ))
+        }
     }
 }
 
@@ -711,12 +753,16 @@ duplicate_rows_by_id_list <- function(metadata, id_col) {
     return(metadata)
 }
 metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
-metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
+}
 
 # Make rows unique
 metadata_samp <- unique(metadata_samp)
-metadata_ref <- unique(metadata_ref)
+if (nrow(metadata_ref) > 0) {
+    metadata_ref <- unique(metadata_ref)
+}
 
 # Write output metadata
-write.csv(metadata_samp, file = args$output_path_samp, row.names = FALSE, na = '')
-write.csv(metadata_ref, file = args$output_path_ref, row.names = FALSE, na = '')
+write.csv(metadata_samp, file = 'sample_metadata.csv', row.names = FALSE, na = '')
+write.csv(metadata_ref, file = 'reference_metadata.csv', row.names = FALSE, na = '')

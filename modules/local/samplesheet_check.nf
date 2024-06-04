@@ -3,25 +3,25 @@ Validates the input data and returns a reformatted version that is used for the 
 */
 
 process SAMPLESHEET_CHECK {
-    tag "$samplesheet"
+    tag "$sample_csv"
 
-    conda "conda-forge::r-rentrez=1.2.3"                                           
+    conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :            
-        'quay.io/biocontainers/r-entrez:1.1.0--r3.4.1_0' }"                                 
+        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'quay.io/biocontainers/r-entrez:1.1.0--r3.4.1_0' }"
 
     input:
     path sample_csv
     path reference_csv
 
     output:
-    path 'sample_metadata.csv'    , emit: sample_metadata
-    path 'reference_metadata.csv' , emit: reference_metadata
+    path 'sample_metadata.csv'    , emit: sample_data
+    path 'reference_metadata.csv' , emit: reference_data
     path "versions.yml"           , emit: versions
 
     script:
     """
-    check_samplesheet.R ${sample_metadata} ${reference_metadata} sample_metadata.csv reference_metadata.csv
+    check_samplesheet.R ${sample_csv} ${reference_csv}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
