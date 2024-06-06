@@ -8,6 +8,13 @@ min_coverage <- 30
 
 # Parse taxonomomy inputs
 args <- commandArgs(trailingOnly = TRUE)
+args <- c(
+    '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_families.txt',
+    '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_genera.txt',
+    '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_species.txt',
+    '30', '20', '10',
+    'Bp_804855_SE.tsv'
+)
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])

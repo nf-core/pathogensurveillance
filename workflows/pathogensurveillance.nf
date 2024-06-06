@@ -78,7 +78,6 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
-include { SRATOOLS_FASTERQDUMP        } from '../modules/local/fasterqdump'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
@@ -106,34 +105,16 @@ workflow PATHOGENSURVEILLANCE {
     version_data = version_data.mix(PREPARE_INPUT.out.versions)
 
     // Run FastQC
-    shortreads = PREPARE_INPUT.out.sample_data
-        .filter { sample_meta, read_paths, report_meta, ref_metas ->
-            sample_meta.reads_type == "illumina"
-        }
-        .map { sample_meta, read_paths, report_meta, ref_metas ->
-            [sample_data, read_paths]
-        }
-        .unique()
-    FASTQC ( shortreads )
-    version_data = version_data.mix(FASTQC.out.versions.toSortedList().map{it[0]})
-
-    // Make initial taxonomic classification to decide how to treat sample
-    reads = PREPARE_INPUT.out.sample_data
-        .map { sample_meta, read_paths, report_meta, ref_metas ->
-            [sample_data, read_paths]
-        }
-        .unique()
-    COARSE_SAMPLE_TAXONOMY ( reads )
-    version_data = version_data.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
-
-    // Search for and download reference assemblies for all samples
-    DOWNLOAD_REFERENCES (
-        COARSE_SAMPLE_TAXONOMY.out.species,
-        COARSE_SAMPLE_TAXONOMY.out.genera,
-        COARSE_SAMPLE_TAXONOMY.out.families,
-        PREPARE_INPUT.out.sample_data
-    )
-    version_data = version_data.mix(DOWNLOAD_REFERENCES.out.versions)
+    //shortreads = PREPARE_INPUT.out.sample_data
+    //    .filter { sample_meta, read_paths, report_meta, ref_metas ->
+    //        sample_meta.reads_type == "illumina"
+    //    }
+    //    .map { sample_meta, read_paths, report_meta, ref_metas ->
+    //        [sample_data, read_paths]
+    //    }
+    //    .unique()
+    //FASTQC ( shortreads )
+    //version_data = version_data.mix(FASTQC.out.versions.toSortedList().map{it[0]})
 
     //// Assign closest reference for samples without a user-assigned reference
     //ASSIGN_REFERENCES (

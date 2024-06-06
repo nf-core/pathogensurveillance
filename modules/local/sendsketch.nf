@@ -12,8 +12,9 @@ process BBMAP_SENDSKETCH {
     tuple val(meta), path(file)
 
     output:
-    tuple val(meta), path('*.txt'), env(DEPTH), emit: hits
-    path "versions.yml"                       , emit: versions
+    tuple val(meta), path('*.txt'), emit: hits
+    tuple val(meta), env(DEPTH)   , emit: depth
+    path "versions.yml"           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
