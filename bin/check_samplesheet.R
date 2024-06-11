@@ -114,7 +114,7 @@ known_read_types <- c(
 )
 
 # Regular expression for characters that cannot appear in IDs
-invalid_id_char_pattern <- '[\\/:*?"<>| .()-]+'
+invalid_id_char_pattern <- '[\\/:;*?"<>| .()-]+'
 
 # Name of default group if all samples do not have a group defined
 default_group_full <- 'all'
@@ -756,6 +756,28 @@ metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
 }
+
+# Convert reference groups to reference ids in the sample data
+metadata_samp$ref_ids <- unlist(lapply(metadata_samp$ref_group_ids, function(group_ids) {
+    ref_ids <- metadata_ref$ref_id[metadata_ref$ref_group_ids %in% strsplit(group_ids, split = ';')]
+    paste(ref_ids, collapse = ';')
+}))
+
+# Remove unneeded columns
+metadata_samp$enabled <- NULL
+metadata_samp$ref_group_ids <- NULL
+metadata_samp$ref_id <- NULL
+metadata_samp$ref_name <- NULL
+metadata_samp$ref_description <- NULL
+metadata_samp$ref_path <- NULL
+metadata_samp$ref_ncbi_accession <- NULL
+metadata_samp$ref_ncbi_query <- NULL
+metadata_samp$ref_ncbi_query_max <- NULL
+metadata_samp$ref_primary_usage <- NULL
+metadata_samp$ref_color_by <- NULL
+metadata_samp$ref_enabled <- NULL
+metadata_ref$ref_group_ids <- NULL
+metadata_ref$ref_enabled <- NULL
 
 # Make rows unique
 metadata_samp <- unique(metadata_samp)
