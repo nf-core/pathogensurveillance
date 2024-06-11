@@ -23,6 +23,15 @@ conda config --set channel_priority strict
 conda create --yes --name nf-core python=3.12 nf-core nextflow
 EOF
 
+# Add conda bin to path
+ENV PATH /opt/conda/bin:$PATH
+
+# Set up environment
+RUN echo "conda activate nf-core" >> ~/.bashrc
+
+# Set entrypoint to bash
+# ENTRYPOINT ["bash", "-l", "-c"]
+
 #RUN <<EOF
 #nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile conda,aps --outdir test_out -resume -latest
 #EOF
