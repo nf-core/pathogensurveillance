@@ -15,10 +15,9 @@ process PICK_ASSEMBLIES {
     val n_ref_genera
 
     output:
-    tuple val(meta), path("${prefix}.tsv")    , emit: stats
-    tuple val(meta), path("${prefix}_ids.txt"), emit: id_list
-    path "merged_assembly_stats.tsv", emit: merged_stats
-    path "versions.yml", emit: versions
+    tuple val(meta), path("${prefix}.tsv"), emit: stats
+    path "merged_assembly_stats.tsv"      , emit: merged_stats
+    path "versions.yml"                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -28,8 +27,6 @@ process PICK_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${prefix}.tsv ${assem_data_tsvs}
-
-    tail -n +2 ${prefix}.tsv | cut -f1,3,6 > ${prefix}_ids.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

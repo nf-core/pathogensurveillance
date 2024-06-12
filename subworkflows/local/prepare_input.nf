@@ -95,57 +95,67 @@ workflow PREPARE_INPUT {
     FIND_ASSEMBLIES ( all_families )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
 
-    //// Choose reference sequences to provide context for each sample
-    //PICK_ASSEMBLIES (
-    //    INITIAL_CLASSIFICATION.out.families
-    //        .join(INITIAL_CLASSIFICATION.out.genera)
-    //        .join(INITIAL_CLASSIFICATION.out.species),
-    //    FIND_ASSEMBLIES.out.stats
-    //        .map { taxon, assembly_meta -> assembly_meta }
-    //        .toSortedList(),
-    //    params.n_ref_strains,
-    //    params.n_ref_species,
-    //    params.n_ref_genera
-    //)
+    // Choose reference sequences to provide context for each sample
+    PICK_ASSEMBLIES (
+        INITIAL_CLASSIFICATION.out.families
+            .join(INITIAL_CLASSIFICATION.out.genera)
+            .join(INITIAL_CLASSIFICATION.out.species),
+        FIND_ASSEMBLIES.out.stats
+            .map { taxon, assembly_meta -> assembly_meta }
+            .toSortedList(),
+        params.n_ref_strains,
+        params.n_ref_species,
+        params.n_ref_genera
+    )
 
-    //new_reference_data = PICK_ASSEMBLIES.out.id_list
-    //    //.map {sample_meta, new_ref_csv -> new_ref_csv}
-    //    .splitText(elem: 1)
-    //    .map { sample_meta, new_refs -> [sample_meta, new_ref_csv.replace('\n', '')] }
-    //    .filter { sample_meta, new_refs -> [sample_meta, new_refs != ''] }
-    //    .map { sample_meta, new_refs -> [sample_meta, new_refs.split('\t')] }
-    //    .map { sample_meta, new_refs -> [sample_meta] }
-    //    .unique() // sample_meta, ref_meta, ref_group_id
+    sample_data = PICK_ASSEMBLIES.out.stats
+        .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
+        .map{ sample_id, ref_meta ->
+            [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
+        }
+        .tap{ new_reference_data }
+        .groupTuple(by: 0)
+        .combine(sample_data.map { sample_meta, ref_metas, reads_path -> [[id: sample_meta.sample_id], sample_meta, ref_metas, reads_path] }, by: 0)
+        .map{ sample_id, new_ref_metas, sample_meta, ref_metas, reads_path ->
+            [sample_meta, ref_metas + new_ref_metas, reads_path]
+        }
 
-    //// Add new reference accessions to sample and reference metadata
+    reference_data = new_reference_data
+        .map{ sample_id, ref_meta -> ref_meta }
+        .mix(reference_data)
 
-    //sample_data = sample_data
-    //    .transpose(by: 3)
-    //    .combine(reference_data, by: 3)
-    //    .map { ref_group_id, sample_meta, sample_paths, ncbi_accession, report_meta, ref_meta, ref_path, ref_ncbi_accession ->
-    //         [sample_meta, sample_paths, ncbi_accession, report_meta, ref_meta]
-    //    }
-    //    .groupTuple(by: 0..3)
-
-    //// Download reference files if an accession is provided
-    //ref_ncbi_acc = reference_data
-    //    .filter { ref_meta, path, ncbi_accession, ref_group_id ->
-    //        ncbi_accession != null
-    //    }
-    //    .map { ref_meta, path, ncbi_accession, ref_group_id ->
-    //        [ref_meta, ncbi_accession]
-    //    }
-    //    .unique()
-    //DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
-    //reference_data = reference_data
-    //    .join(DOWNLOAD_ASSEMBLIES.out.sequence, remainder: true)
-    //    .map { ref_meta, path, ncbi_accession, ref_group_id, assembly ->
-    //        [ref_meta, assembly ?: path]
-    //    }
+    // Download reference files if an accession is provided
+    ref_ncbi_acc = reference_data
+        .filter{ ref_meta -> ref_meta.ref_ncbi_accession }
+        .tap{ ref_data_with_ncbi_acc }
+        .map { ref_meta ->
+            [[id: ref_meta.ref_ncbi_accession], ref_meta.ref_ncbi_accession]
+        }
+        .unique()
+    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
+    reference_data = ref_data_with_ncbi_acc
+        .map{ ref_meta -> [[id: ref_meta.ref_ncbi_accession], ref_meta] }
+        .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
+        .map{ ncbi_acc_meta, ref_meta, ref_path ->
+            ref_meta.ref_path = ref_path
+            ref_meta
+        }
+        .mix(reference_data.filter{ ref_meta -> ! ref_meta.ref_ncbi_accession })
+    sample_data = sample_data
+        .transpose(by: 1)
+        .map{ sample_meta, ref_meta, reads_path ->
+            [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta, reads_path ]
+        }
+        .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
+        .map { ncbi_acc_meta, sample_meta, ref_meta, reads_path, ref_path ->
+            ref_meta.ref_path = ref_path
+            [sample_meta, ref_meta, reads_path]
+        }
+        .groupTuple(by: [0, 2])
 
 
     emit:
-    sample_data       // sample_meta, [sample_paths], report_meta, [ref_meta]
+    sample_data       // sample_meta, [sample_paths], [ref_meta]
     reference_data    // ref_meta, path
     sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
     reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data

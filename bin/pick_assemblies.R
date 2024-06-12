@@ -6,14 +6,41 @@ set.seed(1)
 # Options
 min_coverage <- 30
 
-# Parse taxonomomy inputs
+# Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_families.txt',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_genera.txt',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/7e/dff8adc6428bd2f8b39f51156d8bc8/Bp_804855_SE_species.txt',
+#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_families.txt',
+#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_genera.txt',
+#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_species.txt',
 #     '30', '20', '10',
-#     'Bp_804855_SE.tsv'
+#     'test_out.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Acidilobaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Alcaligenaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Apidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Apodidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Betaflexiviridae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Burkholderiaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Caprimulgidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Desulfurococcaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Emydidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Enterobacteriaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Formicidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Halictidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Halomonadaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Lamiaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Megachilidae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Micrococcaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Moraxellaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Nectriaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pedaliaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Peronosporaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Phrymaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Poaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Propionibacteriaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pyrodictiaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pythiaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Staphylococcaceae.tsv',
+#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Xanthomonadaceae.tsv'
 # )
 args <- as.list(args)
 families <- readLines(args[[1]])
@@ -101,6 +128,20 @@ if (length(fa_stats) != 0 ) {
 # Combine results
 result <- rbind(sp_stats, gn_stats, fa_stats)
 
+# Reformat results to the same format as the user-defined metadata
+formatted_result <- data.frame(
+    ref_id = result$reference_id,
+    ref_name = gsub(result$Organism, pattern = ' \\(.+\\)$', replacement = ''),
+    ref_description = paste0(gsub(result$Organism, pattern = ' \\(.+\\)$', replacement = ''), ' (', result$LastMajorReleaseAccession, ')'),
+    ref_path = '',
+    ref_ncbi_accession = result$LastMajorReleaseAccession,
+    ref_ncbi_query = '',
+    ref_ncbi_query_max = '',
+    ref_primary_usage = 'optional',
+    ref_contextual_usage = 'optional',
+    ref_color_by = ''
+)
+
 # Save to output file
-write.table(result, file = out_path, sep = '\t', quote = FALSE, row.names = FALSE)
+write.table(formatted_result, file = out_path, sep = '\t', quote = FALSE, row.names = FALSE)
 write.table(assem_data, file = 'merged_assembly_stats.tsv', sep = '\t', quote = FALSE, row.names = FALSE)
