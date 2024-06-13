@@ -60,9 +60,10 @@ include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_t
 include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
 include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysis'
 include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
-include { ASSIGN_REFERENCES        } from '../subworkflows/local/assign_references'
+include { SKETCH_COMPARISON        } from '../subworkflows/local/sketch_comparison'
 include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
 include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny'
+include { INITIAL_QC_CHECKS        } from '../subworkflows/local/initial_qc_checks'
 
 
 /*
@@ -74,7 +75,6 @@ include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -95,64 +95,51 @@ def multiqc_report = []
 workflow PATHOGENSURVEILLANCE {
 
     // Initalize channel to accumulate information about software versions used
-    version_data = Channel.empty()
+    versions = Channel.empty()
     // Initalize messages channel with an empty list
     //     Note that at least one value is needed so that modlues that require this are run
     messages = Channel.fromList([[]])
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_csv, reference_data_csv )
-    version_data = version_data.mix(PREPARE_INPUT.out.versions)
+    versions = versions.mix(PREPARE_INPUT.out.versions)
 
-    // Run FastQC
-    //shortreads = PREPARE_INPUT.out.sample_data
-    //    .filter { sample_meta, read_paths, report_meta, ref_metas ->
-    //        sample_meta.reads_type == "illumina"
-    //    }
-    //    .map { sample_meta, read_paths, report_meta, ref_metas ->
-    //        [sample_data, read_paths]
-    //    }
-    //    .unique()
-    //FASTQC ( shortreads )
-    //version_data = version_data.mix(FASTQC.out.versions.toSortedList().map{it[0]})
+    // Initial quick analysis of sequences and references based on sketchs
+    SKETCH_COMPARISON ( PREPARE_INPUT.out.sample_data )
+    versions = versions.mix(SKETCH_COMPARISON.out.versions)
+    messages = messages.mix(SKETCH_COMPARISON.out.messages)
 
-    //// Assign closest reference for samples without a user-assigned reference
-    //ASSIGN_REFERENCES (
-    //    ch_input_parsed,
-    //    DOWNLOAD_REFERENCES.out.assem_samp_combos,
-    //    DOWNLOAD_REFERENCES.out.sequence,
-    //    DOWNLOAD_REFERENCES.out.signatures,
-    //    COARSE_SAMPLE_TAXONOMY.out.depth
-    //)
-    //version_data = version_data.mix(ASSIGN_REFERENCES.out.versions)
-    //messages = messages.mix(ASSIGN_REFERENCES.out.messages)
+    // Initial quality control of reads
+    INITIAL_QC_CHECKS ( PREPARE_INPUT.out.sample_data )
+    versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
+    messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
-    //// Call variants and create SNP-tree and minimum spanning nextwork
-    //VARIANT_ANALYSIS (
-    //    ASSIGN_REFERENCES.out.sample_data, // meta, [reads], ref_meta, reference, group_meta
-    //    PREPARE_INPUT.out.csv
-    //)
-    //version_data = version_data.mix(VARIANT_ANALYSIS.out.versions)
-    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    // Call variants and create SNP-tree and minimum spanning nextwork
+    VARIANT_ANALYSIS (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix
+    )
+    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     //// Assemble and annotate bacterial genomes
     //GENOME_ASSEMBLY (
-    //    ASSIGN_REFERENCES.out.sample_data
+    //    SKETCH_COMPARISON.out.sample_data
     //        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
     //        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
     //)
-    //version_data = version_data.mix(GENOME_ASSEMBLY.out.versions)
+    //versions = versions.mix(GENOME_ASSEMBLY.out.versions)
 
     //// Create core gene phylogeny for bacterial samples
-    //ref_gffs = ASSIGN_REFERENCES.out.context_refs
+    //ref_gffs = SKETCH_COMPARISON.out.context_refs
     //    .transpose() // group_meta, ref_meta
     //    .map { group_meta, ref_meta -> [ref_meta, group_meta] }
     //    .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // ref_meta, group_meta, gff
     //    .map { ref_meta, group_meta, gff -> [group_meta, gff] }
     //    .groupTuple() // group_meta, [gff]
-    //    .combine(ASSIGN_REFERENCES.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
+    //    .combine(SKETCH_COMPARISON.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
     //    .map { group_meta, gff_list, meta -> [meta, gff_list] }
-    //gff_and_group = ASSIGN_REFERENCES.out.sample_data  // meta, [fastq], ref_meta, reference, group_meta
+    //gff_and_group = SKETCH_COMPARISON.out.sample_data  // meta, [fastq], ref_meta, reference, group_meta
     //    .combine(GENOME_ASSEMBLY.out.gff, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff
     //    .combine(ref_gffs, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff]
     //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff], depth
@@ -161,14 +148,14 @@ workflow PATHOGENSURVEILLANCE {
     //    gff_and_group,
     //    PREPARE_INPUT.out.csv
     //)
-    //version_data = version_data.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    //versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     //messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     //// Read2tree BUSCO phylogeny for eukaryotes
-    //ref_metas = ASSIGN_REFERENCES.out.context_refs // group_meta, [ref_meta]
-    //    .combine(ASSIGN_REFERENCES.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
+    //ref_metas = SKETCH_COMPARISON.out.context_refs // group_meta, [ref_meta]
+    //    .combine(SKETCH_COMPARISON.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
     //    .map { group_meta, ref_meta_list, meta -> [meta, ref_meta_list] }
-    //busco_input = ASSIGN_REFERENCES.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
+    //busco_input = SKETCH_COMPARISON.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
     //    .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)]
     //    .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
     //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
@@ -180,7 +167,7 @@ workflow PATHOGENSURVEILLANCE {
 
     //// Save version info
     //CUSTOM_DUMPSOFTWAREVERSIONS (
-    //    version_data.unique().collectFile(name: 'collated_versions.yml')
+    //    versions.unique().collectFile(name: 'collated_versions.yml')
     //)
 
 
@@ -204,7 +191,7 @@ workflow PATHOGENSURVEILLANCE {
     //    ch_multiqc_logo.collect().ifEmpty([])
     //)
     //multiqc_report = MULTIQC.out.report.toList()
-    //version_data    = version_data.mix(MULTIQC.out.versions)
+    //versions    = versions.mix(MULTIQC.out.versions)
 
     //// Save error/waring/message info
     //RECORD_MESSAGES (
@@ -212,7 +199,7 @@ workflow PATHOGENSURVEILLANCE {
     //)
 
     //// Create main summary report
-    //report_samp_data = ASSIGN_REFERENCES.out.sample_data // meta, [reads], ref_meta, reference, group_meta
+    //report_samp_data = SKETCH_COMPARISON.out.sample_data // meta, [reads], ref_meta, reference, group_meta
     //    .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch
     //    .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch, ref_stats
     //    .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats
@@ -221,10 +208,10 @@ workflow PATHOGENSURVEILLANCE {
     //    .groupTuple() // group_meta, [ref_meta], [meta], [reads], [reference], [sendsketch], [ref_stats], [quast]
     //report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
     //    .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
-    //report_group_data = ASSIGN_REFERENCES.out.ani_matrix // group_meta, ani_matrix
+    //report_group_data = SKETCH_COMPARISON.out.ani_matrix // group_meta, ani_matrix
     //    .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, [core_phylo]
     //    .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder:true) // group_meta, ani_matrix, [core_phylo], popc
-    //    .join(ASSIGN_REFERENCES.out.mapping_ref, remainder:true) // group_meta, ani_matrix, [core_phylo], pocp, mapping_ref
+    //    .join(SKETCH_COMPARISON.out.mapping_ref, remainder:true) // group_meta, ani_matrix, [core_phylo], pocp, mapping_ref
     //report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
     //    .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
     //    .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]

@@ -46,7 +46,7 @@ workflow PREPARE_INPUT {
         .filter{ sample_meta, ref_metas -> sample_meta.ncbi_accession}
     sample_data_without_acc = sample_data
         .filter{ sample_meta, ref_metas -> ! sample_meta.ncbi_accession }
-        .map { sample_meta, ref_metas -> [sample_meta, ref_metas, sample_meta.paths]}
+        .map { sample_meta, ref_metas -> [sample_meta, ref_metas]}
     ncbi_acc_sample_key = sample_data_with_acc
         .map{ sample_meta, ref_metas -> [[id: sample_meta.ncbi_accession], sample_meta, ref_metas] }
     ncbi_acc = ncbi_acc_sample_key
@@ -55,22 +55,35 @@ workflow PREPARE_INPUT {
         }
         .unique()
     SRATOOLS_FASTERQDUMP ( ncbi_acc )
+    versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions.toSortedList().map{it[0]})
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            [sample_meta, ref_metas, reads_path]
+            sample_meta.paths = reads_path
+            [sample_meta, ref_metas]
         }
         .mix(sample_data_without_acc)
 
     // Look up approximate taxonomic classifications
     BBMAP_SENDSKETCH (
         sample_data
-            .map { sample_meta, ref_metas, reads_path ->
-                [[id: sample_meta.sample_id], reads_path]
+            .map { sample_meta, ref_metas ->
+                [[id: sample_meta.sample_id], sample_meta.paths]
             }
             .unique()
     )
     versions = versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
+
+    // Add estimated depth to sample metadata
+    sample_data = sample_data
+        .map{ sample_meta, ref_metas ->
+            [[id: sample_meta.sample_id], sample_meta, ref_metas]
+        }
+        .combine(BBMAP_SENDSKETCH.out.depth, by: 0)
+        .map{ sample_id, sample_meta, ref_metas, depth ->
+            sample_meta.sendsketch_depth = depth
+            [sample_meta, ref_metas]
+        }
 
     // Parse results of sendsketch to get list of taxa to download references for
     INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
@@ -78,10 +91,10 @@ workflow PREPARE_INPUT {
 
     // Get list of families for all samples without exclusive references defined by the user
     all_families = sample_data
-        .filter { sample_meta, ref_metas, reads_path ->
+        .filter { sample_meta, ref_metas ->
             ! ref_metas.collect{it.ref_primary_usage}.contains('exclusive')
         }
-        .map { sample_meta, ref_metas, reads_path ->
+        .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
         }
         .combine(INITIAL_CLASSIFICATION.out.families, by: 0)
@@ -107,7 +120,6 @@ workflow PREPARE_INPUT {
         params.n_ref_species,
         params.n_ref_genera
     )
-
     sample_data = PICK_ASSEMBLIES.out.stats
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
@@ -115,11 +127,10 @@ workflow PREPARE_INPUT {
         }
         .tap{ new_reference_data }
         .groupTuple(by: 0)
-        .combine(sample_data.map { sample_meta, ref_metas, reads_path -> [[id: sample_meta.sample_id], sample_meta, ref_metas, reads_path] }, by: 0)
-        .map{ sample_id, new_ref_metas, sample_meta, ref_metas, reads_path ->
-            [sample_meta, ref_metas + new_ref_metas, reads_path]
+        .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
+        .map{ sample_id, new_ref_metas, sample_meta, ref_metas ->
+            [sample_meta, ref_metas + new_ref_metas]
         }
-
     reference_data = new_reference_data
         .map{ sample_id, ref_meta -> ref_meta }
         .mix(reference_data)
@@ -133,30 +144,28 @@ workflow PREPARE_INPUT {
         }
         .unique()
     DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
-    reference_data = ref_data_with_ncbi_acc
-        .map{ ref_meta -> [[id: ref_meta.ref_ncbi_accession], ref_meta] }
-        .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
-        .map{ ncbi_acc_meta, ref_meta, ref_path ->
-            ref_meta.ref_path = ref_path
-            ref_meta
-        }
-        .mix(reference_data.filter{ ref_meta -> ! ref_meta.ref_ncbi_accession })
+    versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
     sample_data = sample_data
         .transpose(by: 1)
-        .map{ sample_meta, ref_meta, reads_path ->
-            [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta, reads_path ]
+        .map{ sample_meta, ref_meta ->
+            [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
         .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
-        .map { ncbi_acc_meta, sample_meta, ref_meta, reads_path, ref_path ->
+        .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path ->
             ref_meta.ref_path = ref_path
-            [sample_meta, ref_meta, reads_path]
+            [sample_meta, ref_meta]
         }
-        .groupTuple(by: [0, 2])
+        .groupTuple(by: 0)
 
+    // Add reference metadata list to the sample metadata
+    sample_data = sample_data
+        .map{ sample_meta, ref_metas ->
+            sample_meta.ref_metas = ref_metas
+            [sample_meta]
+        }
 
     emit:
-    sample_data       // sample_meta, [sample_paths], [ref_meta]
-    reference_data    // ref_meta, path
+    sample_data
     sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
     reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data
     versions = SAMPLESHEET_CHECK.out.versions

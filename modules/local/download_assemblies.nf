@@ -1,9 +1,11 @@
 process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
-    maxForks 5
-    errorStrategy { return task.attempt > 3 ? 'ignore' : 'retry' }
-    maxRetries 5
+    maxForks 3
+    errorStrategy { return task.attempt > 2 ? 'ignore' : 'retry' }
+    maxRetries 6
+    maxErrors 10
+    storeDir 'path_surveil_data/assemblies'
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
