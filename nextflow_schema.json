@@ -44,6 +44,13 @@
                     "description": "The location to save temporary files for processes. This is only used for some processes that produce large temporary files such as PICARD_SORTSAM.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "data_dir": {
+                    "type": "string",
+                    "default": "path_surveil_data",
+                    "format": "directory-path",
+                    "description": "The location to save downloaded files for later use. This is seperate from the cached data (usually stored in the 'work' directory), so that the cache can be cleared without having to repeat many large downloads.",
+                    "fa_icon": "fas fa-folder-open"
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",

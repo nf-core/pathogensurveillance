@@ -19,30 +19,30 @@ workflow VARIANT_ANALYSIS {
 
     // Make file with smaple IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_id], it.ref_metas] }
+        .map{ [[id: it.sample_id], [id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_id, ref_meta ->
-            [sample_id, report_id, [id: ref_meta.ref_id], ref_meta.ref_path]
+            [sample_id, report_id, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_primary_usage]
         }
         .tap{ references }
-        .collectFile() { sample_id, report_id, ref_id, ref_path ->
-            [ "${report_id.id}.csv", "${sample_id.id},${ref_id.id}\n" ]
+        .collectFile() { sample_id, report_id, ref_id, ref_path, usage ->
+            [ "${report_id.id}.csv", "${sample_id.id},${ref_id.id},${usage}\n" ]
         }
-        .map {[[id: it.getSimpleName()], it]} // TODO this recreates the group_meta, but if other feilds besids "id" are added this will not preserve those
+        .map {[[id: it.getSimpleName()], it]}
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_MAPPING_REFERENCE (
         ani_matrix.join(samp_ref_pairs),
         params.ref_min_ani
     )
-    mapping_ref_ids = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
-        .splitText( elem: 1 )
-        .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-        .splitCsv( elem: 1 )
-        .map { group_meta, sample_id, ref_id ->
-            [[id: sample_id], group_meta, [id: ref_id]]
-        }
-        .join(references)
+    //mapping_ref_ids = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
+    //    .splitText( elem: 1 )
+    //    .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
+    //    .splitCsv( elem: 1 )
+    //    .map { group_meta, sample_id, ref_id ->
+    //        [[id: sample_id], group_meta, [id: ref_id]]
+    //    }
+    //    .join(references)
 
     //// Cutting up long reads
     //longreads = sample_data

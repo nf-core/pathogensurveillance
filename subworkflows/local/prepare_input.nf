@@ -161,7 +161,7 @@ workflow PREPARE_INPUT {
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
             sample_meta.ref_metas = ref_metas
-            [sample_meta]
+            sample_meta
         }
 
     emit:

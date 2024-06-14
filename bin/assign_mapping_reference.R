@@ -1,91 +1,76 @@
 #!/usr/bin/env Rscript
 
-
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/68/ea901183107b8c018617efda5b9fa7/Brady_comp.csv',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/tmp/09/5d1306ac2147a3b26630de2037d38b/Brady.csv',
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/96/ff75e7540756721ef4a41543c19b9d/other_comp.csv',
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/96/ff75e7540756721ef4a41543c19b9d/other.csv',
 #     'deleteme.csv',
 #     '0.9'
 # )
 args <- as.list(args)
 names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani")
 ani_matrix <- read.csv(args$ani_matrix, check.names = FALSE)
-rownames(ani_matrix) <- as.character(colnames(ani_matrix)) #
-samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "reference"))
-samp_ref_pairs$sample_id <- as.character(samp_ref_pairs$sample_id) #
+rownames(ani_matrix) <- as.character(colnames(ani_matrix))
+samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "reference_id", "usage"))
+samp_ref_pairs$sample_id <- as.character(samp_ref_pairs$sample_id) 
 start_min_ani <- as.numeric(args$start_min_ani) # The minimum ANI for a reference to be assigned to a samples
 end_min_ani <- max(c(0, start_min_ani - 0.3)) # How low the minimum can go if no samples can be assigned
 ani_interval <- 0.05 # How much the minimum ANI threshold changes each time it is decreased
 
-if (all(! is.na(samp_ref_pairs$reference))) {
-    output <- samp_ref_pairs
-} else {
-    # Classify samples and references
-    sample_ids <- samp_ref_pairs$sample_id
-    user_ref_ids <- unique(samp_ref_pairs$reference[! is.na(samp_ref_pairs$reference)])
-    down_ref_ids <- colnames(ani_matrix)[! colnames(ani_matrix) %in% c(sample_ids, user_ref_ids)]
-
-    # Subset ANI matrix for samples without user-defined references
-    refless_sample_ids <- samp_ref_pairs$sample_id[is.na(samp_ref_pairs$reference)]
-    sample_ani <- ani_matrix[refless_sample_ids, c(user_ref_ids, down_ref_ids)]
-
-    # Initialize empty data frame to hold the final assignments
-    output <- data.frame(sample_id = character(0), reference = character(0))
-
-    # Function to assign references given a minimum ANI
-    assign_ref <- function(min_ani, table) {
-        output <- NULL  # Reinitialize output here
-        tf_table = table >= min_ani
-        get_ref_max_samp <- function(ids) {
-            n_samps <- apply(tf_table[, ids, drop = FALSE], MARGIN = 2, sum, na.rm = TRUE)
-            if (max(n_samps) > 0) {
-                best_ref <- names(n_samps)[which.max(n_samps)]
-                samples_assigned <- rownames(tf_table[tf_table[, best_ref], best_ref, drop = FALSE])
-                if (length(samples_assigned) > 0) {
-                    return(data.frame(sample_id = samples_assigned, reference = best_ref))
-                }
-            }
-            return(NULL)  # Return NULL if no valid data.frame can be created
-        }
-        if (length(user_ref_ids) > 0) {
-            output <- get_ref_max_samp(user_ref_ids)
-        }
-        if (is.null(output)) {
-            output <- get_ref_max_samp(down_ref_ids)
-        }
-        return(output)
+# If 'exclusive'/ 'required' references are present for a sample, remove all other references. Also remove 'excluded' references
+samp_ref_pairs <- do.call(rbind, lapply(split(samp_ref_pairs, samp_ref_pairs$sample_id), function(sample_data) {
+    if (any(sample_data$usage == 'exclusive')) {
+        sample_data <- sample_data[sample_data$usage == 'exclusive', , drop = FALSE]
     }
-
-    # Main loop for assignment based on given min_ani
-    min_ani <- start_min_ani
-    while (nrow(sample_ani) > 0 & min_ani >= end_min_ani) {
-        # print(paste("Number of remaining samples: ", nrow(sample_ani)))
-        rows_to_add <- assign_ref(min_ani, sample_ani)
-        if (!is.null(rows_to_add) && nrow(rows_to_add) > 0) {
-            sample_ani <- sample_ani[! rownames(sample_ani) %in% rows_to_add$sample_id, ]
-            output <- rbind(output, rows_to_add)
-        } else {
-            min_ani <- min_ani - ani_interval
-            # print(paste("Reducing min_ani to: ", min_ani))
-        }
+    if (any(sample_data$usage == 'required')) {
+        sample_data <- sample_data[sample_data$usage == 'required', , drop = FALSE]
     }
+    excluded_ids <- sample_data$sample_id[sample_data$usage == 'excluded']
+    sample_data <- sample_data[! sample_data$usage %in% excluded_ids, , drop = FALSE]
+    return(sample_data)
+}))
+rownames(samp_ref_pairs) <- NULL
 
-    # If no reference found, fill with NAs
-    if (nrow(output) == 0) {
-        output <- data.frame(sample_id = refless_sample_ids, reference = rep(NA_character_, length(refless_sample_ids)))
+# Function to assign references given a minimum ANI
+reference_ids <- unique(samp_ref_pairs$reference_id)
+assign_ref <- function(sample_ids, min_ani) {
+    valid_samples_for_ref <- lapply(reference_ids, function(ref_id) {
+        good_ani <- ani_matrix[ref_id, sample_ids] >= min_ani
+        can_use_ref <- unlist(lapply(sample_ids, function(sample_id) {
+            any(samp_ref_pairs$sample_id == sample_id & samp_ref_pairs$reference_id == ref_id)
+        }))
+        sample_ids[good_ani & can_use_ref]
+    })
+    names(valid_samples_for_ref) <- reference_ids
+    n_samples <- unlist(lapply(valid_samples_for_ref, length))
+    if (max(n_samples) == 0) {
+        return(NULL)
     }
+    best_refs <- reference_ids[n_samples == max(n_samples)]
+    best_ref <- best_refs[which.max(rowMeans(ani_matrix[best_refs, sample_ids, drop = FALSE]))]
+    return(data.frame(sample_id = valid_samples_for_ref[[best_ref]], reference_id = best_ref))
+}
 
-    # Combine with samples having user-defined references
-    output <- rbind(output, samp_ref_pairs[!is.na(samp_ref_pairs$reference), ])
-    rownames(output) <- output$sample_id
+# Main loop for assignment based on given min_ani
+unassigned_sample_ids <- unique(samp_ref_pairs$sample_id)
+output <- data.frame(sample_id = character(0), reference_id = character(0))
+min_ani <- start_min_ani
+while (length(unassigned_sample_ids) > 0 & min_ani >= end_min_ani) {
+    # print(paste("Number of remaining samples: ", length(unassigned_sample_ids)))
+    rows_to_add <- assign_ref(unassigned_sample_ids, min_ani)
+    if (! is.null(rows_to_add) && nrow(rows_to_add) > 0) {
+        unassigned_sample_ids <- unassigned_sample_ids[! unassigned_sample_ids %in% rows_to_add$sample_id]
+        output <- rbind(output, rows_to_add)
+    } else {
+        min_ani <- min_ani - ani_interval
+        # print(paste("Reducing min_ani to: ", min_ani))
+    }
+}
 
-    # Sort output to match order of input samples
-    output <- output[samp_ref_pairs$sample_id, ]
-
-    # Convert NAs to a string not likely to be confused with a real ref ID
-    output$reference[is.na(output$reference)] <- "__NULL__"
+# If no reference found, fill with NAs
+if (length(unassigned_sample_ids) > 0) {
+    output <- rbind(output, data.frame(sample_id = unassigned_sample_ids, reference_id = "__NULL__"))
 }
 
 # Write output to file

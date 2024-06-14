@@ -18,7 +18,7 @@ workflow SKETCH_COMPARISON {
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
         sample_data
-            .map { [[id: it.sample_id[0]], it.paths[0], it.sendsketch_depth[0]] }
+            .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
             .unique(),
         params.sketch_max_depth
     )
@@ -38,7 +38,7 @@ workflow SKETCH_COMPARISON {
 
     // Create signature for each reference genome
     references = sample_data
-        .map{ it.ref_metas }
+        .map{ [it.ref_metas] }
         .transpose(by: 0)
         .map{ ref_meta -> [[id: ref_meta[0].ref_id], ref_meta[0].ref_path] }
         .unique()
@@ -47,6 +47,7 @@ workflow SKETCH_COMPARISON {
     )
     versions = versions.mix(SOURMASH_SKETCH_GENOME.out.versions)
 
+    // Compare all genomes/samples to eachother to create an ANI matrix
     grouped_sample_sigs = sample_data
         .map { [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(SOURMASH_SKETCH_READS.out.signatures, by:0)
@@ -62,37 +63,6 @@ workflow SKETCH_COMPARISON {
     grouped_sigs = grouped_sample_sigs
         .mix(grouped_ref_sigs)
         .groupTuple()
-
-    //// Make list of user-defined reference signatures for each group
-    //user_sigs = sample_data
-    //    .map { [it[2], it[4]] } // ref_meta, group_meta
-    //    .combine(SOURMASH_SKETCH_GENOME.out.signatures, by: 0) // ref_meta, group_meta, sig
-    //    .map { it[1..2] }  // [group_meta, sig], possibly duplicated
-    //    .unique()
-    //    .groupTuple() // group_meta, [sig]
-
-    //// Make list of sample signatures for each group
-    //sample_sigs = sample_data
-    //    .combine(SOURMASH_SKETCH_READS.out.signatures, by: 0)
-    //    .map { [it[4], it[5]] }
-    //    .groupTuple() // group_meta, [sig]
-
-    //// Make list of downloaded reference genome signatures for each group
-    //assem_sigs = assem_samp_combos
-    //    .combine(signatures, by: 0)
-    //    .map { [it[1], it[0], it[2]] } // meta, assem, sig
-    //    .combine(sample_data, by: 0) // meta, assem, sig, fastq, ref_meta, ref, group_meta
-    //    .map { [it[6], it[2]] } // group_meta, sig
-    //    .groupTuple() // group_meta, [sig]
-    //    .map { [it[0], it[1].unique()] }
-
-    //// Combine all signatures for each group
-    //group_sigs = sample_sigs // group_meta, sample_sigs
-    //    .join(assem_sigs) // group_meta, sample_sigs, assem_sigs
-    //    .join(user_sigs, remainder: true) // group_meta, sample_sigs, assem_sigs, user_sigs
-    //    .map { [it[0], it[1] + it[2] + (it[3] != null ? it[3] : [])] }
-
-    // Compare all genomes/samples to eachother to create an ANI matrix
     SOURMASH_COMPARE (
         grouped_sigs,
         [], // file_list (optional)
