@@ -8,17 +8,60 @@ include { SUBSET_CORE_GENES         } from '../../modules/local/subset_core_gene
 include { RENAME_CORE_GENE_HEADERS  } from '../../modules/local/rename_core_gene_headers'
 include { CALCULATE_POCP            } from '../../modules/local/calculate_pocp'
 include { FILES_IN_DIR              } from '../../modules/local/files_in_dir.nf'
+include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
 
 workflow CORE_GENOME_PHYLOGENY {
 
     take:
-    sample_gff // [ val(meta), file(sample_gffs), val(group_meta), [file(ref_gffs)] ]
-    ch_samplesheet // channel: path
+    sample_data
+    //sample_gff // TODO: remove [ val(meta), file(sample_gffs), val(group_meta), [file(ref_gffs)] ]
+    //ch_samplesheet // channel: path TODO: try to remove to make cacheing work better.
+    ani_matrix // report_group_id, ani_matrix
 
     main:
 
-    ch_versions = Channel.empty()
+    versions = Channel.empty()
     messages = Channel.empty()
+
+    // Make file with sample IDs and user-defined references or NA for each group
+    samp_ref_pairs = sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids], it.ref_metas] }
+        .transpose(by: 2)
+        .map{ sample_meta, report_meta, ref_meta ->
+            [sample_meta, report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_primary_usage]
+        }
+        .tap{ references }
+        .collectFile() { sample_meta, report_meta, ref_id, ref_path, usage ->
+            [ "${report_meta.id}.csv", "${sample_meta.id},${ref_id.id},${usage}\n" ]
+        }
+        .map {[[id: it.getSimpleName()], it]}
+
+    // Assign referneces to groups for context in phylogenetic analyses
+    ASSIGN_CONTEXT_REFERENCES (
+        ani_matrix.join(samp_ref_pairs),
+        params.n_ref_closest,
+        params.n_ref_context
+    )
+    sample_data_with_refs = ASSIGN_CONTEXT_REFERENCES.out.samp_ref_pairs
+        .splitText( elem: 1 )
+        .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
+        .splitCsv( elem: 1 )
+        .map { report_meta, csv_contents ->
+            [[id: csv_contents[0]], report_meta, [id: csv_contents[1]]]
+        }
+        .join(references, by: 0..2)
+        .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type] }, by: 0..1)
+        .branch { // Remove any samples that do not have reference information
+            filtered: it[2] != null
+            no_ref: it[2] == null
+        }
+
+    // Report samples that do not have reference information
+    no_ref_warnings = sample_data_with_refs.no_ref
+        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            [sample_meta, report_meta, null, "CORE_GENOME_PHYLOGENY", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."]
+        }
+    messages = messages.mix(no_ref_warnings)
 
     // group samples by reference genome
     ch_gff_grouped = sample_gff
@@ -26,7 +69,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { [it[2], it[1] + it[3].flatten().unique()] } // [ val(group_meta), [ gff ] ]
 
     PIRATE ( ch_gff_grouped )
-    ch_versions = ch_versions.mix(PIRATE.out.versions.first())
+    versions = versions.mix(PIRATE.out.versions.first())
 
     // Check that Pirate worked and report
     good_pirate_results = PIRATE.out.results
@@ -37,7 +80,7 @@ workflow CORE_GENOME_PHYLOGENY {
     messages = messages.mix(pirate_failed)
 
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
-    ch_versions = ch_versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
+    versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
 
 
     // Calculate POCP from presence/absence matrix of genes
@@ -47,7 +90,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Extract sequences of all genes (does not align, contrary to current name)
     ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
-    ch_versions = ch_versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
+    versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
 
     // Rename FASTA file headers to start with just sample ID for use with IQTREE
     RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
@@ -77,11 +120,11 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
     MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
-    ch_versions = ch_versions.mix(MAFFT_SMALL.out.versions.first())
+    versions = versions.mix(MAFFT_SMALL.out.versions.first())
 
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
-    ch_versions = ch_versions.mix(IQTREE2_CORE.out.versions.first())
+    versions = versions.mix(IQTREE2_CORE.out.versions.first())
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple() // group_meta, [trees]
@@ -100,7 +143,7 @@ workflow CORE_GENOME_PHYLOGENY {
     pirate_aln = pirate_aln              // group_meta, align_fasta
     phylogeny  = phylogeny               // group_meta, [trees]
     pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
-    versions   = ch_versions             // versions.yml
+    versions   = versions             // versions.yml
     messages   = messages                // meta, group_meta, ref_meta, workflow, level, message
 
 }

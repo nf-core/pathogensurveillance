@@ -71,24 +71,6 @@ workflow SKETCH_COMPARISON {
     )
     versions = versions.mix(SOURMASH_COMPARE.out.versions)
 
-    //// Make file with smaple IDs and user-defined references or NA for each group
-    //samp_ref_pairs = sample_data
-    //    .collectFile() { item -> [ "${item[4].id}.csv", "${item[0].id},${item[2].id ?: 'NA'}\n" ] }
-    //    .map {[[id: it.getSimpleName()], it]} // TODO this recreates the group_meta, but if other feilds besids "id" are added this will not preserve those
-
-    //// For each group, assign references for variant calling if not user-defined
-    //ASSIGN_MAPPING_REFERENCE (
-    //    SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
-    //    params.ref_min_ani
-    //)
-
-    //// Assign referneces to groups for context in phylogenetic analyses
-    //ASSIGN_CONTEXT_REFERENCES (
-    //    SOURMASH_COMPARE.out.csv.join(samp_ref_pairs),
-    //    params.n_ref_closest,
-    //    params.n_ref_context
-    //)
-
     //// Convert CSV output back to nextflow channels
     //mapping_ref_ids = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
     //    .splitText( elem: 1 )

@@ -122,48 +122,28 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(VARIANT_ANALYSIS.out.versions)
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
-    //// Assemble and annotate bacterial genomes
-    //GENOME_ASSEMBLY (
-    //    SKETCH_COMPARISON.out.sample_data
-    //        .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)
-    //        .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by: 0)
-    //)
-    //versions = versions.mix(GENOME_ASSEMBLY.out.versions)
+    // Assemble and annotate bacterial genomes
+    GENOME_ASSEMBLY (
+        PREPARE_INPUT.out.sample_data
+    )
+    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
+    messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
     //// Create core gene phylogeny for bacterial samples
-    //ref_gffs = SKETCH_COMPARISON.out.context_refs
-    //    .transpose() // group_meta, ref_meta
-    //    .map { group_meta, ref_meta -> [ref_meta, group_meta] }
-    //    .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // ref_meta, group_meta, gff
-    //    .map { ref_meta, group_meta, gff -> [group_meta, gff] }
-    //    .groupTuple() // group_meta, [gff]
-    //    .combine(SKETCH_COMPARISON.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
-    //    .map { group_meta, gff_list, meta -> [meta, gff_list] }
-    //gff_and_group = SKETCH_COMPARISON.out.sample_data  // meta, [fastq], ref_meta, reference, group_meta
-    //    .combine(GENOME_ASSEMBLY.out.gff, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff
-    //    .combine(ref_gffs, by: 0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff]
-    //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // meta, [fastq], ref_meta, reference, group_meta, gff, [ref_gff], depth
-    //    .map { [it[0], it[5], it[4], it[6], it[7]] } // meta, gff, group_meta, [ref_gff], depth
     //CORE_GENOME_PHYLOGENY (
-    //    gff_and_group,
-    //    PREPARE_INPUT.out.csv
+    //    PREPARE_INPUT.out.sample_data,
+    //    SKETCH_COMPARISON.out.ani_matrix
     //)
     //versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     //messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     //// Read2tree BUSCO phylogeny for eukaryotes
-    //ref_metas = SKETCH_COMPARISON.out.context_refs // group_meta, [ref_meta]
-    //    .combine(SKETCH_COMPARISON.out.sample_data.map{ meta, fastq, ref_meta, ref, group_meta -> [group_meta, meta] }, by: 0)
-    //    .map { group_meta, ref_meta_list, meta -> [meta, ref_meta_list] }
-    //busco_input = SKETCH_COMPARISON.out.sample_data  // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)
-    //    .combine(ref_metas, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)]
-    //    .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom)
-    //    .combine(COARSE_SAMPLE_TAXONOMY.out.depth, by:0) // val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
-    //    .map { it[0..1] + it[4..7] } // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
     //BUSCO_PHYLOGENY (
-    //    busco_input,
-    //    DOWNLOAD_REFERENCES.out.sequence
+    //    PREPARE_INPUT.out.sample_data,
+    //    SKETCH_COMPARISON.out.ani_matrix
     //)
+    //versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
+    //messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     //// Save version info
     //CUSTOM_DUMPSOFTWAREVERSIONS (

@@ -8,7 +8,7 @@ process SAMPLESHEET_CHECK {
     conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
-        'quay.io/biocontainers/r-entrez:1.1.0--r3.4.1_0' }"
+        'docker.io/zacharyfoster/rentrez:0.1' }"
 
     input:
     path sample_csv

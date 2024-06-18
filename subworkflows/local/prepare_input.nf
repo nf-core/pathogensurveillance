@@ -1,13 +1,13 @@
 //
 // Check input samplesheets and convert to channels
 //
-include { BBMAP_SENDSKETCH  } from '../../modules/local/sendsketch'
-include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
-include { SRATOOLS_FASTERQDUMP        } from '../../modules/local/fasterqdump'
+include { BBMAP_SENDSKETCH       } from '../../modules/local/sendsketch'
+include { SAMPLESHEET_CHECK      } from '../../modules/local/samplesheet_check'
+include { SRATOOLS_FASTERQDUMP   } from '../../modules/local/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../modules/local/initial_classification'
-include { DOWNLOAD_ASSEMBLIES                       } from '../../modules/local/download_assemblies'
-include { FIND_ASSEMBLIES                           } from '../../modules/local/find_assemblies'
-include { PICK_ASSEMBLIES                           } from '../../modules/local/pick_assemblies'
+include { DOWNLOAD_ASSEMBLIES    } from '../../modules/local/download_assemblies'
+include { FIND_ASSEMBLIES        } from '../../modules/local/find_assemblies'
+include { PICK_ASSEMBLIES        } from '../../modules/local/pick_assemblies'
 
 workflow PREPARE_INPUT {
     take:
@@ -74,20 +74,22 @@ workflow PREPARE_INPUT {
     )
     versions = versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
 
-    // Add estimated depth to sample metadata
+    // Parse results of sendsketch to get list of taxa to download references for
+    INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
+    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions.toSortedList().map{it[0]})
+
+    // Add estimated depth and kingdom to sample metadata
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta, ref_metas]
         }
         .combine(BBMAP_SENDSKETCH.out.depth, by: 0)
-        .map{ sample_id, sample_meta, ref_metas, depth ->
+        .combine(INITIAL_CLASSIFICATION.out.kingdom, by: 0)
+        .map{ sample_id, sample_meta, ref_metas, depth, kingdom ->
             sample_meta.sendsketch_depth = depth
+            sample_meta.kingdom = kingdom
             [sample_meta, ref_metas]
         }
-
-    // Parse results of sendsketch to get list of taxa to download references for
-    INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
-    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions.toSortedList().map{it[0]})
 
     // Get list of families for all samples without exclusive references defined by the user
     all_families = sample_data
@@ -151,8 +153,10 @@ workflow PREPARE_INPUT {
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
         .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
-        .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path ->
+        .combine(DOWNLOAD_ASSEMBLIES.out.gff, by: 0)
+        .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
             ref_meta.ref_path = ref_path
+            ref_meta.gff = gff_path
             [sample_meta, ref_meta]
         }
         .groupTuple(by: 0)

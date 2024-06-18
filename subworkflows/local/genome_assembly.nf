@@ -12,50 +12,58 @@ include { FLYE as FLYE_PACBIO   } from '../../modules/nf-core/flye/main'
 workflow GENOME_ASSEMBLY {
 
     take:
-    ch_input // meta, [reads], ref_meta, reference, group_meta, kingdom, depth
+    sample_data
 
     main:
 
-    ch_versions = Channel.empty()
-    ch_input_filtered = ch_input
-        .filter { it[5] == "Bacteria" }
-    ch_reads = ch_input_filtered
-        .map { [it[0], it[1], it[8]] }
+    versions = Channel.empty()
+    messages = Channel.empty()
+    filtered_input = sample_data
+        .filter {it.kingdom == "Bacteria"}
+        .map{ [[id: it.sample_id], it.paths, it.sendsketch_depth, it.sequence_type] }
+        .unique()
+    reads = filtered_input
+        .map { sample_meta, read_paths, kingdom, depth, seq_type ->
+            [sample_meta, read_paths, depth]
+        }
         .unique()
 
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        ch_reads,
+        reads,
         params.sketch_max_depth
     )
-    ch_versions = ch_versions.mix(SUBSET_READS.out.versions.first())
+    versions = versions.mix(SUBSET_READS.out.versions.first())
     subset_reads = SUBSET_READS.out.reads
-        .join(ch_input_filtered) // meta, [subset_reads], [reads], ref_meta, reference, group_meta, kingdom, depth
+        .join(filtered_input) // meta, [subset_reads], [reads], depth, seq_type
+        .map { sample_meta, subset_read_paths, read_paths, depth, seq_type ->
+            [sample_meta, subset_read_paths, seq_type]
+        }
 
     shortreads = subset_reads
-        .filter {it[0].id == "illumina"}
-        .map { it[0..1] } // meta, [subset_reads]
-    FASTP (shortreads, [], false, false )
-    ch_versions = ch_versions.mix(FASTP.out.versions.first())
+        .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" }
+        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
+    FASTP( shortreads, [], false, false )
+    versions = versions.mix(FASTP.out.versions.first())
 
-    SPADES (
-        FASTP.out.reads.map { [it[0], it[1], [], []] }, // val(meta), path(illumina), path(pacbio), path(nanopore)
+    SPADES(
+        FASTP.out.reads.map{ sample_meta, read_paths -> [sample_meta, reads_paths, [], []] },
         [], // val yml
         []  // val hmm
     )
-    ch_versions = ch_versions.mix(SPADES.out.versions.first())
+    versions = versions.mix(SPADES.out.versions.first())
 
     nanopore = subset_reads
-        .filter {it[0].reads_type == "nanopore"}
-        .map { it[0..1] }
+        .filter{ sample_meta, read_paths, seq_type -> seq_type == "nanopore"}
+        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_NANOPORE (
         nanopore,
         "--nano-hq"
     )
 
     pacbio = subset_reads
-        .filter {it[0].reads_type == "pacbio"}
-        .map { it[0..1] }
+        .filter{ sample_meta, read_paths, seq_type -> seq_type == "pacbio"}
+        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_PACBIO (
         pacbio,
         "--pacbio-hifi"
@@ -64,17 +72,17 @@ workflow GENOME_ASSEMBLY {
     FILTER_ASSEMBLY (
         SPADES.out.scaffolds
     )
-    ch_versions = ch_versions.mix(FILTER_ASSEMBLY.out.versions.first())
+    versions = versions.mix(FILTER_ASSEMBLY.out.versions.first())
 
     filtered_assembly = FILTER_ASSEMBLY.out.filtered
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
-    ch_ref_grouped = ch_input_filtered
-        .combine(filtered_assembly, by: 0) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
-        .groupTuple(by: 2) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
-        .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
-    QUAST ( ch_ref_grouped )
-    ch_versions = ch_versions.mix(QUAST.out.versions.first())
+    //ch_ref_grouped = filtered_input
+    //    .combine(filtered_assembly, by: 0) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
+    //    .groupTuple(by: 2) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
+    //    .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
+    //QUAST ( ch_ref_grouped )
+    //versions = versions.mix(QUAST.out.versions.first())
 
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
@@ -83,14 +91,14 @@ workflow GENOME_ASSEMBLY {
             bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
             UNTAR( bakta_db_tar )
             bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
-            ch_versions = ch_versions.mix(UNTAR.out.versions)
+            versions = versions.mix(UNTAR.out.versions)
         } else {
             bakta_db = Channel.fromPath(params.bakta_db).first()
         }
     } else if (params.download_bakta_db){
         BAKTA_BAKTADBDOWNLOAD()
-        bakta_db  = BAKTA_BAKTADBDOWNLOAD.out.db
-        ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
+        bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+        versions = versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
     }
 
     // Run bakta
@@ -100,14 +108,14 @@ workflow GENOME_ASSEMBLY {
         [], // proteins (optional)
         [] // prodigal_tf (optional)
     )
-    ch_versions = ch_versions.mix(BAKTA_BAKTA.out.versions.first())
+    versions = versions.mix(BAKTA_BAKTA.out.versions.first())
 
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]
     gff       = BAKTA_BAKTA.out.gff
     scaffolds = filtered_assembly
-    quast     = QUAST.out.results
-
-    versions = ch_versions                     // channel: [ versions.yml ]
+    //quast     = QUAST.out.results
+    versions = versions
+    messages = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 
