@@ -1,11 +1,11 @@
-include { REFERENCE_INDEX        } from './reference_index'  // this is being called from subworkflows
-include { ALIGN_READS            } from './align_reads'
-include { CALL_VARIANTS          } from './call_variants'
-include { IQTREE2 as IQTREE2_SNP } from '../../modules/local/iqtree2'
-include { VCF_TO_TAB             } from '../../modules/local/vcf_to_tab'
-include { VCF_TO_SNPALN          } from '../../modules/local/vcf_to_snpaln'
-include { SEQKIT_SLIDING         } from '../../modules/nf-core/seqkit/sliding/main'
-include { ASSIGN_MAPPING_REFERENCE                    } from '../../modules/local/assign_mapping_reference'
+include { REFERENCE_INDEX          } from './reference_index'  // this is being called from subworkflows
+include { ALIGN_READS              } from './align_reads'
+include { CALL_VARIANTS            } from './call_variants'
+include { IQTREE2 as IQTREE2_SNP   } from '../../modules/local/iqtree2'
+include { VCF_TO_TAB               } from '../../modules/local/vcf_to_tab'
+include { VCF_TO_SNPALN            } from '../../modules/local/vcf_to_snpaln'
+include { SEQKIT_SLIDING           } from '../../modules/nf-core/seqkit/sliding/main'
+include { ASSIGN_MAPPING_REFERENCE } from '../../modules/local/assign_mapping_reference'
 
 workflow VARIANT_ANALYSIS {
 
@@ -17,7 +17,7 @@ workflow VARIANT_ANALYSIS {
     versions = Channel.empty()
     messages = Channel.empty()
 
-    // Make file with smaple IDs and user-defined references or NA for each group
+    // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 2)
