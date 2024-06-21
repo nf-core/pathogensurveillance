@@ -18,13 +18,13 @@ workflow INITIAL_QC_CHECKS {
     FASTQC ( shortreads )
     versions = versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
 
-    //// Run Nanoplot
-    //nanopore_reads = sample_data
-    //    .filter { it.sequence_type == "nanopore" }
-    //    .map { [[id: it.sample_id], it.paths] }
-    //    .unique()
-    //NANOPLOT ( nanopore_reads )
-    //versions = versions.mix(NANOPLOT.out.versions.toSortedList().map{it[0]})
+    // Run Nanoplot
+    nanopore_reads = sample_data
+        .filter { it.sequence_type == "nanopore" || it.sequence_type == "pacbio" }
+        .map { [[id: it.sample_id], it.paths] }
+        .unique()
+    NANOPLOT ( nanopore_reads )
+    versions = versions.mix(NANOPLOT.out.versions.toSortedList().map{it[0]})
 
     emit:
     versions      = versions                                // versions

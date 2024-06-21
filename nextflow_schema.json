@@ -66,13 +66,20 @@
                 "bakta_db": {
                     "type": "string",
                     "description": "The path to the Bakta database folder. This or --download_bakta_db must be included.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "format": "directory-path"
                 },
                 "download_bakta_db": {
                     "type": "boolean",
                     "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
                     "fa_icon": "fas fa-download"
-                }
+                },
+                "bakta_db_type": {
+                    "type": "string",
+                    "pattern": "light|full",
+                    "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
+                    "default":"light"
+                },
             }
         },
         "analysis_parameters": {
@@ -215,7 +222,7 @@
                 "max_memory": {
                     "type": "string",
                     "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
+                    "default": "64.GB",
                     "fa_icon": "fas fa-memory",
                     "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
                     "hidden": true,
