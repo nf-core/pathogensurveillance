@@ -20,7 +20,7 @@ workflow GENOME_ASSEMBLY {
     messages = Channel.empty()
     filtered_input = sample_data
         .filter {it.kingdom == "Bacteria"}
-        .map{ [[id: it.sample_id], it.paths, it.sendsketch_depth, it.sequence_type] }
+        .map{ [[id: it.sample_id], it.paths, it.kingdom, it.sendsketch_depth, it.sequence_type] }
         .unique()
     reads = filtered_input
         .map { sample_meta, read_paths, kingdom, depth, seq_type ->
@@ -36,7 +36,7 @@ workflow GENOME_ASSEMBLY {
     versions = versions.mix(SUBSET_READS.out.versions.first())
     subset_reads = SUBSET_READS.out.reads
         .join(filtered_input) // meta, [subset_reads], [reads], depth, seq_type
-        .map { sample_meta, subset_read_paths, read_paths, depth, seq_type ->
+        .map { sample_meta, subset_read_paths, read_paths, kingdom, depth, seq_type ->
             [sample_meta, subset_read_paths, seq_type]
         }
 
@@ -47,7 +47,7 @@ workflow GENOME_ASSEMBLY {
     versions = versions.mix(FASTP.out.versions.first())
 
     SPADES(
-        FASTP.out.reads.map{ sample_meta, read_paths -> [sample_meta, reads_paths, [], []] },
+        FASTP.out.reads.map{ sample_meta, read_paths -> [sample_meta, read_paths, [], []] },
         [], // val yml
         []  // val hmm
     )
@@ -77,6 +77,7 @@ workflow GENOME_ASSEMBLY {
     filtered_assembly = FILTER_ASSEMBLY.out.filtered
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
+        .unique()
     //ch_ref_grouped = filtered_input
     //    .combine(filtered_assembly, by: 0) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
     //    .groupTuple(by: 2) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb

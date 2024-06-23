@@ -33,8 +33,8 @@ workflow ALIGN_READS {
         .combine(SUBSET_READS.out.reads, by:0) // ref_samp_meta, meta, [reads], ref_meta, reference, reference_index, bam_index, [reads_subset]
         .map { it[0..1] + [it[7]] + it[3..6] } // ref_samp_meta, meta, [reads_subset], ref_meta, reference, reference_index, bam_index
 
-    ch_reads     = samp_ref_combo2
-        .map { [it[0], it[2].size() > 2 ? it[2][0..1] : it[2]] } // NOTE: not sure why there are sometimes more than 2 read files. Might need to change once long reads are fullly supported
+    ch_reads = samp_ref_combo2
+        .map { [it[0], it[2] instanceof Collection && it[2].size() > 2 ? it[2][0..1] : it[2]] } // NOTE: not sure why there are sometimes more than 2 read files. Might need to change once long reads are fullly supported
     ch_bwa_index = samp_ref_combo2.map { [it[0], it[6]] }
     BWA_MEM ( ch_reads, ch_bwa_index, false )
     ch_versions = ch_versions.mix(BWA_MEM.out.versions.toSortedList().map{it[0]})

@@ -8,9 +8,9 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/95/2b6877fb33c7402333bfbfef786241/all_comp.csv', 
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/95/2b6877fb33c7402333bfbfef786241/all.csv',
-#     '3', 
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/8b/c258ddf77ae0ad38e0fd0669434543/all_comp.csv',
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/8b/c258ddf77ae0ad38e0fd0669434543/all.csv',
+#     '3',
 #     '5',
 #     'all_context_refs.csv'
 # )
@@ -22,9 +22,20 @@ n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
 
 # Read sample data with user-defined references
-sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references'))
-sample_ids <- sample_data$sample_id
-ref_ids <- rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids]
+sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
+sample_ids <- unique(sample_data$sample_id)
+ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
+
+# If 'exclusive' references are present for a sample, remove all other references. Also remove 'excluded' references
+sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), function(table) {
+    if (any(table$usage == 'exclusive')) {
+        table <- table[table$usage == 'exclusive', , drop = FALSE]
+    }
+    excluded_ids <- table$sample_id[table$usage == 'excluded']
+    table <- table[! table$usage %in% excluded_ids, , drop = FALSE]
+    return(table)
+}))
+rownames(sample_data) <- NULL
 
 # Scale ANI values for each sample
 rescale <- function(x) {
@@ -34,10 +45,14 @@ ani_ref_v_smaples <- ani_matrix[ref_ids, sample_ids]
 ani_ref_v_smaples[ani_ref_v_smaples == 0] <- NA
 ani_scaled <- apply(ani_ref_v_smaples, 2, rescale)
 
-# Initialize list of selected references with closest references
-selected_refs <- unique(unlist(lapply(sample_ids, function(id) {
+# Initialize list of selected references with closest references and required references
+closest_refs <- unlist(lapply(sample_ids, function(id) {
     rownames(ani_scaled)[tail(order(ani_scaled[, id]), n = n_refs_closest)]
-})))
+}))
+required_refs <- unlist(lapply(sample_ids, function(id) {
+    sample_data$references[sample_data$sample_id == id & sample_data$usage == 'required']
+}))
+selected_refs <- unique(c(closest_refs, required_refs))
 
 # Initialized data.frame of bins that need a reference
 bins <- seq(from = 0, to = 1, length.out = n_refs_contextual + 1)

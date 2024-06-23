@@ -47,7 +47,30 @@ workflow VARIANT_ANALYSIS {
         .branch { // Remove any samples that do not have reference information
             filtered: it[2] != null
             no_ref: it[2] == null
+        } // sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type
+
+    // Cutting up long reads
+    longreads = sample_data_with_refs.filtered
+        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            sequence_type == "nanopore" || sequence_type == "pacbio"
         }
+    SEQKIT_SLIDING (
+        longreads.map { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            [sample_meta, read_paths]
+        }
+        .unique()
+    )
+    chopped_reads = SEQKIT_SLIDING.out.fastx
+        .combine(longreads, by: 0)
+        .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            [sample_meta, report_meta, ref_meta, ref_path, usage, chopped_reads, sequence_type]
+        }
+    filtered_input = sample_data_with_refs.filtered
+        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            sequence_type == "illumina"
+        }
+        .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, group_meta
+
 
     // Report samples that do not have reference information
     no_ref_warnings = sample_data_with_refs.no_ref
@@ -58,7 +81,7 @@ workflow VARIANT_ANALYSIS {
 
     // Create indexes for each reference
     REFERENCE_INDEX (
-        sample_data_with_refs.filtered
+        filtered_input
             .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
                 [ref_meta, ref_path]
             }
@@ -66,7 +89,7 @@ workflow VARIANT_ANALYSIS {
     )
     versions = versions.mix(REFERENCE_INDEX.out.versions)
 
-    input_with_indexes = sample_data_with_refs.filtered
+    input_with_indexes = filtered_input
         .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             [ref_meta, sample_meta, read_paths, ref_path, report_meta]
         }

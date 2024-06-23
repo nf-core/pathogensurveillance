@@ -114,28 +114,29 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
-    //// Call variants and create SNP-tree and minimum spanning nextwork
-    //VARIANT_ANALYSIS (
-    //    PREPARE_INPUT.out.sample_data,
-    //    SKETCH_COMPARISON.out.ani_matrix
-    //)
-    //versions = versions.mix(VARIANT_ANALYSIS.out.versions)
-    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    // Call variants and create SNP-tree and minimum spanning nextwork
+    VARIANT_ANALYSIS (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix
+    )
+    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
-    //// Assemble and annotate bacterial genomes
-    //GENOME_ASSEMBLY (
-    //    PREPARE_INPUT.out.sample_data
-    //)
-    //versions = versions.mix(GENOME_ASSEMBLY.out.versions)
-    //messages = messages.mix(GENOME_ASSEMBLY.out.messages)
+    // Assemble and annotate bacterial genomes
+    GENOME_ASSEMBLY (
+        PREPARE_INPUT.out.sample_data
+    )
+    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
+    messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
-    //// Create core gene phylogeny for bacterial samples
-    //CORE_GENOME_PHYLOGENY (
-    //    PREPARE_INPUT.out.sample_data,
-    //    SKETCH_COMPARISON.out.ani_matrix
-    //)
-    //versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
-    //messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+    // Create core gene phylogeny for bacterial samples
+    CORE_GENOME_PHYLOGENY (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix,
+        GENOME_ASSEMBLY.out.gff
+    )
+    versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
     //// Read2tree BUSCO phylogeny for eukaryotes
     //BUSCO_PHYLOGENY (

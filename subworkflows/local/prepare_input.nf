@@ -168,6 +168,13 @@ workflow PREPARE_INPUT {
             sample_meta
         }
 
+    // Ensure that items that can be single or multiple are always formatted as lists
+    sample_data = sample_data
+        .map{ sample_meta ->
+            sample_meta.paths = sample_meta.paths instanceof Collection ? sample_meta.paths : [sample_meta.paths]
+            sample_meta
+        }
+
     emit:
     sample_data
     sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data

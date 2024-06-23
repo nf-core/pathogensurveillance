@@ -13,7 +13,7 @@ process ASSIGN_CONTEXT_REFERENCES {
     val n_ref_context
 
     output:
-    tuple val(group_meta), path("${prefix}_context_refs.csv"), emit: samp_ref_pairs
+    tuple val(group_meta), path("${prefix}_context_refs.csv"), emit: references
     path "versions.yml"                                      , emit: versions
 
     when:
