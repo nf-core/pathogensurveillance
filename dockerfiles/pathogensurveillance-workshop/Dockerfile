@@ -1,6 +1,6 @@
 ################## BASE IMAGE ######################
 
-FROM continuumio/miniconda3
+FROM nfcore/gitpod:latest
 
 ################## METADATA #######################
 
@@ -10,28 +10,8 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 ################## BUILD ######################
 
-RUN <<EOF
-apt update
-apt install --yes less vim
-EOF
+USER root
 
 RUN <<EOF
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda config --set channel_priority strict
-conda create --yes --name nf-core python=3.12 nf-core nextflow
+    nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile aps,docker -resume -latest
 EOF
-
-# Add conda bin to path
-ENV PATH /opt/conda/bin:$PATH
-
-# Set up environment
-RUN echo "conda activate nf-core" >> ~/.bashrc
-
-# Set entrypoint to bash
-# ENTRYPOINT ["bash", "-l", "-c"]
-
-#RUN <<EOF
-#nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile conda,aps --outdir test_out -resume -latest
-#EOF
