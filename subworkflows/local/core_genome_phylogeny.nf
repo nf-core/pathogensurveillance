@@ -68,10 +68,12 @@ workflow CORE_GENOME_PHYLOGENY {
             }
             .unique()
     )
+
+    // group samples by report group
     ref_gff_data = selected_ref_data
         .combine(MAKE_GFF_WITH_FASTA.out.gff, by: 0)
         .map{ ref_meta, report_meta, ref_path, ref_gff, ref_combined ->
-            [ref_meta, report_meta, ref_gff]
+            [ref_meta, report_meta, ref_combined]
         }
     sample_gff_data = sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
@@ -82,8 +84,6 @@ workflow CORE_GENOME_PHYLOGENY {
             [report_meta, gff]
         }
         .unique()
-
-    // group samples by report group
     PIRATE (
         gff_data.groupTuple(by: 0)
     )
