@@ -24,7 +24,7 @@ process R2TF {
     CODEX=\$(echo "${ref_meta.name}" | awk '{print toupper(substr(\$1,1,3))toupper(substr(\$2,1,2))}')
     mkdir ${outdir}
 
-    fna=\$(grep '^>' ${busco_dir}/${prefix}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
+    fna=\$(grep '^>' ${busco_dir}/*_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
 
     while IFS= read -r fastafile; do
         echo "Processing file \$fastafile"
@@ -49,7 +49,7 @@ process R2TF {
     done <<< \$fna
 
 
-    faa=\$(grep '^>' ${busco_dir}/${ref_meta.id}_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.faa)
+    faa=\$(grep '^>' ${busco_dir}/*_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.faa)
 
     while IFS= read -r fastafile; do
         #echo "Processing file \$fastafile"

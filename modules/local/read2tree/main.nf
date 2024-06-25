@@ -8,8 +8,7 @@ process READ2TREE {
         'biocontainers/read2tree:0.1.5--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta),  path(paired_1, stageAs: 'paired_1_??.fa'), path(paired_2, stageAs: 'paired_2_??.fa'), path(single), path(long_reads)
-    tuple val(db_meta), path(markers), path(dna_ref) // directory with marker database
+    tuple val(meta),  path(paired_1, stageAs: 'paired_1_??.fa'), path(paired_2, stageAs: 'paired_2_??.fa'), path(single), path(long_reads), path(markers), path(dna_ref)
 
     output:
     tuple val(meta), path("${prefix}_read2tree"), emit: out

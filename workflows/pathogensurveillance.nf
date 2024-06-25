@@ -138,13 +138,13 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
-    //// Read2tree BUSCO phylogeny for eukaryotes
-    //BUSCO_PHYLOGENY (
-    //    PREPARE_INPUT.out.sample_data,
-    //    SKETCH_COMPARISON.out.ani_matrix
-    //)
-    //versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
-    //messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
+    // Read2tree BUSCO phylogeny for eukaryotes
+    BUSCO_PHYLOGENY (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix
+    )
+    versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
+    messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     //// Save version info
     //CUSTOM_DUMPSOFTWAREVERSIONS (

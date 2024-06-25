@@ -89,10 +89,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .unique()
     PIRATE (
         gff_data
-            .groupTuple(by: 0)
-            .map{ report_meta, gffs ->
-                [report_meta, gffs.sort()]
-            }
+            .groupTuple(by: 0, sort: 'hash')
     )
     versions = versions.mix(PIRATE.out.versions.first())
 
