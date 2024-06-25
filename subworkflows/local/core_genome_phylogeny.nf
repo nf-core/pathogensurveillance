@@ -91,7 +91,7 @@ workflow CORE_GENOME_PHYLOGENY {
         gff_data
             .groupTuple(by: 0, sort: 'hash')
     )
-    versions = versions.mix(PIRATE.out.versions.first())
+    versions = versions.mix(PIRATE.out.versions)
 
     // Check that Pirate worked and report
     good_pirate_results = PIRATE.out.results
@@ -102,7 +102,7 @@ workflow CORE_GENOME_PHYLOGENY {
     messages = messages.mix(pirate_failed)
 
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
-    versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
+    versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions)
 
 
     // Calculate POCP from presence/absence matrix of genes
@@ -112,7 +112,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Extract sequences of all genes (does not align, contrary to current name)
     ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
-    versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
+    versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions)
 
     // Rename FASTA file headers to start with just sample ID for use with IQTREE
     RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
@@ -143,11 +143,11 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
     MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
-    versions = versions.mix(MAFFT_SMALL.out.versions.first())
+    versions = versions.mix(MAFFT_SMALL.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
     IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
-    versions = versions.mix(IQTREE2_CORE.out.versions.first())
+    versions = versions.mix(IQTREE2_CORE.out.versions)
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple() // group_meta, [trees]

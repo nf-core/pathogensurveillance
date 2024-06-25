@@ -77,7 +77,6 @@ include { INITIAL_QC_CHECKS        } from '../subworkflows/local/initial_qc_chec
 //
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
@@ -114,13 +113,13 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
-    // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_ANALYSIS (
-        PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.ani_matrix
-    )
-    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
-    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    //// Call variants and create SNP-tree and minimum spanning nextwork
+    //VARIANT_ANALYSIS (
+    //    PREPARE_INPUT.out.sample_data,
+    //    SKETCH_COMPARISON.out.ani_matrix
+    //)
+    //versions = versions.mix(VARIANT_ANALYSIS.out.versions)
+    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (
@@ -149,7 +148,7 @@ workflow PATHOGENSURVEILLANCE {
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions
-            .unique()
+            .unique().view()
             .collectFile(name: 'collated_versions.yml')
     )
 

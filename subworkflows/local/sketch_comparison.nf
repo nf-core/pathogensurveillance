@@ -22,7 +22,7 @@ workflow SKETCH_COMPARISON {
             .unique(),
         params.sketch_max_depth
     )
-    versions = versions.mix(SUBSET_READS.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(SUBSET_READS.out.versions)
 
     // Trim rare k-mers from raw reads
     KHMER_TRIMLOWABUND (
@@ -70,61 +70,6 @@ workflow SKETCH_COMPARISON {
         true  // save CSV
     )
     versions = versions.mix(SOURMASH_COMPARE.out.versions)
-
-    //// Convert CSV output back to nextflow channels
-    //mapping_ref_ids = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
-    //    .splitText( elem: 1 )
-    //    .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-    //    .splitCsv( elem: 1 )
-    //    .map { [it[0].id] + it[1] } // [val(sample_id), val(group_id), val(reference_id)]
-    //context_ref_ids = ASSIGN_CONTEXT_REFERENCES.out.samp_ref_pairs
-    //    .splitText( elem: 1 )
-    //    .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-    //    .splitCsv( elem: 1 )
-    //    .map { [it[0], it[1][0]] } // group_meta, ref_id
-
-    //// Convert IDs back into full meta
-    //id_meta_key = sample_data
-    //    .map { [it[4].id, it[0].id, it[4], it[0]] }
-    //mapping_refs = mapping_ref_ids
-    //    .combine(id_meta_key, by: 0..1)
-    //    .map { [it[4], it[3], it[2]] } // [val(meta), val(group_meta), val(ref_id)]
-    //ref_id_key = assem_samp_combos // ref_meta, meta
-    //    .map { ref_meta, meta -> [ref_meta.id, ref_meta] }
-
-    //context_refs = context_ref_ids
-    //    .map { group_meta, ref_id -> [ref_id, group_meta] }
-    //    .combine(ref_id_key, by: 0)
-    //    .map { ref_id, group_meta, ref_meta -> [group_meta, ref_meta] }
-    //    .groupTuple()
-
-    //// Add reference file based on ref_meta
-    //user_refs = sample_data
-    //    .filter { it[3] != null }
-    //    .map { [it[2].id, it[2], it[3]] }
-    //    .unique() // [val(ref_id), val(ref_meta), file(reference)]
-    //null_refs = Channel.of ( ["__NULL__", [id: null], null])
-    //all_refs = sequence
-    //    .map { [it[0].id, it[0], it[1]] }
-    //    .concat(user_refs) // [val(ref_id), val(ref_meta), file(reference)]
-    //    .concat(null_refs)
-    //mapping_refs_with_seq = mapping_refs
-    //    .map { [it[2]] + it[0..1] } // [val(ref_id), val(meta), val(group_meta)]
-    //    .combine(all_refs, by: 0)  // [val(ref_id), val(meta), val(group_meta), val(ref_meta), file(reference)]
-    //    .map { it[1..4] }  // [val(meta), val(group_meta), val(ref_meta), file(reference)]
-
-    //// Recreate sample data with new references picked
-    //new_sample_data = sample_data  // meta, [reads], ref_meta, reference, group_meta
-    //    .map { [it[0], it[4], it[1]] } // meta, group_meta, [reads]
-    //    .combine ( assigned_refs_with_seq, by: 0..1 ) // meta, group_meta, [reads], ref_meta, reference
-    //    .map { [it[0]] + it[2..4] + [it[1]] } // meta, [reads], ref_meta, reference, group_meta
-
-    //// Report any samples that could not be assigned a reference
-    //no_ref_warnings = new_sample_data // meta, [reads], ref_meta, reference, group_meta
-    //    .filter { it[3] == null }
-    //    .map { [it[0], it[4], null, "ASSIGN_REFERENCES", "WARNING", "Sample could not be assigned a reference, possibly because no similar orgnaism are present in NCBI RefSeq"] } // meta, group_meta, ref_meta, workflow, level, message
-    //messages = messages.mix(no_ref_warnings)
-
 
     emit:
     ani_matrix    = SOURMASH_COMPARE.out.csv                   // group_meta, csv

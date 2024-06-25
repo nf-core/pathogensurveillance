@@ -16,7 +16,7 @@ workflow INITIAL_QC_CHECKS {
         .map { [[id: it.sample_id], it.paths] }
         .unique()
     FASTQC ( shortreads )
-    versions = versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(FASTQC.out.versions)
 
     // Run Nanoplot
     nanopore_reads = sample_data
@@ -24,7 +24,7 @@ workflow INITIAL_QC_CHECKS {
         .map { [[id: it.sample_id], it.paths] }
         .unique()
     NANOPLOT ( nanopore_reads )
-    versions = versions.mix(NANOPLOT.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(NANOPLOT.out.versions)
 
     emit:
     fastqc_zip    = FASTQC.out.zip

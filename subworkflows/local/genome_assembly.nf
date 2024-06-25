@@ -33,7 +33,7 @@ workflow GENOME_ASSEMBLY {
         reads,
         params.sketch_max_depth
     )
-    versions = versions.mix(SUBSET_READS.out.versions.first())
+    versions = versions.mix(SUBSET_READS.out.versions)
     subset_reads = SUBSET_READS.out.reads
         .join(filtered_input) // meta, [subset_reads], [reads], depth, seq_type
         .map { sample_meta, subset_read_paths, read_paths, kingdom, depth, seq_type ->
@@ -44,14 +44,14 @@ workflow GENOME_ASSEMBLY {
         .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" }
         .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FASTP( shortreads, [], false, false )
-    versions = versions.mix(FASTP.out.versions.first())
+    versions = versions.mix(FASTP.out.versions)
 
     SPADES(
         FASTP.out.reads.map{ sample_meta, read_paths -> [sample_meta, read_paths, [], []] },
         [], // val yml
         []  // val hmm
     )
-    versions = versions.mix(SPADES.out.versions.first())
+    versions = versions.mix(SPADES.out.versions)
 
     nanopore = subset_reads
         .filter{ sample_meta, read_paths, seq_type -> seq_type == "nanopore"}
@@ -72,7 +72,7 @@ workflow GENOME_ASSEMBLY {
     FILTER_ASSEMBLY (
         SPADES.out.scaffolds
     )
-    versions = versions.mix(FILTER_ASSEMBLY.out.versions.first())
+    versions = versions.mix(FILTER_ASSEMBLY.out.versions)
 
     filtered_assembly = FILTER_ASSEMBLY.out.filtered
         .mix(FLYE_NANOPORE.out.fasta)
@@ -83,7 +83,7 @@ workflow GENOME_ASSEMBLY {
     //    .groupTuple(by: 2) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
     //    .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
     //QUAST ( ch_ref_grouped )
-    //versions = versions.mix(QUAST.out.versions.first())
+    //versions = versions.mix(QUAST.out.versions))
 
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
@@ -109,7 +109,7 @@ workflow GENOME_ASSEMBLY {
         [], // proteins (optional)
         [] // prodigal_tf (optional)
     )
-    versions = versions.mix(BAKTA_BAKTA.out.versions.first())
+    versions = versions.mix(BAKTA_BAKTA.out.versions)
 
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]

@@ -32,13 +32,13 @@ workflow REFERENCE_INDEX {
     ch_versions = Channel.empty()
 
     PICARD_CREATESEQUENCEDICTIONARY ( reference )
-    ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions.toSortedList().map{it[0]})
+    ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
     SAMTOOLS_FAIDX ( reference, [[], []] )
-    ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions.toSortedList().map{it[0]})
+    ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions)
 
-    BWA_INDEX ( reference ) 
-    ch_versions = ch_versions.mix (BWA_INDEX.out.versions.toSortedList().map{it[0]})
+    BWA_INDEX ( reference )
+    ch_versions = ch_versions.mix (BWA_INDEX.out.versions)
 
     emit:
     picard_dict   = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict

@@ -117,10 +117,10 @@ workflow VARIANT_ANALYSIS {
     versions = versions.mix(CALL_VARIANTS.out.versions)
 
     VCF_TO_TAB ( CALL_VARIANTS.out.vcf )
-    versions = versions.mix(VCF_TO_TAB.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(VCF_TO_TAB.out.versions)
 
     VCF_TO_SNPALN ( VCF_TO_TAB.out.tab )
-    versions = versions.mix(VCF_TO_SNPALN.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(VCF_TO_SNPALN.out.versions)
 
     // Dont make trees for groups with less than 3 samples
     align_with_samp_meta = VCF_TO_SNPALN.out.fasta // val(ref+group_meta), fasta

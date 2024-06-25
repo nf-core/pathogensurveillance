@@ -34,19 +34,19 @@ workflow CALL_VARIANTS {
         ch_ref_grouped.map { [it[0], it[2]] },
         ch_ref_grouped.map { it[7] },
     )
-    versions = versions.mix(GRAPHTYPER_GENOTYPE.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GRAPHTYPER_GENOTYPE.out.versions)
 
     // Combine graphtyper VCFs for each group of samples
     GRAPHTYPER_VCFCONCATENATE ( GRAPHTYPER_GENOTYPE.out.vcf )
-    versions = versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions)
 
     // Make tbi index for combined VCF
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
-    versions = versions.mix(TABIX_TABIX.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(TABIX_TABIX.out.versions)
 
     // Make .gzi file from reference in case it is gzipped
     BGZIP_MAKE_GZIP ( ch_ref )
-    versions = versions.mix(BGZIP_MAKE_GZIP.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(BGZIP_MAKE_GZIP.out.versions)
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
@@ -60,11 +60,11 @@ workflow CALL_VARIANTS {
         vf_input.map { it[5] },
         vf_input.map { it[6] }
     )
-    versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 
     // SelectVariants on the variant level, excluding non-variant sites:
     VCFLIB_VCFFILTER ( GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi) )
-    versions = versions.mix(VCFLIB_VCFFILTER.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(VCFLIB_VCFFILTER.out.versions)
 
     emit:
     vcf      = VCFLIB_VCFFILTER.out.vcf               // val(ref+group_meta), file(vcf)

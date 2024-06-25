@@ -55,7 +55,7 @@ workflow PREPARE_INPUT {
         }
         .unique()
     SRATOOLS_FASTERQDUMP ( ncbi_acc )
-    versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
@@ -72,11 +72,11 @@ workflow PREPARE_INPUT {
             }
             .unique()
     )
-    versions = versions.mix(BBMAP_SENDSKETCH.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(BBMAP_SENDSKETCH.out.versions)
 
     // Parse results of sendsketch to get list of taxa to download references for
     INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
-    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
 
     // Add estimated depth and kingdom to sample metadata
     sample_data = sample_data
@@ -108,7 +108,7 @@ workflow PREPARE_INPUT {
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES ( all_families )
-    versions = versions.mix(FIND_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
     // Choose reference sequences to provide context for each sample
     PICK_ASSEMBLIES (
@@ -146,7 +146,7 @@ workflow PREPARE_INPUT {
         }
         .unique()
     DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
-    versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
     sample_data = sample_data
         .transpose(by: 1)
         .map{ sample_meta, ref_meta ->
