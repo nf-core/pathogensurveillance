@@ -113,13 +113,13 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
-    //// Call variants and create SNP-tree and minimum spanning nextwork
-    //VARIANT_ANALYSIS (
-    //    PREPARE_INPUT.out.sample_data,
-    //    SKETCH_COMPARISON.out.ani_matrix
-    //)
-    //versions = versions.mix(VARIANT_ANALYSIS.out.versions)
-    //messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    // Call variants and create SNP-tree and minimum spanning nextwork
+    VARIANT_ANALYSIS (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix
+    )
+    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Assemble and annotate bacterial genomes
     GENOME_ASSEMBLY (
@@ -148,7 +148,7 @@ workflow PATHOGENSURVEILLANCE {
     // Save version info
     CUSTOM_DUMPSOFTWAREVERSIONS (
         versions
-            .unique().view()
+            .unique()
             .collectFile(name: 'collated_versions.yml')
     )
 
@@ -160,17 +160,18 @@ workflow PATHOGENSURVEILLANCE {
     ch_methods_description = Channel.value(methods_description)
 
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.fastqc_zip.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.nanoplot_txt.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')) // NOTE: this breaks the cache
+    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml')) // NOTE: this breaks the cache
+    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
+    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.fastqc_zip.map{it[1]}.collect(sort: true).ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.nanoplot_txt.map{it[1]}.collect(sort: true).ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(GENOME_ASSEMBLY.out.quast.map{it[1]}.collect(sort: true).ifEmpty([]))
 
     MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.collect().ifEmpty([]),
-        ch_multiqc_custom_config.collect().ifEmpty([]),
-        ch_multiqc_logo.collect().ifEmpty([])
+        ch_multiqc_files.collect(sort: true),
+        ch_multiqc_config.collect(sort: true).ifEmpty([]),
+        ch_multiqc_custom_config.collect(sort: true).ifEmpty([]),
+        ch_multiqc_logo.collect(sort: true).ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()
     versions    = versions.mix(MULTIQC.out.versions)
@@ -181,9 +182,10 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     //// Create main summary report
-    //report_samp_data = SKETCH_COMPARISON.out.sample_data // meta, [reads], ref_meta, reference, group_meta
-    //    .combine(COARSE_SAMPLE_TAXONOMY.out.hits, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch
-    //    .combine(DOWNLOAD_REFERENCES.out.stats, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch, ref_stats
+    //report_samp_data = PREPARE_INPUT.out.sample_data
+    //    .map{[[id: it.sample_id], it.paths, [id: it.ref_id], it.ref_path, [id: it.report_group_ids]]}
+    //    .combine(PREPARE_INPUT.out.sendsketch, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch
+    //    .combine(PREPARE_INPUT.out.ref_stats, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch, ref_stats
     //    .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats
     //    .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats, quast
     //    .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, [reads], reference, sendsketch, ref_stats, quast

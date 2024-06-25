@@ -179,6 +179,8 @@ workflow PREPARE_INPUT {
     sample_data
     sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
     reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data
+    sendsketch = BBMAP_SENDSKETCH.out.hits
+    ref_stats      = PICK_ASSEMBLIES.out.stats                // stats for each sample
     versions = SAMPLESHEET_CHECK.out.versions
 }
 

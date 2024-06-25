@@ -35,7 +35,7 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(SUBSET_READS.out.versions)
     subset_reads = SUBSET_READS.out.reads
-        .join(filtered_input) // meta, [subset_reads], [reads], depth, seq_type
+        .join(filtered_input)
         .map { sample_meta, subset_read_paths, read_paths, kingdom, depth, seq_type ->
             [sample_meta, subset_read_paths, seq_type]
         }
@@ -78,12 +78,13 @@ workflow GENOME_ASSEMBLY {
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
         .unique()
-    //ch_ref_grouped = filtered_input
-    //    .combine(filtered_assembly, by: 0) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
-    //    .groupTuple(by: 2) // meta, [reads], ref_meta, reference, group_meta, kingdom, depth, filt_assemb
-    //    .map { [it[2], it[7].sort().unique(), it[3].sort()[0] ?: [], []] } // ref_meta, assembly, reference, gff
-    //QUAST ( ch_ref_grouped )
-    //versions = versions.mix(QUAST.out.versions))
+    QUAST (
+        filtered_assembly
+            .map { sample_meta, assembly ->
+                [sample_meta, assembly, [], []]
+            }
+    )
+    versions = versions.mix(QUAST.out.versions)
 
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
@@ -96,7 +97,7 @@ workflow GENOME_ASSEMBLY {
         } else {
             bakta_db = Channel.fromPath(params.bakta_db).first()
         }
-    } else if (params.download_bakta_db){
+    } else if (params.download_bakta_db) {
         BAKTA_BAKTADBDOWNLOAD()
         bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
         versions = versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
@@ -115,8 +116,8 @@ workflow GENOME_ASSEMBLY {
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]
     gff       = BAKTA_BAKTA.out.gff
     scaffolds = filtered_assembly
-    //quast     = QUAST.out.results
-    versions = versions
-    messages = messages    // meta, group_meta, ref_meta, workflow, level, message
+    quast     = QUAST.out.results
+    versions  = versions
+    messages  = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 
