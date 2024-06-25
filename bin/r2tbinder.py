@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import glob
+import sys
 from collections import defaultdict
 
 def read_fasta(file_path):
@@ -31,10 +32,10 @@ def bin_fasta_files(fasta_files_pattern):
     # Write binned sequences to separate files, each sequence retains its original header
     for identifier, headers_and_sequences in all_sequences.items():
         safe_identifier = identifier.replace(">", "").replace("|", "_").replace(" ", "_")[:20]  # Create a file-safe identifier
-        file_name = f"busco_markers/{safe_identifier}.fasta"
+        file_name = f"{sys.argv[2]}/{safe_identifier}.fasta"
         with open(file_name, 'w') as file:
             for header, seq_lines in headers_and_sequences:
                 file.write(f"{header}\n")
                 file.write('\n'.join(seq_lines) + '\n\n')
 # Example usage
-bin_fasta_files("r2t_markers/*.fa")
+bin_fasta_files(f"{sys.argv[1]}/*.fa")

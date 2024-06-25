@@ -1,5 +1,5 @@
 process R2TDIR {
-    tag "all"
+    tag "$meta.id"
     label 'process_single'
 
     conda "conda-forge::coreutils=9.1"
@@ -8,19 +8,20 @@ process R2TDIR {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    path busco_dir
+    tuple val(meta), path(busco_dir)
 
     output:
-    path "r2t_markers", emit: markers
-    path "dna_ref.fa", emit: dna_ref 
+    tuple val(meta), path("${prefix}_r2t_markers"), emit: markers
+    tuple val(meta), path("${prefix}_dna_ref.fa"), emit: dna_ref
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
-    mkdir r2t_markers
-    cat **/*ntformatted.fa > dna_ref.fa
-    cp **/*aaformatted.fa r2t_markers/
+    mkdir ${prefix}_r2t_markers
+    cat **/*ntformatted.fa > ${prefix}_dna_ref.fa
+    cp **/*aaformatted.fa ${prefix}_r2t_markers/
     """
 }

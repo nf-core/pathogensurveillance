@@ -89,6 +89,10 @@ workflow BUSCO_PHYLOGENY {
     // Create directories for Read2Tree
     R2TDIR (
         R2TF.out.output
+            .combine(selected_ref_data, by: 0)
+            .map { ref_meta, rt2f_out, report_meta, ref_path ->
+                [report_meta, rt2f_out]
+            }
             .groupTuple(by: 0, sort: 'hash')
     )
 
@@ -100,7 +104,7 @@ workflow BUSCO_PHYLOGENY {
     // group samples
     input_filtered = sample_data
         .map{ sample_meta ->
-            [[id: sample_meta.sample_id], sample_meta.paths, sample_meta.report_group_ids, it.sequence_type]
+            [[id: sample_meta.sample_id], sample_meta.paths, [id: sample_meta.report_group_ids], sample_meta.sequence_type]
         }
         .unique()
     paired_end = input_filtered
@@ -109,7 +113,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, reads_paths.collect{it[0]}, read_paths.collect{it[1]}]
+            [report_meta, read_paths.collect{it[0]}, read_paths.collect{it[1]}]
         }
     single_end = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
@@ -128,7 +132,7 @@ workflow BUSCO_PHYLOGENY {
             [report_meta, reads_paths]
         }
     rt2_input = paired_end
-        .join(single_end, remainder:true) // group_meta, pair_1, pair_2, single_end
+        .join(single_end, remainder:true)// group_meta, pair_1, pair_2, single_end
         .join(longread, remainder:true) // group_meta, pair_1, pair_2, single_end, longread
         .map { [it[0], it[1] ?: [], it[2] ?: [], it[3] ?: [], it[4] ?: []] } // replace nulls with []
         .join( R2TBIN.out.busco_markers )
@@ -140,6 +144,6 @@ workflow BUSCO_PHYLOGENY {
     emit:
     versions = versions // versions.yml
     messages = messages // meta, group_meta, ref_meta, workflow, level, message
-    tree     = READ2TREE.out.tree // group_meta, tree
+    //tree     = READ2TREE.out.tree // group_meta, tree
 
 }
