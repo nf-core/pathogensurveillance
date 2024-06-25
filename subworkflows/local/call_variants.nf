@@ -13,8 +13,8 @@ workflow CALL_VARIANTS {
 
     main:
 
-    ch_versions = Channel.empty()
-    
+    versions = Channel.empty()
+
     // group samples by reference genome and group
     //    ch_ref_grouped: [val(ref+group_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
     ch_ref_grouped = ch_input
@@ -24,7 +24,7 @@ workflow CALL_VARIANTS {
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
     ch_ref = ch_ref_grouped.map { it[0..1] }
-    MAKE_REGION_FILE ( ch_ref ) 
+    MAKE_REGION_FILE ( ch_ref )
 
     // Run graphtyper on each group of samples for all chromosomes
     ch_ref_grouped = ch_ref_grouped.join(MAKE_REGION_FILE.out.regions) // make inputs in same order
@@ -34,22 +34,22 @@ workflow CALL_VARIANTS {
         ch_ref_grouped.map { [it[0], it[2]] },
         ch_ref_grouped.map { it[7] },
     )
-    ch_versions = ch_versions.mix(GRAPHTYPER_GENOTYPE.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GRAPHTYPER_GENOTYPE.out.versions.toSortedList().map{it[0]})
 
     // Combine graphtyper VCFs for each group of samples
     GRAPHTYPER_VCFCONCATENATE ( GRAPHTYPER_GENOTYPE.out.vcf )
-    ch_versions = ch_versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions.toSortedList().map{it[0]})
 
     // Make tbi index for combined VCF
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
-    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(TABIX_TABIX.out.versions.toSortedList().map{it[0]})
 
     // Make .gzi file from reference in case it is gzipped
     BGZIP_MAKE_GZIP ( ch_ref )
-    ch_versions = ch_versions.mix(BGZIP_MAKE_GZIP.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(BGZIP_MAKE_GZIP.out.versions.toSortedList().map{it[0]})
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
-    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // 
+    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
         .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
         .join(ch_ref_grouped.map { it[0..3] })
         .join(BGZIP_MAKE_GZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
@@ -60,15 +60,15 @@ workflow CALL_VARIANTS {
         vf_input.map { it[5] },
         vf_input.map { it[6] }
     )
-    ch_versions = ch_versions.mix(GATK4_VARIANTFILTRATION.out.versions.toSortedList().map{it[0]})             
+    versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions.toSortedList().map{it[0]})
 
     // SelectVariants on the variant level, excluding non-variant sites:
     VCFLIB_VCFFILTER ( GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi) )
-    ch_versions = ch_versions.mix(VCFLIB_VCFFILTER.out.versions.toSortedList().map{it[0]}) 
+    versions = versions.mix(VCFLIB_VCFFILTER.out.versions.toSortedList().map{it[0]})
 
     emit:
     vcf      = VCFLIB_VCFFILTER.out.vcf               // val(ref+group_meta), file(vcf)
     samples  = ch_ref_grouped.map { [it[0], it[4]] }  // val(ref+group_meta), [meta]
-    versions = ch_versions                            // versions.yml
+    versions = versions                            // versions.yml
 }
 

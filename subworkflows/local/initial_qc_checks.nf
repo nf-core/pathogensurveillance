@@ -27,6 +27,8 @@ workflow INITIAL_QC_CHECKS {
     versions = versions.mix(NANOPLOT.out.versions.toSortedList().map{it[0]})
 
     emit:
-    versions      = versions                                // versions
-    messages      = messages                                   // meta, group_meta, ref_meta, workflow, level, message
+    fastqc_zip    = FASTQC.out.zip
+    nanoplot_txt  = NANOPLOT.out.txt
+    versions      = versions         // versions
+    messages      = messages         // meta, group_meta, ref_meta, workflow, level, message
 }
