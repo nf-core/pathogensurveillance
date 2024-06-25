@@ -8,8 +8,7 @@ process SUBSET_CORE_GENES {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(group_meta), path(gene_fam), path(feat_seqs)
-    path sample_data
+    tuple val(group_meta), path(gene_fam), path(feat_seqs), path(sample_data)
     val min_core_genes
     val max_core_genes
 

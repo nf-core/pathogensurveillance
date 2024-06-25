@@ -15,7 +15,6 @@ workflow CORE_GENOME_PHYLOGENY {
 
     take:
     sample_data
-    //ch_samplesheet // channel: path TODO: try to remove to make cacheing work better.
     ani_matrix // report_group_id, ani_matrix
     sample_gff // sample_id, gff
 
@@ -23,6 +22,10 @@ workflow CORE_GENOME_PHYLOGENY {
 
     versions = Channel.empty()
     messages = Channel.empty()
+
+    // Remove any samples that are not prokaryotes
+    sample_data = sample_data
+        .filter{it.kingdom == "Bacteria" || it.kingdom == "Archaea"}
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
@@ -38,7 +41,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Assign referneces to groups for context in phylogenetic analyses
     ASSIGN_CONTEXT_REFERENCES (
-        ani_matrix.join(samp_ref_pairs),
+        ani_matrix.combine(samp_ref_pairs, by: 0),
         params.n_ref_closest,
         params.n_ref_context
     )
@@ -85,82 +88,87 @@ workflow CORE_GENOME_PHYLOGENY {
         }
         .unique()
     PIRATE (
-        gff_data.groupTuple(by: 0)
+        gff_data
+            .groupTuple(by: 0)
+            .map{ report_meta, gffs ->
+                [report_meta, gffs.sort()]
+            }
     )
     versions = versions.mix(PIRATE.out.versions.first())
 
-    //// Check that Pirate worked and report
-    //good_pirate_results = PIRATE.out.results
-    //    .filter { it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
-    //pirate_failed = PIRATE.out.results // val(group_meta), [result_files]
-    //    .filter { ! it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
-    //    .map { [null, it[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Pirate failed to find a core genome, possibly becuase samples are very different or there are too few reads."] } // meta, group_meta, ref_meta, workflow, level, message
-    //messages = messages.mix(pirate_failed)
+    // Check that Pirate worked and report
+    good_pirate_results = PIRATE.out.results
+        .filter { it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
+    pirate_failed = PIRATE.out.results // val(group_meta), [result_files]
+        .filter { ! it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
+        .map { [null, it[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Pirate failed to find a core genome, possibly becuase samples are very different or there are too few reads."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(pirate_failed)
 
-    //REFORMAT_PIRATE_RESULTS ( good_pirate_results )
-    //versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
-
-
-    //// Calculate POCP from presence/absence matrix of genes
-    //CALCULATE_POCP (
-    //   REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
-    //)
-
-    //// Extract sequences of all genes (does not align, contrary to current name)
-    //ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
-    //versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
-
-    //// Rename FASTA file headers to start with just sample ID for use with IQTREE
-    //RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
-
-    //// Filter for core single copy genes with no paralogs
-    //SUBSET_CORE_GENES (
-    //    REFORMAT_PIRATE_RESULTS.out.gene_fam.join(RENAME_CORE_GENE_HEADERS.out.feat_seqs),
-    //    ch_samplesheet,
-    //    params.phylo_min_genes,
-    //    params.phylo_max_genes
-    //)
-
-    //// Report any sample or references that have been removed from the analysis
-    //removed_refs = SUBSET_CORE_GENES.out.removed_ref_ids
-    //    .splitText()
-    //    .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    //removed_samps = SUBSET_CORE_GENES.out.removed_sample_ids
-    //    .splitText()
-    //    .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    //messages = messages.mix(removed_refs)
-    //messages = messages.mix(removed_samps)
+    REFORMAT_PIRATE_RESULTS ( good_pirate_results )
+    versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions.first())
 
 
-    //// Align each gene family with mafft
-    //core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
-    //    .transpose() // group_meta, gene_dir
-    //    .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
-    //FILES_IN_DIR ( core_genes )
-    //MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
-    //versions = versions.mix(MAFFT_SMALL.out.versions.first())
+    // Calculate POCP from presence/absence matrix of genes
+    CALCULATE_POCP (
+       REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
+    )
 
-    //// Inferr phylogenetic tree from aligned core genes
-    //IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
-    //versions = versions.mix(IQTREE2_CORE.out.versions.first())
-    //trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
-    //    .map { [it[0].group_id, it[1]] } // group_meta, tree
-    //    .groupTuple() // group_meta, [trees]
+    // Extract sequences of all genes (does not align, contrary to current name)
+    ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
+    versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions.first())
+
+    // Rename FASTA file headers to start with just sample ID for use with IQTREE
+    RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
+
+    // Filter for core single copy genes with no paralogs
+    SUBSET_CORE_GENES (
+        REFORMAT_PIRATE_RESULTS.out.gene_fam
+            .join(RENAME_CORE_GENE_HEADERS.out.feat_seqs)
+            .join(samp_ref_pairs),
+        params.phylo_min_genes,
+        params.phylo_max_genes
+    )
+
+    // Report any sample or references that have been removed from the analysis
+    removed_refs = SUBSET_CORE_GENES.out.removed_ref_ids
+        .splitText()
+        .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    removed_samps = SUBSET_CORE_GENES.out.removed_sample_ids
+        .splitText()
+        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(removed_refs)
+    messages = messages.mix(removed_samps)
 
 
-    //// Mix in null placeholders for failed groups
-    //pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-    //     .map { [it[1], null] }
-    //     .mix(PIRATE.out.aln) // group_meta, align_fasta
-    //phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-    //     .map { [it[1], null] }
-    //     .mix(trees) // group_meta, [trees]
+    // Align each gene family with mafft
+    core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
+        .transpose() // group_meta, gene_dir
+        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
+    FILES_IN_DIR ( core_genes )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    versions = versions.mix(MAFFT_SMALL.out.versions.first())
+
+    // Inferr phylogenetic tree from aligned core genes
+    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
+    versions = versions.mix(IQTREE2_CORE.out.versions.first())
+    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .groupTuple() // group_meta, [trees]
+
+
+    // Mix in null placeholders for failed groups
+    pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
+         .map { [it[1], null] }
+         .mix(PIRATE.out.aln) // group_meta, align_fasta
+    phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
+         .map { [it[1], null] }
+         .mix(trees) // group_meta, [trees]
 
 
     emit:
-    //pirate_aln = pirate_aln              // group_meta, align_fasta
-    //phylogeny  = phylogeny               // group_meta, [trees]
-    //pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
+    pirate_aln = pirate_aln              // group_meta, align_fasta
+    phylogeny  = phylogeny               // group_meta, [trees]
+    pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
     versions   = versions             // versions.yml
     messages   = messages                // meta, group_meta, ref_meta, workflow, level, message
 

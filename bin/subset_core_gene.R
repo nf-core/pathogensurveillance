@@ -2,14 +2,14 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/subgroup_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/69/edc384acd238e7e7134da029ffa41b/samplesheet.valid.csv',
+# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other.tsv',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other_feat_seqs_renamed',
+#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other.csv',
 #           '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
-metadata <- read.csv(args$metadata, header = TRUE, sep = ',', row.names = NULL, check.names = FALSE)
+metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
 raw_gene_data1 <- raw_gene_data
@@ -17,7 +17,7 @@ raw_gene_data1 <- raw_gene_data
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
 all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
-sample_ids <- all_ids[all_ids %in% metadata$sample_id]
+sample_ids <- unique(metadata$sample_id[metadata$sample_id %in% all_ids])
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
 # Create matrix with number of genes for each gene in each sample

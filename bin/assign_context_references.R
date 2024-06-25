@@ -8,8 +8,8 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/8b/c258ddf77ae0ad38e0fd0669434543/all_comp.csv',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/8b/c258ddf77ae0ad38e0fd0669434543/all.csv',
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/fd/c0dd7b076a42bf0c15975f36c13668/mixed_comp.csv',
+#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/fd/c0dd7b076a42bf0c15975f36c13668/mixed.csv',
 #     '3',
 #     '5',
 #     'all_context_refs.csv'
@@ -41,9 +41,9 @@ rownames(sample_data) <- NULL
 rescale <- function(x) {
     (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
 }
-ani_ref_v_smaples <- ani_matrix[ref_ids, sample_ids]
+ani_ref_v_smaples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]
 ani_ref_v_smaples[ani_ref_v_smaples == 0] <- NA
-ani_scaled <- apply(ani_ref_v_smaples, 2, rescale)
+ani_scaled <- apply(ani_ref_v_smaples, MARGIN = 2, rescale)
 
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
