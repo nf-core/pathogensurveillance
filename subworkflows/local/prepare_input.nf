@@ -177,10 +177,9 @@ workflow PREPARE_INPUT {
 
     emit:
     sample_data
-    sample_metadata_csv = SAMPLESHEET_CHECK.out.sample_data
-    reference_metadata_csv = SAMPLESHEET_CHECK.out.reference_data
     sendsketch = BBMAP_SENDSKETCH.out.hits
-    ref_stats      = PICK_ASSEMBLIES.out.stats                // stats for each sample
+    ncbi_ref_meta = FIND_ASSEMBLIES.out.stats
+    selected_ref_meta = PICK_ASSEMBLIES.out.stats
     versions = SAMPLESHEET_CHECK.out.versions
 }
 

@@ -12,6 +12,7 @@ process READ2TREE {
 
     output:
     tuple val(meta), path("${prefix}_read2tree"), emit: out
+    tuple val(meta), path("${prefix}_read2tree/tree_merge.nwk"), emit: tree
     path "versions.yml"            , emit: versions
 
     when:

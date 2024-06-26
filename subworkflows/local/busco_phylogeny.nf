@@ -142,8 +142,9 @@ workflow BUSCO_PHYLOGENY {
     READ2TREE ( rt2_input )
 
     emit:
-    versions = versions // versions.yml
-    messages = messages // meta, group_meta, ref_meta, workflow, level, message
-    //tree     = READ2TREE.out.tree // group_meta, tree
+    versions      = versions // versions.yml
+    messages      = messages // meta, group_meta, ref_meta, workflow, level, message
+    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references
+    tree          = READ2TREE.out.tree // group_meta, tree
 
 }

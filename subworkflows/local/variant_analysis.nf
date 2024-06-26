@@ -69,7 +69,7 @@ workflow VARIANT_ANALYSIS {
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             sequence_type == "illumina"
         }
-        .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, group_meta
+        .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, report_meta
 
 
     // Report samples that do not have reference information
@@ -109,9 +109,9 @@ workflow VARIANT_ANALYSIS {
 
     CALL_VARIANTS (
         input_with_indexes
-            .map { [it[0], it[2], it[1]] + it[3..5] + [it[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(group_meta), fai, picard]
+            .map { [it[0], it[2], it[1]] + it[3..5] + [it[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard]
             .combine(ALIGN_READS.out.bam, by: 0..1)
-            .combine(ALIGN_READS.out.bai, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(group_meta), fai, picard, bam, bai]
+            .combine(ALIGN_READS.out.bai, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, bam, bai]
             .map { [it[0], it[7], it[8], it[1]] + it[3..6] }
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)
@@ -123,39 +123,40 @@ workflow VARIANT_ANALYSIS {
     versions = versions.mix(VCF_TO_SNPALN.out.versions)
 
     // Dont make trees for groups with less than 3 samples
-    align_with_samp_meta = VCF_TO_SNPALN.out.fasta // val(ref+group_meta), fasta
-        .combine(CALL_VARIANTS.out.samples, by:0) // val(ref+group_meta), fasta, [meta]
+    align_with_samp_meta = VCF_TO_SNPALN.out.fasta // val(ref+report_meta), fasta
+        .combine(CALL_VARIANTS.out.samples, by:0) // val(ref+report_meta), fasta, [meta]
     align_for_tree = align_with_samp_meta
         .filter { it[2].size() >= 3 }
-        .map { it[0..1] } // val(ref+group_meta), fasta
-    too_few_samp_warnings = align_with_samp_meta // val(ref+group_meta), fasta, [meta]
+        .map { it[0..1] } // val(ref+report_meta), fasta
+    too_few_samp_warnings = align_with_samp_meta // val(ref+report_meta), fasta, [meta]
         .filter { it[2].size() < 3 }
-        .map { [null, it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] } // meta, group_meta, ref_meta, workflow, level, message
+        .map { [null, it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] } // meta, report_meta, ref_meta, workflow, level, message
     messages = messages.mix(too_few_samp_warnings)
 
     IQTREE2_SNP ( align_for_tree, [] )
     versions = versions.mix(IQTREE2_SNP.out.versions)
 
-    phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // group_meta, ref_meta, tree
+    phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
     snp_align = VCF_TO_SNPALN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
     vcf = CALL_VARIANTS.out.vcf.map{ [it[0].group, it[0].ref, it[1]] }
 
-    results = CALL_VARIANTS.out.vcf // ref+group_meta, vcf
-        .combine(VCF_TO_SNPALN.out.fasta, by:0) // ref+group_meta, vcf, align
-        .join(IQTREE2_SNP.out.phylogeny, remainder:true, by:0) // ref+group_meta, vcf, align, tree
-        .map{ [it[0].group, it[0].ref] + it[1..3] } // group_meta, ref_meta, vcf, align, tree
+    results = CALL_VARIANTS.out.vcf // ref+report_meta, vcf
+        .combine(VCF_TO_SNPALN.out.fasta, by:0) // ref+report_meta, vcf, align
+        .join(IQTREE2_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
+        .map{ [it[0].group, it[0].ref] + it[1..3] } // report_meta, ref_meta, vcf, align, tree
 
     emit:
-    picard_dict  = REFERENCE_INDEX.out.picard_dict
-    samtools_fai = REFERENCE_INDEX.out.samtools_fai
-    samtools_gzi = REFERENCE_INDEX.out.samtools_gzi
-    bwa_index    = REFERENCE_INDEX.out.bwa_index
-    phylogeny    = phylogeny   // group_meta, ref_meta, tree
-    snp_align    = snp_align   // group_meta, ref_meta, fasta
-    vcf          = vcf         // group_meta, ref_meta, fasta
-    results      = results     // group_meta, ref_meta, vcf, align, tree
-    versions     = versions // versions.yml
-    messages     = messages    // meta, group_meta, ref_meta, workflow, level, message
+    picard_dict   = REFERENCE_INDEX.out.picard_dict
+    samtools_fai  = REFERENCE_INDEX.out.samtools_fai
+    samtools_gzi  = REFERENCE_INDEX.out.samtools_gzi
+    bwa_index     = REFERENCE_INDEX.out.bwa_index
+    phylogeny     = phylogeny   // report_meta, ref_meta, tree
+    snp_align     = snp_align   // report_meta, ref_meta, fasta
+    vcf           = vcf         // report_meta, ref_meta, fasta
+    results       = results     // report_meta, ref_meta, vcf, align, tree
+    mapping_ref   = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // report_meta, csv
+    versions      = versions // versions.yml
+    messages      = messages    // meta, report_meta, ref_meta, workflow, level, message
 
 }
 

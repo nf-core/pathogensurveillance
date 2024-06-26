@@ -181,6 +181,57 @@ workflow PATHOGENSURVEILLANCE {
         messages.collect(flat:false)
     )
 
+
+
+    // Gather sendsketch signatures
+    sendsketch_hits = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.sendsketch, by: 0)
+        .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
+        .unique()
+        .groupTuple(sort: 'hash') // report_meta, sendsketch
+
+    // Gather NCBI reference metadata for all references considered
+    ncbi_ref_meta = PREPARE_INPUT.out.ncbi_ref_meta
+        .map { family_name, ref_meta_tsv -> [ref_meta_tsv] }
+        .collect(sort: true) // [ref_meta_tsv]
+
+    // Gather selected reference metadata
+    selected_ref_meta = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
+        .map{ sample_meta, report_meta, ref_meta -> [report_meta, ref_meta] }
+        .unique()
+        .groupTuple(sort: 'hash') // report_meta, ref_meta
+
+    // Gather sourmash estimated ANI matrix
+    sourmash_ani_matrix = SKETCH_COMPARISON.out.ani_matrix // report_meta, ani_matrix
+
+    // Gather which references were assigned to each report group for variant calling
+    mapping_reference = VARIANT_ANALYSIS.out.mapping_ref // report_meta, selected_ref_meta
+
+    // Gather SNP alignments from the variant analysis
+    snp_align = VARIANT_ANALYSIS.out.snp_align
+        .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
+        .groupTuple(sort: 'hash') // report_meta, snp_align
+
+    // Gather phylogenies from the variant analysis
+    snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+        .map { report_meta, ref_meta, tree -> [report_meta, tree] }
+        .groupTuple(sort: 'hash') // report_meta, tree
+
+    // Gather metadata for references assigned for the core gene phylogeny
+    core_phylo_references = CORE_GENOME_PHYLOGENY.out.selected_refs
+
+    // Gather phylogenies from the core genome phylogeny
+    core_phylo_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
+
+    // Gather which references were assigned for the busco phylogeny
+    busco_pylo_references = BUSCO_PHYLOGENY.out.selected_refs
+
+    // Gather busco phylogenies
+    busco_phylo_trees = BUSCO_PHYLOGENY.out.tree
+
     //// Create main summary report
     //report_samp_data = PREPARE_INPUT.out.sample_data
     //    .map{[[id: it.sample_id], it.paths, [id: it.ref_id], it.ref_path, [id: it.report_group_ids]]}

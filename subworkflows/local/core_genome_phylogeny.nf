@@ -146,11 +146,11 @@ workflow CORE_GENOME_PHYLOGENY {
     versions = versions.mix(MAFFT_SMALL.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(), [] )
+    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
     versions = versions.mix(IQTREE2_CORE.out.versions)
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
-        .groupTuple() // group_meta, [trees]
+        .groupTuple(sort: 'hash') // group_meta, [trees]
 
 
     // Mix in null placeholders for failed groups
@@ -163,10 +163,11 @@ workflow CORE_GENOME_PHYLOGENY {
 
 
     emit:
-    pirate_aln = pirate_aln              // group_meta, align_fasta
-    phylogeny  = phylogeny               // group_meta, [trees]
-    pocp       = CALCULATE_POCP.out.pocp // group_meta, pocp
-    versions   = versions             // versions.yml
-    messages   = messages                // meta, group_meta, ref_meta, workflow, level, message
+    pirate_aln    = pirate_aln              // group_meta, align_fasta
+    phylogeny     = phylogeny               // group_meta, [trees]
+    pocp          = CALCULATE_POCP.out.pocp // group_meta, pocp
+    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references // group_meta, csv
+    versions      = versions             // versions.yml
+    messages      = messages                // meta, group_meta, ref_meta, workflow, level, message
 
 }
