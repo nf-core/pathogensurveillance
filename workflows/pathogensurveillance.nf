@@ -41,10 +41,10 @@ if (!params.bakta_db && !params.download_bakta_db ) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
+multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,9 +95,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Initalize channel to accumulate information about software versions used
     versions = Channel.empty()
-    // Initalize messages channel with an empty list
-    //     Note that at least one value is needed so that modlues that require this are run
-    messages = Channel.fromList([[]])
+    messages = Channel.empty()
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_csv, reference_data_csv )
@@ -153,35 +151,51 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // MultiQC
-    workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
-
-    methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    ch_methods_description = Channel.value(methods_description)
-
-    ch_multiqc_files = Channel.empty()
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')) // NOTE: this breaks the cache
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml')) // NOTE: this breaks the cache
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
-    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.fastqc_zip.map{it[1]}.collect(sort: true).ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(INITIAL_QC_CHECKS.out.nanoplot_txt.map{it[1]}.collect(sort: true).ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(GENOME_ASSEMBLY.out.quast.map{it[1]}.collect(sort: true).ifEmpty([]))
-
+    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
+    //workflow_summary = Channel.value(workflow_summary)
+    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, multiqc_custom_methods_description)
+    //methods_description = Channel.value(methods_description)
+    //multiqc_files = Channel.empty()
+    //multiqc_files = multiqc_files.mix(workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')) // NOTE: this breaks the cache
+    //multiqc_files = multiqc_files.mix(methods_description.collectFile(name: 'methods_description_mqc.yaml')) // NOTE: this breaks the cache
+    //multiqc_files = multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
+    //multiqc_files = multiqc_files.mix(INITIAL_QC_CHECKS.out.fastqc_zip.map{it[1]}.collect(sort: true).ifEmpty([]))
+    //multiqc_files = multiqc_files.mix(INITIAL_QC_CHECKS.out.nanoplot_txt.map{it[1]}.collect(sort: true).ifEmpty([]))
+    //multiqc_files = multiqc_files.mix(GENOME_ASSEMBLY.out.quast.map{it[1]}.collect(sort: true).ifEmpty([]))
+    fastqc_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
+        .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
+        .unique()
+        .groupTuple(sort: 'hash') // report_meta, sendsketch
+    nanoplot_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
+        .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
+        .unique()
+        .groupTuple(sort: 'hash') // report_meta, sendsketch
+    quast_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(GENOME_ASSEMBLY.out.quast, by: 0)
+        .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
+        .unique()
+        .groupTuple(sort: 'hash') // report_meta, sendsketch
+    multiqc_files = fastqc_results
+        .join(nanoplot_results, remainder: true)
+        .join(quast_results, remainder: true)
+        .combine(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
+        .map { report_meta, fastqc, nanoplot, quast, versions ->
+            files = fastqc ?: [] + nanoplot ?: [] + quast ?: [] + [versions]
+            [report_meta, files.flatten()]
+        }.view()
     MULTIQC (
-        ch_multiqc_files.collect(sort: true),
-        ch_multiqc_config.collect(sort: true).ifEmpty([]),
-        ch_multiqc_custom_config.collect(sort: true).ifEmpty([]),
-        ch_multiqc_logo.collect(sort: true).ifEmpty([])
+        multiqc_files,
+        multiqc_config.collect(sort: true).ifEmpty([]),
+        multiqc_custom_config.collect(sort: true).ifEmpty([]),
+        multiqc_logo.collect(sort: true).ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()
     versions    = versions.mix(MULTIQC.out.versions)
-
-    // Save error/waring/message info
-    RECORD_MESSAGES (
-        messages.collect(flat:false)
-    )
-
-
 
     // Gather sendsketch signatures
     sendsketch_hits = PREPARE_INPUT.out.sample_data
@@ -204,12 +218,6 @@ workflow PATHOGENSURVEILLANCE {
         .unique()
         .groupTuple(sort: 'hash') // report_meta, ref_meta
 
-    // Gather sourmash estimated ANI matrix
-    sourmash_ani_matrix = SKETCH_COMPARISON.out.ani_matrix // report_meta, ani_matrix
-
-    // Gather which references were assigned to each report group for variant calling
-    mapping_reference = VARIANT_ANALYSIS.out.mapping_ref // report_meta, selected_ref_meta
-
     // Gather SNP alignments from the variant analysis
     snp_align = VARIANT_ANALYSIS.out.snp_align
         .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
@@ -220,62 +228,36 @@ workflow PATHOGENSURVEILLANCE {
         .map { report_meta, ref_meta, tree -> [report_meta, tree] }
         .groupTuple(sort: 'hash') // report_meta, tree
 
-    // Gather metadata for references assigned for the core gene phylogeny
-    core_phylo_references = CORE_GENOME_PHYLOGENY.out.selected_refs
+    // Gather status messages for each group
+    group_messages = messages
+        .collectFile() { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            [ "${report_meta.id}.csv", "${sample_meta ? sample_meta.id : 'NA'},${ref_meta ? ref_meta.id : 'NA'},${workflow},${level},${message}\n" ]
+        }
+        .map {[[id: it.getSimpleName()], it]}
+        .ifEmpty([])
 
-    // Gather phylogenies from the core genome phylogeny
-    core_phylo_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
-
-    // Gather which references were assigned for the busco phylogeny
-    busco_pylo_references = BUSCO_PHYLOGENY.out.selected_refs
-
-    // Gather busco phylogenies
-    busco_phylo_trees = BUSCO_PHYLOGENY.out.tree
-
-    //// Create main summary report
-    //report_samp_data = PREPARE_INPUT.out.sample_data
-    //    .map{[[id: it.sample_id], it.paths, [id: it.ref_id], it.ref_path, [id: it.report_group_ids]]}
-    //    .combine(PREPARE_INPUT.out.sendsketch, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch
-    //    .combine(PREPARE_INPUT.out.ref_stats, by:0) // meta, [reads], ref_meta, reference, group_meta, sendsketch, ref_stats
-    //    .map { [it[2]] + it[0..1] + it[3..6] } // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats
-    //    .join(GENOME_ASSEMBLY.out.quast, remainder: true, by:0) // ref_meta, meta, [reads], reference, group_meta, sendsketch, ref_stats, quast
-    //    .map { [it[4]] + it[0..3] + it[5..7]} // group_meta, ref_meta, meta, [reads], reference, sendsketch, ref_stats, quast
-    //    .groupTuple() // group_meta, [ref_meta], [meta], [reads], [reference], [sendsketch], [ref_stats], [quast]
-    //report_variant_data = VARIANT_ANALYSIS.out.results // group_meta, ref_meta, vcf, align, tree
-    //    .groupTuple() // group_meta, [ref_meta], [vcf], [align], [tree]
-    //report_group_data = SKETCH_COMPARISON.out.ani_matrix // group_meta, ani_matrix
-    //    .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder:true) // group_meta, ani_matrix, [core_phylo]
-    //    .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder:true) // group_meta, ani_matrix, [core_phylo], popc
-    //    .join(SKETCH_COMPARISON.out.mapping_ref, remainder:true) // group_meta, ani_matrix, [core_phylo], pocp, mapping_ref
-    //report_in = report_samp_data // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast]
-    //    .join(report_variant_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-    //    .map { it.size() == 12 ? it : it[0..7] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree]
-    //    .join(report_group_data, remainder: true) // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
-    //    .map { it.size() == 16 ? it : it[0..11] + [[], [], [], []] } // group_meta, [ref_meta], [meta], [fastq], [reference], [sendsketch], [ref_stats], [quast], [ref_meta], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
-    //    .map { it[0..1] + it[5..7] + it[9..15] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
-    //    .map { [
-    //        it[0],
-    //        it[1].findAll{ it.id != null }.unique(),
-    //        it[2],
-    //        it[3],
-    //        it[4].findAll{ it != null },
-    //        it[5].findAll{ it != null },
-    //        it[6].findAll{ it != null },
-    //        it[7].findAll{ it != null },
-    //        it[8],
-    //        it[9] == null ? [] : it[9],
-    //        it[10],
-    //        it[11]
-    //     ] } // group_meta, [ref_meta], [sendsketch], [ref_stats], [quast], [vcf], [align], [tree], ani_matrix, [core_phylo], pocp, mapping_ref
+    // Combine components into a single channel for the main report_meta
+    report_inputs = sendsketch_hits
+        .join(ncbi_ref_meta, remainder: true)
+        .join(selected_ref_meta, remainder: true)
+        .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
+        .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
+        .join(snp_align, remainder: true)
+        .join(snp_phylogeny, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
+        .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
+        .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
+        .join(group_messages, remainder: true)
+        .join(MULTIQC.out.data, remainder: true)
+        .join(MULTIQC.out.plots, remainder: true)
+        .join(MULTIQC.out.report, remainder: true)
+        .map{ it.collect{ it ?: [] } }.view()
 
     //PREPARE_REPORT_INPUT (
-    //    report_in,
-    //    PREPARE_INPUT.out.csv,
-    //    MULTIQC.out.data,
-    //    MULTIQC.out.plots,
-    //    MULTIQC.out.report,
+    //    report_inputs,
     //    CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first(), // .first converts it to a value channel so it can be reused for multiple reports.
-    //    RECORD_MESSAGES.out.tsv
     //)
 
     //MAIN_REPORT (

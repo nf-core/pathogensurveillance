@@ -1,4 +1,5 @@
 process MULTIQC {
+    tag "$meta.id"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -7,15 +8,15 @@ process MULTIQC {
         'biocontainers/multiqc:1.18--pyhdfd78af_0' }"
 
     input:
-    path  multiqc_files, stageAs: "?/*"
+    tuple val(meta), path(multiqc_files, stageAs: "?/*")
     path(multiqc_config)
     path(extra_multiqc_config)
     path(multiqc_logo)
 
     output:
-    path "*multiqc_report.html", emit: report
-    path "*_data"              , emit: data
-    path "*_plots"             , optional:true, emit: plots
+    tuple val(meta), path("*multiqc_report.html"), emit: report
+    tuple val(meta), path("*_data")              , emit: data
+    tuple val(meta), path("*_plots")             , optional:true, emit: plots
     path "versions.yml"        , emit: versions
 
     when:
@@ -26,6 +27,7 @@ process MULTIQC {
     def config = multiqc_config ? "--config $multiqc_config" : ''
     def extra_config = extra_multiqc_config ? "--config $extra_multiqc_config" : ''
     def logo = multiqc_logo ? /--cl-config 'custom_logo: "${multiqc_logo}"'/ : ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     multiqc \\
         --force \\
