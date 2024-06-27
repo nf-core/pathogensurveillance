@@ -167,19 +167,19 @@ workflow PATHOGENSURVEILLANCE {
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
         .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
         .unique()
-        .groupTuple(sort: 'hash') // report_meta, sendsketch
+        .groupTuple(sort: 'hash')
     nanoplot_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
         .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
         .unique()
-        .groupTuple(sort: 'hash') // report_meta, sendsketch
+        .groupTuple(sort: 'hash')
     quast_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.quast, by: 0)
         .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
         .unique()
-        .groupTuple(sort: 'hash') // report_meta, sendsketch
+        .groupTuple(sort: 'hash')
     multiqc_files = fastqc_results
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
@@ -187,7 +187,7 @@ workflow PATHOGENSURVEILLANCE {
         .map { report_meta, fastqc, nanoplot, quast, versions ->
             files = fastqc ?: [] + nanoplot ?: [] + quast ?: [] + [versions]
             [report_meta, files.flatten()]
-        }.view()
+        }
     MULTIQC (
         multiqc_files,
         multiqc_config.collect(sort: true).ifEmpty([]),
@@ -203,12 +203,21 @@ workflow PATHOGENSURVEILLANCE {
         .combine(PREPARE_INPUT.out.sendsketch, by: 0)
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
-        .groupTuple(sort: 'hash') // report_meta, sendsketch
+        .groupTuple(sort: 'hash')
 
     // Gather NCBI reference metadata for all references considered
+    family = PREPARE_INPUT.out.families
+        .splitText(elem: 1)
+        .map { sample_meta, families ->
+            [families.replace('\n', ''), sample_meta]
+        }
     ncbi_ref_meta = PREPARE_INPUT.out.ncbi_ref_meta
-        .map { family_name, ref_meta_tsv -> [ref_meta_tsv] }
-        .collect(sort: true) // [ref_meta_tsv]
+        .combine(family, by: 0)
+        .map { family, ref_stats, sample_meta -> [sample_meta, ref_stats]}
+        .combine(PREPARE_INPUT.out.sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids]] }, by: 0)
+        .map { sample_meta, ref_stats, report_meta -> [report_meta, ref_stats] }
+        .unique()
+        .groupTuple(sort: 'hash')
 
     // Gather selected reference metadata
     selected_ref_meta = PREPARE_INPUT.out.sample_data
@@ -216,17 +225,17 @@ workflow PATHOGENSURVEILLANCE {
         .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
         .map{ sample_meta, report_meta, ref_meta -> [report_meta, ref_meta] }
         .unique()
-        .groupTuple(sort: 'hash') // report_meta, ref_meta
+        .groupTuple(sort: 'hash')
 
     // Gather SNP alignments from the variant analysis
     snp_align = VARIANT_ANALYSIS.out.snp_align
         .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
-        .groupTuple(sort: 'hash') // report_meta, snp_align
+        .groupTuple(sort: 'hash')
 
     // Gather phylogenies from the variant analysis
     snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
         .map { report_meta, ref_meta, tree -> [report_meta, tree] }
-        .groupTuple(sort: 'hash') // report_meta, tree
+        .groupTuple(sort: 'hash')
 
     // Gather status messages for each group
     group_messages = messages
@@ -249,16 +258,16 @@ workflow PATHOGENSURVEILLANCE {
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(group_messages, remainder: true)
         .join(MULTIQC.out.data, remainder: true)
         .join(MULTIQC.out.plots, remainder: true)
         .join(MULTIQC.out.report, remainder: true)
-        .map{ it.collect{ it ?: [] } }.view()
+        .join(group_messages, remainder: true)
+        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
-    //PREPARE_REPORT_INPUT (
-    //    report_inputs,
-    //    CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first(), // .first converts it to a value channel so it can be reused for multiple reports.
-    //)
+    PREPARE_REPORT_INPUT (
+        report_inputs,
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first() // .first converts it to a value channel so it can be reused for multiple reports.
+    )
 
     //MAIN_REPORT (
     //    PREPARE_REPORT_INPUT.out.report_input,

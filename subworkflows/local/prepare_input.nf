@@ -180,6 +180,7 @@ workflow PREPARE_INPUT {
     sendsketch = BBMAP_SENDSKETCH.out.hits
     ncbi_ref_meta = FIND_ASSEMBLIES.out.stats
     selected_ref_meta = PICK_ASSEMBLIES.out.stats
+    families = INITIAL_CLASSIFICATION.out.families
     versions = SAMPLESHEET_CHECK.out.versions
 }
 

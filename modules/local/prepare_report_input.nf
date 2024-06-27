@@ -8,13 +8,8 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), val(ref_metas), file(sendsketchs), file(ref_data), file(quast_dirs), file(vcfs), file(snp_aligns), file(snp_phylos), file(ani_matrix), file(core_phylo), file(pocp), file(assigned_refs)
-    path samp_data
-    path multiqc_data
-    path multiqc_plots
-    path multiqc_report
+    tuple val(group_meta), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylo), path(multiqc_data), path(multiqc_plots), path(multiqc_report), path(messages)
     path versions
-    path messages
 
     output:
     tuple val(group_meta), path("${prefix}_inputs"), emit: report_input
@@ -29,54 +24,76 @@ process PREPARE_REPORT_INPUT {
     # Make directory for ${prefix}_inputs so that a single path can be passed as parameters
     mkdir ${prefix}_inputs
 
+    # Put sendsketch's output into a single folder for organization
+    mkdir ${prefix}_inputs/sendsketch
+    cp -r ${sendsketch} ${prefix}_inputs/sendsketch/
+
+    # Put all of the statistics for NCBI references considered into a single folder
+    mkdir ${prefix}_inputs/ncbi_reference_data
+    cp -r ${ncbi_ref_meta} ${prefix}_inputs/ncbi_reference_data/
+
+    # Put the metadata for references selected for each sample into a single folder
+    mkdir ${prefix}_inputs/selected_references
+    cp -r ${selected_refs} ${prefix}_inputs/selected_references/
+
+    # Add estimated ANI matrix from sourmash
+    mv ${ani_matrix} ${prefix}_inputs/sourmash_ani_matrix.csv
+
+    # Add metadata for references assined for variant calling
+    if [ ! -z "${mapping_ref}" ]; then
+        mv ${mapping_ref} ${prefix}_inputs/mapping_references.csv
+    fi
+
+    # Add SNP alignment from variant calling
+    if [ ! -z "${snp_aligns}" ]; then
+        mkdir ${prefix}_inputs/snp_alignments
+        cp -r ${snp_aligns} ${prefix}_inputs/snp_alignments/
+    fi
+
+    # Add SNP phylogenies from variant calling
+    if [ ! -z "${snp_phylos}" ]; then
+        mkdir ${prefix}_inputs/snp_trees
+        cp -r ${snp_phylos} ${prefix}_inputs/snp_trees/
+    fi
+
+    # Add seleted references for the core gene phylogeny
+    if [ ! -z "${core_phylo_refs}" ]; then
+        cp -r ${core_phylo_refs} ${prefix}_inputs/core_gene_tree_references.csv
+    fi
+
+    # Add POCP estimate from the core genome phylogeny
+    if [ ! -z "${pocp}" ]; then
+        cp -r ${pocp} ${prefix}_inputs/pocp.csv
+    fi
+
+    # Add core genome phylogenies
+    if [ ! -z "${core_phylos}" ]; then
+        mkdir ${prefix}_inputs/core_gene_trees
+        cp -r ${core_phylos} ${prefix}_inputs/core_gene_trees/
+    fi
+
+    # Add seleted references for the busco phylogeny
+    if [ ! -z "${busco_refs}" ]; then
+        cp -r ${busco_refs} ${prefix}_inputs/busco_tree_references.csv
+    fi
+
+    # Add busco phylogeny
+    if [ ! -z "${busco_phylo}" ]; then
+        cp -r ${busco_phylo} ${prefix}_inputs/busco_tree.nwk
+    fi
+
     # Put multiqc's output into a single folder for organization
     mkdir ${prefix}_inputs/multiqc
     cp -r ${multiqc_data} ${prefix}_inputs/multiqc/
     cp -r ${multiqc_plots} ${prefix}_inputs/multiqc/
     cp -r ${multiqc_report} ${prefix}_inputs/multiqc/
 
-    # Put quast's output into a single folder for organization
-    mkdir ${prefix}_inputs/quast
-    if [ ! -z "${quast_dirs}" ]; then
-      cp -r ${quast_dirs} ${prefix}_inputs/quast/
+    # Add pipeline status messages
+    if [ ! -z "${messages}" ]; then
+        mv ${messages} ${prefix}_inputs/messages.tsv
     fi
 
-    # Put sendsketch's output into a single folder for organization
-    mkdir ${prefix}_inputs/sendsketch
-    cp -r ${sendsketchs} ${prefix}_inputs/sendsketch/
-
-    # Put variant data into a single folder for organization
-    mkdir ${prefix}_inputs/variant_data
-    if [ ! -z "${snp_phylos}" ]; then
-         cp -r ${snp_phylos} ${prefix}_inputs/variant_data/
-    fi
-    if [ ! -z "${vcfs}" ]; then
-        cp -r ${vcfs} ${prefix}_inputs/variant_data/
-    fi
-    if [ ! -z "${snp_aligns}" ]; then
-        cp -r ${snp_aligns} ${prefix}_inputs/variant_data/
-    fi
-
-    # Save report group name to file
-    echo "${group_meta.id}" > ${prefix}_inputs/group_id.txt
-
-    # Move RefSeq reference data for each sample (for phylogenetic context) to their own directory
-    mkdir ${prefix}_inputs/ref_data
-    cp -r ${ref_data} ${prefix}_inputs/ref_data/
-
-    # Put core gene phylogenies in a single folder for organization
-    mkdir ${prefix}_inputs/core_phylo
-    if [ ! -z "${core_phylo}" ]; then
-        cp -r ${core_phylo} ${prefix}_inputs/core_phylo/
-    fi
-
-    # Move other single-value paths to input directory
-    mkdir other_${prefix}_inputs
-    mv ${samp_data} ${prefix}_inputs/samp_data.csv
-    mv ${ani_matrix} ${prefix}_inputs/ani_matrix.csv
-    mv ${assigned_refs} ${prefix}_inputs/assigned_refs.csv
-    mv ${pocp} ${prefix}_inputs/pocp.tsv
+    # Add versions of software used
     mv ${versions} ${prefix}_inputs/versions.yml
-    mv ${messages} ${prefix}_inputs/messages.tsv
     """
 }
