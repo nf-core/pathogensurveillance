@@ -14,9 +14,10 @@ process MULTIQC {
     path(multiqc_logo)
 
     output:
-    tuple val(meta), path("*multiqc_report.html"), emit: report
-    tuple val(meta), path("*_data")              , emit: data
-    tuple val(meta), path("*_plots")             , optional:true, emit: plots
+    tuple val(meta), path("${prefix}_multiqc"), emit: outdir
+    //tuple val(meta), path("*multiqc_report.html"), emit: report
+    //tuple val(meta), path("*_data")              , emit: data
+    //tuple val(meta), path("*_plots")             , optional:true, emit: plots
     path "versions.yml"        , emit: versions
 
     when:
@@ -27,10 +28,11 @@ process MULTIQC {
     def config = multiqc_config ? "--config $multiqc_config" : ''
     def extra_config = extra_multiqc_config ? "--config $extra_multiqc_config" : ''
     def logo = multiqc_logo ? /--cl-config 'custom_logo: "${multiqc_logo}"'/ : ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
     multiqc \\
         --force \\
+        --outdir ${prefix}_multiqc \\
         $args \\
         $config \\
         $extra_config \\

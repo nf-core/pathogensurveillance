@@ -194,8 +194,7 @@ workflow PATHOGENSURVEILLANCE {
         multiqc_custom_config.collect(sort: true).ifEmpty([]),
         multiqc_logo.collect(sort: true).ifEmpty([])
     )
-    multiqc_report = MULTIQC.out.report.toList()
-    versions    = versions.mix(MULTIQC.out.versions)
+    versions = versions.mix(MULTIQC.out.versions)
 
     // Gather sendsketch signatures
     sendsketch_hits = PREPARE_INPUT.out.sample_data
@@ -258,9 +257,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(MULTIQC.out.data, remainder: true)
-        .join(MULTIQC.out.plots, remainder: true)
-        .join(MULTIQC.out.report, remainder: true)
+        .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
