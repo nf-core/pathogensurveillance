@@ -196,6 +196,34 @@ workflow PATHOGENSURVEILLANCE {
     )
     versions = versions.mix(MULTIQC.out.versions)
 
+    // Gather sample data for each report
+    sample_data_csvs = PREPARE_INPUT.out.sample_data
+        .map{ sample_meta ->
+            out = new HashMap(sample_meta)
+            out.remove('paths')
+            out.remove('ref_metas')
+            out.remove('ref_ids')
+            [[id: out.report_group_ids], out]
+        }
+        .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
+            [ "${report_meta.id}_sample_data.csv", sample_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+        }
+        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+
+    // Gather reference data for each report
+    reference_data_csvs = PREPARE_INPUT.out.sample_data
+        .map { sample_meta ->
+            [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
+        }
+        .transpose(by: 1)
+        .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
+            out = new HashMap(ref_meta)
+            out.remove('ref_path')
+            out.remove('gff')
+            [ "${report_meta.id}_reference_data.csv", out.keySet().collect{'"' + it + '"'}.join(',') + "\n" + out.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+        }
+        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+
     // Gather sendsketch signatures
     sendsketch_hits = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
@@ -238,14 +266,16 @@ workflow PATHOGENSURVEILLANCE {
 
     // Gather status messages for each group
     group_messages = messages
-        .collectFile() { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.csv", "${sample_meta ? sample_meta.id : 'NA'},${ref_meta ? ref_meta.id : 'NA'},${workflow},${level},${message}\n" ]
+        .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            [ "${report_meta.id}.csv", "\"sample_id\",\"reference_id\",\"workflow\",\"level\",\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\",\"${ref_meta ? ref_meta.id : 'NA'}\",\"${workflow}\",\"${level}\",\"${message}\"\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
         .ifEmpty([])
 
     // Combine components into a single channel for the main report_meta
-    report_inputs = sendsketch_hits
+    report_inputs = sample_data_csvs
+        .join(reference_data_csvs, remainder: true)
+        .join(sendsketch_hits, remainder: true)
         .join(ncbi_ref_meta, remainder: true)
         .join(selected_ref_meta, remainder: true)
         .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
@@ -259,7 +289,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+        .map{ it.collect{ it ?: [] } }.view() //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (
         report_inputs,

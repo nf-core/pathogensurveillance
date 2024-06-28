@@ -8,7 +8,7 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylo), path(multiqc), path(messages)
+    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylo), path(multiqc), path(messages)
     path versions
 
     output:
@@ -23,6 +23,15 @@ process PREPARE_REPORT_INPUT {
     """
     # Make directory for ${prefix}_inputs so that a single path can be passed as parameters
     mkdir ${prefix}_inputs
+
+    # Save report group name to file
+    echo "${group_meta.id}" > ${prefix}_inputs/group_id.txt
+
+    # Add sample metadata for this report group
+    cp -r ${sample_data} ${prefix}_inputs/sample_data.csv
+
+    # Add reference metadata for this report group
+    cp -r ${ref_data} ${prefix}_inputs/reference_data.csv
 
     # Put sendsketch's output into a single folder for organization
     mkdir ${prefix}_inputs/sendsketch
