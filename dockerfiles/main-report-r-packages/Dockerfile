@@ -62,7 +62,8 @@ install.r \
     metacoder \
     ggdendro \
     DT \
-    heatmaply
+    heatmaply \
+    leaflet
 EOF
 
 RUN <<EOF
@@ -78,7 +79,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer@d31072393a4f90b3afd663c5b1b997657d5314e2")'
+Rscript -e 'devtools::install_github("grunwaldlab/psminer@641727c9e46fb08553a383e6cdf3f501144b3dba")'
 EOF
 
 

@@ -6,7 +6,7 @@ process DOWNLOAD_ASSEMBLIES {
     maxRetries 6
     maxErrors 10
 
-    conda "conda-forge::ncbi-datasets-cli=15.11.0"
+    conda "conda-forge::ncbi-datasets-cli=15.11.0 conda-forge::unzip=6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ncbi-datasets-cli:14.26.0 ':
         'zachary-foster/ncbi-datasets-cli:16.0.0' }"

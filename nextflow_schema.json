@@ -261,6 +261,15 @@
                     "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
+                "copymode": {
+                    "type": "string",
+                    "default": "medium",
+                    "description": "Designates which files are copied from work/ directory",
+                    "help_text": "Sets `publishDir` mode for individual files. Storage footprint of the pipeline can be quite large, and files can be saved twice: both within the work/ directory and within the published output directory. By default, this parameter is set so that intermediate files will be linked from the published directory to their location in the work/ directory instead of being stored twice.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": ["high", "medium", "low", "none"],
+                    "hidden": false
+                },
                 "email_on_fail": {
                     "type": "string",
                     "description": "Email address for completion summary, only when pipeline fails.",
