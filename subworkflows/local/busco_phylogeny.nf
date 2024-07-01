@@ -11,8 +11,6 @@ workflow BUSCO_PHYLOGENY {
     take:
     sample_data
     ani_matrix // report_group_id, ani_matrix
-    // input // val(meta), [file(fastq)], val(group_meta), [val(ref_meta)], val(kingdom), val(depth)
-    //ref_seqs // val(ref_meta), file(fna)
 
     main:
 

@@ -151,17 +151,6 @@ workflow PATHOGENSURVEILLANCE {
     )
 
     // MultiQC
-    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
-    //workflow_summary = Channel.value(workflow_summary)
-    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, multiqc_custom_methods_description)
-    //methods_description = Channel.value(methods_description)
-    //multiqc_files = Channel.empty()
-    //multiqc_files = multiqc_files.mix(workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')) // NOTE: this breaks the cache
-    //multiqc_files = multiqc_files.mix(methods_description.collectFile(name: 'methods_description_mqc.yaml')) // NOTE: this breaks the cache
-    //multiqc_files = multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
-    //multiqc_files = multiqc_files.mix(INITIAL_QC_CHECKS.out.fastqc_zip.map{it[1]}.collect(sort: true).ifEmpty([]))
-    //multiqc_files = multiqc_files.mix(INITIAL_QC_CHECKS.out.nanoplot_txt.map{it[1]}.collect(sort: true).ifEmpty([]))
-    //multiqc_files = multiqc_files.mix(GENOME_ASSEMBLY.out.quast.map{it[1]}.collect(sort: true).ifEmpty([]))
     fastqc_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
@@ -199,11 +188,7 @@ workflow PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     sample_data_csvs = PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            out = new HashMap(sample_meta)
-            out.remove('paths')
-            out.remove('ref_metas')
-            out.remove('ref_ids')
-            [[id: out.report_group_ids], out]
+            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
         }
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
             [ "${report_meta.id}_sample_data.csv", sample_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
@@ -216,11 +201,11 @@ workflow PATHOGENSURVEILLANCE {
             [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
         }
         .transpose(by: 1)
+        .map { report_meta, ref_meta ->
+            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+        }
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            out = new HashMap(ref_meta)
-            out.remove('ref_path')
-            out.remove('gff')
-            [ "${report_meta.id}_reference_data.csv", out.keySet().collect{'"' + it + '"'}.join(',') + "\n" + out.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+            [ "${report_meta.id}_reference_data.csv", ref_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
         }
         .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
@@ -289,7 +274,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-        .map{ it.collect{ it ?: [] } }.view() //replace nulls with empty lists
+        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (
         report_inputs,

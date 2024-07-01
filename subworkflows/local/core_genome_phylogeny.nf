@@ -136,7 +136,6 @@ workflow CORE_GENOME_PHYLOGENY {
     messages = messages.mix(removed_refs)
     messages = messages.mix(removed_samps)
 
-
     // Align each gene family with mafft
     core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
         .transpose() // group_meta, gene_dir
@@ -151,7 +150,6 @@ workflow CORE_GENOME_PHYLOGENY {
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
-
 
     // Mix in null placeholders for failed groups
     pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message

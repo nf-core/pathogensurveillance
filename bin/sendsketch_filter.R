@@ -44,8 +44,8 @@ writeLines(species, "species.txt")
 writeLines(genus, "genera.txt")
 writeLines(family, "families.txt")
 
-# Save kingdom 
-kingdom <- gsub("sk:(.+);p:.*", "\\1", data$taxonomy[1])
+# Save kingdom
+kingdom <- gsub("sk:(.+?);[kp]:.*", "\\1", data$taxonomy[1])
 writeLines(kingdom, "kingdom.txt")
 
 # Save full taxonomic classification
