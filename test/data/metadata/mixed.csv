@@ -1,4 +1,4 @@
-sample_id,reads_sra,reads_type,color_by,organism_group,kingdom,report_group
+sample_id,ncbi_accession,sequence_type,color_by,organism_group,kingdom,report_group_ids
 PHW726_fox_matthiolae,SRR10432277,illumina,organism_group,fungi,fungi,mixed;fungi
 BDM_Pbelbahrii,ERR1578941,illumina,organism_group,oomycete,sar,mixed;oomycete
 HoneyBee_Adorsata,SRR1564144,illumina,organism_group,insect,metazoa,mixed;insect
