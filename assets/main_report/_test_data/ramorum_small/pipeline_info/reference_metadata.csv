@@ -1,0 +1,2 @@
+"ref_id","ref_name","ref_description","ref_path","ref_ncbi_accession","ref_ncbi_query","ref_ncbi_query_max","ref_primary_usage","ref_contextual_usage","ref_color_by"
+"PR_102_v3_1","PR-102 v3.1","PR-102 v3.1","https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/refs/PR-102_v3.1.fasta.gz","","","30","optional","optional",""

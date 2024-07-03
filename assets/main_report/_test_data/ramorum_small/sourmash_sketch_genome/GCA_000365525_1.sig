@@ -1,0 +1,1 @@
+/home/marthasudermann/pathogensurveillance/work/84/72fdd371e18da11263f0adce8f87fa/GCA_000365525_1.sig
