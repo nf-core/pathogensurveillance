@@ -1,4 +1,4 @@
-Shortread_1,Shortread_2,color_by,Kingdom
+path,path_2,color_by,Kingdom
 /home/buchananr/Desktop/pathogensurveillance/test_reads/arch1_1.fastq.gz,/home/buchananr/Desktop/pathogensurveillance/test_reads/arch1_2.fastq.gz,Kingdom,Bacteria
 /home/buchananr/Desktop/pathogensurveillance/test_reads/arch2_1.fastq.gz,/home/buchananr/Desktop/pathogensurveillance/test_reads/arch2_2.fastq.gz,Kingdom,Bacteria
 /home/buchananr/Desktop/pathogensurveillance/test_reads/ERR11194149_1.fastq.gz,/home/buchananr/Desktop/pathogensurveillance/test_reads/ERR11194149_2.fastq.gz,Kingdom,Archaea
