@@ -274,6 +274,8 @@ workflow PATHOGENSURVEILLANCE {
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
+	.filter{it[0] != null} // remove extra item if messages is empty
+	.map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (
