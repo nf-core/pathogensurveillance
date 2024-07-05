@@ -81,8 +81,21 @@ workflow BUSCO_PHYLOGENY {
 
     // Create Read2tree database
     R2TF (
-        BUSCO.out.busco_dir
+        BUSCO.out.single_copy_fna
+            .filter{ ref_meta, gene_paths ->
+                gene_paths.size() > 0
+            }
+            .join(BUSCO.out.single_copy_faa)
 	)
+    no_gene_warnings = BUSCO.out.single_copy_fna
+        .filter{ ref_meta, gene_paths ->
+            gene_paths.size() == 0
+        }
+        .combine(selected_ref_data, by: 0)
+        .map { ref_meta, gene_paths, report_meta, ref_path ->
+            [null, report_meta, ref_meta, "BUSCO_PHYLOGENY", "WARNING", "Reference excluded from BUSCO phylogeny because no single copy busco genes were found."]
+        }
+    messages = messages.mix(no_gene_warnings)
 
     // Create directories for Read2Tree
     R2TDIR (

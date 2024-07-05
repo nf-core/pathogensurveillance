@@ -8,7 +8,7 @@ process R2TF {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(ref_meta), path(busco_dir)
+    tuple val(ref_meta), path(single_copy_fna), path(single_copy_faa)
 
     output:
     tuple val(ref_meta), path("${outdir}"), emit: output
@@ -24,7 +24,7 @@ process R2TF {
     CODEX=\$(echo "${ref_meta.name}" | awk '{print toupper(substr(\$1,1,3))toupper(substr(\$2,1,2))}')
     mkdir ${outdir}
 
-    fna=\$(grep '^>' ${busco_dir}/*_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.fna)
+    fna=\$(grep '^>' $single_copy_fna)
 
     while IFS= read -r fastafile; do
         echo "Processing file \$fastafile"
@@ -49,7 +49,7 @@ process R2TF {
     done <<< \$fna
 
 
-    faa=\$(grep '^>' ${busco_dir}/*_genomic.fna/run_eukaryota_odb10/busco_sequences/single_copy_busco_sequences/*.faa)
+    faa=\$(grep '^>' $single_copy_faa)
 
     while IFS= read -r fastafile; do
         #echo "Processing file \$fastafile"
