@@ -1,0 +1,4 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+12788261	GCF_000700745.1	ASM70074v2	279965	Antrostomus carolinensis (chuck-will's-widow)	279965	Antrostomus carolinensis	haploid	Scaffold	30	false	Minor	Minor	representative genome	2014/06/10 00:00	2023/02/18 00:00	22170	46377
+7334401	GCA_013399635.1	ASM1339963v1	118183	Chordeiles acutipennis (lesser nighthawk)	118183	Chordeiles acutipennis	haploid	Scaffold	67	false	Major	Major	representative genome	2020/07/10 00:00	2020/07/10 00:00	40733	630207
+7334311	GCA_013399395.1	ASM1339939v1	382315	Nyctiprogne leucopyga (birds)	382315	Nyctiprogne leucopyga	haploid	Scaffold	62	false	Major	Major	representative genome	2020/07/10 00:00	2020/07/10 00:00	28894	190423

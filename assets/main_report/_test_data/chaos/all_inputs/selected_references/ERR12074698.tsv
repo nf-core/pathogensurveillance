@@ -1,0 +1,22 @@
+ref_id	ref_name	ref_description	ref_path	ref_ncbi_accession	ref_ncbi_query	ref_ncbi_query_max	ref_primary_usage	ref_contextual_usage	ref_color_by
+GCF_902167145_1	Zea mays	Zea mays (GCF_902167145.1)		GCF_902167145.1			optional	optional	
+GCA_005223365_2	Oryza meyeriana var. granulata	Oryza meyeriana var. granulata (GCA_005223365.2)		GCA_005223365.2			optional	optional	
+GCA_003046395_2	Panicum miliaceum	Panicum miliaceum (GCA_003046395.2)		GCA_003046395.2			optional	optional	
+GCA_004007595_1	Oryza sativa	Oryza sativa (GCA_004007595.1)		GCA_004007595.1			optional	optional	
+GCA_021604985_1	Eleusine coracana subsp. coracana	Eleusine coracana subsp. coracana (GCA_021604985.1)		GCA_021604985.1			optional	optional	
+GCA_005286985_2	Setaria viridis	Setaria viridis (GCA_005286985.2)		GCA_005286985.2			optional	optional	
+GCF_000147395_1	Oryza glaberrima	Oryza glaberrima (GCF_000147395.1)		GCF_000147395.1			optional	optional	
+GCF_000231095_2	Oryza brachyantha	Oryza brachyantha (GCF_000231095.2)		GCF_000231095.2			optional	optional	
+GCA_003061485_1	Panicum hallii var. hallii	Panicum hallii var. hallii (GCA_003061485.1)		GCA_003061485.1			optional	optional	
+GCF_016808335_1	Panicum virgatum	Panicum virgatum (GCF_016808335.1)		GCF_016808335.1			optional	optional	
+GCA_015952705_1	Sorghum bicolor	Sorghum bicolor (GCA_015952705.1)		GCA_015952705.1			optional	optional	
+GCA_002220415_3	Triticum aestivum	Triticum aestivum (GCA_002220415.3)		GCA_002220415.3			optional	optional	
+GCA_024137805_1	Hordeum vulgare	Hordeum vulgare (GCA_024137805.1)		GCA_024137805.1			optional	optional	
+GCF_002575655_2	Aegilops tauschii subsp. strangulata	Aegilops tauschii subsp. strangulata (GCF_002575655.2)		GCF_002575655.2			optional	optional	
+GCF_022539505_1	Lolium rigidum	Lolium rigidum (GCF_022539505.1)		GCF_022539505.1			optional	optional	
+GCF_902167145_1	Zea mays	Zea mays (GCF_902167145.1)		GCF_902167145.1			optional	optional	
+GCF_028017835_1	Emys orbicularis	Emys orbicularis (GCF_028017835.1)		GCF_028017835.1			optional	optional	
+GCF_027887155_1	Malaclemys terrapin pileata	Malaclemys terrapin pileata (GCF_027887155.1)		GCF_027887155.1			optional	optional	
+GCF_013100865_1	Trachemys scripta elegans	Trachemys scripta elegans (GCF_013100865.1)		GCF_013100865.1			optional	optional	
+GCF_020740795_1	Apus apus	Apus apus (GCF_020740795.1)		GCF_020740795.1			optional	optional	
+GCA_904845875_1	Miscanthus lutarioriparius	Miscanthus lutarioriparius (GCA_904845875.1)		GCA_904845875.1			optional	optional	

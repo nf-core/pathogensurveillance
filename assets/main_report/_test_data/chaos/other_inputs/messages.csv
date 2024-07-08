@@ -1,0 +1,4 @@
+"sample_id","reference_id","workflow","level","message"
+"NA","GCF_000223395_1","VARIANT_ANALYSIS","WARNING","Not enough samples to build a SNP tree."
+"NA","GCF_000193595_2","VARIANT_ANALYSIS","WARNING","Not enough samples to build a SNP tree."
+"NA","GCF_902167145_1","VARIANT_ANALYSIS","WARNING","Not enough samples to build a SNP tree."

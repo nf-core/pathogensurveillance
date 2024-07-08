@@ -1,0 +1,4 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+10078941	GCF_907164935.1	iOsmBic2.1	1437191	Osmia bicornis bicornis (red mason bee)	1437190	Osmia bicornis	haploid (principal pseudohaplotype of diploid)	Chromosome	93	false	Major	Major	representative genome	2021/05/17 00:00	2022/02/01 00:00	9077890	10976010
+6720351	GCF_012274295.1	USDA_OLig_1.0	473952	Osmia lignaria (orchard mason bee)	473952	Osmia lignaria	haploid	Contig	127	false	Major	Major	representative genome	2020/04/13 00:00	2020/05/13 00:00	5475884	5475884
+367368	GCF_000220905.1	MROT_1.0	143995	Megachile rotundata (alfalfa leafcutting bee)	143995	Megachile rotundata	haploid	Scaffold	300	false	Major	Major	representative genome	2011/07/19 00:00	2012/04/10 00:00	64153	1699680

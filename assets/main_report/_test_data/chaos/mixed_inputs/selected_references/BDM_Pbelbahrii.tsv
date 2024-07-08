@@ -1,0 +1,24 @@
+ref_id	ref_name	ref_description	ref_path	ref_ncbi_accession	ref_ncbi_query	ref_ncbi_query_max	ref_primary_usage	ref_contextual_usage	ref_color_by
+GCA_019512045_2	Perilla frutescens var. hirtella	Perilla frutescens var. hirtella (GCA_019512045.2)		GCA_019512045.2			optional	optional	
+GCA_019511825_2	Perilla frutescens var. frutescens	Perilla frutescens var. frutescens (GCA_019511825.2)		GCA_019511825.2			optional	optional	
+GCF_028751815_1	Salvia miltiorrhiza	Salvia miltiorrhiza (GCF_028751815.1)		GCF_028751815.1			optional	optional	
+GCF_023119035_1	Salvia hispanica	Salvia hispanica (GCF_023119035.1)		GCF_023119035.1			optional	optional	
+GCF_004379255_1	Salvia splendens	Salvia splendens (GCF_004379255.1)		GCF_004379255.1			optional	optional	
+GCF_016766755_1	Cutibacterium avidum	Cutibacterium avidum (GCF_016766755.1)		GCF_016766755.1			optional	optional	
+GCF_019704575_1	Cutibacterium modestum	Cutibacterium modestum (GCF_019704575.1)		GCF_019704575.1			optional	optional	
+GCF_020181495_1	Cutibacterium acnes subsp. acnes	Cutibacterium acnes subsp. acnes (GCF_020181495.1)		GCF_020181495.1			optional	optional	
+GCF_028021195_1	Cutibacterium equinum	Cutibacterium equinum (GCF_028021195.1)		GCF_028021195.1			optional	optional	
+GCF_900186975_1	Cutibacterium granulosum	Cutibacterium granulosum (GCF_900186975.1)		GCF_900186975.1			optional	optional	
+GCF_024436255_1	Cutibacterium sp. SC8-2W	Cutibacterium sp. SC8-2W (GCF_024436255.1)		GCF_024436255.1			optional	optional	
+GCF_009696315_1	Cutibacterium porci	Cutibacterium porci (GCF_009696315.1)		GCF_009696315.1			optional	optional	
+GCF_036889625_1	Cutibacterium namnetense	Cutibacterium namnetense (GCF_036889625.1)		GCF_036889625.1			optional	optional	
+GCA_019512045_2	Perilla frutescens var. hirtella	Perilla frutescens var. hirtella (GCA_019512045.2)		GCA_019512045.2			optional	optional	
+GCA_034509735_1	Sesamum alatum	Sesamum alatum (GCA_034509735.1)		GCA_034509735.1			optional	optional	
+GCF_022009635_1	Variovorax paradoxus	Variovorax paradoxus (GCF_022009635.1)		GCF_022009635.1			optional	optional	
+GCF_013407955_1	Microlunatus parietis	Microlunatus parietis (GCF_013407955.1)		GCF_013407955.1			optional	optional	
+GCF_001753225_1	Delftia tsuruhatensis	Delftia tsuruhatensis (GCF_001753225.1)		GCF_001753225.1			optional	optional	
+GCF_011305995_1	Diaphorobacter sp. HDW4A	Diaphorobacter sp. HDW4A (GCF_011305995.1)		GCF_011305995.1			optional	optional	
+GCF_009859475_1	Hydrogenophaga sp. BPS33	Hydrogenophaga sp. BPS33 (GCF_009859475.1)		GCF_009859475.1			optional	optional	
+GCF_034479025_1	Comamonas testosteroni	Comamonas testosteroni (GCF_034479025.1)		GCF_034479025.1			optional	optional	
+GCF_001955695_1	Rhodoferax koreense	Rhodoferax koreense (GCF_001955695.1)		GCF_001955695.1			optional	optional	
+GCF_003029685_1	Paracidovorax avenae	Paracidovorax avenae (GCF_003029685.1)		GCF_003029685.1			optional	optional	

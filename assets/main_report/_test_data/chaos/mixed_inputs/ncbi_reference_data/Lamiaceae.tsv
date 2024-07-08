@@ -1,0 +1,7 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+16316571	GCF_004379255.1	SspV2	180675	Salvia splendens (eudicots)	180675	Salvia splendens	haploid	Chromosome	100	false	Minor	Minor	representative genome	2021/05/20 00:00	2023/03/30 00:00	4037669	35138742
+16004191	GCF_028751815.1	IMPLAD_Smil_shh	226208	Salvia miltiorrhiza (eudicots)	226208	Salvia miltiorrhiza	haploid	Chromosome	668.96	false	Major	Major	representative genome	2023/02/24 00:00	2023/07/05 00:00	1012308	60279590
+12623731	GCF_023119035.1	UniMelb_Shisp_WGS_1.0	49212	Salvia hispanica (eudicots)	49212	Salvia hispanica	haploid	Chromosome	1200	false	Major	Major	representative genome	2022/04/29 00:00	2022/05/09 00:00	116000	53190533
+11370821	GCA_004303085.2	ASM430308v2	608512	Perilla frutescens var. hirtella (eudicots)	48386	Perilla frutescens	haploid	Scaffold	120	false	Major	Major	na	2021/11/02 00:00	2022/11/05 00:00	80148	2413193
+11370741	GCA_019512045.2	ICMM_Pcit_2.0	608512	Perilla frutescens var. hirtella (eudicots)	48386	Perilla frutescens	haploid	Scaffold	57.2	false	Major	Major	na	2021/11/02 00:00	2023/02/12 00:00	854780	64469250
+11370731	GCA_019511825.2	ICMM_Pfru_2.0	151328	Perilla frutescens var. frutescens (eudicots)	48386	Perilla frutescens	haploid	Scaffold	54.5	false	Major	Major	na	2021/11/02 00:00	2021/11/02 00:00	2738655	62644896

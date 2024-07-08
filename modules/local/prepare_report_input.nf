@@ -96,7 +96,7 @@ process PREPARE_REPORT_INPUT {
 
     # Add pipeline status messages
     if [ ! -z "${messages}" ]; then
-        mv ${messages} ${prefix}_inputs/messages.tsv
+        mv ${messages} ${prefix}_inputs/messages.csv
     fi
 
     # Add versions of software used

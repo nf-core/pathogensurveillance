@@ -1,0 +1,154 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+47174048	GCA_031315385.1	ASM3131538v1	2950891	Tomato vitivirus 1 (viruses)	2950891	Tomato vitivirus 1	haploid	Complete Genome	NA	false	Major	Major	na	2022/07/18 00:00	2023/09/08 00:00	7501	7501
+47172008	GCA_031314365.1	ASM3131436v1	2945986	polyscias citrivirus 1 (viruses)	2945986	polyscias citrivirus 1	haploid	Complete Genome	NA	false	Major	Major	na	2022/06/15 00:00	2023/09/08 00:00	8306	8306
+47171988	GCA_031314355.1	ASM3131435v1	2945985	polyscias capillovirus 1 (viruses)	2945985	polyscias capillovirus 1	haploid	Complete Genome	NA	false	Major	Major	na	2022/06/15 00:00	2023/09/08 00:00	6447	6447
+47159158	GCA_031308455.1	ASM3130845v1	2917348	Grapevine virus O (viruses)	2917348	Grapevine virus O	haploid	Complete Genome	NA	false	Major	Major	na	2022/02/11 00:00	2023/09/08 00:00	7559	7559
+47159138	GCA_031308445.1	ASM3130844v1	2917347	Grapevine virus N (viruses)	2917347	Grapevine virus N	haploid	Complete Genome	NA	false	Major	Major	na	2022/02/11 00:00	2023/09/08 00:00	7485	7485
+47098848	GCA_031259865.1	ASM3125986v1	2862825	wheat yellow stunt associated betaflexivirus (viruses)	2862825	wheat yellow stunt associated betaflexivirus	haploid	Complete Genome	NA	false	Major	Major	na	2021/07/28 00:00	2023/09/08 00:00	8410	8410
+47098168	GCA_031259355.1	ASM3125935v1	2859709	Wheat virus Q (viruses)	2859709	Wheat virus Q	haploid	Complete Genome	NA	false	Major	Major	na	2021/07/17 00:00	2023/09/07 00:00	8412	8412
+47075848	GCA_031239595.1	ASM3123959v1	2806893	Garlic yellow stripe associated virus (viruses)	2806893	Garlic yellow stripe associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2021/01/29 00:00	2023/09/07 00:00	8777	8777
+47075628	GCA_031239485.1	ASM3123948v1	2802540	Citrus leaf blotch virus 2 (viruses)	2802540	Citrus leaf blotch virus 2	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/07 00:00	2023/09/07 00:00	8698	8698
+47075248	GCA_031239295.1	ASM3123929v1	2792879	Cole mild mosaic virus (viruses)	2792879	Cole mild mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2019/11/21 00:00	2023/09/07 00:00	8557	8557
+47022488	GCA_031199595.1	ASM3119959v1	2711145	Sweet potato virus F (viruses)	2711145	Sweet potato virus F	haploid	Complete Genome	NA	false	Major	Major	na	2019/04/29 00:00	2023/09/07 00:00	9122	9122
+47020568	GCA_031199005.1	ASM3119900v1	2703654	Nandina citrivirus (viruses)	2703654	Nandina citrivirus	haploid	Complete Genome	NA	false	Major	Major	na	2020/01/24 00:00	2023/09/07 00:00	8892	8892
+47009628	GCA_031192525.1	ASM3119252v1	2593970	Ficus tepovirus A (viruses)	2593970	Ficus tepovirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	6849	6849
+47009588	GCA_031192515.1	ASM3119251v1	2593969	Trichosanthes tepovirus A (viruses)	2593969	Trichosanthes tepovirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	6860	6860
+47009548	GCA_031192505.1	ASM3119250v1	2593968	Paeonia citrivirus A (viruses)	2593968	Paeonia citrivirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	6451	6451
+47009488	GCA_031192485.1	ASM3119248v1	2593965	Karelinia prunevirus A (viruses)	2593965	Karelinia prunevirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	8383	8383
+47009408	GCA_031192465.1	ASM3119246v1	2593962	Allium carlavirus A (viruses)	2593962	Allium carlavirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	8500	8500
+47009388	GCA_031192455.1	ASM3119245v1	2593961	Agave vitivirus A (viruses)	2593961	Agave vitivirus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/08/13 00:00	2023/09/06 00:00	6926	6926
+47001008	GCA_031186355.1	ASM3118635v1	2559943	Dioscorea virus A (viruses)	2559943	Dioscorea virus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/05/27 00:00	2023/09/06 00:00	7631	7631
+42322638	GCF_029886605.1	ASM2988660v1	3071210	Musa ornata-associated banmivirus (viruses)	3059757	Banmivirus MoaBV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7364	7364
+42322438	GCF_029886505.1	ASM2988650v1	2913660	Hogweed virus 4 (viruses)	2913660	Hogweed virus 4	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8301	8301
+42321218	GCF_029885845.1	ASM2988584v1	2838076	Agapanthus carlavirus B (viruses)	3059827	Carlavirus AgCVB	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8780	8780
+42320718	GCF_029885595.1	ASM2988559v1	2838077	Clivia carlavirus A (viruses)	3059830	Carlavirus ClCVA	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8412	8412
+42320658	GCF_029885565.1	ASM2988556v1	2777710	Rose virus B (viruses)	2777710	Rose virus B	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8845	8845
+42320198	GCF_029885225.1	ASM2988522v1	2791164	Camellia ringspot associated virus 4 (viruses)	2791164	Camellia ringspot associated virus 4	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8829	8829
+42320118	GCF_029885185.1	ASM2988518v1	2764701	Aconite virus A (viruses)	2764701	Aconite virus A	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8866	8866
+42319878	GCF_029885065.1	ASM2988506v1	2763538	Grapevine foveavirus A (viruses)	2763538	Grapevine foveavirus A	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8624	8624
+42319618	GCF_029884935.1	ASM2988493v1	2683823	Loquat virus A (viruses)	2683823	Loquat virus A	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7553	7553
+32999108	GCF_023155825.1	ASM2315582v1	2805380	Agave virus T (viruses)	2956492	Tepovirus AgVT	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	6408	6408
+32998698	GCF_023155495.1	ASM2315549v1	2796532	Soybean carlavirus 1 (viruses)	2955590	Carlavirus SCV1	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8681	8681
+32991038	GCF_023148215.1	ASM2314821v1	2283237	Grapevine virus L (viruses)	2956654	Vitivirus GVL	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7621	7621
+32990528	GCF_023147845.1	ASM2314784v1	2763129	Cherry virus T (viruses)	2956493	Tepovirus ChVT	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	6847	6847
+32990208	GCF_023147625.1	ASM2314762v1	2754817	Rubus virus 1 (viruses)	2955911	Foveavirus RuV1	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8645	8645
+32973198	GCF_023131325.1	ASM2313132v1	2650000	Rose virus A (viruses)	2955589	Carlavirus RoVA	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8869	8869
+32973138	GCF_023131315.1	ASM2313131v1	3071279	rubber tree virus 1 (viruses)	2955580	Capillovirus TRV1	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	6811	6811
+32973018	GCF_023131195.1	ASM2313119v1	3071214	papaya mottle-associated virus (viruses)	2955587	Carlavirus PapMaV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	9080	9080
+32972998	GCF_023131175.1	ASM2313117v1	2716617	Papaya mild mottle associated virus (viruses)	2955586	Carlavirus PaMMaV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	9081	9081
+32972948	GCF_023131165.1	ASM2313116v1	2705123	Cherry symptomless virus (viruses)	2705123	Cherry symptomless virus	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7460	7460
+32965998	GCF_023124425.1	ASM2312442v1	2562808	Zostera virus T (viruses)	2956494	Tepovirus ZoVT	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	6992	6992
+32965898	GCF_023124375.1	ASM2312437v1	2605718	Blueberry green mosaic associated virus (viruses)	2956653	Vitivirus BGMaV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7477	7477
+32964378	GCF_023123135.1	ASM2312313v1	2606569	Camellia ringspot associated virus 1 (viruses)	2956339	Prunevirus CRSaV-1	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7779	7779
+32964338	GCF_023123115.1	ASM2312311v1	2597809	Mexico trichovirus (viruses)	2597809	Mexico trichovirus	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8009	8009
+32964038	GCF_023122965.1	ASM2312296v1	2248769	Birch carlavirus (viruses)	2955584	Carlavirus BiCV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8896	8896
+32963938	GCF_023122915.1	ASM2312291v1	2586033	Shallot virus S (viruses)	2955591	Carlavirus ShVS	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8384	8384
+32963898	GCF_023122895.1	ASM2312289v1	2358294	Peach chlorotic leaf spot virus (viruses)	2956554	Trichovirus PCLSV	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	7466	7466
+32961178	GCF_023120455.1	ASM2312045v1	2108357	Cherry virus B (viruses)	2955910	Foveavirus ChVB	haploid	Complete Genome	NA	false	Major	Major	na	2023/05/04 00:00	2023/05/04 00:00	8806	8806
+8518888	GCF_000894735.2	ViralProj70003	1051792	Grapevine Pinot gris virus (viruses)	1051792	Grapevine Pinot gris virus	haploid	Complete Genome	NA	false	Major	Major	na	2018/07/12 00:00	2021/11/06 00:00	7259	7259
+8393988	GCF_004134665.1	ASM413466v1	2419804	Salvia divinorum RNA virus 1 (viruses)	2419804	Salvia divinorum RNA virus 1	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	9214	9214
+8392868	GCF_004133545.1	ASM413354v1	2303411	Panax ginseng flexivirus 1 (viruses)	2303411	Panax ginseng flexivirus 1	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	9002	9002
+8392448	GCF_004133125.1	ASM413312v1	2137858	Mume virus A (viruses)	2137858	Mume virus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7644	7644
+8392048	GCF_004132725.1	ASM413272v1	2093496	Grapevine virus J (viruses)	2093496	Grapevine virus J	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7390	7390
+8391888	GCF_004132565.1	ASM413256v1	2116736	Chrysanthemum virus R (viruses)	2955585	Carlavirus CVR	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	8890	8890
+8391748	GCF_004132425.1	ASM413242v1	2185086	Blackberry virus A (viruses)	2185086	Blackberry virus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7285	7285
+8391568	GCF_004132245.1	ASM413224v1	2200955	Lettuce chordovirus 1 (viruses)	2200955	Lettuce chordovirus 1	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	8536	8536
+8391328	GCF_004132005.1	VLJ-178	2022475	Grapevine virus G (viruses)	2022475	Grapevine virus G	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7475	7475
+8390628	GCF_004131305.1	ASM413130v1	2045345	Grapevine virus H (viruses)	2045345	Grapevine virus H	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7446	7446
+8390588	GCF_004131265.1	ASM413126v1	2560282	Actinidia seed borne latent virus (viruses)	2560282	Actinidia seed borne latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	8192	8192
+8390548	GCF_004131225.1	VID561	2022475	Grapevine virus G (viruses)	2022475	Grapevine virus G	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7496	7496
+8390268	GCF_004130965.1	ASM413096v1	1569057	Ribes americanum virus A (viruses)	1569057	Ribes americanum virus A	haploid	Complete Genome	NA	false	Major	Major	na	2019/02/12 00:00	2021/11/06 00:00	7106	7106
+6314328	GCF_003029105.1	ASM302910v1	1702121	Atractylodes mottle virus (viruses)	1702121	Atractylodes mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2018/08/24 00:00	2021/11/06 00:00	8881	8881
+6036248	GCF_002937185.1	comp6140	2052157	Grapevine virus I (viruses)	2052157	Grapevine virus I	haploid	Complete Genome	NA	false	Major	Major	na	2018/02/22 00:00	2021/11/06 00:00	7507	7507
+5720958	GCF_002817735.1	ASM281773v1	1667230	Caucasus prunus virus (viruses)	1667230	Caucasus prunus virus	haploid	Complete Genome	NA	false	Major	Major	na	2018/08/24 00:00	2021/11/06 00:00	8255	8255
+5720848	GCF_002817615.1	ASM281761v1	255255	Melon yellowing-associated virus (viruses)	255255	Melon yellowing-associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2018/08/24 00:00	2021/11/06 00:00	9073	9073
+5011038	GCF_002271125.1	ViralProj399959	2020286	Ocimum basilicum RNA virus 1 (viruses)	2020286	Ocimum basilicum RNA virus 1	haploid	Complete Genome	NA	false	Major	Major	na	2017/08/24 00:00	2021/11/06 00:00	6930	6930
+4861528	GCF_002219425.1	ViralProj394306	2016034	Grapevine virus K (viruses)	2016034	Grapevine virus K	haploid	Complete Genome	NA	false	Major	Major	na	2017/07/14 00:00	2021/11/06 00:00	7476	7476
+4860528	GCF_002184195.1	ViralProj388402	387423	Agave tequilana leaf virus (viruses)	387423	Agave tequilana leaf virus	haploid	Complete Genome	NA	false	Major	Major	na	2017/05/30 00:00	2021/11/06 00:00	6958	6958
+4857508	GCF_002116215.1	Vitivirus	1972716	Arracacha virus V (viruses)	1972716	Arracacha virus V	haploid	Complete Genome	NA	false	Major	Major	na	2017/04/12 00:00	2021/11/06 00:00	7398	7398
+4857248	GCF_002105425.1	ViralProj383800	1978413	Watermelon virus A (viruses)	1978413	Watermelon virus A	haploid	Complete Genome	NA	false	Major	Major	na	2017/04/21 00:00	2021/11/06 00:00	8372	8372
+4857228	GCF_002105405.1	ViralProj383801	1803898	Pepper virus A (viruses)	2955588	Carlavirus PepVA	haploid	Complete Genome	NA	false	Major	Major	na	2017/04/21 00:00	2021/11/06 00:00	8696	8696
+4809168	GCF_001744835.1	ViralProj344217	1899566	Ligustrum virus A (viruses)	1899566	Ligustrum virus A	haploid	Complete Genome	NA	false	Major	Major	na	2016/09/23 00:00	2021/11/06 00:00	8525	8525
+4807188	GCF_001736475.1	ViralProj343486	1853762	Jasmine virus C (viruses)	1853762	Jasmine virus C	haploid	Complete Genome	NA	false	Major	Major	na	2016/09/19 00:00	2021/11/06 00:00	8506	8506
+4805468	GCF_001693545.1	ViralProj331041	1868472	Yacon virus A (viruses)	1868472	Yacon virus A	haploid	Complete Genome	NA	false	Major	Major	na	2016/07/24 00:00	2021/11/06 00:00	6400	6400
+4800368	GCF_001567035.1	ViralProj312655	1770618	Currant virus A (viruses)	1770618	Currant virus A	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/22 00:00	2021/11/06 00:00	7925	7925
+4800028	GCF_001551605.1	ViralProj310908	1569052	Elderberry carlavirus A (viruses)	1569052	Elderberry carlavirus A	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/05 00:00	2021/11/06 00:00	8628	8628
+4800008	GCF_001551585.1	ViralProj310904	1569056	Elderberry carlavirus E (viruses)	2169803	Sambucus virus E	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/05 00:00	2021/11/06 00:00	8540	8540
+4799668	GCF_001551245.1	ViralProj310905	1569055	Elderberry carlavirus D (viruses)	2169802	Sambucus virus D	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/05 00:00	2021/11/06 00:00	8612	8612
+4799348	GCF_001550925.1	ViralProj310907	1569053	Elderberry carlavirus B (viruses)	1569053	Elderberry carlavirus B	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/05 00:00	2021/11/06 00:00	8607	8607
+4799008	GCF_001550545.1	ViralProj310906	1569054	Elderberry carlavirus C (viruses)	2169801	Sambucus virus C	haploid	Complete Genome	NA	false	Major	Major	na	2016/02/05 00:00	2021/11/06 00:00	8613	8613
+4795588	GCF_001502755.1	ViralProj307773	351426	Asian prunus virus 2 (viruses)	351426	Asian prunus virus 2	haploid	Complete Genome	NA	false	Major	Major	na	2016/01/05 00:00	2021/11/06 00:00	9362	9362
+4795008	GCF_001502135.1	ViralProj307772	351428	Asian prunus virus 3 (viruses)	351428	Asian prunus virus 3	haploid	Complete Genome	NA	false	Major	Major	na	2016/01/05 00:00	2021/11/06 00:00	9654	9654
+4789668	GCF_001430135.1	ViralProj300235	797075	Nerine latent virus (viruses)	797075	Nerine latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2015/10/30 00:00	2021/11/06 00:00	8334	8334
+4781658	GCF_001184965.1	ViralProj289929	157777	Pea streak virus (viruses)	157777	Pea streak virus	haploid	Complete Genome	NA	false	Major	Major	na	2015/07/20 00:00	2021/11/06 00:00	8041	8041
+4778758	GCF_000988995.1	ViralProj273489	1592930	Yam latent virus (viruses)	1592930	Yam latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2015/05/04 00:00	2021/11/06 00:00	8531	8531
+4776598	GCF_000954395.1	ViralProj277201	165250	Alfalfa latent virus (viruses)	157777	Pea streak virus	haploid	Complete Genome	NA	false	Major	Major	na	2015/03/06 00:00	2021/11/06 00:00	8041	8041
+4770178	GCF_000925115.1	ViralProj267138	1425363	Carrot Ch virus 1 (viruses)	1425363	Carrot Ch virus 1	haploid	Complete Genome	NA	false	Major	Major	na	2014/11/17 00:00	2021/11/06 00:00	8155	8155
+4770158	GCF_000925095.1	ViralProj267001	1425362	Carrot Ch virus 2 (viruses)	1425362	Carrot Ch virus 2	haploid	Complete Genome	NA	false	Major	Major	na	2014/11/17 00:00	2021/11/06 00:00	8047	8047
+4769858	GCF_000924795.1	ViralProj265907	351427	Asian prunus virus 1 (viruses)	351427	Asian prunus virus 1	haploid	Complete Genome	NA	false	Major	Major	na	2014/10/31 00:00	2021/11/06 00:00	9409	9409
+4767498	GCF_000922315.1	ViralProj257702	1472425	Prunus virus T (viruses)	1472425	Prunus virus T	haploid	Complete Genome	NA	false	Major	Major	na	2014/08/13 00:00	2021/11/06 00:00	6835	6835
+4766438	GCF_000921255.1	ViralProj253575	1424279	Cherry twisted leaf associated virus (viruses)	1424279	Cherry twisted leaf associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2014/06/25 00:00	2021/11/06 00:00	8431	8431
+4764338	GCF_000919115.1	ViralProj243632	1468172	Gaillardia latent virus (viruses)	1468172	Gaillardia latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2014/04/07 00:00	2021/11/06 00:00	8659	8659
+4762038	GCF_000916795.1	ViralProj233521	1343920	Prunevirus armeniacae (viruses)	1343920	Prunevirus armeniacae	haploid	Complete Genome	NA	false	Major	Major	na	2014/01/07 00:00	2021/11/06 00:00	7315	7315
+4752658	GCF_000907155.1	ViralProj196970	1312929	Cherry rusty mottle associated virus (viruses)	1312929	Cherry rusty mottle associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2013/04/15 00:00	2021/11/06 00:00	8397	8397
+4747078	GCF_000901495.1	ViralProj178592	1247116	Diuris virus B (viruses)	1247116	Diuris virus B	haploid	Complete Genome	NA	false	Major	Major	na	2012/10/31 00:00	2021/11/06 00:00	7001	7001
+4745978	GCF_000900395.1	ViralProj178460	1243178	Rubus canadensis virus 1 (viruses)	1243178	Rubus canadensis virus 1	haploid	Complete Genome	NA	false	Major	Major	na	2012/10/29 00:00	2021/11/06 00:00	8328	8328
+4745418	GCF_000899815.1	ViralProj171010	1046402	Potato virus H (viruses)	1046402	Potato virus H	haploid	Complete Genome	NA	false	Major	Major	na	2012/07/20 00:00	2021/11/06 00:00	8410	8410
+4745138	GCF_000899555.1	ViralProj178591	1247115	Diuris virus A (viruses)	1247115	Diuris virus A	haploid	Complete Genome	NA	false	Major	Major	na	2012/10/31 00:00	2021/11/06 00:00	6956	6956
+4744698	GCF_000899135.1	ViralProj173352	1221437	Grapevine virus F (viruses)	1221437	Grapevine virus F	haploid	Complete Genome	NA	false	Major	Major	na	2012/08/21 00:00	2021/11/06 00:00	7551	7551
+4744278	GCF_000898715.1	ViralProj176615	1211388	Apple green crinkle associated virus (viruses)	1211388	Apple green crinkle associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2013/02/12 00:00	2021/11/06 00:00	9266	9266
+4744058	GCF_000898495.1	ViralProj173048	1307958	Sweet potato C6 virus (viruses)	1307958	Sweet potato C6 virus	haploid	Complete Genome	NA	false	Major	Major	na	2012/08/20 00:00	2021/11/06 00:00	8857	8857
+4743638	GCF_000898055.1	ViralProj163147	3158378	american hop latent virus (viruses)	1177630	Carlavirus americanense	haploid	Complete Genome	NA	false	Major	Major	na	2012/05/05 00:00	2021/11/06 00:00	8601	8601
+4742158	GCF_000896535.1	ViralProj78925	47900	Garlic common latent virus (viruses)	47900	Garlic common latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2011/12/13 00:00	2021/11/06 00:00	8638	8638
+4742118	GCF_000896495.1	ViralProj77137	1112770	Vitivirus betactinidiae (viruses)	1112770	Vitivirus betactinidiae	haploid	Complete Genome	NA	false	Major	Major	na	2011/11/18 00:00	2021/11/06 00:00	7488	7488
+4738858	GCF_000893215.1	ViralProj63625	81877	Grapevine berry inner necrosis virus (viruses)	81877	Grapevine berry inner necrosis virus	haploid	Complete Genome	NA	false	Major	Major	na	2011/03/11 00:00	2021/11/06 00:00	7241	7241
+4738718	GCF_000893055.1	ViralProj74427	1093773	Mirabilis jalapa mottle virus (viruses)	1093773	Mirabilis jalapa mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2011/10/17 00:00	2021/11/06 00:00	8315	8315
+4738258	GCF_000892595.1	ViralProj65813	1003891	Hardenbergia virus A (viruses)	1003891	Hardenbergia virus A	haploid	Complete Genome	NA	false	Major	Major	na	2011/04/25 00:00	2021/11/06 00:00	6942	6942
+4734498	GCF_000888875.1	ViralProj61427	75387	Foveavirus latensarmeniacae (viruses)	75387	Foveavirus latensarmeniacae	haploid	Complete Genome	NA	false	Major	Major	na	2010/12/27 00:00	2021/11/06 00:00	9311	9311
+4734398	GCF_000888775.1	ViralProj60623	67761	Cowpea mild mottle virus (viruses)	67761	Cowpea mild mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2010/12/01 00:00	2021/11/06 00:00	8127	8127
+4732198	GCF_000886555.1	ViralProj39583	132477	Kalanchoe latent virus (viruses)	132477	Kalanchoe latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2009/07/23 00:00	2021/11/06 00:00	8517	8517
+4732138	GCF_000886495.1	ViralProj38689	375546	Hydrangea chlorotic mottle virus (viruses)	375546	Hydrangea chlorotic mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2009/06/30 00:00	2021/11/06 00:00	8433	8433
+4731738	GCF_000886075.1	ViralProj42145	666859	Butterbur mosaic virus (viruses)	666859	Butterbur mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2009/11/25 00:00	2021/11/06 00:00	8662	8662
+4729318	GCF_000883575.1	ViralProj33877	592206	Helleborus net necrosis virus (viruses)	592206	Helleborus net necrosis virus	haploid	Complete Genome	NA	false	Major	Major	na	2009/02/04 00:00	2021/11/06 00:00	8542	8542
+4729138	GCF_000883375.1	ViralProj32727	183585	Peach mosaic virus (viruses)	183585	Peach mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2008/11/13 00:00	2021/11/06 00:00	7988	7988
+4729018	GCF_000883255.1	ViralProj32629	138982	Potato latent virus (viruses)	138982	Potato latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2008/11/06 00:00	2021/11/06 00:00	7890	7890
+4727998	GCF_000882155.1	ViralProj36557	185218	Robigovirus elaeis (viruses)	185218	Robigovirus elaeis	haploid	Complete Genome	NA	false	Major	Major	na	2009/04/02 00:00	2021/11/06 00:00	7781	7781
+4727238	GCF_000881395.1	ViralProj30853	516956	Grapevine virus E (viruses)	516956	Grapevine virus E	haploid	Complete Genome	NA	false	Major	Major	na	2008/08/04 00:00	2021/11/06 00:00	7564	7564
+4726978	GCF_000881135.1	ViralProj34841	590403	Red clover vein mosaic virus (viruses)	590403	Red clover vein mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2009/03/12 00:00	2021/11/06 00:00	8604	8604
+4726638	GCF_000880795.1	ViralProj32685	335963	Hippeastrum latent virus (viruses)	335963	Hippeastrum latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2008/11/13 00:00	2021/11/06 00:00	8500	8500
+4725538	GCF_000879695.1	ViralProj30735	36403	Potato virus T (viruses)	36403	Potato virus T	haploid	Complete Genome	NA	false	Major	Major	na	2008/07/21 00:00	2021/11/06 00:00	6539	6539
+4724078	GCF_000875045.1	ViralProj29191	142843	Hop mosaic virus (viruses)	142843	Hop mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2008/03/31 00:00	2021/11/06 00:00	8550	8550
+4723898	GCF_000874885.1	ViralProj28681	478550	Ligustrum necrotic ringspot virus (viruses)	478550	Ligustrum necrotic ringspot virus	haploid	Complete Genome	NA	false	Major	Major	na	2008/02/05 00:00	2021/11/06 00:00	8412	8412
+4723318	GCF_000874325.1	ViralProj20977	471498	Peach chlorotic mottle virus (viruses)	471498	Peach chlorotic mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2007/10/05 00:00	2021/11/06 00:00	9005	9005
+4722778	GCF_000873785.1	ViralProj19427	436066	Phlox virus S (viruses)	436066	Phlox virus S	haploid	Complete Genome	NA	false	Major	Major	na	2007/04/24 00:00	2021/11/06 00:00	8590	8590
+4720878	GCF_000871925.1	ViralProj20665	404404	Coleus vein necrosis virus (viruses)	404404	Coleus vein necrosis virus	haploid	Complete Genome	NA	false	Major	Major	na	2007/08/30 00:00	2021/11/06 00:00	8727	8727
+4720858	GCF_000871905.1	ViralProj20657	329164	Potato virus P (viruses)	329164	Potato virus P	haploid	Complete Genome	NA	false	Major	Major	na	2007/08/29 00:00	2021/11/06 00:00	8404	8404
+4720258	GCF_000871325.1	ViralProj27905	475777	Phlox virus B (viruses)	475777	Phlox virus B	haploid	Complete Genome	NA	false	Major	Major	na	2007/11/20 00:00	2021/11/06 00:00	9058	9058
+4719538	GCF_000870605.1	ViralProj18985	12165	Chrysanthemum virus B (viruses)	12165	Chrysanthemum virus B	haploid	Complete Genome	NA	false	Major	Major	na	2007/08/07 00:00	2021/11/06 00:00	8855	8855
+4718918	GCF_000869965.1	ViralProj17373	160844	Narcissus common latent virus (viruses)	160844	Narcissus common latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2006/07/29 00:00	2021/11/06 00:00	8539	8539
+4716638	GCF_000867745.1	ViralProj18071	367682	Narcissus symptomless virus (viruses)	797075	Nerine latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2006/10/27 00:00	2021/11/06 00:00	8281	8281
+4716398	GCF_000867525.1	ViralProj17487	379892	Passiflora latent virus (viruses)	379892	Passiflora latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2006/08/24 00:00	2021/11/06 00:00	8386	8386
+4716138	GCF_000867245.1	ViralProj16749	216614	Daphne virus S (viruses)	216614	Daphne virus S	haploid	Complete Genome	NA	false	Major	Major	na	2006/05/09 00:00	2021/11/06 00:00	8739	8739
+4715458	GCF_000866605.1	ViralProj15574	12169	Potato virus S (viruses)	12169	Potato virus S	haploid	Complete Genome	NA	false	Major	Major	na	2005/08/05 00:00	2021/11/06 00:00	8478	8478
+4712078	GCF_000863345.1	ViralProj15382	101764	Carlavirus latensaconiti (viruses)	101764	Carlavirus latensaconiti	haploid	Complete Genome	NA	false	Major	Major	na	2001/05/30 00:00	2021/11/06 00:00	8657	8657
+4712038	GCF_000863305.1	ViralProj15373	104263	Hop latent virus (viruses)	104263	Hop latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2000/09/27 00:00	2021/11/06 00:00	8612	8612
+4710058	GCF_000861365.1	ViralProj15329	31722	Blueberry scorch virus (viruses)	31722	Blueberry scorch virus	haploid	Complete Genome	NA	false	Major	Major	na	2002/04/04 00:00	2021/11/06 00:00	8512	8512
+4709738	GCF_000861065.1	ViralProj15426	12458	Garlic latent virus (viruses)	12172	Shallot latent virus	haploid	Complete Genome	NA	false	Major	Major	na	2002/04/12 00:00	2021/11/06 00:00	8363	8363
+4709258	GCF_000860585.1	ViralProj15324	12167	Potato virus M (viruses)	12167	Potato virus M	haploid	Complete Genome	NA	false	Major	Major	na	2005/08/11 00:00	2021/11/06 00:00	8533	8533
+4708798	GCF_000860125.1	ViralProj15249	196400	Grapevine rupestris stem pitting-associated virus (viruses)	196400	Grapevine rupestris stem pitting-associated virus	haploid	Complete Genome	NA	false	Major	Major	na	2000/08/01 00:00	2021/11/06 00:00	8744	8744
+4708178	GCF_000859505.1	ViralProj15119	28347	Capillovirus mali (viruses)	28347	Capillovirus mali	haploid	Complete Genome	NA	false	Major	Major	na	2005/01/18 00:00	2021/11/06 00:00	6495	6495
+4707618	GCF_000858925.1	ViralProj15172	307677	Trichovirus armeniacae (viruses)	307677	Trichovirus armeniacae	haploid	Complete Genome	NA	false	Major	Major	na	2005/04/07 00:00	2021/11/06 00:00	7494	7494
+4706458	GCF_000857765.1	ViralProj15083	35289	Grapevine virus B (viruses)	35289	Grapevine virus B	haploid	Complete Genome	NA	false	Major	Major	na	2002/04/16 00:00	2021/11/06 00:00	7599	7599
+4704638	GCF_000855945.1	ViralProj15080	42882	Cherry virus A (viruses)	42882	Cherry virus A	haploid	Complete Genome	NA	false	Major	Major	na	2002/04/22 00:00	2021/11/06 00:00	7383	7383
+4703898	GCF_000855125.1	ViralProj15086	35288	Grapevine virus A (viruses)	35288	Grapevine virus A	haploid	Complete Genome	NA	false	Major	Major	na	2006/02/06 00:00	2021/11/06 00:00	7351	7351
+4703758	GCF_000854985.1	ViralProj15056	12166	Poplar mosaic virus (viruses)	12166	Poplar mosaic virus	haploid	Complete Genome	NA	false	Major	Major	na	2004/01/21 00:00	2021/11/06 00:00	8741	8741
+4703678	GCF_000854905.1	ViralProj15038	263004	Sweet potato chlorotic fleck virus (viruses)	263004	Sweet potato chlorotic fleck virus	haploid	Complete Genome	NA	false	Major	Major	na	2004/12/17 00:00	2021/11/06 00:00	9104	9104
+4702898	GCF_000854125.1	ViralProj15015	12173	Lily symptomless virus (viruses)	12173	Lily symptomless virus	haploid	Complete Genome	NA	false	Major	Major	na	2003/10/15 00:00	2021/11/06 00:00	8394	8394
+4701878	GCF_000853085.1	ViralProj14819	167927	Sugarcane striate mosaic-associated virus (viruses)	2956487	Sustrivirus SCSMaV	haploid	Complete Genome	NA	false	Major	Major	na	2002/05/17 00:00	2021/11/06 00:00	8146	8146
+4701158	GCF_000852305.1	ViralProj14825	129141	Citrus leaf blotch virus (viruses)	129141	Citrus leaf blotch virus	haploid	Complete Genome	NA	false	Major	Major	na	2002/05/17 00:00	2021/11/06 00:00	8747	8747
+4699378	GCF_000850465.1	ViralProj14744	35350	Foveavirus mali (viruses)	35350	Foveavirus mali	haploid	Complete Genome	NA	false	Major	Major	na	2013/01/25 00:00	2021/11/06 00:00	9332	9332
+4698378	GCF_000849465.1	ViralProj14729	129143	Cherry necrotic rusty mottle virus (viruses)	129143	Cherry necrotic rusty mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2000/08/01 00:00	2021/11/06 00:00	8432	8432
+4697478	GCF_000848545.1	ViralProj14711	148879	Banmivirus BanMMV (viruses)	148879	Banmivirus BanMMV	haploid	Complete Genome	NA	false	Major	Major	na	2001/04/06 00:00	2021/11/08 00:00	7352	7352
+4697398	GCF_000848465.1	ViralProj14695	131226	Cherry mottle leaf virus (viruses)	131226	Cherry mottle leaf virus	haploid	Complete Genome	NA	false	Major	Major	na	2000/08/01 00:00	2021/11/06 00:00	8018	8018
+4697218	GCF_000848285.1	ViralProj14658	12175	Trichovirus mali (viruses)	12175	Trichovirus mali	haploid	Complete Genome	NA	false	Major	Major	na	2000/08/01 00:00	2021/11/06 00:00	7555	7555
+4697178	GCF_000848245.1	ViralProj14650	65467	Cherry green ring mottle virus (viruses)	65467	Cherry green ring mottle virus	haploid	Complete Genome	NA	false	Major	Major	na	2000/08/01 00:00	2021/11/06 00:00	8372	8372

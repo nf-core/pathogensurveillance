@@ -1,0 +1,2 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+138271	GCF_000504015.1	Mimgu1_0	4155	Erythranthe guttata (spotted monkey flower)	4155	Erythranthe guttata	haploid	Scaffold	6.43	false	Major	Major	representative genome	2014/04/02 00:00	2015/06/24 00:00	45432	1123783

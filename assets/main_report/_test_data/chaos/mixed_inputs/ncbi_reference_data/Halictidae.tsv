@@ -1,0 +1,4 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+13120241	GCF_003710045.1	USU_Nmel_1.3	2448451	Nomia melanderi (Alkali bee)	2448451	Nomia melanderi	haploid	Scaffold	75	false	Minor	Minor	representative genome	2018/11/02 00:00	2023/04/30 00:00	28924	2408925
+6518601	GCF_011865705.1	USU_MGEN_1.2	115081	Megalopta genalis (bees)	115081	Megalopta genalis	haploid	Scaffold	51.25	false	Major	Major	representative genome	2020/04/01 00:00	2020/04/17 00:00	30643	3666345
+475301	GCF_001272555.1	ASM127255v1	178035	Dufourea novaeangliae (bees)	178035	Dufourea novaeangliae	haploid	Scaffold	90	false	Major	Major	representative genome	2015/08/21 00:00	2016/02/09 00:00	191865	2549405
