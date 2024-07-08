@@ -1,0 +1,2 @@
+"sample_id","reference_id","workflow","level","message"
+"NA","GCA_020800215_1","VARIANT_ANALYSIS","WARNING","Not enough samples to build a SNP tree."
