@@ -47,46 +47,6 @@ library(rcrossref)
 library(psminer)
 ```
 
-```{r parse_inputs}
-# group_path <- file.path(params$inputs, "group_id.txt")
-# sample_data_path <- file.path(params$inputs, "sample_data.csv")
-# ref_data_path <- file.path(params$inputs, "ref_data")
-# assigned_refs_path <- file.path(params$inputs, "assigned_refs.csv")
-# 
-# group <- read_lines(group_path)
-# sample_data <- psminer::parse_sample_meta(sample_data_path, assigned_refs_path, group)
-# ref_data <- psminer::parse_ref_meta(ref_data_path, assigned_refs_path, sample_data_path, group)
-# 
-# # Parse variant data
-# variant_data_path <- file.path(params$inputs, "variant_data")
-# snp_tree_paths <- list.files(variant_data_path, pattern = "\\.treefile$", full.names = TRUE)
-# vcf_paths <- list.files(variant_data_path, pattern = "\\.vcf\\.gz$", full.names = TRUE)
-# snp_align_paths <- list.files(variant_data_path, pattern = "\\.fasta$", full.names = TRUE)
-# 
-# # Parse ANI matrix
-# ani_matrix_path <- file.path(params$inputs, "ani_matrix.csv")
-# ani_matrix <- psminer::parse_ani_matrix(ani_matrix_path)
-# 
-# # Parse POCP matrix
-# pocp_matrix_path <- file.path(params$inputs, "pocp.tsv")
-# pocp_matrix <- psminer::parse_pocp_matrix(pocp_matrix_path)
-# 
-# # Parse core gene phylogeny
-# core_phylo_dir_path <- file.path(params$inputs, "core_phylo")
-# core_phylo_paths <- list.files(core_phylo_dir_path, pattern = "\\.treefile$", full.names = TRUE)
-# 
-# # Parse quality control data (currently not used)
-# multiqc_path <- file.path(params$inputs, "multiqc")
-# multiqc_report_path <- file.path(multiqc_path, 'multiqc_report.html')
-# quast_path <- file.path(params$inputs, "quast")
-# quast_ref_names <- list.files(quast_path)
-# quast_report_paths <- file.path(quast_path, quast_ref_names, 'report.html')
-# 
-# # Parse version data
-# version_path <- file.path(params$inputs, "versions.yml")
-# version_data <- psminer::parse_software_meta(version_path)
-```
-
 # Summary
 
 ```{r}
@@ -109,7 +69,11 @@ This section provides an overview of the pipeline execution status, including a 
 
 ```{r generate-tables}
 messages_path <- file.path(params$inputs, "messages.csv")
-messages <- readr::read_csv(messages_path)
+if (file.exists(messages_path)) {
+    messages <- readr::read_csv(messages_path)
+} else {
+    messages <- tibble(sample_id = character(0), reference_id = character(0), workflow = character(0), level = character(0), message = character(0))
+}
 tables <- status_tables(messages)
 ```
 
