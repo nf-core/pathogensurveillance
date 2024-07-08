@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "_test_data/chaos/all_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 ```
 
 
-```{r load_libraries, warning=FALSE, message=FALSE}
+```{r load_libraries}
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -85,16 +85,12 @@ tables <- status_tables(messages)
 tables$simpleTable
 ```
 
-```{r, results='asis'}
-cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table provides a high-level overview of pipeline steps where issues were detected. This tables tells you how many groups or samples have issues that require your attention.
 
 :::
-')
-```
 
 ## Group-Level Issues
 
@@ -102,16 +98,12 @@ This table provides a high-level overview of pipeline steps where issues were de
 tables$detailedGroupsTable
 ```
 
-```{r, results='asis'}
-cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table dives into the issues that impact entire report groups, providing a more granular view of problems not limited to individual samples but affecting the group as a whole. It helps in identifying systemic issues or errors in group-specific processes.
 
 :::
-')
-```
 
 ## Sample-Level Issues
 
@@ -119,16 +111,12 @@ This table dives into the issues that impact entire report groups, providing a m
 tables$detailedSamplesTable
 ```
 
-```{r, results='asis'}
-cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table offers detailed insights into issues specific to individual samples. It is designed to help you pinpoint and address sample-specific problems, facilitating targeted troubleshooting and resolution efforts.
 
 :::
-')
-```
 
 :::
 
@@ -315,7 +303,6 @@ phylo_paths <- c(core_phylo_paths, busco_path)
 ```
 
 ```{r id_core_phylo, eval = length(phylo_paths) > 0, fig.height = 8}
-
 core_plots <- lapply(phylo_paths, function(path) {
     psminer::make_phylogeny(path, sample_data, reference_data)
 })
