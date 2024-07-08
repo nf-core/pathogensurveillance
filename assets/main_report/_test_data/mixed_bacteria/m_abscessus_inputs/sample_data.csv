@@ -1,0 +1,5 @@
+"sample_id","name","description","path","path_2","ncbi_accession","ncbi_query","ncbi_query_max","sequence_type","report_group_ids","color_by","ploidy","ref_contextual_usage","species","organism_group","country_orgin","single_end","sendsketch_depth","kingdom"
+"SAMN11100995","SAMN11100995","SAMN11100995","null","null","SRR12574847","null","10","illumina","m_abscessus","species","1","optional","m_abscessus","bacteria","null","false","42.409","Bacteria"
+"SAMN11100994","SAMN11100994","SAMN11100994","null","null","SRR12574848","null","10","illumina","m_abscessus","species","1","optional","m_abscessus","bacteria","null","false","45.385","Bacteria"
+"SAMN11100993","SAMN11100993","SAMN11100993","null","null","SRR12574849","null","10","illumina","m_abscessus","species","1","optional","m_abscessus","bacteria","null","false","26.270","Bacteria"
+"SAMN11100996","SAMN11100996","SAMN11100996","null","null","SRR12574846","null","10","illumina","m_abscessus","species","1","optional","m_abscessus","bacteria","null","false","33.383","Bacteria"
