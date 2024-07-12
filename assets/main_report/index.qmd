@@ -50,10 +50,8 @@ library(psminer)
 # Summary
 
 ```{r}
-group_path <- file.path(params$inputs, "group_id.txt")
-group <- read_lines(group_path)
-sample_data_path <- file.path(params$inputs, "sample_data.csv")
-sample_data <- readr::read_csv(sample_data_path)
+group <- report_group_parsed(params$inputs)
+sample_data <- sample_meta_parsed(params$inputs)
 ```
 
 This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
@@ -68,13 +66,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 This section provides an overview of the pipeline execution status, including a summary table, detailed sample-specific issues, and group-level issues for further analysis.
 
 ```{r generate-tables}
-messages_path <- file.path(params$inputs, "messages.csv")
-if (file.exists(messages_path)) {
-    messages <- readr::read_csv(messages_path)
-} else {
-    messages <- tibble(sample_id = character(0), reference_id = character(0), workflow = character(0), level = character(0), message = character(0))
-}
-tables <- status_tables(messages)
+tables <- status_message_tables(params$inputs)
 ```
 
 ::: {.panel-tabset}
@@ -124,11 +116,8 @@ This table offers detailed insights into issues specific to individual samples. 
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-sample_data_path <- file.path(params$inputs, "sample_data.csv")
-sample_data <- readr::read_csv(sample_data_path)
-psminer::print_sample_metadata(sample_data)
+sample_meta_table(params$inputs)
 ```
-
 
 
 # Identification
@@ -143,15 +132,13 @@ For more robust identifications based on whole genome sequences, see the results
 ### Taxonomic classification summary
 
 ```{r}
-sendsketch_paths <- list.files(file.path(params$inputs, "sendsketch"), full.names = T)
-sketch_data <- psminer::parse_sendsketch(sendsketch_paths)
-top_hits <- psminer::best_sendsketch_hits(sketch_data)
+top_hits <- sendsketch_parsed(params$inputs, only_best = TRUE)
 unique_tax <- unique(sub(top_hits$taxonomy, pattern = ';s:(.+);.+$', replacement = ';s:\\1')) # ignore below species level information
 is_single_taxon <- length(unique_tax) == 1
 ```
 
 ```{r fig.height = 8, eval = !is_single_taxon}
-psminer::plot_sendsketch_taxonomy(sketch_data)
+psminer::sendsketch_taxonomy_plot(top_hits)
 ```
 
 ```{r, results='asis', eval = !is_single_taxon}
@@ -185,14 +172,14 @@ cat(paste0(
 ### Per-sample classification
 
 ```{r sketchtable, fig.width=5}
-psminer::sketch_idtb(sketch_data)
+sendsketch_table(top_hits)
 ```
 
 ::: {.callout-tip collapse="true"}
 ## About this table
 
 This table shows the "highest scoring" tentative taxonomic classification for each sample.
-Included metrics can provide insights into how each sample compares with reference genomes on online databases and the likelihood these comparisions are valid.
+Included metrics can provide insights into how each sample compares with reference genomes on online databases and the likelihood these comparisons are valid.
 
 * **Sample:** The sample ID submitted by the user.
 * **WKID:** Weighted k-mer Identity, adjusted for genome size differences.
