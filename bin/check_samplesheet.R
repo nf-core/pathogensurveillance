@@ -139,6 +139,7 @@ is_present <- function(x) {
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
+# args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv')
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -713,7 +714,7 @@ lookup_sequence_type <- function(id) {
     }
     gsub(summary_result$expxml, pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2')
 }
-undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadata_samp$sequence_type)])
+undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadata_samp$sequence_type) & is_present(metadata_samp$ncbi_accession)])
 type_replace_key <- lapply(undefined_accessions, lookup_sequence_type)
 names(type_replace_key) <- undefined_accessions
 is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
