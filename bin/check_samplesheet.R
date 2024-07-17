@@ -403,11 +403,15 @@ get_ncbi_sra_runs <- function(query) {
     description <- unlist(lapply(summary_result, function(x) {
         gsub(x$expxml[1], pattern = '.+<Title>(.+?)</Title>.+', replacement = '\\1')
     }))
+    bases <- as.numeric(unlist(lapply(summary_result, function(x) {
+        gsub(x$expxml[1], pattern = '.+ total_bases="(.+?)" .+', replacement = '\\1')
+    })))
     output <- data.frame(
         ncbi_accession = run_ids,
         sequence_type = sequence_type,
         name = name,
-        description = paste0(description, ' (', run_ids, ')')
+        description = paste0(description, ' (', run_ids, ')'),
+        total_bases = bases
     )
     rownames(output) <- NULL
     return(output)
@@ -418,6 +422,9 @@ ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
 names(ncbi_result) <- unique_queries
 new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_query)), function(index) {
     query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
+    # Remove any samples with abnormally low reads
+    query_data <- query_data[query_data$total_bases > 100000, ]
+    # subsample using ncbi_query_max
     query_max <- metadata_samp$ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
         query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
@@ -426,6 +433,7 @@ new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_que
         query_max <- min(c(nrow(query_data), as.numeric(query_max)))
     }
     query_data <- query_data[sample(1:nrow(query_data), query_max), ]
+    # Create output table
     output <- metadata_samp[rep(index, nrow(query_data)), ]
     output$sample_id <- paste0(metadata_samp$sample_id[index], query_data$ncbi_accession)
     output$name <- paste0(metadata_samp$name[index], query_data$name)
