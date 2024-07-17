@@ -376,8 +376,8 @@ get_ncbi_sra_runs <- function(query) {
     if (query == '') {
         return(NULL)
     }
-    search_result <- rentrez::entrez_search(db = 'sra', query)
-    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
+    search_result <- rentrez::entrez_search(db = 'sra', query, retmax = 300)
+    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids, retmax = 300)
     if (length(search_result$ids) == 1) {
         summary_result <- list(summary_result)
     }
@@ -439,8 +439,8 @@ metadata_samp <- rbind(
 
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
-    search_result <- rentrez::entrez_search(db = 'assembly', query)
-    summary_result <- rentrez::entrez_summary(db = 'assembly', search_result$ids)
+    search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 300)
+    summary_result <- rentrez::entrez_summary(db = 'assembly', search_result$ids, retmax = 300)
     if (length(search_result$ids) == 1) {
         summary_result <- list(summary_result)
     }
