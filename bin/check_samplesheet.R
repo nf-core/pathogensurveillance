@@ -138,7 +138,6 @@ is_present <- function(x) {
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv')
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
@@ -158,7 +157,7 @@ remove_empty_rows <- function(metadata) {
     is_empty <- apply(metadata, MARGIN = 1, function(row) all(! is_present(row)))
     metadata[! is_empty, ]
 }
-metadata_samp <- remove_empty_rows(metadata_samp)
+metadata_samp[] <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_rows(metadata_ref)
 }
@@ -206,7 +205,7 @@ remove_empty_cols <- function(metadata, csv_name) {
     }
     metadata[, ! is_headerless]
 }
-metadata_samp <- remove_empty_cols(metadata_samp)
+metadata_samp[] <- remove_empty_cols(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_cols(metadata_ref)
 }
