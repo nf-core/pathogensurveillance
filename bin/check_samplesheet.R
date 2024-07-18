@@ -173,7 +173,7 @@ if (nrow(metadata_samp) == 0) {
 validate_col_names <- function(cols, known_columns) {
     # Trim whitespace
     modified_names <- trimws(cols)
-    # Replace capital letters with lowercase 
+    # Replace capital letters with lowercase
     modified_names <- tolower(modified_names)
     # Replace spaces with underscores
     modified_names <- gsub(' +', '_', modified_names)
@@ -325,7 +325,7 @@ validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep 
     missing_cols <- all_color_by_cols[! all_color_by_cols %in% colnames(metadata)]
     if (length(missing_cols) > 0) {
         stop(call. = FALSE, paste0(
-            'The following columns in the ', csv_name, ' CSV referenced by the "', color_by_col, 
+            'The following columns in the ', csv_name, ' CSV referenced by the "', color_by_col,
             '" column do not exist: ', paste0('"', missing_cols, '"', collapse = ', '), '\n'
         ))
     }
@@ -343,7 +343,7 @@ ref_data_addition <- ref_in_samp_data[has_ref_data, ]
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- rbind(metadata_ref, ref_data_addition)
 
-# Validate usage columns 
+# Validate usage columns
 validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
         value <- tolower(trimws(metadata[[col]][index]))
@@ -365,7 +365,7 @@ if (nrow(metadata_ref) > 0) {
 for (index in 1:nrow(metadata_samp)) {
     if (! grepl(metadata_samp$ploidy[index], pattern = '^[0-9]+$')) {
         stop(call. = FALSE, paste0(
-            'The value for the ploidy column "', metadata_samp$ploidy[index], 
+            'The value for the ploidy column "', metadata_samp$ploidy[index],
             '" of the sample metadata CSV on row ', index, ' is not numeric.'
         ))
     }
@@ -377,7 +377,7 @@ get_ncbi_sra_runs <- function(query) {
         return(NULL)
     }
     search_result <- rentrez::entrez_search(db = 'sra', query, retmax = 10000, use_history = TRUE)
-    starts <- seq(from = 1 , to = length(search_result$ids), by = 500)
+    starts <- seq(from = 0 , to = length(search_result$ids) - 1, by = 500)
     summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
         rentrez::entrez_summary(db = 'sra', retmax = 500, retstart = start, web_history = search_result$web_history)
     }))
@@ -444,14 +444,14 @@ new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_que
     output
 }))
 metadata_samp <- rbind(
-    metadata_samp[! is_present(metadata_samp$ncbi_query), ], 
+    metadata_samp[! is_present(metadata_samp$ncbi_query), ],
     new_sample_data
 )
 
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
     search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
-    starts <- seq(from = 1 , to = length(search_result$ids), by = 500)
+    starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
     summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
         rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
     }))
@@ -494,7 +494,7 @@ new_ref_data <- do.call(rbind, lapply(which(is_present(metadata_ref$ref_ncbi_que
     return(output)
 }))
 metadata_ref <- rbind(
-    metadata_ref[! is_present(metadata_ref$ref_ncbi_query), ], 
+    metadata_ref[! is_present(metadata_ref$ref_ncbi_query), ],
     new_ref_data
 )
 

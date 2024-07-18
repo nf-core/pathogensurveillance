@@ -42,7 +42,7 @@ library(webshot2)
 library(ggdendro)
 library(rcrossref)
 library(devtools)
-install.packages(c('phylocanvas', 'poppr', 'metacoder'), repos='http://cran.us.r-project.org')
+# install.packages(c('phylocanvas', 'poppr', 'metacoder'), repos='http://cran.us.r-project.org')
 # devtools::install_github("grunwaldlab/psminer")
 library(phylocanvas)
 library(poppr)
@@ -276,23 +276,36 @@ The accuracy of this identification depends on the presence of close reference s
 ### Core gene phylogeny
 
 ```{r}
-sample_data <- sample_meta_parsed(params$inputs)
-reference_data <- ref_meta_parsed(params$inputs)
-phylo_paths <- c(core_tree_path(params$inputs), busco_tree_path(params$inputs))
+core_plots <- core_tree_plot(params$inputs)
 ```
 
-```{r id_core_phylo, eval = length(phylo_paths) > 0, fig.height = 8}
-core_plots <- lapply(phylo_paths, function(path) {
-    psminer::make_phylogeny(path, sample_data, reference_data)
-})
-if (knitr::is_html_output()) {
-    htmltools::tagList(setNames(core_plots, NULL))
-} else {
-    print(core_plots)
+
+```{r id_core_phylo, results='asis', eval = length(core_tree_path(params$inputs)) > 0, fig.height = 8}
+# if (knitr::is_html_output()) {
+#     htmltools::tagList(setNames(core_plots, NULL))
+# } else {
+#     print(core_plots)
+# }
+to_render <- character(0)
+to_render <- c(to_render, paste0('\n::: panel-tabset\n'))
+for (factor in names(core_plots)) {
+    to_render <- c(to_render, paste0('\n### ', factor, '\n'))
+    to_render <- c(to_render, paste0('```{r core_plot_', which(names(core_plots) == factor), ', fig.height = 8}'))
+    to_render <- c(to_render, paste0('core_plots[["', factor, '"]]'))
+    to_render <- c(to_render, paste0('```'))
 }
+to_render <- c(to_render, paste0('\n:::\n'))
+res = knitr::knit_child(text = to_render, quiet = TRUE)
+cat(res, sep = '\n')
+# cat(as.character(htmltools::as.tags(core_plots[[1]], standalone = TRUE)))
+# htmltools:::knit_print.html(htmltools::as.tags(core_plots[[1]]))
 ```
 
-```{r, results='asis', eval = length(phylo_paths) > 0}
+
+
+
+
+```{r, results='asis', eval = length(core_tree_path(params$inputs)) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -304,9 +317,9 @@ It is the most robust identification provided by this pipeline, but its precisio
 ')
 ```
 
-```{r, results='asis', eval = length(phylo_paths) == 0}
+```{r, results='asis', eval = length(core_tree_path(params$inputs)) == 0}
 cat('
-Could not generate core genome phylogeny.
+Could not generate core genome phylogeny. No tree files found.
 ')
 ```
 
