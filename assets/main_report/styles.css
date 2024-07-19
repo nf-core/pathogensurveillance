@@ -29,3 +29,7 @@ h1.title {
 .content > section {
     padding-bottom: 50px;
 }
+
+.zoomist-wrapper {
+    background-color: white !important;
+}

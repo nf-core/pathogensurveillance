@@ -276,33 +276,18 @@ The accuracy of this identification depends on the presence of close reference s
 ### Core gene phylogeny
 
 ```{r}
-core_plots <- core_tree_plot(params$inputs)
+core_plots <- core_tree_plot(params$inputs, interactive = FALSE)
 ```
 
 
-```{r id_core_phylo, results='asis', eval = length(core_tree_path(params$inputs)) > 0, fig.height = 8}
-# if (knitr::is_html_output()) {
-#     htmltools::tagList(setNames(core_plots, NULL))
-# } else {
-#     print(core_plots)
-# }
-to_render <- character(0)
-to_render <- c(to_render, paste0('\n::: panel-tabset\n'))
-for (factor in names(core_plots)) {
-    to_render <- c(to_render, paste0('\n### ', factor, '\n'))
-    to_render <- c(to_render, paste0('```{r core_plot_', which(names(core_plots) == factor), ', fig.height = 8}'))
-    to_render <- c(to_render, paste0('core_plots[["', factor, '"]]'))
-    to_render <- c(to_render, paste0('```'))
+```{r results='asis'}
+plot_one <- function(x) {
+    print(core_plots[[x]])
 }
-to_render <- c(to_render, paste0('\n:::\n'))
-res = knitr::knit_child(text = to_render, quiet = TRUE)
-cat(res, sep = '\n')
-# cat(as.character(htmltools::as.tags(core_plots[[1]], standalone = TRUE)))
-# htmltools:::knit_print.html(htmltools::as.tags(core_plots[[1]]))
+tip_count <- sum(core_plots[[1]]$data$isTip)
+max_label_size <- max(nchar(core_plots[[1]]$data$label))
+print_figures_with_selector(plot_one, selector = names(core_plots), label = 'Color', img_class = 'core-gene-phylo', width = 1500 + max_label_size * 30, height = 300 + tip_count * 60, res = 250)
 ```
-
-
-
 
 
 ```{r, results='asis', eval = length(core_tree_path(params$inputs)) > 0}
@@ -310,7 +295,7 @@ cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This a core gene phylogeny of samples with RefSeq genomes for context.
+This a core gene phylogeny of samples with reference genomes for context.
 A core gene phylogeny uses the sequences of all gene shared by all of the genomes included in the tree to infer evolutionary relationships.
 It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences.
 :::
