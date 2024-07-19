@@ -286,7 +286,7 @@ plot_one <- function(x) {
 }
 tip_count <- sum(core_plots[[1]]$data$isTip)
 max_label_size <- max(nchar(core_plots[[1]]$data$label))
-print_figures_with_selector(plot_one, selector = names(core_plots), label = 'Color', img_class = 'core-gene-phylo', width = 1500 + max_label_size * 30, height = 300 + tip_count * 60, res = 250)
+print_figures_with_selector(plot_one, selector = names(core_plots), label = 'Color', img_class = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
 ```
 
 
