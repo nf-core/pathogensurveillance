@@ -332,19 +332,16 @@ n_samples <- unlist(lapply(snp_trees, function(tree) length(tree$tip.label) - 1)
 
 ## SNP trees
 
-```{r plot_snp_trees, results='asis', eval = length(snp_trees) > 0, fig.height = 8}
-for (id in names(snp_trees)) {
-    cat(paste0('::: panel-tabset\n### ', id, '\n\n'))
-    cat(paste0('#### **', n_samples[id], ' samples with ', n_variants[id], ' variants aligned to reference "', snp_ref_names[id], '":** \n\n'))
-    a_plot <- psminer::make_phylogeny(snp_trees[[id]], sample_data, reference_data)
-    if (knitr::is_html_output()) {
-        cat(as.character(htmltools::as.tags(a_plot, standalone = TRUE)))
-    } else {
-        print(a_plot)
-    }
-    cat('\n:::')
+```{r results='asis'}
+snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
+plot_one <- function(x) {
+    print(snp_plots[[x]])
 }
+tip_count <- sum(snp_plots[[1]]$data$isTip)
+max_label_size <- max(nchar(snp_plots[[1]]$data$label))
+print_figures_with_selector(plot_one, selector = names(snp_plots), label = 'Color', img_class = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
 ```
+
 
 ```{r, results='asis', eval = length(snp_trees) > 0}
 cat('
