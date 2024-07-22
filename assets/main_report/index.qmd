@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/chaos/all_inputs"
+  inputs: "_test_data/xanthomonas/xan_test_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -286,7 +286,7 @@ plot_one <- function(x) {
 }
 tip_count <- sum(core_plots[[1]]$data$isTip)
 max_label_size <- max(nchar(core_plots[[1]]$data$label))
-print_figures_with_selector(plot_one, selector = names(core_plots), label = 'Color', img_class = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
+print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
 ```
 
 
@@ -311,25 +311,6 @@ Could not generate core genome phylogeny. No tree files found.
 
 # Genetic diversity
 
-```{r parse_snp_align}
-sample_data <- sample_meta_parsed(params$inputs)
-reference_data <- ref_meta_parsed(params$inputs)
-group <- report_group_parsed(params$inputs)
-snp_align_paths <- variant_align_path(params$inputs)
-
-snp_alignments <- parse_alignment_fastas(snp_align_paths, group)
-snp_alignments <- snp_alignments[unlist(lapply(snp_alignments, function(x) !is.null(x)))]
-n_variants <- unlist(lapply(snp_alignments, ncol))
-snp_ref_names <- unlist(lapply(names(snp_alignments), function(id) reference_data$ref_name[! is.na(reference_data$ref_name) & reference_data$ref_id == id]))
-names(snp_ref_names) <- names(snp_alignments)
-```
-
-```{r parse_snp_trees}
-snp_tree_paths <- variant_tree_path(params$inputs)
-snp_trees <- parse_snp_trees(snp_tree_paths, group)
-n_samples <- unlist(lapply(snp_trees, function(tree) length(tree$tip.label) - 1))
-```
-
 ## SNP trees
 
 ```{r results='asis'}
@@ -339,11 +320,11 @@ plot_one <- function(x) {
 }
 tip_count <- sum(snp_plots[[1]]$data$isTip)
 max_label_size <- max(nchar(snp_plots[[1]]$data$label))
-print_figures_with_selector(plot_one, selector = names(snp_plots), label = 'Color', img_class = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
+print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
 ```
 
 
-```{r, results='asis', eval = length(snp_trees) > 0}
+```{r, results='asis', eval = length(snp_plots) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -357,55 +338,53 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{r div_no_snp_phylo, eval = length(snp_trees) <= 0}
+```{r div_no_snp_phylo, eval = length(snp_plots) <= 0}
 cat('There is no tree to draw. See staus messages at the start of the report for details.')
 ```
 
 
 ## Minimum spanning network
 
-
-```{r plot_msns, results='asis', eval = length(snp_alignments) > 0, fig.height = 8, fig.width=10}
+```{r}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
-total_alignments <- length(snp_alignments)
+align_data <- variant_align_path_data(params$inputs)
+alignments <- variant_align_parsed(params$inputs)
+alignments <- alignments[!unlist(lapply(alignments, is.null))]
+align_data <- align_data[align_data$path %in% names(alignments), ]
+sample_data <- sample_meta_parsed(params$inputs)
+ref_data <- ref_meta_parsed(params$inputs)
+```
 
-color_col <- as.character(sample_data$color_by[!is.na(sample_data$color_by)])
-color_factors <- as.list(unique(unlist(strsplit(color_col, split = ';'))))
-if (length(color_factors) == 0) {
-    color_factors <- list(NULL)
+```{r plot_msns, results='asis', eval = length(alignments) > 0}
+# Find which columns are used to provide colors to the trees, if any
+ids_used <- unique(unlist(lapply(alignments, function(a) {
+  if (is.null(a)) {
+    return(character(0))
+  } else {
+    return(rownames(a))
+  }
+})))
+color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
+color_by_cols <- color_by_cols[! is.na(color_by_cols)]
+color_by_col_names <- c(color_by_cols, 'Default')
+color_by_cols <- c(as.list(color_by_cols), list(NULL))  # NULL ensures that the default color scheme is also used
+
+plot_one <- function(ref_id, threshold, color_by) {
+  align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
+  align_without_ref <- align[rownames(align) != ref_id, ]
+  psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
 }
 
-cat('::: panel-tabset\n')
-
-for (color_by in color_factors) {
-    
-    # Print title of tab
-    if (is.null(color_by)) {
-        title <- 'MSN'
-    } else {
-        title <- color_by
-    }
-    cat(paste0('### ', title, '\n\n'))
-    
-    # Plot for each reference
-    for (reference in names(snp_alignments)) {
-        cat(paste0('#### **', nrow(snp_alignments[[reference]])-1, ' samples aligned to "', reference, '":** \n\n'))
-        if (!is.null(snp_alignments[[reference]]) && nrow(snp_alignments[[reference]]) > 4) {
-            plot_one <- function(threshold) {
-                psminer::make_MSN(snp_alignments[[reference]], sample_data, user_seed = 2, snp_diff_prop = threshold, population = color_by)
-            }
-            print_figures_with_selector(plot_one, selector = threshold_options, label = 'Threshold', img_class = paste0(reference, '_', title), width = 800, height = 600)
-        } else {
-            cat('There is no MSN to draw. See status messages at the start of the report for details.\n')
-        }
-    }
-}
-
-cat('\n:::\n')
+plot_vars <- list(
+  Reference = align_data$ref_id,
+  Threshold = threshold_options,
+  'Color By' = unlist(color_by_cols)
+)
+print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1500, res = 300)
 ```
 
 
-```{r, results='asis', eval = length(snp_alignments) > 0}
+```{r, results='asis', eval = length(alignments) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 
@@ -421,7 +400,7 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
  ')
 ```
 
-```{asis div_no_snp_align, echo = length(snp_alignments) <= 0}
+```{asis div_no_snp_align, echo = length(alignments) <= 0}
 cat('
 Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
 ')
