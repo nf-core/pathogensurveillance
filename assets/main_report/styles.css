@@ -33,3 +33,13 @@ h1.title {
 .zoomist-wrapper {
     background-color: white !important;
 }
+
+.zoomist-image { 
+  display: flex;
+}
+
+.zoomist-wrapper img {
+    height: 80vh;
+    width: auto;
+    margin: 0 auto;
+}

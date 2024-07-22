@@ -380,7 +380,7 @@ plot_vars <- list(
   Threshold = threshold_options,
   'Color By' = unlist(color_by_cols)
 )
-print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1500, res = 300)
+print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1500, res = 200)
 ```
 
 

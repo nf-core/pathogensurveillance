@@ -12,6 +12,8 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 USER root
 
+# Install nanoplot, quast, bandage, multiqc
+
 RUN <<EOF
     nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile aps,docker -resume -latest
 EOF
