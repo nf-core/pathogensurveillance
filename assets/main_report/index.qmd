@@ -66,51 +66,49 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 ## Pipeline Status Report
 
-This section provides an overview of the pipeline execution status, including a summary table, detailed sample-specific issues, and group-level issues for further analysis.
+Overview of pipeline status messages produced by the pipeline during execution.
+These generally consist of warning or error messages describing problems encountered in analysis.
 
-```{r generate-tables}
-tables <- status_message_tables(params$inputs)
+```{r}
+no_messages = nrow(status_message_parsed(params$inputs)) == 0
 ```
+
 
 ::: {.panel-tabset}
 
-## Simple Summary
+## Summary
 
-```{r simple-table}
-tables$simpleTable
+```{r, include=!no_messages}
+status_message_table_summary(params$inputs)
 ```
 
+```{r, include=!no_messages, results='asis'}
+cat(
+'
 ::: {.callout-tip collapse="true"}
 ## About this table
 
-This table provides a high-level overview of pipeline steps where issues were detected. This tables tells you how many groups or samples have issues that require your attention.
-
+The number and severity of issues experienced by the pipeline.
 :::
+')
+```
 
-## Group-Level Issues
+```{r, results='asis', include=no_messages}
+cat('✅  **No issues were reported.**')
+```
+
+
+
+## Details
 
 ```{r detailed-groups-table}
-tables$detailedGroupsTable
+status_message_table(params$inputs)
 ```
 
 ::: {.callout-tip collapse="true"}
 ## About this table
 
-This table dives into the issues that impact entire report groups, providing a more granular view of problems not limited to individual samples but affecting the group as a whole. It helps in identifying systemic issues or errors in group-specific processes.
-
-:::
-
-## Sample-Level Issues
-
-```{r detailed-samples-table}
-tables$detailedSamplesTable
-```
-
-::: {.callout-tip collapse="true"}
-## About this table
-
-This table offers detailed insights into issues specific to individual samples. It is designed to help you pinpoint and address sample-specific problems, facilitating targeted troubleshooting and resolution efforts.
-
+A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the isssue are incuded.
 :::
 
 :::
@@ -209,7 +207,7 @@ print_ani_table(ani_matrix * 100, sample_data, reference_data)
 ::: {.callout-tip collapse="true"}
 ## About this table
 
-This table shows the Average Nucleotide Identity (ANI) between each sample and the 2 references most similar to it based on this measure.
+This table shows the Average Nucleotide Identity (ANI) between each sample and the two references most similar to it based on this measure.
 ANI is used to measure how similar the shared portion of two genomes are.
 Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
 :::
