@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "_test_data/high_complexity_kpneumoniae/_no_group_defined__inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -94,7 +94,7 @@ The number and severity of issues experienced by the pipeline.
 ```
 
 ```{r, results='asis', include=no_messages}
-cat('✅  **No issues were reported.**')
+cat('✅  **No issues reported.**')
 ```
 
 
@@ -108,7 +108,7 @@ status_message_table(params$inputs)
 ::: {.callout-tip collapse="true"}
 ## About this table
 
-A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the isssue are incuded.
+A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the issue are included.
 :::
 
 :::
@@ -127,7 +127,7 @@ sample_meta_table(params$inputs)
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
 These are intended to be preliminary identifications.
-For more robust identifications based on whole genome sequences, see the results of the core genome phylogeny below.
+For more robust identifications based on whole genome sequences, see "Phylogenetic context" section below.
 
 ::: panel-tabset
 ### Taxonomic classification summary
@@ -378,7 +378,7 @@ plot_vars <- list(
   Threshold = threshold_options,
   'Color By' = unlist(color_by_cols)
 )
-print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1500, res = 200)
+print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1200, res = 175)
 ```
 
 
@@ -411,12 +411,9 @@ Could not generate minimum spanning networks. This is likely due to not having a
 
 The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
 
--   A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
--   The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
-
-## {{< bi sliders >}} Input settings
-
-Add settings used to run Nextflow and the pipeline parameters.
+- A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
+- The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
+- *To be continued...*
 
 ## {{< bi gear-wide-connected >}} Analysis software
 
@@ -430,7 +427,7 @@ version_data$citation <- reflist[match(version_data$program, reflist$program), '
 knitr::kable(version_data)
 ```
 
-## version and packages
+## R packages used
 
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
