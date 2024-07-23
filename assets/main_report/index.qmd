@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/high_complexity_kpneumoniae/_no_group_defined__inputs"
+  inputs: "_test_data/mycobacteroides/_no_group_defined__inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -12,6 +12,7 @@ nocite: |
 
 ```{r knitr_settings}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
+#"/home/fosterz/data/files/projects/current/pathogensurveillance/work/89/fd5ae1c12d9de756a9475d1320cf50"
 ```
 
 
@@ -311,8 +312,12 @@ Could not generate core genome phylogeny. No tree files found.
 
 ## SNP trees
 
-```{r results='asis'}
+```{r}
 snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
+```
+
+
+```{r, eval = length(snp_plots) > 0, results='asis'}
 plot_one <- function(x) {
     print(snp_plots[[x]])
 }
@@ -348,6 +353,7 @@ threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 align_data <- variant_align_path_data(params$inputs)
 alignments <- variant_align_parsed(params$inputs)
 alignments <- alignments[!unlist(lapply(alignments, is.null))]
+alignments <- alignments[unlist(lapply(alignments, nrow)) > 3]
 align_data <- align_data[align_data$path %in% names(alignments), ]
 sample_data <- sample_meta_parsed(params$inputs)
 ref_data <- ref_meta_parsed(params$inputs)
@@ -376,7 +382,7 @@ plot_one <- function(ref_id, threshold, color_by) {
 plot_vars <- list(
   Reference = align_data$ref_id,
   Threshold = threshold_options,
-  'Color By' = unlist(color_by_cols)
+  'Color By' = color_by_cols
 )
 print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1200, res = 175)
 ```
@@ -398,9 +404,9 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
  ')
 ```
 
-```{asis div_no_snp_align, echo = length(alignments) <= 0}
+```{r, results='asis', eval = length(alignments) <= 0}
 cat('
-Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+Could not generate minimum spanning networks. This can happen when there are too few samples or too few SNPs.
 ')
 ```
 

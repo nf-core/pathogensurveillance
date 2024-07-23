@@ -12,7 +12,7 @@ workflow INITIAL_QC_CHECKS {
 
     // Run FastQC
     shortreads = sample_data
-        .filter { it.sequence_type == "illumina" }
+        .filter { it.sequence_type == "illumina" || it.sequence_type == "bgiseq" }
         .map { [[id: it.sample_id], it.paths] }
         .unique()
     FASTQC ( shortreads )

@@ -41,7 +41,7 @@ workflow GENOME_ASSEMBLY {
         }
 
     shortreads = subset_reads
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" }
+        .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" || seq_type == "bgiseq" }
         .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FASTP( shortreads, [], false, false )
     versions = versions.mix(FASTP.out.versions)

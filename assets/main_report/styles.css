@@ -39,8 +39,8 @@ h1.title {
 }
 
 .zoomist-wrapper img {
-    height: 80vh;
-    max-height: 1000px;
+    height: auto;
+    max-height: min(80vh, 1000px);
     width: auto;
     max-width: 100%;
     margin: 0 auto;

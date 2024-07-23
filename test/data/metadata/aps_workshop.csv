@@ -1,4 +1,8 @@
-ncbi_accession,notes
-SRR27397525,should be X. campestris pv. papavericola
-SRR24199743,should be Agrobacterium tumefaciens H25/79
-SRR12936035,should be Bradyrhizobium sp. 200
+sample_id,path,sequence_type,enabled
+22-315,test/data/reads/xan_22-315_nanopore.fastq.gz,nanopore,FALSE
+22-321,test/data/reads/xan_22-321_nanopore.fastq.gz,nanopore,FALSE
+22-322,test/data/reads/xan_22-322_nanopore.fastq.gz,nanopore,FALSE
+22-323,test/data/reads/xan_22-323_nanopore.fastq.gz,nanopore,TRUE
+22-324,test/data/reads/xan_22-324_nanopore.fastq.gz,nanopore,FALSE
+22-325,test/data/reads/xan_22-325_nanopore.fastq.gz,nanopore,FALSE
+22-331,test/data/reads/xan_22-331_nanopore.fastq.gz,nanopore,FALSE
