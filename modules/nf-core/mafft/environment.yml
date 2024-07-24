@@ -4,4 +4,4 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - bioconda::mafft=7.520
+  - conda-forge::mafft=7.526
