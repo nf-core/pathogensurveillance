@@ -82,4 +82,6 @@ install.r devtools
 Rscript -e 'devtools::install_github("grunwaldlab/psminer@04b19cf205d20f26cae53850704c11e241cd32c5")'
 EOF
 
+USER root
+
 
