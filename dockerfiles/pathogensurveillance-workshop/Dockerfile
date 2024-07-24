@@ -14,6 +14,6 @@ USER root
 
 # Install nanoplot, quast, bandage, multiqc
 
-RUN <<EOF
-    nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile aps,docker -resume -latest
-EOF
+
+COPY reads /data/reads
+COPY sample_data.csv /data/sample_data.csv

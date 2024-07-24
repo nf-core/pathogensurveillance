@@ -742,8 +742,8 @@ metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_ty
     }))
     if (sum(is_seq_type) == 0) {
         stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column on row ', index, ' does not contain a known sequence type. ',
-            'One of the following words must appear (case insensitive):\n',
+            'The value in the "sequence_type" column on row ', index, ' ("', metadata_samp$sequence_type[index], '") does not contain a supported sequence type. ',
+            'The following sequencing types are supported (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
     }
