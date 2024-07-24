@@ -28,6 +28,7 @@ process MAIN_REPORT {
 
     # Render the report
     quarto render main_report \\
+        ${args} \\
         --output-dir ${prefix}_report \\
         -P inputs:../${inputs}
 
