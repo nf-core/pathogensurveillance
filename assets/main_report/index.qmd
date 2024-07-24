@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/mycobacteroides/_no_group_defined__inputs"
+  inputs: "_test_data/chaos/all_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -13,6 +13,10 @@ nocite: |
 ```{r knitr_settings}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
 #"/home/fosterz/data/files/projects/current/pathogensurveillance/work/89/fd5ae1c12d9de756a9475d1320cf50"
+# "_test_data/mixed_bacteria/n_meningitidis_inputs"
+# "_test_data/xanthomonas/xan_test_inputs"
+# "_test_data/mycobacteroides/_no_group_defined__inputs"
+# "_test_data/chaos/all_inputs"
 ```
 
 
@@ -341,8 +345,12 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{r div_no_snp_phylo, eval = length(snp_plots) <= 0}
-cat('There is no tree to draw. See staus messages at the start of the report for details.')
+```{r results='asis', eval = length(snp_plots) <= 0}
+cat('
+There is no tree to draw.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
+')
 ```
 
 
@@ -370,10 +378,8 @@ ids_used <- unique(unlist(lapply(alignments, function(a) {
 })))
 color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
 color_by_cols <- color_by_cols[! is.na(color_by_cols)]
-color_by_col_names <- c(color_by_cols, 'Default')
-color_by_cols <- c(as.list(color_by_cols), list(NULL))  # NULL ensures that the default color scheme is also used
 
-plot_one <- function(ref_id, threshold, color_by) {
+plot_one <- function(ref_id, threshold, color_by = NULL) {
   align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
   align_without_ref <- align[rownames(align) != ref_id, ]
   psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
@@ -381,9 +387,11 @@ plot_one <- function(ref_id, threshold, color_by) {
 
 plot_vars <- list(
   Reference = align_data$ref_id,
-  Threshold = threshold_options,
-  'Color By' = color_by_cols
+  Threshold = threshold_options
 )
+if (length(color_by_cols) > 0) {
+    plot_vars$Color = unlist(color_by_cols)
+}
 print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1200, res = 175)
 ```
 
@@ -406,7 +414,9 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
 
 ```{r, results='asis', eval = length(alignments) <= 0}
 cat('
-Could not generate minimum spanning networks. This can happen when there are too few samples or too few SNPs.
+Could not generate minimum spanning networks.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
 ')
 ```
 

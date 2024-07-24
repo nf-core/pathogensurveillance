@@ -283,10 +283,10 @@ workflow PATHOGENSURVEILLANCE {
         CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
-    //MAIN_REPORT (
-    //    PREPARE_REPORT_INPUT.out.report_input,
-    //    Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
-    //)
+    MAIN_REPORT (
+        PREPARE_REPORT_INPUT.out.report_input,
+        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+    )
 
 }
 
