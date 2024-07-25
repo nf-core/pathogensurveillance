@@ -13,7 +13,11 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 RUN sudo apt-get update && sudo apt-get install ffmpeg libsm6 libxext6 -y
 
 RUN <<EOF
-conda create -n qc --yes bioconda::nanoplot bioconda::quast bioconda::multiqc bioconda::bandage nf-core
+conda create -n qc --yes bioconda::nanoplot bioconda::quast bioconda::multiqc bioconda::bandage
+EOF
+
+RUN <<EOF
+conda install -n qc --yes nf-core
 EOF
 
 COPY reads /data/reads
