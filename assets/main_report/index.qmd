@@ -12,15 +12,16 @@ nocite: |
 
 ```{r knitr_settings}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
-#"/home/fosterz/data/files/projects/current/pathogensurveillance/work/89/fd5ae1c12d9de756a9475d1320cf50"
+# "/home/fosterz/data/files/projects/current/pathogensurveillance/work/89/fd5ae1c12d9de756a9475d1320cf50"
 # "_test_data/mixed_bacteria/n_meningitidis_inputs"
+# "_test_data/mixed_bacteria/m_abscessus_inputs/"
 # "_test_data/xanthomonas/xan_test_inputs"
 # "_test_data/mycobacteroides/_no_group_defined__inputs"
 # "_test_data/chaos/all_inputs"
 ```
 
 
-```{r load_libraries}
+```{r load_libraries, include=FALSE}
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -47,8 +48,10 @@ library(webshot2)
 library(ggdendro)
 library(rcrossref)
 library(devtools)
-install.packages(c('phylocanvas', 'poppr', 'metacoder'), repos='http://cran.us.r-project.org')
-devtools::install_github("grunwaldlab/psminer")
+if (!require(phylocanvas)) install.packages('phylocanvas', repos='http://cran.us.r-project.org')
+if (!require(phylocanvas)) install.packages('poppr', repos='http://cran.us.r-project.org')
+if (!require(phylocanvas)) install.packages('metacoder', repos='http://cran.us.r-project.org')
+if (!require(psminer)) devtools::install_github("grunwaldlab/psminer")
 library(phylocanvas)
 library(poppr)
 library(metacoder)
@@ -220,7 +223,7 @@ Note that this measure only takes into account the shared portion of genomes, so
 
 ### ANI heatmap
 
-```{r ani_heatmap, fig.height = 10}
+```{r ani_heatmap}
 make_ani_heatmap(ani_matrix * 100, reference_data, sample_data)
 ```
 
@@ -253,7 +256,7 @@ Currently, POCP is only calculated for Prokaryotes.
 
 ### POCP heatmap
 
-```{r pocp_heatmap, fig.height = 10}
+```{r pocp_heatmap}
 make_ani_heatmap(pocp_matrix, reference_data, sample_data)
 ```
 

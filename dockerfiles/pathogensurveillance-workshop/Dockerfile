@@ -10,12 +10,10 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 ################## BUILD ######################
 
-USER root
-
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
+RUN sudo apt-get update && sudo apt-get install ffmpeg libsm6 libxext6 -y
 
 RUN <<EOF
-conda install --yes nanoplot=1.41.6 quast=5.2.0 multiqc=1.18 bandage=0.8.1
+conda create -n qc --yes bioconda::nanoplot bioconda::quast bioconda::multiqc bioconda::bandage
 EOF
 
 COPY reads /data/reads

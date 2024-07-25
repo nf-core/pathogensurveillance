@@ -79,7 +79,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer@04b19cf205d20f26cae53850704c11e241cd32c5")'
+Rscript -e 'devtools::install_github("grunwaldlab/psminer@ba7c73f4a2a5a4983659a911d12bf024574c69bc")'
 EOF
 
 USER root
