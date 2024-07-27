@@ -110,7 +110,8 @@ known_extensions <- c(
 known_read_types <- c(
     'illumina',
     'nanopore',
-    'pacbio'
+    'pacbio',
+    'bgiseq'
 )
 
 # Regular expression for characters that cannot appear in IDs
@@ -140,6 +141,7 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv')
+# args <- list("~/Downloads/ncbi_and_usda_3516_metadata.csv")
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
     metadata_original_ref <- read.csv(args[[2]], check.names = FALSE)
@@ -740,8 +742,8 @@ metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_ty
     }))
     if (sum(is_seq_type) == 0) {
         stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column on row ', index, ' does not contain a known sequence type. ',
-            'One of the following words must appear (case insensitive):\n',
+            'The value in the "sequence_type" column on row ', index, ' ("', metadata_samp$sequence_type[index], '") does not contain a supported sequence type. ',
+            'The following sequencing types are supported (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
     }

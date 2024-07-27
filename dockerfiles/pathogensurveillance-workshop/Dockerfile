@@ -10,10 +10,15 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 ################## BUILD ######################
 
-USER root
-
-# Install nanoplot, quast, bandage, multiqc
+RUN sudo apt-get update && sudo apt-get install ffmpeg libsm6 libxext6 -y
 
 RUN <<EOF
-    nextflow run https://github.com/grunwaldlab/pathogensurveillance -profile aps,docker -resume -latest
+conda create -n qc --yes bioconda::nanoplot bioconda::quast bioconda::multiqc bioconda::bandage
 EOF
+
+RUN <<EOF
+conda install -n qc --yes nf-core
+EOF
+
+COPY reads /data/reads
+COPY sample_data.csv /data/sample_data.csv

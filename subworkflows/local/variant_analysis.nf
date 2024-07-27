@@ -67,7 +67,7 @@ workflow VARIANT_ANALYSIS {
         }
     filtered_input = sample_data_with_refs.filtered
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
-            sequence_type == "illumina"
+            sequence_type == "illumina" || sequence_type == "bgiseq"
         }
         .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, report_meta
 

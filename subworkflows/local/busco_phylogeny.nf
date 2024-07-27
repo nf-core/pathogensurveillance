@@ -120,7 +120,7 @@ workflow BUSCO_PHYLOGENY {
         .unique()
     paired_end = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
-            type == "illumina" && read_paths.size() == 2
+            (type == "illumina" || type == "bgiseq") && read_paths.size() == 2
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->
@@ -128,7 +128,7 @@ workflow BUSCO_PHYLOGENY {
         }
     single_end = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
-            type == "illumina" && read_paths.size() == 1
+            (type == "illumina" || type == "bgiseq") && read_paths.size() == 1
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->

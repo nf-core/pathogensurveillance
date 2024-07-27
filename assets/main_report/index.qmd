@@ -12,10 +12,16 @@ nocite: |
 
 ```{r knitr_settings}
 knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
+# "/home/fosterz/data/files/projects/current/pathogensurveillance/work/89/fd5ae1c12d9de756a9475d1320cf50"
+# "_test_data/mixed_bacteria/n_meningitidis_inputs"
+# "_test_data/mixed_bacteria/m_abscessus_inputs/"
+# "_test_data/xanthomonas/xan_test_inputs"
+# "_test_data/mycobacteroides/_no_group_defined__inputs"
+# "_test_data/chaos/all_inputs"
 ```
 
 
-```{r load_libraries}
+```{r load_libraries, include=FALSE}
 library(dplyr)
 library(ggplot2)
 library(readr)
@@ -42,8 +48,10 @@ library(webshot2)
 library(ggdendro)
 library(rcrossref)
 library(devtools)
-# install.packages(c('phylocanvas', 'poppr', 'metacoder'), repos='http://cran.us.r-project.org')
-# devtools::install_github("grunwaldlab/psminer")
+if (!require(phylocanvas)) install.packages('phylocanvas', repos='http://cran.us.r-project.org')
+if (!require(poppr)) install.packages('poppr', repos='http://cran.us.r-project.org')
+if (!require(metacoder)) install.packages('metacoder', repos='http://cran.us.r-project.org')
+if (!require(psminer)) devtools::install_github("grunwaldlab/psminer")
 library(phylocanvas)
 library(poppr)
 library(metacoder)
@@ -94,7 +102,7 @@ The number and severity of issues experienced by the pipeline.
 ```
 
 ```{r, results='asis', include=no_messages}
-cat('✅  **No issues were reported.**')
+cat('✅  **No issues reported.**')
 ```
 
 
@@ -108,7 +116,7 @@ status_message_table(params$inputs)
 ::: {.callout-tip collapse="true"}
 ## About this table
 
-A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the isssue are incuded.
+A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the issue are included.
 :::
 
 :::
@@ -127,7 +135,7 @@ sample_meta_table(params$inputs)
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
 These are intended to be preliminary identifications.
-For more robust identifications based on whole genome sequences, see the results of the core genome phylogeny below.
+For more robust identifications based on whole genome sequences, see "Phylogenetic context" section below.
 
 ::: panel-tabset
 ### Taxonomic classification summary
@@ -215,7 +223,7 @@ Note that this measure only takes into account the shared portion of genomes, so
 
 ### ANI heatmap
 
-```{r ani_heatmap, fig.height = 10}
+```{r ani_heatmap}
 make_ani_heatmap(ani_matrix * 100, reference_data, sample_data)
 ```
 
@@ -248,7 +256,7 @@ Currently, POCP is only calculated for Prokaryotes.
 
 ### POCP heatmap
 
-```{r pocp_heatmap, fig.height = 10}
+```{r pocp_heatmap}
 make_ani_heatmap(pocp_matrix, reference_data, sample_data)
 ```
 
@@ -311,8 +319,12 @@ Could not generate core genome phylogeny. No tree files found.
 
 ## SNP trees
 
-```{r results='asis'}
+```{r}
 snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
+```
+
+
+```{r, eval = length(snp_plots) > 0, results='asis'}
 plot_one <- function(x) {
     print(snp_plots[[x]])
 }
@@ -336,8 +348,12 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{r div_no_snp_phylo, eval = length(snp_plots) <= 0}
-cat('There is no tree to draw. See staus messages at the start of the report for details.')
+```{r results='asis', eval = length(snp_plots) <= 0}
+cat('
+There is no tree to draw.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
+')
 ```
 
 
@@ -348,6 +364,7 @@ threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 align_data <- variant_align_path_data(params$inputs)
 alignments <- variant_align_parsed(params$inputs)
 alignments <- alignments[!unlist(lapply(alignments, is.null))]
+alignments <- alignments[unlist(lapply(alignments, nrow)) > 3]
 align_data <- align_data[align_data$path %in% names(alignments), ]
 sample_data <- sample_meta_parsed(params$inputs)
 ref_data <- ref_meta_parsed(params$inputs)
@@ -364,10 +381,8 @@ ids_used <- unique(unlist(lapply(alignments, function(a) {
 })))
 color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
 color_by_cols <- color_by_cols[! is.na(color_by_cols)]
-color_by_col_names <- c(color_by_cols, 'Default')
-color_by_cols <- c(as.list(color_by_cols), list(NULL))  # NULL ensures that the default color scheme is also used
 
-plot_one <- function(ref_id, threshold, color_by) {
+plot_one <- function(ref_id, threshold, color_by = NULL) {
   align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
   align_without_ref <- align[rownames(align) != ref_id, ]
   psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
@@ -375,10 +390,12 @@ plot_one <- function(ref_id, threshold, color_by) {
 
 plot_vars <- list(
   Reference = align_data$ref_id,
-  Threshold = threshold_options,
-  'Color By' = unlist(color_by_cols)
+  Threshold = threshold_options
 )
-print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1500, res = 200)
+if (length(color_by_cols) > 0) {
+    plot_vars$Color = unlist(color_by_cols)
+}
+print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1200, res = 175)
 ```
 
 
@@ -398,9 +415,11 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
  ')
 ```
 
-```{asis div_no_snp_align, echo = length(alignments) <= 0}
+```{r, results='asis', eval = length(alignments) <= 0}
 cat('
-Could not generate minimum spanning networks. This is likely due to not having any FASTA SNP alignment inputs.
+Could not generate minimum spanning networks.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
 ')
 ```
 
@@ -411,12 +430,9 @@ Could not generate minimum spanning networks. This is likely due to not having a
 
 The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
 
--   A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
--   The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
-
-## {{< bi sliders >}} Input settings
-
-Add settings used to run Nextflow and the pipeline parameters.
+- A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
+- The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
+- *To be continued...*
 
 ## {{< bi gear-wide-connected >}} Analysis software
 
@@ -430,7 +446,7 @@ version_data$citation <- reflist[match(version_data$program, reflist$program), '
 knitr::kable(version_data)
 ```
 
-## version and packages
+## R packages used
 
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
