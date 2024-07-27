@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/xanthomonas/xan_test_inputs"
+  inputs: "_test_data/chaos/all_inputs"
 execute:
   echo: false
 bibliography: references.bib
