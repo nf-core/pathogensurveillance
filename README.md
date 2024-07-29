@@ -67,8 +67,6 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
    nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL -resume --sample_data <CSV> --out_dir <OUTDIR> --download_bakta_db
    ```
 
-```
-
 
 
 ## Documentation
