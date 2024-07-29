@@ -1,9 +1,10 @@
+<!--
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-pathogensurveillance_logo_dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/images/nf-core-pathogensurveillance_logo_light.png">
   <img alt="nf-core/pathogensurveillance" src="docs/images/nf-core-pathogensurveillance_logo_light.png">
 </picture>
-
+-->
 
 [![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/pathogensurveillance/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
@@ -48,12 +49,12 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
    ```bash
-   nextflow run nf-core/pathogensurveillance -profile test,YOURPROFILE --outdir <OUTDIR> -resume
+   nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL,xanthomonas_small -resume --out_dir test_output
    ```
 
-   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
+   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`RUN_TOOL` in the example command above). You can chain multiple config profiles in a comma-separated string.
 
-   > - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile test,docker`.
+   > - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile xanthomonas_small,docker`.
    > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
    > - If you are using `singularity`, please use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
    > - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
@@ -63,13 +64,9 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
    ```bash
-   nextflow run nf-core/pathogensurveillance --input samplesheet.csv --outdir <OUTDIR> -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> -resume
+   nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL -resume --sample_data <CSV> --out_dir <OUTDIR> --download_bakta_db
    ```
 
-You can also try running a small example dataset hosted with the source code using the following command (no need to download anything):
-
-```
-nextflow run nf-core/pathogensurveillance --input https://raw.githubusercontent.com/grunwaldlab/pathogensurveillance/master/test/data/metadata_small.csv --outdir test_out --download_bakta_db true -profile docker -resume
 ```
 
 
@@ -80,7 +77,7 @@ The nf-core/pathogensurveillance pipeline comes with documentation about the pip
 
 ### Input format
 
-The primary input to the pipeline is a CSV (comma comma-separated value) file.
+The primary input to the pipeline is a CSV (comma comma-separated value) file, specified using the `--sample_data` option.
 This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to CSV.
 Columns can be in any order and unneeded columns can be left out or left blank.
 Column names are case insensitive and spaces are equivalent to underscores.
@@ -102,9 +99,10 @@ Below is a description of each column used by `pathogensurveillance`:
 * **enabled**: Either "TRUE" or "FALSE", indicating whether the sample should be included in the analysis or not. Defaults to "TRUE".
 * **ref_group_ids**: One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata CSV.
 
-Additionally, users can supply a reference metadata CSV that can be used to assign custom references to particular samples.
+Additionally, users can supply a reference metadata CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
+If not provided, the pipeline will download and choose references to use automatically.
 References are assigned to samples if they share a reference group ID in the `ref_group_ids` columns that can appear in both input CSVs.
-The reference metadata CSV can have the following columns:
+The reference metadata CSV or the sample metadata CSV can have the following columns:
 
 * **ref_group_ids**: One or more reference group IDs separated by ";". These are used to group references and supply an ID that can be used in the `ref_group_ids` column of the sample metadata CSV to assign references to particular samples. * **ref_id**: The unique identifier for each user-defined reference genome. This will be used in file names to distinguish samples in the output. Each reference ID must correspond to a single source of reference data (The `ref_path`, `ref_ncbi_accession`, and `ref_ncbi_query` columns), although the same reference data can be used by multiple IDs. Any values that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `path`, `ref_name` columns or supplied automatically when `ref_ncbi_accession` or `ref_ncbi_query` are used.
 * ref_id: The unique identify for each reference input. This will be used in file names to distinguish references in the output. Each sample ID must correspond to a single source of reference data (e.g. the `ref_path` and `ref_ncbi_accession` columns), although the same sequence data can be used by different IDs. Any values supplied that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `ref_path`, `ref_ncbi_accession`, or `ref_name` columns.
@@ -121,7 +119,7 @@ The reference metadata CSV can have the following columns:
 
 ## Credits
 
-nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald.
+nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Camilo Parada-Rojas, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
