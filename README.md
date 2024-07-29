@@ -71,7 +71,9 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ## Documentation
 
-The nf-core/pathogensurveillance pipeline comes with documentation about the pipeline [usage](https://nf-co.re/pathogensurveillance/usage), [parameters](https://nf-co.re/pathogensurveillance/parameters) and [output](https://nf-co.re/pathogensurveillance/output).
+Documentation is currently under development, but can be found here:
+
+https://grunwaldlab.github.io/pathogensurveillance_documentation
 
 ### Input format
 
