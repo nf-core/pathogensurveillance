@@ -1,0 +1,29 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+11784281	GCA_021527805.1	ASM2152780v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Contig	20	false	Major	Major	na	2022/01/19 00:00	2022/01/19 00:00	11661	11661
+11784271	GCA_021527785.1	ASM2152778v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Scaffold	20	false	Major	Major	na	2022/01/19 00:00	2022/01/19 00:00	19820	21846
+11784261	GCA_021527745.1	ASM2152774v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Scaffold	20	false	Major	Major	na	2022/01/19 00:00	2022/01/19 00:00	27800	29237
+11783331	GCA_021527665.1	ASM2152766v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Scaffold	20	false	Major	Major	na	2022/01/19 00:00	2022/01/19 00:00	23636	24852
+11779811	GCA_021527685.1	ASM2152768v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Contig	210	false	Major	Major	representative genome	2022/01/19 00:00	2022/01/19 00:00	1005788	1005788
+10811201	GCA_019828595.1	UMN_Aphcoc_1.0	112091	Aphanomyces cochlioides (oomycetes)	112091	Aphanomyces cochlioides	haploid	Contig	233	false	Major	Major	representative genome	2021/08/31 00:00	2021/08/31 00:00	2604000	2604000
+5435851	GCA_009835205.1	AaE_v1	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Scaffold	20	false	Major	Major	na	2020/01/09 00:00	2020/01/09 00:00	2078	3673
+5435841	GCA_009835185.1	As_578.67_v1	120398	Aphanomyces stellatus (oomycetes)	120398	Aphanomyces stellatus	haploid	Scaffold	20	false	Major	Major	representative genome	2020/01/09 00:00	2020/01/09 00:00	31831	34018
+5435821	GCA_009835175.1	Ae201684_v1	100861	Aphanomyces euteiches (oomycetes)	100861	Aphanomyces euteiches	haploid	Scaffold	100	false	Major	Major	na	2020/01/09 00:00	2020/01/09 00:00	109455	275164
+4729501	GCA_900708865.1	Aphanomyces_stellatus_CBS568.67	120398	Aphanomyces stellatus (oomycetes)	120398	Aphanomyces stellatus	haploid	Scaffold	20	false	Major	Major	na	2019/09/20 00:00	2019/09/27 00:00	31791	34018
+2124141	GCA_002197585.2	ASM219758v2	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Scaffold	20	false	Major	Major	na	2018/11/27 00:00	2018/11/28 00:00	16588	17172
+2022921	GCA_003666305.1	astaci_KB13	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	unresolved-diploid	Contig	118	false	Major	Major	na	2018/10/17 00:00	2019/07/24 00:00	2121	2121
+1995841	GCA_003546785.1	astaci_457	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	51	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	4763	4763
+1995831	GCA_003546805.1	astaci_197901	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	40	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	6100	6100
+1995821	GCA_003546825.1	Da	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	20	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	14570	14570
+1995811	GCA_003546765.1	astaci_SV	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	18	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	13234	13234
+1995801	GCA_003546625.1	astaci_SA	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	20	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	7997	7997
+1995791	GCA_003546605.1	astaci_YX	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	17	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	7510	7510
+1995781	GCA_003546585.1	astaci_D2	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	20	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	8836	8836
+1995771	GCA_003546545.1	astaci_Si	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	19	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	8462	8462
+1995761	GCA_003546565.1	astaci_KV	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Contig	20	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	8730	8730
+1995751	GCA_003546525.1	inv_NJM0002	157072	Aphanomyces invadans (oomycetes)	157072	Aphanomyces invadans	haploid	Contig	67	false	Major	Major	na	2018/09/11 00:00	2018/09/27 00:00	13944	13944
+1063221	GCA_002081595.1	ACH_lane_v1	1202772	Achlya hypogyna (oomycetes)	1202772	Achlya hypogyna	haploid	Scaffold	100	false	Major	Major	representative genome	2017/04/06 00:00	2017/04/06 00:00	35886	52035
+1063211	GCA_002081575.1	Thrcla_v1	74557	Thraustotheca clavata (oomycetes)	74557	Thraustotheca clavata	haploid	Scaffold	100	false	Major	Major	representative genome	2017/04/06 00:00	2017/04/06 00:00	13445	15005
+554338	GCF_000281045.1	Sap_diclina_VS20_V1	1156394	Saprolegnia diclina VS20 (oomycetes)	112098	Saprolegnia diclina	haploid	Scaffold	171	false	Major	Major	representative genome	2013/02/22 00:00	2022/12/05 00:00	30015	602571
+180961	GCF_000151545.1	ASM15154v2	695850	Saprolegnia parasitica CBS 223.65 (oomycetes)	101203	Saprolegnia parasitica	haploid	Scaffold	25	false	Major	Major	representative genome	2014/05/29 00:00	2022/12/10 00:00	34471	280942
+93281	GCF_000520115.1	Apha_inva_NJM9701_V1	157072	Aphanomyces invadans (oomycetes)	157072	Aphanomyces invadans	haploid	Scaffold	138	false	Major	Major	representative genome	2014/01/15 00:00	2022/12/09 00:00	30531	1130244
+93271	GCF_000520075.1	Apha_asta_APO3_V1	112090	Aphanomyces astaci (oomycetes)	112090	Aphanomyces astaci	haploid	Scaffold	107	false	Major	Major	representative genome	2014/01/14 00:00	2022/12/09 00:00	36439	657536

@@ -1,0 +1,2 @@
+Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
+23008621	GCA_040437455.1	PleCup_hybrid	202457	Plecturocebus cupreus (coppery titi)	202457	Plecturocebus cupreus	haploid	Chromosome	175	false	Major	Major	representative genome	2024/07/02 00:00	2024/07/02 00:00	16955781	130776705
