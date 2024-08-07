@@ -85,7 +85,7 @@
                     "pattern": "lenient|deep|false|true",
                     "description": "Which type of caching to perform. Possible values include 'lenient', 'deep', 'true', and 'false'. 'lenient' caching does not take into account file modifications times and 'deep' takes into account file content. See https://www.nextflow.io/docs/latest/process.html#process-cache for more information.",
                     "default":"true"
-                },
+                }
             }
         },
         "analysis_parameters": {
