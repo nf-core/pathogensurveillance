@@ -140,7 +140,7 @@ is_present <- function(x) {
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
-# args <- list('test/data/metadata/chaos_samples.csv')
+# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
 # args <- list("~/Downloads/ncbi_and_usda_3516_metadata.csv")
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -159,7 +159,7 @@ remove_empty_rows <- function(metadata) {
     is_empty <- apply(metadata, MARGIN = 1, function(row) all(! is_present(row)))
     metadata[! is_empty, ]
 }
-metadata_samp[] <- remove_empty_rows(metadata_samp)
+metadata_samp <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_rows(metadata_ref)
 }
@@ -192,7 +192,7 @@ if (nrow(metadata_ref) > 0) {
     colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
 }
 
-# Remove empty columns
+# Remove empty columns and columns with no header
 remove_empty_cols <- function(metadata, csv_name) {
     if (nrow(metadata) == 0) {
         return(metadata)
@@ -207,7 +207,7 @@ remove_empty_cols <- function(metadata, csv_name) {
     }
     metadata[, ! is_headerless]
 }
-metadata_samp[] <- remove_empty_cols(metadata_samp)
+metadata_samp <- remove_empty_cols(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_cols(metadata_ref)
 }
