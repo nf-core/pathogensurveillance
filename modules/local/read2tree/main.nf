@@ -8,7 +8,7 @@ process READ2TREE {
         'biocontainers/read2tree:0.1.5--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta),  path(paired_1, stageAs: 'paired_1_??.fa'), path(paired_2, stageAs: 'paired_2_??.fa'), path(single), path(long_reads), path(markers), path(dna_ref)
+    tuple val(meta), val(pair_meta), path(paired_1), path(paired_2), val(single_meta), path(single), val(long_meta), path(long_reads), path(markers), path(dna_ref)
 
     output:
     tuple val(meta), path("${prefix}_read2tree"), emit: out
@@ -43,38 +43,47 @@ process READ2TREE {
     	read2tree --standalone_path ${markers}/ --dna_reference ${dna_ref} --output_path ${prefix}_read2tree --reference
 
     	# Add each paired end shortread sample
-    	for R1 in ${paired_1}; do
-        	R2=\$(echo \$R1 | sed 's/^paired_1_/paired_2_/')
+        FORWARD=(${paired_1})
+        REVERSE=(${paired_2})
+        IDS=(${pair_meta.collect{it.id}})
+    	for i in \${!FORWARD[@]}; do
         	read2tree \\
             ${args} \\
             --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
-        	--reads \$R1 \$R2
+        	--reads \${FORWARD[\$i]} \${REVERSE[\$i]} \\
+            --species_name \${IDS[\$i]}
     	done
 
     	# Add each single end shortread sample
-    	for R1 in ${single}; do
+        SINGLE=(${single})
+        IDS=(${single_meta.collect{it.id}})
+    	for i in \${!SINGLE[@]}; do
         	read2tree \\
             ${args} \\
             --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
-        	--reads \$R1
+        	--reads \${SINGLE[\$i]} \\
+            --species_name \${IDS[\$i]}
     	done
 
     	# Add each long read sample
-    	for R1 in ${long_reads}; do
+        LONG=(${long_reads})
+        IDS=(${long_meta.collect{it.id}})
+    	for i in \${!LONG[@]}; do
         	read2tree \\
             ${args} \\
             --threads $task.cpus \\
         	--standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
         	--output_path ${prefix}_read2tree \\
-            --read_type long
-        	--reads \$R1
+            --read_type long \\
+        	--reads \${LONG[\$i]} \\
+            --species_name \${IDS[\$i]}
     	done
 
     	# Build tree

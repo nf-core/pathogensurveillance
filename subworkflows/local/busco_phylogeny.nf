@@ -5,6 +5,7 @@ include { R2TF                      } from '../../modules/local/r2tf'
 include { R2TDIR                    } from '../../modules/local/r2tdir'
 include { R2TBIN                    } from '../../modules/local/r2tbin'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
+include { MAKE_READ2TREE_DB         } from '../../modules/local/make_read2tree_db'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -54,13 +55,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .combine(references, by: 0..1)
         .map {report_meta, ref_meta, ref_path, ref_name ->
-            [[id: ref_meta.id, name: ref_name], report_meta, ref_path]
-        }
-
-    // Only use reference with unique species names TODO: this relies on users to name reference correctly. A better solution should be found
-    selected_ref_data = selected_ref_data
-        .unique { ref_meta, report_meta, ref_path ->
-            ["${ref_meta.name.substring(0,3)}${ref_meta.name.split(' ')[1].substring(0, 2)}".toUpperCase(), report_meta]
+            [[id: ref_meta.id], report_meta, ref_path]
         }
 
     // Download BUSCO datasets
@@ -80,13 +75,17 @@ workflow BUSCO_PHYLOGENY {
     )
 
     // Create Read2tree database
-    R2TF (
-        BUSCO.out.single_copy_fna
-            .filter{ ref_meta, gene_paths ->
-                gene_paths.size() > 0
-            }
-            .join(BUSCO.out.single_copy_faa)
-	)
+    grouped_busco_out = BUSCO.out.single_copy_fna
+        .filter{ ref_meta, gene_paths ->
+            gene_paths.size() > 0
+        }
+        .join(BUSCO.out.busco_dir)
+        .combine(selected_ref_data, by: 0)
+        .map { ref_meta, gene_paths, busco_dir, report_meta, ref_path ->
+            [report_meta, busco_dir]
+        }
+        .unique()
+        .groupTuple(by: 0)
     no_gene_warnings = BUSCO.out.single_copy_fna
         .filter{ ref_meta, gene_paths ->
             gene_paths.size() == 0
@@ -96,21 +95,7 @@ workflow BUSCO_PHYLOGENY {
             [null, report_meta, ref_meta, "BUSCO_PHYLOGENY", "WARNING", "Reference excluded from BUSCO phylogeny because no single copy busco genes were found."]
         }
     messages = messages.mix(no_gene_warnings)
-
-    // Create directories for Read2Tree
-    R2TDIR (
-        R2TF.out.output
-            .combine(selected_ref_data, by: 0)
-            .map { ref_meta, rt2f_out, report_meta, ref_path ->
-                [report_meta, rt2f_out]
-            }
-            .groupTuple(by: 0, sort: 'hash')
-    )
-
-    // Bin busco files by genes
-    R2TBIN (
-        R2TDIR.out.markers
-    )
+    MAKE_READ2TREE_DB ( grouped_busco_out, "eukaryota_odb10" )
 
     // group samples
     input_filtered = sample_data
@@ -124,7 +109,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, read_paths.collect{it[0]}, read_paths.collect{it[1]}]
+            [report_meta, sample_metas, read_paths.collect{it[0]}, read_paths.collect{it[1]}]
         }
     single_end = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
@@ -132,7 +117,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, reads_paths]
+            [report_meta, sample_metas, reads_paths]
         }
     longread = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
@@ -140,14 +125,14 @@ workflow BUSCO_PHYLOGENY {
         }
         .groupTuple(by: 2)
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, reads_paths]
+            [report_meta, sample_metas, reads_paths]
         }
     rt2_input = paired_end
-        .join(single_end, remainder:true)// group_meta, pair_1, pair_2, single_end
-        .join(longread, remainder:true) // group_meta, pair_1, pair_2, single_end, longread
+        .join(single_end, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single
+        .join(longread, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, long
         .map { [it[0], it[1] ?: [], it[2] ?: [], it[3] ?: [], it[4] ?: []] } // replace nulls with []
-        .join( R2TBIN.out.busco_markers )
-        .join( R2TDIR.out.dna_ref )
+        .join( MAKE_READ2TREE_DB.out.ref_aa )
+        .join( MAKE_READ2TREE_DB.out.ref_dna )
 
     // Run Read2tree
     READ2TREE ( rt2_input )
@@ -157,5 +142,6 @@ workflow BUSCO_PHYLOGENY {
     messages      = messages // meta, group_meta, ref_meta, workflow, level, message
     selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references
     tree          = READ2TREE.out.tree // group_meta, tree
+    r2t_ref_meta  = MAKE_READ2TREE_DB.out.ref_meta
 
 }

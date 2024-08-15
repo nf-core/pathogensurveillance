@@ -8,7 +8,7 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylo), path(multiqc), path(messages)
+    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylo), path(rt2_ref_meta), path(multiqc), path(messages)
     path versions
 
     output:
@@ -89,6 +89,9 @@ process PREPARE_REPORT_INPUT {
     # Add busco phylogeny
     if [ ! -z "${busco_phylo}" ]; then
         cp -r ${busco_phylo} ${prefix}_inputs/busco_tree.nwk
+    fi
+    if [ ! -z "${r2t_ref_meta}" ]; then
+        cp -r ${r2t_ref_meta} ${prefix}_inputs/read2tree_ref_meta.csv
     fi
 
     # Put multiqc's output into a single folder for organization

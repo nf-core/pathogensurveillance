@@ -272,10 +272,11 @@ workflow PATHOGENSURVEILLANCE {
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
+        .join(BUSCO_PHYLOGENY.out.r2t_ref_meta, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-	.filter{it[0] != null} // remove extra item if messages is empty
-	.map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
+	    .filter{it[0] != null} // remove extra item if messages is empty
+	    .map{ it.size() == 17 ? it + [null] : it } // adds placeholder if messages is empty
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (

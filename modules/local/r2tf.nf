@@ -35,13 +35,6 @@ process R2TF {
         geneid="\${CODEX}-\${buscoid}"
     	header=\$(grep '>' \$fasta)
 
-        # Genearting a unique IDentifier
-        #NUM=\$(echo \$fasta | cut -d 'a' -f1)
-        NUM=\$(echo \$header | awk -F '>' '{print \$2}' | awk -F ':' '{print \$1}')
-	    echo "NUM \$NUM"
-        ID="\$CODEX \$NUM"
-        echo "Identifier: \$ID"
-
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
         sed "s/\$header/>\$geneid \\| \$buscoid \\| \$geneid \\| [${ref_meta.name} ${ref_meta.id}]/" "\$fasta" | sed -e 's/\\(.*\\)/\\U\\1/'  >> ${outdir}/${prefix}_ntformatted.fa
@@ -59,13 +52,6 @@ process R2TF {
 	    buscoid=\$(basename \$fasta .faa)
         geneid="\${CODEX}-\${buscoid}"
         header=\$(grep '>' \$fasta)
-
-        # Genearting a unique IDentifier
-        #NUM=\$(echo \$fasta | cut -d 'a' -f1)
-        NUM=\$(echo \$header | awk -F '>' '{print \$2}' | awk -F ':' '{print \$1}')
-    	echo "NUM \$NUM"
-        ID="\$CODEX \$NUM"
-        echo "Identifier: \$ID"
 
         # Replace the headers in the FASTA file
         echo "Processing file fasta \$fasta with header \$header"
