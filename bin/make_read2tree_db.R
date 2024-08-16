@@ -80,4 +80,4 @@ for (gene_data in split(single_copy_faa_data, single_copy_faa_data$busco_id)) {
 }
 
 # Save table with info on which random code corresponds to which reference ID
-write.table(ref_data, file = ref_data_out_path, sep = ',', quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(ref_data, file = ref_data_out_path, sep = ',', quote = FALSE, row.names = FALSE)

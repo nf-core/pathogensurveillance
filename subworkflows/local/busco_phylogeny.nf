@@ -10,7 +10,7 @@ include { MAKE_READ2TREE_DB         } from '../../modules/local/make_read2tree_d
 workflow BUSCO_PHYLOGENY {
 
     take:
-    sample_data
+    original_sample_data
     ani_matrix // report_group_id, ani_matrix
 
     main:
@@ -19,7 +19,7 @@ workflow BUSCO_PHYLOGENY {
     messages = Channel.empty()
 
     // Remove any samples that are not eukaryotes
-    sample_data = sample_data
+    sample_data = original_sample_data
         .filter{it.kingdom == "Eukaryota"}
 
     // Make file with sample IDs and user-defined references or NA for each group
@@ -101,13 +101,12 @@ workflow BUSCO_PHYLOGENY {
     input_filtered = sample_data
         .map{ sample_meta ->
             [[id: sample_meta.sample_id], sample_meta.paths, [id: sample_meta.report_group_ids], sample_meta.sequence_type]
-        }
-        .unique()
+        }.unique()
     paired_end = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
             (type == "illumina" || type == "bgiseq") && read_paths.size() == 2
         }
-        .groupTuple(by: 2)
+        .groupTuple(by: 2, sort: 'hash')
         .map { sample_metas, read_paths, report_meta, types ->
             [report_meta, sample_metas, read_paths.collect{it[0]}, read_paths.collect{it[1]}]
         }
@@ -115,27 +114,43 @@ workflow BUSCO_PHYLOGENY {
         .filter { sample_meta, read_paths, report_meta, type ->
             (type == "illumina" || type == "bgiseq") && read_paths.size() == 1
         }
-        .groupTuple(by: 2)
+        .groupTuple(by: 2, sort: 'hash')
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, sample_metas, reads_paths]
+            [report_meta, sample_metas, read_paths.collect{it[0]}]
         }
     longread = input_filtered
         .filter { sample_meta, read_paths, report_meta, type ->
-            type == "nanopore" && read_paths.size() == 1
+            (type == "nanopore" || type == "pacbio") && read_paths.size() == 1
         }
-        .groupTuple(by: 2)
+        .groupTuple(by: 2, sort: 'hash')
         .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, sample_metas, reads_paths]
+            [report_meta, sample_metas, read_paths.collect{it[0]}]
         }
-    rt2_input = paired_end
-        .join(single_end, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single
-        .join(longread, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, long
-        .map { [it[0], it[1] ?: [], it[2] ?: [], it[3] ?: [], it[4] ?: []] } // replace nulls with []
-        .join( MAKE_READ2TREE_DB.out.ref_aa )
-        .join( MAKE_READ2TREE_DB.out.ref_dna )
+    //rt2_input = paired_end
+    //    .join(single_end, remainder:true).view() // group_meta, pair_meta, pair_1, pair_2, single_meta, single
+    //    .join(longread, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, long
+    //    .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+    //    .join( MAKE_READ2TREE_DB.out.ref_aa )
+    //    .join( MAKE_READ2TREE_DB.out.ref_dna )
+
+    // NOTE: This annoying way of adding parts of tuple channels one part at a time is becuase when a channel is empty,
+    //   only one null is added, not the number of nulls equal to the the number of elements that should be in the tuple.
+    r2t_input = MAKE_READ2TREE_DB.out.ref_aa
+        .join(MAKE_READ2TREE_DB.out.ref_dna)
+        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, sample_metas]}, remainder:true)
+        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, read_1]}, remainder:true)
+        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, read_2]}, remainder:true)
+        .join(single_end.map{report_meta, sample_metas, read_paths -> [report_meta, sample_metas]}, remainder:true)
+        .join(single_end.map{report_meta, sample_metas, read_paths -> [report_meta, read_paths]}, remainder:true)
+        .join(longread.map{report_meta, sample_metas, read_paths -> [report_meta, sample_metas]}, remainder:true)
+        .join(longread.map{report_meta, sample_metas, read_paths -> [report_meta, read_paths]}, remainder:true)
+        .map {report_meta, ref_aa, ref_dna, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads ->
+            [report_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads, ref_aa, ref_dna]
+        }
+        .map{ it.collect{ it ?: [] } }.view() //replace nulls with empty lists
 
     // Run Read2tree
-    READ2TREE ( rt2_input )
+    READ2TREE ( r2t_input )
 
     emit:
     versions      = versions // versions.yml

@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/chaos/all_inputs"
+  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/work/1a/ef4ee9d0dd24b2b14003aa1d401ed0/p_ram_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -239,10 +239,15 @@ These measurements are not as reliable as the methods used to create phylogeneti
 ### POCP top matches
 
 ```{r}
-pocp_matrix <- pocp_matrix_parsed(params$inputs)[[1]]
-print_pocp_table(pocp_matrix, sample_data, reference_data)
+pocp_matrix <- pocp_matrix_parsed(params$inputs)
 ```
 
+```{r eval=length(pocp_matrix) > 0}
+print_pocp_table(pocp_matrix[[1]], sample_data, reference_data)
+```
+
+```{r, results='asis', eval=length(pocp_matrix) > 0}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
@@ -252,14 +257,24 @@ Which proteins are shared is determined from pairwise comparisons of all protein
 The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
 Currently, POCP is only calculated for Prokaryotes.
 :::
+')
+```
+
+```{r, results='asis', eval=length(pocp_matrix) == 0}
+cat('
+POPC not calculated.
+')
+```
 
 
 ### POCP heatmap
 
-```{r pocp_heatmap}
-make_ani_heatmap(pocp_matrix, reference_data, sample_data)
+```{r pocp_heatmap, eval=length(pocp_matrix) > 0}
+make_ani_heatmap(pocp_matrix[[1]], reference_data, sample_data)
 ```
 
+```{r, results='asis', eval = length(pocp_matrix) > 0}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
@@ -269,7 +284,14 @@ Which proteins are shared is determined from pairwise comparisons of all protein
 The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
 Currently, POCP is only calculated for Prokaryotes.
 :::
+')
+```
 
+```{r, results='asis', eval = length(pocp_matrix) == 0}
+cat('
+POPC not calculated.
+')
+```
 
 :::
 
@@ -285,8 +307,7 @@ The accuracy of this identification depends on the presence of close reference s
 core_plots <- core_tree_plot(params$inputs, interactive = FALSE)
 ```
 
-
-```{r results='asis'}
+```{r results='asis', eval = length(core_plots) > 0}
 plot_one <- function(x) {
     print(core_plots[[x]])
 }
@@ -295,8 +316,7 @@ max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
 print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = 500 + tip_count * 60, res = 300)
 ```
 
-
-```{r, results='asis', eval = length(core_tree_path(params$inputs)) > 0}
+```{r, results='asis', eval = length(core_plots) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -308,9 +328,9 @@ It is the most robust identification provided by this pipeline, but its precisio
 ')
 ```
 
-```{r, results='asis', eval = length(core_tree_path(params$inputs)) == 0}
+```{r, results='asis', eval = length(core_plots) == 0}
 cat('
-Could not generate core genome phylogeny. No tree files found.
+Could not generate core genome phylogeny.
 ')
 ```
 

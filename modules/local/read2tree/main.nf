@@ -45,7 +45,7 @@ process READ2TREE {
     	# Add each paired end shortread sample
         FORWARD=(${paired_1})
         REVERSE=(${paired_2})
-        IDS=(${pair_meta.collect{it.id}})
+        IDS=(${pair_meta.collect{it.id}.join(' ')})
     	for i in \${!FORWARD[@]}; do
         	read2tree \\
             ${args} \\
@@ -59,7 +59,7 @@ process READ2TREE {
 
     	# Add each single end shortread sample
         SINGLE=(${single})
-        IDS=(${single_meta.collect{it.id}})
+        IDS=(${single_meta.collect{it.id}.join(' ')})
     	for i in \${!SINGLE[@]}; do
         	read2tree \\
             ${args} \\
@@ -73,7 +73,7 @@ process READ2TREE {
 
     	# Add each long read sample
         LONG=(${long_reads})
-        IDS=(${long_meta.collect{it.id}})
+        IDS=(${long_meta.collect{it.id}.join(' ')})
     	for i in \${!LONG[@]}; do
         	read2tree \\
             ${args} \\
