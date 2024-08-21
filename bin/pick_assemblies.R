@@ -8,40 +8,13 @@ min_coverage <- 30
 
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_families.txt',
-#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_genera.txt',
-#     '~/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Bp_511283_SE_species.txt',
-#     '30', '20', '10',
-#     'test_out.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Acidilobaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Alcaligenaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Apidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Apodidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Betaflexiviridae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Burkholderiaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Caprimulgidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Desulfurococcaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Emydidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Enterobacteriaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Formicidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Halictidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Halomonadaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Lamiaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Megachilidae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Micrococcaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Moraxellaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Nectriaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pedaliaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Peronosporaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Phrymaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Poaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Propionibacteriaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pyrodictiaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Pythiaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Staphylococcaceae.tsv',
-#     '/home/fosterz/files/projects/work/current/pathogensurveillance/work/22/8636da718f1d315f2d4191ffff35b7/Xanthomonadaceae.tsv'
-# )
+args <- c(
+    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_families.txt',
+    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_genera.txt',
+    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_species.txt',
+    '30', '20', '10',
+    'H1_17_17_8_S154_L002.tsv'
+)
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -52,6 +25,9 @@ n_ref_genera <- args[[6]]
 out_path <- args[[7]]
 
 # Parse input TSVs
+if (length(args) < 8) {
+    stop('No family-level reference metadata files supplied. Check input data.')
+}
 tsv_paths <- unlist(args[8:length(args)])
 tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE)
 tsv_data <- lapply(seq_along(tsv_paths), function(index) {
