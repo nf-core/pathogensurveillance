@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_main_report_error/prepare_main_report"
+  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/work/a6/c5955888f5a9432ae1eeb3a85e5a12/p_ram_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -301,10 +301,10 @@ This section includes phylogenetic trees of samples with references sequences do
 The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
 
 
-### Core gene phylogeny
+### Multigene phylogeny
 
 ```{r}
-core_plots <- core_tree_plot(params$inputs, interactive = FALSE)
+core_plots <- multigene_tree_plot(params$inputs, interactive = FALSE)
 ```
 
 ```{r results='asis', eval = length(core_plots) > 0}
@@ -321,8 +321,7 @@ cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This a core gene phylogeny of samples with reference genomes for context.
-A core gene phylogeny uses the sequences of all gene shared by all of the genomes included in the tree to infer evolutionary relationships.
+This a multgene phylogeny of samples with reference genomes for context.
 It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences.
 :::
 ')

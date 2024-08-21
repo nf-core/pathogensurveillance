@@ -8,13 +8,13 @@ min_coverage <- 30
 
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c(
-    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_families.txt',
-    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_genera.txt',
-    '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_species.txt',
-    '30', '20', '10',
-    'H1_17_17_8_S154_L002.tsv'
-)
+# args <- c(
+#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_families.txt',
+#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_genera.txt',
+#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_species.txt',
+#     '30', '20', '10',
+#     'H1_17_17_8_S154_L002.tsv'
+# )
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
