@@ -23,6 +23,7 @@ n_refs_contextual <- as.integer(args$n_refs_contextual)
 
 # Read sample data with user-defined references
 sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
+sample_data[] <- lapply(sample_data, as.character)
 sample_ids <- unique(sample_data$sample_id)
 ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
 
