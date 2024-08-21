@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "_test_data/chaos/all_inputs"
+  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_main_report_error/prepare_main_report"
 execute:
   echo: false
 bibliography: references.bib
@@ -18,7 +18,6 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 # "_test_data/xanthomonas/xan_test_inputs"
 # "_test_data/mycobacteroides/_no_group_defined__inputs"
 # "_test_data/chaos/all_inputs"
-# "/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_main_report_error/prepare_main_report"
 ```
 
 
@@ -314,7 +313,7 @@ plot_one <- function(x) {
 }
 tip_count <- sum(core_plots[[1]]$data$isTip)
 max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
-print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 10000)), res = 300)
+print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
 ```
 
 ```{r, results='asis', eval = length(core_plots) > 0}
@@ -351,7 +350,7 @@ plot_one <- function(x) {
 }
 tip_count <- sum(snp_plots[[1]]$data$isTip)
 max_label_size <- max(nchar(snp_plots[[1]]$data$label), na.rm = TRUE)
-print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 10000)), res = 300)
+print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
 ```
 
 
