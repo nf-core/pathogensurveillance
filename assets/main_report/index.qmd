@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/work/a6/c5955888f5a9432ae1eeb3a85e5a12/p_ram_inputs"
+  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/subgroup_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 # "_test_data/xanthomonas/xan_test_inputs"
 # "_test_data/mycobacteroides/_no_group_defined__inputs"
 # "_test_data/chaos/all_inputs"
+"/home/fosterz/data/files/projects/current/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/subgroup_inputs"
 ```
 
 

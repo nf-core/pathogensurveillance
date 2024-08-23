@@ -1,6 +1,7 @@
 process READ2TREE {
     tag "$meta.id"
     label 'process_medium'
+    errorStrategy 'ignore'
 
     conda "bioconda::read2tree=0.1.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

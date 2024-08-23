@@ -126,12 +126,6 @@ workflow BUSCO_PHYLOGENY {
         .map { sample_metas, read_paths, report_meta, types ->
             [report_meta, sample_metas, read_paths.collect{it[0]}]
         }
-    //rt2_input = paired_end
-    //    .join(single_end, remainder:true).view() // group_meta, pair_meta, pair_1, pair_2, single_meta, single
-    //    .join(longread, remainder:true) // group_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, long
-    //    .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
-    //    .join( MAKE_READ2TREE_DB.out.ref_aa )
-    //    .join( MAKE_READ2TREE_DB.out.ref_dna )
 
     // NOTE: This annoying way of adding parts of tuple channels one part at a time is becuase when a channel is empty,
     //   only one null is added, not the number of nulls equal to the the number of elements that should be in the tuple.
@@ -147,7 +141,7 @@ workflow BUSCO_PHYLOGENY {
         .map {report_meta, ref_aa, ref_dna, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads ->
             [report_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads, ref_aa, ref_dna]
         }
-        .map{ it.collect{ it ?: [] } }.view() //replace nulls with empty lists
+        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     // Run Read2tree
     READ2TREE ( r2t_input )

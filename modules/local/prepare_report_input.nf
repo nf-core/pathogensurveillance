@@ -20,12 +20,10 @@ process PREPARE_REPORT_INPUT {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
+    config_file_text = workflow.configFiles.collect{"  - ${it}"}.join("\n")
     """
     # Make directory for ${prefix}_inputs so that a single path can be passed as parameters
     mkdir ${prefix}_inputs
-
-    # Save report group name to file
-    echo "${group_meta.id}" > ${prefix}_inputs/group_id.txt
 
     # Add sample metadata for this report group
     cp -r ${sample_data} ${prefix}_inputs/sample_data.csv
@@ -104,5 +102,22 @@ process PREPARE_REPORT_INPUT {
 
     # Add versions of software used
     mv ${versions} ${prefix}_inputs/versions.yml
+
+    # Record run metadata
+    cat <<-END_INFO > ${prefix}_inputs/pathogensurveillance_run_info.yml
+    group_id: ${group_meta.id}
+    command_line: ${workflow.commandLine}
+    commit_id: ${workflow.commitId}
+    config_files:
+    ${config_file_text}
+    container_engine: ${workflow.containerEngine}
+    profile: ${workflow.profile}
+    revision: ${workflow.revision}
+    run_name: ${workflow.runName}
+    session_id: ${workflow.sessionId}
+    start_time: ${workflow.start}
+    nextflow_version: ${nextflow.version}
+    pipeine_verison: ${workflow.manifest.version}
+    END_INFO
     """
 }
