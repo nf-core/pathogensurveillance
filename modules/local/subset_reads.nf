@@ -23,18 +23,18 @@ process SUBSET_READS {
     def args = task.ext.args ?: ''
     """
     READ_COUNT=\$(gunzip -c ${fastqs[0]} | grep -c '@' )
-    
-    if [${depth} == 0]; then
-        SUBSET_COUNT=\$(echo "\$READ_COUNT * ${max_depth} / ${depth}" | bc)
-    else
+
+    if [[ ${depth} -eq 0 ]]; then
         SUBSET_COUNT=\$READ_COUNT
+    else
+        SUBSET_COUNT=\$(awk -v READ_COUNT=\$READ_COUNT 'BEGIN { printf "%d",  (READ_COUNT * ${max_depth} / ${depth}) }')
     fi
-    
-    if [ \$SUBSET_COUNT -gt \$READ_COUNT ]; then
-        for f in ${fastqs.join(' ')}                                      
-        do                                                                      
-            ln -s \$f "\$(basename \$f .fastq.gz)_subset.fastq.gz"      
-        done                                                                            
+
+    if [ \$SUBSET_COUNT -ge \$READ_COUNT ]; then
+        for f in ${fastqs.join(' ')}
+        do
+            ln -s \$f "\$(basename \$f .fastq.gz)_subset.fastq.gz"
+        done
     else
         for f in ${fastqs.join(' ')}
         do

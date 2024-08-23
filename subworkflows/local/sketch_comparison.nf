@@ -4,7 +4,6 @@ include { ASSIGN_CONTEXT_REFERENCES                   } from '../../modules/loca
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_READS    } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_SKETCH as SOURMASH_SKETCH_GENOME   } from '../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_COMPARE                            } from '../../modules/local/sourmash_compare'
-include { SUBSET_READS                                } from '../../modules/local/subset_reads'
 
 workflow SKETCH_COMPARISON {
 
@@ -15,18 +14,11 @@ workflow SKETCH_COMPARISON {
     versions = Channel.empty()
     messages = Channel.empty()
 
-    // Subset sample reads to increase speed of following steps
-    SUBSET_READS (
-        sample_data
-            .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
-            .unique(),
-        params.sketch_max_depth
-    )
-    versions = versions.mix(SUBSET_READS.out.versions)
-
     // Trim rare k-mers from raw reads
     KHMER_TRIMLOWABUND (
-        SUBSET_READS.out.reads
+        sample_data
+            .map { [[id: it.sample_id], it.paths] }
+            .unique(),
     )
     versions = versions.mix(KHMER_TRIMLOWABUND.out.versions)
 

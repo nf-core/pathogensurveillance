@@ -8,6 +8,7 @@ include { INITIAL_CLASSIFICATION } from '../../modules/local/initial_classificat
 include { DOWNLOAD_ASSEMBLIES    } from '../../modules/local/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../modules/local/find_assemblies'
 include { PICK_ASSEMBLIES        } from '../../modules/local/pick_assemblies'
+include { SUBSET_READS           } from '../../modules/local/subset_reads'
 
 workflow PREPARE_INPUT {
     take:
@@ -172,6 +173,24 @@ workflow PREPARE_INPUT {
     sample_data = sample_data
         .map{ sample_meta ->
             sample_meta.paths = sample_meta.paths instanceof Collection ? sample_meta.paths : [sample_meta.paths]
+            sample_meta
+        }
+
+    // Subset sample reads to increase speed of following steps
+    SUBSET_READS (
+        sample_data
+            .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
+            .unique(),
+        params.max_depth
+    )
+    versions = versions.mix(SUBSET_READS.out.versions)
+    sample_data = sample_data
+        .map { sample_meta ->
+            [[id: sample_meta.sample_id], sample_meta]
+        }
+        .combine(SUBSET_READS.out.reads, by: 0)
+        .map { sample_id, sample_meta, subset_reads ->
+            sample_meta.paths = subset_reads
             sample_meta
         }
 

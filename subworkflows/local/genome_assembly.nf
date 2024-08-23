@@ -4,7 +4,6 @@ include { FILTER_ASSEMBLY       } from '../../modules/local/filter_assembly'
 include { QUAST                 } from '../../modules/local/quast.nf'
 include { BAKTA_BAKTA           } from '../../modules/nf-core/bakta/bakta/main'
 include { BAKTA_BAKTADBDOWNLOAD } from '../../modules/nf-core/bakta/baktadbdownload/main'
-include { SUBSET_READS          } from '../../modules/local/subset_reads'
 include { UNTAR                 } from '../../modules/nf-core/untar/main'
 include { FLYE as FLYE_NANOPORE } from '../../modules/nf-core/flye/main'
 include { FLYE as FLYE_PACBIO   } from '../../modules/nf-core/flye/main'
@@ -20,27 +19,10 @@ workflow GENOME_ASSEMBLY {
     messages = Channel.empty()
     filtered_input = sample_data
         .filter {it.kingdom == "Bacteria"}
-        .map{ [[id: it.sample_id], it.paths, it.kingdom, it.sendsketch_depth, it.sequence_type] }
-        .unique()
-    reads = filtered_input
-        .map { sample_meta, read_paths, kingdom, depth, seq_type ->
-            [sample_meta, read_paths, depth]
-        }
+        .map{ [[id: it.sample_id], it.paths, it.sequence_type] }
         .unique()
 
-    // Subset sample reads to increase speed of following steps
-    SUBSET_READS (
-        reads,
-        params.sketch_max_depth
-    )
-    versions = versions.mix(SUBSET_READS.out.versions)
-    subset_reads = SUBSET_READS.out.reads
-        .join(filtered_input)
-        .map { sample_meta, subset_read_paths, read_paths, kingdom, depth, seq_type ->
-            [sample_meta, subset_read_paths, seq_type]
-        }
-
-    shortreads = subset_reads
+    shortreads = filtered_input
         .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" || seq_type == "bgiseq" }
         .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FASTP( shortreads, [], false, false )
@@ -53,7 +35,7 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(SPADES.out.versions)
 
-    nanopore = subset_reads
+    nanopore = filtered_input
         .filter{ sample_meta, read_paths, seq_type -> seq_type == "nanopore"}
         .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_NANOPORE (
@@ -61,7 +43,7 @@ workflow GENOME_ASSEMBLY {
         "--nano-hq"
     )
 
-    pacbio = subset_reads
+    pacbio = filtered_input
         .filter{ sample_meta, read_paths, seq_type -> seq_type == "pacbio"}
         .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_PACBIO (

@@ -94,22 +94,10 @@
             "description": "Parmaters that modify the analysis done by the pipleine.",
             "default": "",
             "properties": {
-                "sketch_max_depth": {
+                "max_depth": {
                     "type": "number",
-                    "default": 3,
-                    "description": "Depth reads are subsampled to for the initial sketch-based identification.",
-                    "fa_icon": "fas fa-align-center"
-                },
-                "variant_max_depth": {
-                    "type": "number",
-                    "default": 15,
-                    "description": "Depth reads are subsampled to for the variant-based parts of the analysis",
-                    "fa_icon": "fas fa-align-center"
-                },
-                "assembly_max_depth": {
-                    "type": "number",
-                    "default": 30,
-                    "description": "Depth reads are subsampled to for genome assembly. This will be multiplied by the predicted ploidy of each sample",
+                    "default": 100,
+                    "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
                     "fa_icon": "fas fa-align-center"
                 },
                 "n_ref_strains": {
