@@ -5,7 +5,7 @@ process TRIM_AND_SKETCH {
     conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/khmer:3.0.0a3--py37haa7609a_2' :
-        'docker.io/zacharyfoster/bbmap_khmer:0.1' }"
+        'docker.io/zacharyfoster/khmer_sourmash:0.1' }"
 
     input:
     tuple val(meta), path(fasta)
