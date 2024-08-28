@@ -9,6 +9,7 @@ include { DOWNLOAD_ASSEMBLIES    } from '../../modules/local/download_assemblies
 include { FIND_ASSEMBLIES        } from '../../modules/local/find_assemblies'
 include { PICK_ASSEMBLIES        } from '../../modules/local/pick_assemblies'
 include { SUBSET_READS           } from '../../modules/local/subset_reads'
+include { COUNT_READS            } from '../../modules/local/count_reads'
 
 workflow PREPARE_INPUT {
     take:
@@ -176,12 +177,32 @@ workflow PREPARE_INPUT {
             sample_meta
         }
 
+    // Count the number of reads and basepairs to decide whether not to subset_reads
+    samples_to_subset = sample_data
+        .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
+        .unique()
+        .filter { sample_id, fastq_paths, depth ->
+            depth.toFloat() > params.max_depth.toFloat()
+        }
+    samples_to_not_subset = sample_data
+        .filter {
+            it.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
+        }
+    COUNT_READS (
+        samples_to_subset
+            .map { sample_meta, fastq_paths, depth ->
+                [sample_meta, fastq_paths]
+            }
+            .unique(),
+    )
+
     // Subset sample reads to increase speed of following steps
     SUBSET_READS (
-        sample_data
-            .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
-            .unique(),
-        params.max_depth
+        samples_to_subset
+            .combine(COUNT_READS.out.read_count, by: 0)
+            .map { sample_meta, fastq_paths, depth, read_count ->
+                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * read_count.toFloat()).toInteger() ]
+            }
     )
     versions = versions.mix(SUBSET_READS.out.versions)
     sample_data = sample_data
@@ -193,6 +214,8 @@ workflow PREPARE_INPUT {
             sample_meta.paths = subset_reads
             sample_meta
         }
+        .mix(samples_to_not_subset)
+
 
     emit:
     sample_data

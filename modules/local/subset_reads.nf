@@ -8,8 +8,7 @@ process SUBSET_READS {
         'biocontainers/seqkit:2.2.0--h9ee0642_0' }"
 
     input:
-    tuple val(meta), path(fastqs), val(depth)
-    val max_depth
+    tuple val(meta), path(fastqs), val(read_count)
 
     output:
     tuple val(meta), path("*_subset.fastq.gz"), emit: reads
@@ -22,25 +21,10 @@ process SUBSET_READS {
     prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     """
-    READ_COUNT=\$(gunzip -c ${fastqs[0]} | grep -c '@' )
-
-    if [[ ${depth} -eq 0 ]]; then
-        SUBSET_COUNT=\$READ_COUNT
-    else
-        SUBSET_COUNT=\$(awk -v READ_COUNT=\$READ_COUNT 'BEGIN { printf "%d",  (READ_COUNT * ${max_depth} / ${depth}) }')
-    fi
-
-    if [ \$SUBSET_COUNT -ge \$READ_COUNT ]; then
-        for f in ${fastqs.join(' ')}
-        do
-            ln -s \$f "\$(basename \$f .fastq.gz)_subset.fastq.gz"
-        done
-    else
-        for f in ${fastqs.join(' ')}
-        do
-            seqkit head ${args} --threads $task.cpus -n \$SUBSET_COUNT -o "\$(basename \$f .fastq.gz)_subset.fastq.gz" \$f
-        done
-    fi
+    for f in ${fastqs.join(' ')}
+    do
+        seqkit head ${args} --threads $task.cpus -n ${read_count} -o "\$(basename \$f .fastq.gz)_subset.fastq.gz" \$f
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
