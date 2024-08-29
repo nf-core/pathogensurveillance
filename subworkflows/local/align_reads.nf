@@ -1,9 +1,6 @@
-include { BWA_MEM                            } from '../../modules/nf-core/bwa/mem/main'
-include { PICARD_ADDORREPLACEREADGROUPS      } from '../../modules/nf-core/picard/addorreplacereadgroups/main'
-include { PICARD_SORTSAM as PICARD_SORTSAM_1 } from '../../modules/nf-core/picard/sortsam/main'
-include { PICARD_SORTSAM as PICARD_SORTSAM_2 } from '../../modules/nf-core/picard/sortsam/main'
-include { PICARD_MARKDUPLICATES              } from '../../modules/nf-core/picard/markduplicates/main'
-include { SAMTOOLS_INDEX                     } from '../../modules/nf-core/samtools/index/main'
+include { BWA_MEM         } from '../../modules/nf-core/bwa/mem/main'
+include { PICARD_FORMAT   } from '../../modules/local/picard_format.nf'
+include { SAMTOOLS_INDEX  } from '../../modules/nf-core/samtools/index/main'
 
 workflow ALIGN_READS {
 
@@ -22,36 +19,50 @@ workflow ALIGN_READS {
     BWA_MEM ( ch_reads, ch_bwa_index, false )
     versions = versions.mix(BWA_MEM.out.versions)
 
-    PICARD_ADDORREPLACEREADGROUPS ( BWA_MEM.out.bam )
-    versions = versions.mix(PICARD_ADDORREPLACEREADGROUPS.out.versions)
-
-    PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
-    versions = versions.mix(PICARD_SORTSAM_1.out.versions)
-
     ch_reference = samp_ref_combo.map { [it[0], it[4]] } // channel: [ val(ref_samp_meta), file(reference) ]
     ch_ref_index = samp_ref_combo.map { [it[0], it[5]] } // channel: [ val(ref_samp_meta), file(ref_index) ]
-    picard_input = PICARD_SORTSAM_1.out.bam // joined to associated right reference with each sample
+    picard_input = BWA_MEM.out.bam // joined to associated right reference with each sample
         .join(ch_reference)
         .join(ch_ref_index)
+    PICARD_FORMAT ( picard_input )
 
-    PICARD_MARKDUPLICATES (
-        picard_input.map { it[0..1] },
-        picard_input.map { [it[0], it[2]] },
-        picard_input.map { [it[0], it[3]] }
-    )
-    versions = versions.mix(PICARD_MARKDUPLICATES.out.versions)
 
-    PICARD_SORTSAM_2 ( PICARD_MARKDUPLICATES.out.bam, 'coordinate' )
 
-    SAMTOOLS_INDEX ( PICARD_SORTSAM_2.out.bam )
+
+
+
+//    PICARD_ADDORREPLACEREADGROUPS ( BWA_MEM.out.bam )
+//    versions = versions.mix(PICARD_ADDORREPLACEREADGROUPS.out.versions)
+//
+//    PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
+//    versions = versions.mix(PICARD_SORTSAM_1.out.versions)
+//
+//    ch_reference = samp_ref_combo.map { [it[0], it[4]] } // channel: [ val(ref_samp_meta), file(reference) ]
+//    ch_ref_index = samp_ref_combo.map { [it[0], it[5]] } // channel: [ val(ref_samp_meta), file(ref_index) ]
+//    picard_input = PICARD_SORTSAM_1.out.bam // joined to associated right reference with each sample
+//        .join(ch_reference)
+//        .join(ch_ref_index)
+//
+//    PICARD_MARKDUPLICATES (
+//        picard_input.map { it[0..1] },
+//        picard_input.map { [it[0], it[2]] },
+//        picard_input.map { [it[0], it[3]] }
+//    )
+//    versions = versions.mix(PICARD_MARKDUPLICATES.out.versions)
+//
+//    PICARD_SORTSAM_2 ( PICARD_MARKDUPLICATES.out.bam, 'coordinate' )
+
+
+
+
+    SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
     versions = versions.mix(SAMTOOLS_INDEX.out.versions)
 
     // Revet combined metas back to seperate ones for sample and reference
-    out_bam = PICARD_SORTSAM_2.out.bam        // channel: [ val(ref_samp_meta), [ bam ] ]
+    out_bam = PICARD_FORMAT.out.bam        // channel: [ val(ref_samp_meta), [ bam ] ]
         .map { [it[0].sample, it[0].ref, it[1]] }
     out_bai = SAMTOOLS_INDEX.out.bai        // channel: [ val(ref_samp_meta), [ bai ] ]
         .map { [it[0].sample, it[0].ref, it[1]] }
-
 
     emit:
     bam      = out_bam        // channel: [ val(meta), val(ref_meta), [ bam ] ]
