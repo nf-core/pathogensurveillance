@@ -26,35 +26,6 @@ workflow ALIGN_READS {
         .join(ch_ref_index)
     PICARD_FORMAT ( picard_input )
 
-
-
-
-
-
-//    PICARD_ADDORREPLACEREADGROUPS ( BWA_MEM.out.bam )
-//    versions = versions.mix(PICARD_ADDORREPLACEREADGROUPS.out.versions)
-//
-//    PICARD_SORTSAM_1 ( PICARD_ADDORREPLACEREADGROUPS.out.bam, 'coordinate' )
-//    versions = versions.mix(PICARD_SORTSAM_1.out.versions)
-//
-//    ch_reference = samp_ref_combo.map { [it[0], it[4]] } // channel: [ val(ref_samp_meta), file(reference) ]
-//    ch_ref_index = samp_ref_combo.map { [it[0], it[5]] } // channel: [ val(ref_samp_meta), file(ref_index) ]
-//    picard_input = PICARD_SORTSAM_1.out.bam // joined to associated right reference with each sample
-//        .join(ch_reference)
-//        .join(ch_ref_index)
-//
-//    PICARD_MARKDUPLICATES (
-//        picard_input.map { it[0..1] },
-//        picard_input.map { [it[0], it[2]] },
-//        picard_input.map { [it[0], it[3]] }
-//    )
-//    versions = versions.mix(PICARD_MARKDUPLICATES.out.versions)
-//
-//    PICARD_SORTSAM_2 ( PICARD_MARKDUPLICATES.out.bam, 'coordinate' )
-
-
-
-
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
     versions = versions.mix(SAMTOOLS_INDEX.out.versions)
 

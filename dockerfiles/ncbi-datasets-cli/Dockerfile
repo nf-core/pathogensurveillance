@@ -23,5 +23,5 @@ MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 USER root
 
-RUN conda install -c conda-forge ncbi-datasets-cli=16.0.0 unzip
+RUN conda install -c conda-forge ncbi-datasets-cli=16.0.0 unzip bioconda::samtools=1.18
 
