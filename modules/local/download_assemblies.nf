@@ -15,11 +15,11 @@ process DOWNLOAD_ASSEMBLIES {
     tuple val(ref_meta), val(id)
 
     output:
-    tuple val(ref_meta), path("${prefix}.zip"), emit: assembly
-    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}_genomic.fna"), emit: sequence
-    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}.gff"), emit: gff, optional: true
-    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}_cds.fna"), emit: cds, optional: true
-    tuple val(ref_meta), path("ncbi_dataset/data/${id}/${prefix}.faa"), emit: protein, optional: true
+    //tuple val(ref_meta), path("${prefix}.zip"), emit: assembly
+    tuple val(ref_meta), path("${prefix}.fasta.gz"), emit: sequence
+    tuple val(ref_meta), path("${prefix}.gff.gz"), emit: gff, optional: true
+    //tuple val(ref_meta), path("${prefix}_cds.fna"), emit: cds, optional: true
+    //tuple val(ref_meta), path("${prefix}.faa"), emit: protein, optional: true
 
     path "versions.yml"                 , emit: versions
 
@@ -41,16 +41,26 @@ process DOWNLOAD_ASSEMBLIES {
 
     # Rename files with assembly name
     if [ -f ncbi_dataset/data/${id}/${id}_*_genomic.fna ]; then
-        mv ncbi_dataset/data/${id}/${id}_*_genomic.fna ncbi_dataset/data/${id}/${prefix}_genomic.fna
+        mv ncbi_dataset/data/${id}/${id}_*_genomic.fna ${prefix}.fasta
     fi
     if [ -f ncbi_dataset/data/${id}/genomic.gff ]; then
-        mv ncbi_dataset/data/${id}/genomic.gff ncbi_dataset/data/${id}/${prefix}.gff
+        mv ncbi_dataset/data/${id}/genomic.gff ${prefix}.gff
     fi
-    if [ -f ncbi_dataset/data/${id}/cds_from_genomic.fna ]; then
-        mv ncbi_dataset/data/${id}/cds_from_genomic.fna ncbi_dataset/data/${id}/${prefix}_cds.fna
-    fi
-    if [ -f ncbi_dataset/data/${id}/protein.faa ]; then
-        mv ncbi_dataset/data/${id}/protein.faa ncbi_dataset/data/${id}/${prefix}.faa
+    #if [ -f ncbi_dataset/data/${id}/cds_from_genomic.fna ]; then
+    #    mv ncbi_dataset/data/${id}/cds_from_genomic.fna ${prefix}_cds.fna
+    #fi
+    #if [ -f ncbi_dataset/data/${id}/protein.faa ]; then
+    #    mv ncbi_dataset/data/${id}/protein.faa ${prefix}.faa
+    #fi
+
+    # Delete unneeded files
+    rm ${prefix}.zip
+    rm  -rf ncbi_dataset
+
+    # Compress output files
+    gzip ${prefix}.fasta
+    if [ -f ${prefix}.gff ]; then
+        gzip ${prefix}.gff
     fi
 
     cat <<-END_VERSIONS > versions.yml
