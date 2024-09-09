@@ -12,6 +12,7 @@ process MAKE_REGION_FILE {
 
     output:
     tuple val(ref_meta), path("*.txt"), emit: regions
+    path "versions.yml"               , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,5 +21,10 @@ process MAKE_REGION_FILE {
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
     zgrep '>' ${ref} | sed 's/>//g' | sed 's/ .*//g' > ${prefix}.txt
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        zgrep: \$(zgrep --version 2>&1) | sed 's/^.*gzip) //; s/ .*\$//'
+    END_VERSIONS
     """
 }

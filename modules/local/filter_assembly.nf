@@ -1,7 +1,8 @@
 process FILTER_ASSEMBLY {
     tag "$meta.id"
+    label 'process_low'
 
-    conda (params.enable_conda ? "conda-forge::biopython=1.78" : null)
+    conda "conda-forge::biopython=1.78"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'biocontainers/biopython:1.78' }"
@@ -13,8 +14,11 @@ process FILTER_ASSEMBLY {
     tuple val(meta), path("*_filtered.fasta"), emit: filtered
     path "versions.yml"             , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
-    def args = task.ext.args ?: ''                                              
+    def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     gzip -dc ${scaffold} > ${prefix}_unzipped.fasta

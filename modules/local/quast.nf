@@ -5,7 +5,7 @@ process QUAST {
     conda "bioconda::quast=5.2.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/quast:5.2.0--py39pl5321h2add14b_1' :
-        'quay.io/biocontainers/quast:5.2.0--py38pl5321h5cf8b27_3' }"
+        'biocontainers/quast:5.2.0--py38pl5321h5cf8b27_3' }"
 
     input:
     tuple val(meta), path(consensus), path(fasta), path(gff)

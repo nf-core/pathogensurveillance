@@ -4,6 +4,7 @@ Validates the input data and returns a reformatted version that is used for the 
 
 process SAMPLESHEET_CHECK {
     tag "$sample_csv"
+    label 'process_low'
 
     conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -18,6 +19,9 @@ process SAMPLESHEET_CHECK {
     path 'sample_metadata.csv'    , emit: sample_data
     path 'reference_metadata.csv' , emit: reference_data
     path "versions.yml"           , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
     """

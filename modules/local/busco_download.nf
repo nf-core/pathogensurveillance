@@ -2,7 +2,7 @@ process BUSCO_DOWNLOAD {
     tag "$lineage"
     label 'process_low'
 
-    conda "bioconda::busco=5.5.0"
+    conda "bioconda::busco=5.7.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/busco:5.5.0--pyhdfd78af_0':
         'biocontainers/busco:5.5.0--pyhdfd78af_0' }"

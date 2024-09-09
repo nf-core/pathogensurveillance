@@ -2,7 +2,7 @@ process SUBSET_READS {
     tag "$meta.id"
     label 'process_low'
 
-    conda "bioconda::seqkit=2.2.0"
+    conda "bioconda::seqkit=2.8.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/seqkit:2.2.0--h9ee0642_0':
         'biocontainers/seqkit:2.2.0--h9ee0642_0' }"

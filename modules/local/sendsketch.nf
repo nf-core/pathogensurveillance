@@ -3,7 +3,7 @@ process BBMAP_SENDSKETCH {
     label 'process_single'
     maxForks 1
 
-    conda "bioconda::bbmap=39.01"
+    conda "bioconda::bbmap=39.08"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/bbmap:39.01--h5c4e2a8_0':
         'biocontainers/bbmap:39.01--h5c4e2a8_0' }"

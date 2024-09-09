@@ -5,7 +5,7 @@ process VCF_TO_TAB {
     conda "bioconda::vcftools=0.1.16"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/vcftools:0.1.16--pl5321h9a82719_6':
-        'quay.io/biocontainers/vcftools:0.1.16--pl5321h9a82719_6' }"
+        'biocontainers/vcftools:0.1.16--pl5321h9a82719_6' }"
 
     input:
     tuple val(ref_meta), path(vcf)

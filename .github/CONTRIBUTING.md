@@ -1,22 +1,22 @@
-# nf-core/plantpathsurveil: Contributing Guidelines
+# nf-core/pathogensurveillance: Contributing Guidelines
 
 Hi there!
-Many thanks for taking an interest in improving nf-core/plantpathsurveil.
+Many thanks for taking an interest in improving nf-core/pathogensurveillance.
 
-We try to manage the required tasks for nf-core/plantpathsurveil using GitHub issues, you probably came to this page when creating one.
+We try to manage the required tasks for nf-core/pathogensurveillance using GitHub issues, you probably came to this page when creating one.
 Please use the pre-filled template to save time.
 
 However, don't be put off by this template - other more general issues and suggestions are welcome!
 Contributions to the code are even more welcome ;)
 
-> If you need help using or modifying nf-core/plantpathsurveil then the best place to ask is on the nf-core Slack [#plantpathsurveil](https://nfcore.slack.com/channels/plantpathsurveil) channel ([join our Slack here](https://nf-co.re/join/slack)).
+> If you need help using or modifying nf-core/pathogensurveillance then the best place to ask is on the nf-core Slack [#pathogensurveillance](https://nfcore.slack.com/channels/pathogensurveillance) channel ([join our Slack here](https://nf-co.re/join/slack)).
 
 ## Contribution workflow
 
-If you'd like to write some code for nf-core/plantpathsurveil, the standard workflow is as follows:
+If you'd like to write some code for nf-core/pathogensurveillance, the standard workflow is as follows:
 
-1. Check that there isn't already an issue about your idea in the [nf-core/plantpathsurveil issues](https://github.com/nf-core/plantpathsurveil/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
-2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [nf-core/plantpathsurveil repository](https://github.com/nf-core/plantpathsurveil) to your GitHub account
+1. Check that there isn't already an issue about your idea in the [nf-core/pathogensurveillance issues](https://github.com/nf-core/pathogensurveillance/issues) to avoid duplicating work. If there isn't one already, please create one so that others know you're working on this
+2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [nf-core/pathogensurveillance repository](https://github.com/nf-core/pathogensurveillance) to your GitHub account
 3. Make the necessary changes / additions within your forked repository following [Pipeline conventions](#pipeline-contribution-conventions)
 4. Use `nf-core schema build` and add any new parameters to the pipeline JSON schema (requires [nf-core tools](https://github.com/nf-core/tools) >= 1.10).
 5. Submit a Pull Request against the `dev` branch and wait for the code to be reviewed and merged
@@ -54,11 +54,11 @@ These tests are run both with the latest available version of `Nextflow` and als
 
 ## Getting help
 
-For further information/help, please consult the [nf-core/plantpathsurveil documentation](https://nf-co.re/plantpathsurveil/usage) and don't hesitate to get in touch on the nf-core Slack [#plantpathsurveil](https://nfcore.slack.com/channels/plantpathsurveil) channel ([join our Slack here](https://nf-co.re/join/slack)).
+For further information/help, please consult the [nf-core/pathogensurveillance documentation](https://nf-co.re/pathogensurveillance/usage) and don't hesitate to get in touch on the nf-core Slack [#pathogensurveillance](https://nfcore.slack.com/channels/pathogensurveillance) channel ([join our Slack here](https://nf-co.re/join/slack)).
 
 ## Pipeline contribution conventions
 
-To make the nf-core/plantpathsurveil code and processing logic more understandable for new contributors and to ensure quality, we semi-standardise the way the code and other contributions are written.
+To make the nf-core/pathogensurveillance code and processing logic more understandable for new contributors and to ensure quality, we semi-standardise the way the code and other contributions are written.
 
 ### Adding a new step
 

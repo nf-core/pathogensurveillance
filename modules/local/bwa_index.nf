@@ -2,7 +2,7 @@ process BWA_INDEX {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::bwa=0.7.17"
+    conda "bioconda::bwa=0.7.18"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/bwa:0.7.17--hed695b0_7' :
         'biocontainers/bwa:0.7.17--hed695b0_7' }"

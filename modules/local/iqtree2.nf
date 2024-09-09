@@ -2,7 +2,7 @@ process IQTREE2 {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::iqtree=2.1.4_beta"
+    conda "bioconda::iqtree=2.3.6"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/iqtree:2.1.4_beta--hdcc8f71_0' :
         'biocontainers/iqtree:2.1.4_beta--hdcc8f71_0' }"

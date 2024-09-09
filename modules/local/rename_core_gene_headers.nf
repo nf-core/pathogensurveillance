@@ -12,6 +12,7 @@ process RENAME_CORE_GENE_HEADERS {
 
     output:
     tuple val(ref_meta), path("${prefix}_feat_seqs_renamed"), emit: feat_seqs
+    path "versions.yml"                                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -27,5 +28,10 @@ process RENAME_CORE_GENE_HEADERS {
     do
         sed 's/>.*genome:\\(.*\\)gene.*/>\\1/g' \$file > ${prefix}_feat_seqs_renamed/\$(basename \$file)
     done
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        sed: \$(sed --version 2>&1) | sed 's/^.*GNU sed) //; s/ .*\$//'
+    END_VERSIONS
     """
 }

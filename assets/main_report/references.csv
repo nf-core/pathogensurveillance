@@ -39,6 +39,6 @@ fastqc,@andrews2010fastqc
 r-base,@Rbase
 perl,
 vcftools,@danecek2011variant
-nf-core/plantpathsurveil,
+nf-core/pathogensurveillance,
 xtract,
 anaconda,@anaconda

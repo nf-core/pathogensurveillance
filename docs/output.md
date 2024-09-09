@@ -1,4 +1,4 @@
-# nf-core/plantpathsurveil: Output
+# nf-core/pathogensurveillance: Output
 
 ## Introduction
 

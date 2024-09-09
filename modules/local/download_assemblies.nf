@@ -6,7 +6,7 @@ process DOWNLOAD_ASSEMBLIES {
     maxRetries 6
     maxErrors 10
 
-    conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 unzip"
+    conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.20 unzip"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/ncbi-datasets-cli:14.26.0':
         'docker.io/zacharyfoster/ncbi-datasets-cli:0.1' }"
