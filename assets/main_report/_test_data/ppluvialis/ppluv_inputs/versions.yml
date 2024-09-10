@@ -1,0 +1,57 @@
+BAKTA_BAKTADBDOWNLOAD:
+  bakta: 1.9.2
+BGZIP_MAKE_GZIP:
+  tabix: '1.12'
+BWA_INDEX:
+  bwa: 0.7.17-r1188
+BWA_MEM:
+  bwa: 0.7.17-r1188
+  samtools: '1.18'
+CUSTOM_DUMPSOFTWAREVERSIONS:
+  python: 3.12.0
+  yaml: 6.0.1
+FASTQC:
+  fastqc: 0.12.1
+GATK4_VARIANTFILTRATION:
+  gatk4: 4.3.0.0
+GRAPHTYPER_GENOTYPE:
+  graphtyper: 2.7.2
+GRAPHTYPER_VCFCONCATENATE:
+  graphtyper: 2.7.2
+IQTREE2_SNP:
+  iqtree: 2.1.4-beta
+KHMER_TRIMLOWABUND:
+  khmer: 3.0.0a3
+PICARD_ADDORREPLACEREADGROUPS:
+  picard: 3.1.1
+PICARD_CREATESEQUENCEDICTIONARY:
+  picard: 3.1.1
+PICARD_MARKDUPLICATES:
+  picard: 3.1.1
+PICARD_SORTSAM_1:
+  picard: 3.1.1
+SAMPLESHEET_CHECK:
+  r-base: 4.4.1
+SAMTOOLS_FAIDX:
+  samtools: '1.18'
+SAMTOOLS_INDEX:
+  samtools: '1.18'
+SOURMASH_COMPARE:
+  sourmash: 4.6.1
+SOURMASH_SKETCH_GENOME:
+  sourmash: 4.8.4
+SOURMASH_SKETCH_READS:
+  sourmash: 4.8.4
+SUBSET_READS:
+  seqkit: 2.2.0
+TABIX_TABIX:
+  tabix: '1.12'
+VCFLIB_VCFFILTER:
+  vcflib: 1.0.3
+VCF_TO_SNPALN:
+  perl: 5.32.1 built for x86_64-linux-thread-multi
+VCF_TO_TAB:
+  vcftools: 0.1.16
+Workflow:
+  Nextflow: 23.10.1
+  nf-core/plantpathsurveil: 1.0dev
