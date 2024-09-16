@@ -2,7 +2,7 @@ process TRIM_AND_SKETCH {
     tag "${meta.id}"
     label 'process_low'
 
-    conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.11"
+    conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/khmer:3.0.0a3--py37haa7609a_2' :
         'docker.io/zacharyfoster/khmer_sourmash:0.1' }"

@@ -1,6 +1,9 @@
 include { BUSCO                     } from '../../modules/nf-core/busco/main'
 include { BUSCO_DOWNLOAD            } from '../../modules/local/busco_download'
 include { READ2TREE                 } from '../../modules/local/read2tree/main'
+include { R2TF                      } from '../../modules/local/r2tf'
+include { R2TDIR                    } from '../../modules/local/r2tdir'
+include { R2TBIN                    } from '../../modules/local/r2tbin'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
 include { MAKE_READ2TREE_DB         } from '../../modules/local/make_read2tree_db'
 

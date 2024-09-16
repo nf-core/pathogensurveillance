@@ -14,10 +14,9 @@ process SUBSET_CORE_GENES {
 
     output:
     tuple val(group_meta), path("${prefix}_core_genes/cluster_*.tsv"), emit: gene_fam
-    tuple val(group_meta), path("${prefix}_feat_seqs/cluster_*")     , emit: feat_seq
-    tuple val(group_meta), path("removed_sample_ids.txt")            , emit: removed_sample_ids
-    tuple val(group_meta), path("removed_ref_ids.txt")               , emit: removed_ref_ids
-    path "versions.yml"                                              , emit: versions
+    tuple val(group_meta), path("${prefix}_feat_seqs/cluster_*"), emit: feat_seq
+    tuple val(group_meta), path("removed_sample_ids.txt"), emit: removed_sample_ids
+    tuple val(group_meta), path("removed_ref_ids.txt"), emit: removed_ref_ids
 
 
     when:
@@ -27,10 +26,5 @@ process SUBSET_CORE_GENES {
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
     subset_core_gene.R $gene_fam $feat_seqs $sample_data $min_core_genes $max_core_genes ${prefix}_core_genes ${prefix}_feat_seqs
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
-    END_VERSIONS
     """
 }

@@ -5,7 +5,7 @@ process VCF_TO_SNPALN {
     conda "bioconda::perl-bioperl=1.7.8"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/perl-bioperl:1.7.8--hdfd78af_1':
-        'biocontainers/perl-bioperl:1.7.8--hdfd78af_1' }"
+        'quay.io/biocontainers/perl-bioperl:1.7.8--hdfd78af_1' }"
 
     input:
     tuple val(ref_meta), path(tab)

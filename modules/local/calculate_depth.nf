@@ -12,7 +12,6 @@ process CALCULATE_DEPTH {
 
     output:
     tuple val(meta), env(DEPTH), emit: depth
-    path "versions.yml"        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,11 +24,6 @@ process CALCULATE_DEPTH {
     READ_COUNT=\$(zgrep -c '@' ${fastqs[0]})
     READ_LEN=\$(zgrep -m 1 '^[^@+#]' ${fastqs[0]} | wc -m)
     DEPTH=\$((\$READ_COUNT * \$READ_LEN / \$REF_WC))
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        zgrep: \$(zgrep --version 2>&1) | sed 's/^.*gzip) //; s/ .*\$//'
-    END_VERSIONS
     """
 }
 

@@ -5,7 +5,7 @@ process CALCULATE_POCP {
     conda "conda-forge::r-base=4.2.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
-        'biocontainers/r-base:4.2.1' }"
+        'quay.io/biocontainers/r-base:4.2.1' }"
 
     input:
     tuple val(group_meta), path(gene_fam_pa)
