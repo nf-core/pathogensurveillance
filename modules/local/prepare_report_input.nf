@@ -13,7 +13,6 @@ process PREPARE_REPORT_INPUT {
 
     output:
     tuple val(group_meta), path("${prefix}_inputs"), emit: report_input
-    path "versions.yml"                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -120,10 +119,5 @@ process PREPARE_REPORT_INPUT {
     nextflow_version: ${nextflow.version}
     pipeine_verison: ${workflow.manifest.version}
     END_INFO
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        cp: \$(cp --version 2>&1) | sed 's/^.*GNU coreutils) //; s/ .*\$//'
-    END_VERSIONS
     """
 }

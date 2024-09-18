@@ -1,4 +1,4 @@
-# nf-core/pathogensurveillance: Citations
+# nf-core/plantpathsurveil: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 

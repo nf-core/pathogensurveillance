@@ -1,0 +1,54 @@
+---
+title: "Test report for core genome phylogeny"
+output: html_document
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  treefile: "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile"
+  metadata: "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
+---
+
+```{r include=FALSE, eval=FALSE}
+params = list(
+  treefile = "/home/fosterz/files/projects/work/current/nf-core-plantpathsurveil/test/output_full/iqtree2/input_alignments.treefile",
+  metadata = "/media/fosterz/external_primary/files/projects/work/current/nf-core-plantpathsurveil/test/data/metadata_medium.csv"
+)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prepare
+
+Load required libraries.
+
+```{r}
+library(ggtree)
+library(treeio)
+```
+
+
+Load metadata.
+
+```{r}
+metadata <- read.csv(params$metadata)
+metadata$sample <- paste0(metadata$sample, "_T1")
+```
+
+Load treefile.
+
+```{r}
+tree <- read.newick(params$treefile)
+```
+
+plot tree
+
+```{r}
+ggplot(tree, aes(x, y)) +
+  geom_tree() + 
+  theme_tree() +
+  geom_tiplab(as_ylab = FALSE, color = '#555555') +
+  xlim(0, 0.0002)
+```
+

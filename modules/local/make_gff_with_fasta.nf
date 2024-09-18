@@ -12,7 +12,6 @@ process MAKE_GFF_WITH_FASTA {
 
     output:
     tuple val(meta), path("${prefix}.gff"), emit: gff
-    path "versions.yml"                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,13 +24,8 @@ process MAKE_GFF_WITH_FASTA {
 
     # Add FASTA section header
     echo "##FASTA" >> ${prefix}.gff
-
+    
     # Add FASTA info, replacing headers with just ID
     sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}.gff
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        sed: \$(sed --version 2>&1) | sed 's/^.*GNU sed) //; s/ .*\$//'
-    END_VERSIONS
     """
 }

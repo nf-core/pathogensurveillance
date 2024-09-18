@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/master/assets/schema_input.json",
-    "title": "nf-core/pathogensurveillance pipeline - params.sample_data schema",
-    "description": "Schema for the file provided with params.sample_data",
+    "$id": "https://raw.githubusercontent.com/nf-core/plantpathsurveil/master/assets/schema_input.json",
+    "title": "nf-core/plantpathsurveil pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
         "type": "object",
