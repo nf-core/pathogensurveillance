@@ -1,7 +1,7 @@
 process BBMAP_SENDSKETCH {
     tag "$meta.id"
     label 'process_single'
-    maxForks 1
+    maxForks 5
 
     conda "bioconda::bbmap=39.08"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

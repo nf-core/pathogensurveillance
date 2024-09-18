@@ -96,7 +96,7 @@ workflow PREPARE_INPUT {
     // Get list of families for all samples without exclusive references defined by the user
     all_families = sample_data
         .filter { sample_meta, ref_metas ->
-            ! ref_metas.collect{it.ref_primary_usage}.contains('exclusive')
+            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') && ref_metas.collect{it.ref_contextual_usage}.contains('exclusive'))
         }
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]

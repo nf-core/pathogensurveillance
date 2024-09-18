@@ -21,7 +21,7 @@ process VCF_TO_SNPALN {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    perl \$(which vcftab_to_snpaln_nodel.pl) --output_ref -i ${tab} > ${prefix}.fasta
+    vcftab_to_snpaln_nodel.pl --output_ref -i ${tab} > ${prefix}.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
