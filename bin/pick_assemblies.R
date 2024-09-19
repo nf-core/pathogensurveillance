@@ -9,12 +9,13 @@ min_coverage <- 30
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_families.txt',
-#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_genera.txt',
-#     '/home/fosterz/data/files/projects/current/pathogensurveillance/scratch/riley_pick_assemblies_error/tsv_error/H1_17_17_8_S154_L002_species.txt',
-#     '30', '20', '10',
-#     'H1_17_17_8_S154_L002.tsv'
-# )
+#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_families.txt',
+#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_genera.txt',
+#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_species.txt',
+#      '1', '1', '1',
+#      'GCF_025200905_1.tsv',
+#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/Bradyrhizobiaceae.tsv'
+#  )
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -58,7 +59,7 @@ get_count <- function(table, count) {
 
 
 # Quality control
-assem_data <- assem_data[assem_data$Coverage >= min_coverage, ]
+assem_data <- assem_data[assem_data$Coverage >= min_coverage, , drop = FALSE]
 
 # Pick representatives for each species
 sp_stats <- assem_data[assem_data$SpeciesName %in% species, , drop = FALSE]
@@ -67,11 +68,13 @@ sp_stats <- lapply(split(sp_stats, sp_stats$SpeciesName), function(per_sp_data) 
     per_org_data[which.max(per_org_data$ScaffoldN50), ]
   })
 })
-if (length(sp_stats) != 0 ) {
+if (length(sp_stats) == 0 )  {
+  sp_stats <- assem_data[numeric(0), ]
+} else {
   sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
   rownames(sp_stats) <- NULL
   sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats, n_ref_strains)], ]
-}
+} 
 
 # Pick representatives for each genus
 gn_stats <- assem_data[assem_data$genus %in% genera, , drop = FALSE]
@@ -80,7 +83,9 @@ gn_stats <- lapply(split(gn_stats, gn_stats$genus), function(per_gn_data) {
     per_org_data[which.max(per_org_data$ScaffoldN50), ]
   })
 })
-if (length(gn_stats) != 0 ) {
+if (length(gn_stats) == 0 ) {
+  gn_stats <- assem_data[numeric(0), ]
+} else {
   gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
   rownames(gn_stats) <- NULL
   gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
@@ -94,7 +99,9 @@ fa_stats <- lapply(split(fa_stats, fa_stats$family), function(per_fm_data) {
     per_gn_data[which.max(per_gn_data$ScaffoldN50), ]
   })
 })
-if (length(fa_stats) != 0 ) {
+if (length(fa_stats) == 0 ) {
+  fa_stats <- assem_data[numeric(0), ]
+} else {
   fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
   rownames(fa_stats) <- NULL
   fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
@@ -105,7 +112,21 @@ if (length(fa_stats) != 0 ) {
 result <- rbind(sp_stats, gn_stats, fa_stats)
 
 # Reformat results to the same format as the user-defined metadata
-formatted_result <- data.frame(
+if (nrow(result) == 0) {
+  formatted_result <- data.frame(
+    ref_id = character(0),
+    ref_name = character(0),
+    ref_description = character(0),
+    ref_path = character(0),
+    ref_ncbi_accession = character(0),
+    ref_ncbi_query = character(0),
+    ref_ncbi_query_max = character(0),
+    ref_primary_usage = character(0),
+    ref_contextual_usage = character(0),
+    ref_color_by = character(0)
+  )
+} else {
+  formatted_result <- data.frame(
     ref_id = result$reference_id,
     ref_name = gsub(result$Organism, pattern = ' \\(.+\\)$', replacement = ''),
     ref_description = paste0(gsub(result$Organism, pattern = ' \\(.+\\)$', replacement = ''), ' (', result$LastMajorReleaseAccession, ')'),
@@ -116,7 +137,8 @@ formatted_result <- data.frame(
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_color_by = ''
-)
+  )
+}
 
 # Save to output file
 write.table(formatted_result, file = out_path, sep = '\t', quote = FALSE, row.names = FALSE)
