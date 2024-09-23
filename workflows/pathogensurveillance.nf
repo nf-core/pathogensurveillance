@@ -100,6 +100,7 @@ workflow PATHOGENSURVEILLANCE {
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_csv, reference_data_csv )
     versions = versions.mix(PREPARE_INPUT.out.versions)
+    messages = messages.mix(PREPARE_INPUT.out.messages)
 
     // Initial quick analysis of sequences and references based on sketchs
     SKETCH_COMPARISON ( PREPARE_INPUT.out.sample_data )

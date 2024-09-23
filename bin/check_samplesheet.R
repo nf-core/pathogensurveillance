@@ -207,9 +207,9 @@ remove_empty_cols <- function(metadata, csv_name) {
     }
     metadata[, ! is_headerless]
 }
-metadata_samp <- remove_empty_cols(metadata_samp)
+metadata_samp <- remove_empty_cols(metadata_samp, args[[1]])
 if (nrow(metadata_ref) > 0) {
-    metadata_ref <- remove_empty_cols(metadata_ref)
+    metadata_ref <- remove_empty_cols(metadata_ref, args[[2]])
 }
 
 # Remove all whitespace
