@@ -149,18 +149,24 @@ workflow PREPARE_INPUT {
         .unique()
     DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
     versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
+    local_references = sample_data
+        .transpose(by: 1)
+        .filter{ sample_meta, ref_meta ->
+            ref_meta.ref_path
+        }
     sample_data = sample_data
         .transpose(by: 1)
         .map{ sample_meta, ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
-        .join(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0, remainder: true)
-        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
+        .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
+        .combine(DOWNLOAD_ASSEMBLIES.out.gff, by: 0)
         .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
-            ref_meta.ref_path = ref_path ?: ref_meta.ref_path
-            ref_meta.gff = gff_path ?: ref_meta.gff
+            ref_meta.ref_path = ref_path
+            ref_meta.gff = gff_path
             [sample_meta, ref_meta]
         }
+        .mix(local_references)
         .groupTuple(by: 0)
 
     // Add reference metadata list to the sample metadata
