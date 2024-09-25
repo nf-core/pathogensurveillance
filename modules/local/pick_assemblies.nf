@@ -28,7 +28,7 @@ process PICK_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${prefix}.tsv ${assem_data_tsvs}
-    COUNT=\$(wc -l ${prefix}.tsv)
+    COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -16,7 +16,7 @@ workflow CORE_GENOME_PHYLOGENY {
     take:
     sample_data
     ani_matrix // report_group_id, ani_matrix
-    sample_gff // sample_id, gff
+    sample_and_ref_gff // sample_id, gff
 
     main:
 
@@ -49,7 +49,11 @@ workflow CORE_GENOME_PHYLOGENY {
         .map{ [[id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 1)
         .map{ report_meta, ref_meta ->
-            [report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.gff]
+            [[id: ref_meta.ref_id], report_meta, ref_meta.ref_path, ref_meta.gff]
+        }
+        .combine(sample_and_ref_gff, by: 0)
+        .map { ref_id, report_id, ref_path, downloaded_gff, new_gff ->
+            [report_id, ref_id, ref_path, downloaded_gff ?: new_gff]
         }
 
     // Combine refernece sequence with reference gffs for use with pirate
@@ -78,10 +82,10 @@ workflow CORE_GENOME_PHYLOGENY {
         .map{ ref_meta, report_meta, ref_path, ref_gff, ref_combined ->
             [ref_meta, report_meta, ref_combined]
         }
-    sample_gff_data = sample_data
+    sample_and_ref_gff_data = sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
-        .combine(sample_gff, by: 0) // sample_meta, report_meta, gff
-    gff_data = sample_gff_data
+        .combine(sample_and_ref_gff, by: 0) // sample_meta, report_meta, gff
+    gff_data = sample_and_ref_gff_data
         .mix(ref_gff_data)
         .map { sample_meta, report_meta, gff ->
             [report_meta, gff]

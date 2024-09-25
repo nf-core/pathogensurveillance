@@ -152,7 +152,7 @@ workflow PREPARE_INPUT {
     // Warn of samples for which no reference information could be found
     no_ref_warnings = no_assemblies_found
         .map{ sample_meta, ref_metas ->
-            [sample_meta, null, null, "PREPARE_INPUT", "WARNING", "Could not find any references to download."]
+            [sample_meta, [id: sample_meta.report_group_ids], null, "PREPARE_INPUT", "WARNING", "Could not find any references to download."]
         }
     messages = messages.mix(no_ref_warnings)
 

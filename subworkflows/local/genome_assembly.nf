@@ -68,6 +68,21 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(QUAST.out.versions)
 
+    // Annotate references without a gff
+    missing_gffs = sample_data
+        .map { [it.ref_metas] }
+        .transpose(by: 0)
+        .map { [[id: it.ref_id], it.gff, it.ref_path] }
+        .filter { ref_id, gff, ref_path ->
+            ! gff[0]
+        }
+        .map { ref_id, gff, ref_path ->
+            [ref_id, ref_path]
+        }
+        .unique()
+    all_assemblies = filtered_assembly
+        .mix(missing_gffs)
+
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
     if (params.bakta_db) {
@@ -87,7 +102,7 @@ workflow GENOME_ASSEMBLY {
 
     // Run bakta
     BAKTA_BAKTA (
-        filtered_assembly, // Genome assembly
+        all_assemblies, // Genome assembly
         bakta_db, // Bakta database
         [], // proteins (optional)
         [] // prodigal_tf (optional)
