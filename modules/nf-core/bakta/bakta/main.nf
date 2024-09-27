@@ -31,6 +31,7 @@ process BAKTA_BAKTA {
 
     script:
     def args = task.ext.args   ?: ''
+    # TODO: Fix issue with relying on [0] for meta.id in the future
     prefix   = task.ext.prefix ?: (meta.id instanceof List ? meta.id[0] : meta.id)
     def proteins_opt = proteins ? "--proteins ${proteins[0]}" : ""
     def prodigal_tf = prodigal_tf ? "--prodigal-tf ${prodigal_tf[0]}" : ""
@@ -51,6 +52,7 @@ process BAKTA_BAKTA {
     """
 
     stub:
+    # TODO: Fix issue with relying on [0] for meta.id in the future
     prefix = task.ext.prefix ?: (meta.id instanceof List ? meta.id[0] : meta.id)
     """
     touch ${prefix}.embl
