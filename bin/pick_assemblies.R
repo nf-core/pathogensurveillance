@@ -9,13 +9,43 @@ min_coverage <- 30
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_families.txt',
-#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_genera.txt',
-#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/GCF_025200905_1_species.txt',
-#      '1', '1', '1',
-#      'GCF_025200905_1.tsv',
-#      '/Users/paradarc/Downloads/09e88b7b47454bcf1ca08388d5bc67/Bradyrhizobiaceae.tsv'
-#  )
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_families.txt',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_genera.txt',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_species.txt',
+#      '30', '20', '10',
+#      'SRR12888961.tsv',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Aleyrodidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Amborellaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Aphididae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Buthidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cerambycidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cercopithecidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cheirogaleidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Chrysomelidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cordycipitaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cricetidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cucurbitaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Culicidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Dasypodidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Dasyuridae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Delphacidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Fabaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Formicidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Galagidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Halomonadaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Lampyridae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Liviidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Malvaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Micrococcaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Muscidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Nectriaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Nitidulidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Orchidaceae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Otariidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Pentatomidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Tephritidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Theridiidae.tsv', 
+#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Xanthomonadaceae.tsv' )
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -33,7 +63,7 @@ tsv_paths <- unlist(args[8:length(args)])
 tsv_families <- gsub(basename(tsv_paths), pattern = '.tsv', replacement = '', fixed = TRUE)
 tsv_data <- lapply(seq_along(tsv_paths), function(index) {
     output <- read.csv(tsv_paths[index], sep = '\t')
-    output$family <- tsv_families[index]
+    output$family <- rep(tsv_families[index], nrow(output))
     return(output)
 })
 assem_data <- do.call(rbind, tsv_data)
