@@ -1,6 +1,8 @@
 process TRIM_AND_SKETCH {
     tag "${meta.id}"
     label 'process_low'
+    maxRetries 5
+    maxErrors 30
 
     conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -23,7 +25,7 @@ process TRIM_AND_SKETCH {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     trim-low-abund.py \\
-        -M ${task.memory.toGiga()}e9 \\
+        -M ${task.memory.toGiga()}G \\
         $args \\
         $fasta
 
