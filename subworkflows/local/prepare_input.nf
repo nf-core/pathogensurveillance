@@ -62,7 +62,8 @@ workflow PREPARE_INPUT {
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            sample_meta.paths = reads_path
+            sample_meta.paths = reads_path instanceof Collection ? reads_path : [reads_path] 
+            sample_meta.single_end = sample_meta.paths.size() == 1
             [sample_meta, ref_metas]
         }
         .mix(sample_data_without_acc)
