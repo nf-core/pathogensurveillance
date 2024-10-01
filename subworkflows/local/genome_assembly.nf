@@ -72,9 +72,9 @@ workflow GENOME_ASSEMBLY {
     missing_gffs = sample_data
         .map { [it.ref_metas] }
         .transpose(by: 0)
-        .map { [[id: it.ref_id], it.gff, it.ref_path] }
+        .map { [[id: it.ref_id[0]], it.gff[0], it.ref_path[0]] }
         .filter { ref_id, gff, ref_path ->
-            ! gff[0]
+            ! gff
         }
         .map { ref_id, gff, ref_path ->
             [ref_id, ref_path]
