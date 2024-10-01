@@ -131,7 +131,7 @@ workflow PATHOGENSURVEILLANCE {
     CORE_GENOME_PHYLOGENY (
         PREPARE_INPUT.out.sample_data,
         SKETCH_COMPARISON.out.ani_matrix,
-        GENOME_ASSEMBLY.out.gff
+        GENOME_ASSEMBLY.out.scaffolds
     )
     versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
     messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
