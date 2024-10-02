@@ -8,10 +8,10 @@ process MAKE_GFF_WITH_FASTA {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(meta), path(sequence), path(gff, stageAs: 'input.gff')
+    tuple val(meta), path(sequence), path(gff)
 
     output:
-    tuple val(meta), path("${prefix}.gff"), emit: gff
+    tuple val(meta), path("${prefix}_with_reference.gff"), emit: gff
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,12 +20,20 @@ process MAKE_GFF_WITH_FASTA {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     # Copy gff info, removing the last "###" line
-    head -n -1 input.gff > ${prefix}.gff
+    if [[ $gff == *.gz ]]; then
+        gunzip -c ${gff} | head -n -1 > ${prefix}_with_reference.gff
+    else
+        head -n -1 ${gff} > ${prefix}_with_reference.gff
+    fi
 
     # Add FASTA section header
-    echo "##FASTA" >> ${prefix}.gff
-    
+    echo "##FASTA" >> ${prefix}_with_reference.gff
+
     # Add FASTA info, replacing headers with just ID
-    sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}.gff
+    if [[ $sequence == *.gz ]]; then
+        gunzip -c ${sequence} | sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' >> ${prefix}_with_reference.gff
+    else
+        sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}_with_reference.gff
+    fi
     """
 }

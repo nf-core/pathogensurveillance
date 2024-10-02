@@ -63,13 +63,13 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1 )
         .map { report_meta, csv_contents ->
-            [report_meta, [id: csv_contents[0]]]
+            [[id: csv_contents[0]], report_meta]
         }
         .join(all_ref_data, by: 0..1)
-        .map { report_meta, ref_meta, ref_path, gff_path ->
+        .map { ref_meta, report_meta, ref_path, gff_path ->
             [ref_meta, report_meta, ref_path, gff_path]
         }
-        .branch { report_meta, ref_meta, ref_path, gff_path ->
+        .branch { ref_meta, report_meta, ref_path, gff_path ->
             has_gff: gff_path
             no_gff: ! gff_path
         }
