@@ -20,6 +20,7 @@ workflow PREPARE_INPUT {
 
     // Initalize channel to accumulate information about software versions used
     versions = Channel.empty()
+    messages = Channel.empty()
 
     // Parse input CSVs
     SAMPLESHEET_CHECK ( sample_data_csv, reference_data_csv )
@@ -61,7 +62,8 @@ workflow PREPARE_INPUT {
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            sample_meta.paths = reads_path
+            sample_meta.paths = reads_path instanceof Collection ? reads_path : [reads_path] 
+            sample_meta.single_end = sample_meta.paths.size() == 1
             [sample_meta, ref_metas]
         }
         .mix(sample_data_without_acc)
@@ -124,6 +126,14 @@ workflow PREPARE_INPUT {
         params.n_ref_species,
         params.n_ref_genera
     )
+    no_assemblies_found = PICK_ASSEMBLIES.out.line_count
+        .filter { sample_id, line_count ->
+            line_count == "1"
+        }
+        .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
+        .map { sample_id, line_count, sample_meta, ref_metas ->
+            [sample_meta, ref_metas]
+        }
     sample_data = PICK_ASSEMBLIES.out.stats
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
@@ -135,9 +145,17 @@ workflow PREPARE_INPUT {
         .map{ sample_id, new_ref_metas, sample_meta, ref_metas ->
             [sample_meta, ref_metas + new_ref_metas]
         }
+        .mix(no_assemblies_found)
     reference_data = new_reference_data
         .map{ sample_id, ref_meta -> ref_meta }
         .mix(reference_data)
+
+    // Warn of samples for which no reference information could be found
+    no_ref_warnings = no_assemblies_found
+        .map{ sample_meta, ref_metas ->
+            [sample_meta, [id: sample_meta.report_group_ids], null, "PREPARE_INPUT", "WARNING", "Could not find any references to download."]
+        }
+    messages = messages.mix(no_ref_warnings)
 
     // Download reference files if an accession is provided
     ref_ncbi_acc = reference_data
@@ -149,6 +167,11 @@ workflow PREPARE_INPUT {
         .unique()
     DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
     versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
+    local_references = sample_data
+        .transpose(by: 1)
+        .filter{ sample_meta, ref_meta ->
+            ref_meta.ref_path
+        }
     sample_data = sample_data
         .transpose(by: 1)
         .map{ sample_meta, ref_meta ->
@@ -161,6 +184,7 @@ workflow PREPARE_INPUT {
             ref_meta.gff = gff_path
             [sample_meta, ref_meta]
         }
+        .mix(local_references)
         .groupTuple(by: 0)
 
     // Add reference metadata list to the sample metadata
@@ -224,6 +248,7 @@ workflow PREPARE_INPUT {
     selected_ref_meta = PICK_ASSEMBLIES.out.stats
     families = INITIAL_CLASSIFICATION.out.families
     versions = SAMPLESHEET_CHECK.out.versions
+    messages = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 
 def create_sample_metadata_channel(LinkedHashMap sample_meta) {

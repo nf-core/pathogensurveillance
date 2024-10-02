@@ -10,13 +10,15 @@ include { CALCULATE_POCP            } from '../../modules/local/calculate_pocp'
 include { FILES_IN_DIR              } from '../../modules/local/files_in_dir.nf'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
 include { MAKE_GFF_WITH_FASTA       } from '../../modules/local/make_gff_with_fasta.nf'
+include { BAKTA_BAKTA               } from '../../modules/nf-core/bakta/bakta/main'
+include { BAKTA_BAKTADBDOWNLOAD     } from '../../modules/nf-core/bakta/baktadbdownload/main'
 
 workflow CORE_GENOME_PHYLOGENY {
 
     take:
     sample_data
     ani_matrix // report_group_id, ani_matrix
-    sample_gff // sample_id, gff
+    sample_assemblies // sample_id, assembly_path
 
     main:
 
@@ -45,50 +47,95 @@ workflow CORE_GENOME_PHYLOGENY {
         params.n_ref_closest,
         params.n_ref_context
     )
-    references =  sample_data
+
+    // Get relevant information from all references assigned to samples
+    all_ref_data =  sample_data
         .map{ [[id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 1)
         .map{ report_meta, ref_meta ->
-            [report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.gff]
+            [[id: ref_meta.ref_id], report_meta, ref_meta.ref_path, ref_meta.gff]
         }
+        .unique()
 
-    // Combine refernece sequence with reference gffs for use with pirate
+    // Get information for references selected for this analysis and check if they have an existing gff
     selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1 )
         .map { report_meta, csv_contents ->
-            [report_meta, [id: csv_contents[0]]]
+            [[id: csv_contents[0]], report_meta]
         }
-        .join(references, by: 0..1)
-        .map {report_meta, ref_meta, ref_path, ref_gff ->
-            [ref_meta, report_meta, ref_path, ref_gff]
+        .join(all_ref_data, by: 0..1)
+        .map { ref_meta, report_meta, ref_path, gff_path ->
+            [ref_meta, report_meta, ref_path, gff_path]
         }
+        .branch { ref_meta, report_meta, ref_path, gff_path ->
+            has_gff: gff_path
+            no_gff: ! gff_path
+        }
+
+    // Download the bakta database if needed
+    //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
+    if (params.bakta_db) {
+        if (params.bakta_db.endsWith('.tar.gz')) {
+            bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
+            UNTAR( bakta_db_tar )
+            bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
+            versions = versions.mix(UNTAR.out.versions)
+        } else {
+            bakta_db = Channel.fromPath(params.bakta_db).first()
+        }
+    } else if (params.download_bakta_db) {
+        BAKTA_BAKTADBDOWNLOAD()
+        bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+        versions = versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
+    }
+
+    // Run bakta on samples and references without a gff already
+    sample_assem_data = sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(sample_assemblies, by: 0)
+    ref_assem_data = selected_ref_data.no_gff
+        .map { ref_meta, report_meta, ref_path, gff_path ->
+            [ref_meta, report_meta, ref_path]
+        }
+    all_assem_data = ref_assem_data
+        .mix(sample_assem_data)
+    BAKTA_BAKTA (
+        all_assem_data.map { ref_meta, report_meta, assem_path -> [ref_meta, assem_path] },
+        bakta_db, // Bakta database
+        [], // proteins (optional)
+        [] // prodigal_tf (optional)
+    )
+    versions = versions.mix(BAKTA_BAKTA.out.versions)
+
+    // For references that have a gff already, combine the assembly with the gff the same way bakta outputs
     MAKE_GFF_WITH_FASTA (
-        selected_ref_data
+        selected_ref_data.has_gff
             .map{ ref_meta, report_meta, ref_path, ref_gff ->
                 [ref_meta, ref_path, ref_gff]
             }
-            .unique()
     )
 
     // group samples by report group
-    ref_gff_data = selected_ref_data
+    bakta_gffs = all_assem_data
+        .combine(BAKTA_BAKTA.out.gff, by: 0) // sample_or_ref_meta, report_meta, assem_path, gff_path
+        .map { sample_or_ref_meta, report_meta, assem_path, gff_path ->
+            [sample_or_ref_meta, report_meta, gff_path]
+        }
+    other_gffs = selected_ref_data.has_gff
         .combine(MAKE_GFF_WITH_FASTA.out.gff, by: 0)
         .map{ ref_meta, report_meta, ref_path, ref_gff, ref_combined ->
             [ref_meta, report_meta, ref_combined]
         }
-    sample_gff_data = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
-        .combine(sample_gff, by: 0) // sample_meta, report_meta, gff
-    gff_data = sample_gff_data
-        .mix(ref_gff_data)
-        .map { sample_meta, report_meta, gff ->
+    all_gffs = bakta_gffs
+        .mix(other_gffs)
+        .map { sample_or_ref_meta, report_meta, gff ->
             [report_meta, gff]
         }
         .unique()
     PIRATE (
-        gff_data
+        all_gffs
             .groupTuple(by: 0, sort: 'hash')
     )
     versions = versions.mix(PIRATE.out.versions)

@@ -17,6 +17,7 @@ process PICK_ASSEMBLIES {
     output:
     tuple val(meta), path("${prefix}.tsv"), emit: stats
     path "merged_assembly_stats.tsv"      , emit: merged_stats
+    tuple val(meta), env(COUNT)           , emit: line_count
     path "versions.yml"                   , emit: versions
 
     when:
@@ -27,6 +28,7 @@ process PICK_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${meta.id}"
     """
     pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${prefix}.tsv ${assem_data_tsvs}
+    COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

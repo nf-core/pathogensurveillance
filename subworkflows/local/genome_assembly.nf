@@ -2,8 +2,6 @@ include { FASTP                 } from '../../modules/nf-core/fastp/main'
 include { SPADES                } from '../../modules/nf-core/spades/main'
 include { FILTER_ASSEMBLY       } from '../../modules/local/filter_assembly'
 include { QUAST                 } from '../../modules/local/quast.nf'
-include { BAKTA_BAKTA           } from '../../modules/nf-core/bakta/bakta/main'
-include { BAKTA_BAKTADBDOWNLOAD } from '../../modules/nf-core/bakta/baktadbdownload/main'
 include { UNTAR                 } from '../../modules/nf-core/untar/main'
 include { FLYE as FLYE_NANOPORE } from '../../modules/nf-core/flye/main'
 include { FLYE as FLYE_PACBIO   } from '../../modules/nf-core/flye/main'
@@ -19,7 +17,7 @@ workflow GENOME_ASSEMBLY {
     messages = Channel.empty()
     filtered_input = sample_data
         .filter {it.kingdom == "Bacteria"}
-        .map{ [[id: it.sample_id], it.paths, it.sequence_type] }
+        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type] }
         .unique()
 
     shortreads = filtered_input
@@ -59,6 +57,9 @@ workflow GENOME_ASSEMBLY {
     filtered_assembly = FILTER_ASSEMBLY.out.filtered
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
+        .map { sample_meta, path ->  // remove the "single_end" in the sample meta data so that it is just the ID like most of the pipeline
+            [[id: sample_meta.id], path]
+        }
         .unique()
     QUAST (
         filtered_assembly
@@ -68,35 +69,8 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(QUAST.out.versions)
 
-    // Download the bakta database if needed
-    //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
-    if (params.bakta_db) {
-        if (params.bakta_db.endsWith('.tar.gz')) {
-            bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
-            UNTAR( bakta_db_tar )
-            bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
-            versions = versions.mix(UNTAR.out.versions)
-        } else {
-            bakta_db = Channel.fromPath(params.bakta_db).first()
-        }
-    } else if (params.download_bakta_db) {
-        BAKTA_BAKTADBDOWNLOAD()
-        bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
-        versions = versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
-    }
-
-    // Run bakta
-    BAKTA_BAKTA (
-        filtered_assembly, // Genome assembly
-        bakta_db, // Bakta database
-        [], // proteins (optional)
-        [] // prodigal_tf (optional)
-    )
-    versions = versions.mix(BAKTA_BAKTA.out.versions)
-
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]
-    gff       = BAKTA_BAKTA.out.gff
     scaffolds = filtered_assembly
     quast     = QUAST.out.results
     versions  = versions

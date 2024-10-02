@@ -288,4 +288,3 @@ SRR15309484 ,illumina,Pythium spinosum,oomycete,PRJNA601986,,CBS 275.67,,,,,,,,o
 SRR29814928,illumina,Phytophthora infestans,oomycete,PRJNA1135328,,,,,,,,,,oomycetes,,,,,,,,,,,,,
 SRR26197583,pacbio,Phytophthora cinnamomi,oomycete,PRJNA1019754,,Pc2109,,,,,,,,oomycetes;mixed,mixed,,,,,,,,,,,,
 SRR16542347,illumina,Pernospora effusa,oomycete,PRJNA772192,,,spinach,,,,,,,oomycetes,mixed,,,,,,,,,,,,
->>>>>>> Stashed changes:test/data/metadata/complex.csv
