@@ -9,43 +9,43 @@ min_coverage <- 30
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_families.txt',
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_genera.txt',
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/SRR12888961_species.txt',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/ERR3500120_families.txt',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/ERR3500120_genera.txt',
+#      '/home/fosterz/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/ERR3500120_species.txt',
 #      '30', '20', '10',
-#      'SRR12888961.tsv',
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Aleyrodidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Amborellaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Aphididae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Buthidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cerambycidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cercopithecidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cheirogaleidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Chrysomelidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cordycipitaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cricetidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Cucurbitaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Culicidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Dasypodidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Dasyuridae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Delphacidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Fabaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Formicidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Galagidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Halomonadaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Lampyridae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Liviidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Malvaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Micrococcaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Muscidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Nectriaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Nitidulidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Orchidaceae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Otariidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Pentatomidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Tephritidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Theridiidae.tsv', 
-#      '/home/fosterz/files/projects/pathogensurveillance/work/97/06f9a8f2859960cf8fd7160a8e8503/Xanthomonadaceae.tsv' )
+#      'ERR3500120.tsv',
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Aleyrodidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Amborellaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Aphididae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Buthidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cerambycidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cercopithecidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cheirogaleidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Chrysomelidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cordycipitaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cricetidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Cucurbitaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Culicidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Dasypodidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Dasyuridae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Delphacidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Fabaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Formicidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Galagidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Halomonadaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Lampyridae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Liviidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Malvaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Micrococcaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Muscidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Nectriaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Nitidulidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Orchidaceae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Otariidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Pentatomidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Tephritidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Theridiidae.tsv', 
+#      '~/files/projects/pathogensurveillance/work/98/9b5787f3c655cd5f51f2194df064cf/Xanthomonadaceae.tsv' )
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -87,9 +87,8 @@ get_count <- function(table, count) {
    }
 }
 
-
 # Quality control
-assem_data <- assem_data[assem_data$Coverage >= min_coverage, , drop = FALSE]
+assem_data <- assem_data[! is.na(assem_data$Coverage) & assem_data$Coverage >= min_coverage, , drop = FALSE]
 
 # Pick representatives for each species
 sp_stats <- assem_data[assem_data$SpeciesName %in% species, , drop = FALSE]
@@ -103,7 +102,7 @@ if (length(sp_stats) == 0 )  {
 } else {
   sp_stats <- do.call(rbind, unlist(sp_stats, recursive = FALSE))
   rownames(sp_stats) <- NULL
-  sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(sp_stats, n_ref_strains)], ]
+  sp_stats <- sp_stats[order(sp_stats$ScaffoldN50, decreasing = TRUE)[seq_len(get_count(sp_stats, n_ref_strains))], ]
 } 
 
 # Pick representatives for each genus
@@ -119,7 +118,7 @@ if (length(gn_stats) == 0 ) {
   gn_stats <- do.call(rbind, unlist(gn_stats, recursive = FALSE))
   rownames(gn_stats) <- NULL
   gn_stats <- gn_stats[! gn_stats$SpeciesName %in% sp_stats$SpeciesName, ] # Dont include the species already chosen
-  gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(gn_stats, n_ref_species)], ]
+  gn_stats <- gn_stats[order(gn_stats$ScaffoldN50, decreasing = TRUE)[seq_len(get_count(gn_stats, n_ref_species))], ]
 }
 
 # Pick representatives for each family
@@ -135,7 +134,7 @@ if (length(fa_stats) == 0 ) {
   fa_stats <- do.call(rbind, unlist(fa_stats, recursive = FALSE))
   rownames(fa_stats) <- NULL
   fa_stats <- fa_stats[! fa_stats$genus %in% gn_stats$genus, ] # Dont include the genera already chosen
-  fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[1:get_count(fa_stats, n_ref_genera)], ]
+  fa_stats <- fa_stats[order(fa_stats$ScaffoldN50, decreasing = TRUE)[seq_len(get_count(fa_stats, n_ref_genera))], ]
 }
 
 # Combine results
