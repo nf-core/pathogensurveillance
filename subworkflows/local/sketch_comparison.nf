@@ -47,7 +47,7 @@ workflow SKETCH_COMPARISON {
         .unique()
     grouped_sigs = grouped_sample_sigs
         .mix(grouped_ref_sigs)
-        .groupTuple()
+        .groupTuple(by: 0, sort: 'hash')
     SOURMASH_COMPARE (
         grouped_sigs,
         [], // file_list (optional)

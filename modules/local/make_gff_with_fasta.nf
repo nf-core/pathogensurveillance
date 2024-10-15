@@ -11,7 +11,7 @@ process MAKE_GFF_WITH_FASTA {
     tuple val(meta), path(sequence), path(gff)
 
     output:
-    tuple val(meta), path("${prefix}_with_reference.gff"), emit: gff
+    tuple val(meta), path("${prefix}.gff"), emit: gff
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,19 +21,23 @@ process MAKE_GFF_WITH_FASTA {
     """
     # Copy gff info, removing the last "###" line
     if [[ $gff == *.gz ]]; then
-        gunzip -c ${gff} | head -n -1 > ${prefix}_with_reference.gff
+        gunzip -c ${gff} | head -n -1 > ${prefix}_with_ref.gff
     else
-        head -n -1 ${gff} > ${prefix}_with_reference.gff
+        head -n -1 ${gff} > ${prefix}_with_ref.gff
     fi
 
     # Add FASTA section header
-    echo "##FASTA" >> ${prefix}_with_reference.gff
+    echo "##FASTA" >> ${prefix}_with_ref.gff
 
     # Add FASTA info, replacing headers with just ID
     if [[ $sequence == *.gz ]]; then
-        gunzip -c ${sequence} | sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' >> ${prefix}_with_reference.gff
+        gunzip -c ${sequence} | sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' >> ${prefix}_with_ref.gff
     else
-        sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}_with_reference.gff
+        sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}_with_ref.gff
     fi
+    
+    # Rename output file to be just the sample ID and make sure input file does not have same name
+    mv ${gff} input_${gff}
+    mv ${prefix}_with_ref.gff ${prefix}.gff
     """
 }

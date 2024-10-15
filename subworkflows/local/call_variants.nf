@@ -19,7 +19,7 @@ workflow CALL_VARIANTS {
     //    ch_ref_grouped: [val(ref+group_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
     ch_ref_grouped = ch_input
         .map { [[id: "${it[5].id}_${it[3].id}", group: it[5], ref: it[3]], it[0], it[1], it[2], it[4], it[6], it[7]] }
-        .groupTuple()
+        .groupTuple(by: 0, sort: 'hash')
         .map { [it[0], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[1], it[2], it[3]] } // remove redundant reference genome paths
 
     // make list of chromosome (fasta headers) names compatible with graphtyper

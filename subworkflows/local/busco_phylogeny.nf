@@ -85,7 +85,7 @@ workflow BUSCO_PHYLOGENY {
             [report_meta, busco_dir]
         }
         .unique()
-        .groupTuple(by: 0)
+        .groupTuple(by: 0, sort: 'hash')
     no_gene_warnings = BUSCO.out.single_copy_fna
         .filter{ ref_meta, gene_paths ->
             gene_paths.size() == 0

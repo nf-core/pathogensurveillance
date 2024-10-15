@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/home/fosterz/data/files/projects/current/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/subgroup_inputs"
+  inputs: "/home/fosterz/files/projects/pathogensurveillance/work/24/59694d38068d1a1835061d34ad77f4/_no_group_defined__inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -62,7 +62,8 @@ library(psminer)
 # Summary
 
 ```{r}
-group <- report_group_parsed(params$inputs)
+run_info <- run_info_parsed(params$inputs)
+group <- run_info$group_id
 sample_data <- sample_meta_parsed(params$inputs)
 ```
 

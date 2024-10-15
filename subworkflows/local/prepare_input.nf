@@ -41,7 +41,7 @@ workflow PREPARE_INPUT {
         .transpose(by: 0)
         .combine(reference_data.map{ ref_meta -> [ref_meta.ref_id, ref_meta] }, by: 0)
         .map { ref_id, sample_meta, ref_meta -> [sample_meta, ref_meta] }
-        .groupTuple(by: 0)
+        .groupTuple(by: 0, sort: 'hash')
         .mix(sample_data_without_refs)
 
     // Download FASTQ files if an NCBI accession is provided
@@ -62,7 +62,7 @@ workflow PREPARE_INPUT {
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            sample_meta.paths = reads_path instanceof Collection ? reads_path : [reads_path] 
+            sample_meta.paths = reads_path instanceof Collection ? reads_path : [reads_path]
             sample_meta.single_end = sample_meta.paths.size() == 1
             [sample_meta, ref_metas]
         }
@@ -140,7 +140,7 @@ workflow PREPARE_INPUT {
             [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
         }
         .tap{ new_reference_data }
-        .groupTuple(by: 0)
+        .groupTuple(by: 0, sort: 'hash')
         .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
         .map{ sample_id, new_ref_metas, sample_meta, ref_metas ->
             [sample_meta, ref_metas + new_ref_metas]
@@ -185,7 +185,7 @@ workflow PREPARE_INPUT {
             [sample_meta, ref_meta]
         }
         .mix(local_references)
-        .groupTuple(by: 0)
+        .groupTuple(by: 0, sort: 'hash')
 
     // Add reference metadata list to the sample metadata
     sample_data = sample_data
