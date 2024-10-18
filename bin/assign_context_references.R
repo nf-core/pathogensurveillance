@@ -8,8 +8,8 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/fd/c0dd7b076a42bf0c15975f36c13668/mixed_comp.csv',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/fd/c0dd7b076a42bf0c15975f36c13668/mixed.csv',
+#     'scratch/assign_context_refs_bug/species_group_1_comp.csv',
+#     'scratch/assign_context_refs_bug/species_group_1.csv',
 #     '3',
 #     '5',
 #     'all_context_refs.csv'
@@ -24,7 +24,6 @@ n_refs_contextual <- as.integer(args$n_refs_contextual)
 # Read sample data with user-defined references
 sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
 sample_ids <- unique(sample_data$sample_id)
-ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
 
 # If 'exclusive' references are present for a sample, remove all other references. Also remove 'excluded' references
 sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), function(table) {
@@ -36,21 +35,28 @@ sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), 
     return(table)
 }))
 rownames(sample_data) <- NULL
+all_ids <- unique(c(sample_data$references, sample_data$sample_id))
+ani_matrix <- ani_matrix[row.names(ani_matrix) %in% all_ids, names(ani_matrix) %in% all_ids, drop = FALSE]
 
 # Scale ANI values for each sample
 rescale <- function(x) {
-    (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+    if (length(x) > 1) {
+        return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+    } else {
+        return(x)
+    }
 }
-ani_ref_v_smaples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]
-ani_ref_v_smaples[ani_ref_v_smaples == 0] <- NA
-ani_scaled <- apply(ani_ref_v_smaples, MARGIN = 2, rescale)
+ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
+ani_ref_v_samples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]
+ani_ref_v_samples[ani_ref_v_samples == 0] <- NA
+ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE))
 
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
     rownames(ani_scaled)[tail(order(ani_scaled[, id]), n = n_refs_closest)]
 }))
 required_refs <- unlist(lapply(sample_ids, function(id) {
-    sample_data$references[sample_data$sample_id == id & sample_data$usage == 'required']
+    sample_data$references[sample_data$sample_id == id & sample_data$usage %in% c('required', 'exclusive')]
 }))
 selected_refs <- unique(c(closest_refs, required_refs))
 
