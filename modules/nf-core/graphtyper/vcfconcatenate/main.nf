@@ -27,7 +27,7 @@ process GRAPHTYPER_VCFCONCATENATE {
     input_vcfs = vcf.collate(1000).collect{it.join(' ')} // Batching needed because if there are too many VCFs the shell cannot run the command
     commands = input_vcfs.withIndex().collect{ batch_vcfs, index -> 
       "graphtyper vcf_concatenate ${batch_vcfs} ${args} --output=${prefix}_subset_${index}.vcf.gz"
-    }.join('\n')
+    }.join('\n    ')
     """
     # Run each batch of VCFs
     ${commands}

@@ -40,6 +40,8 @@ workflow BUSCO_PHYLOGENY {
         params.n_ref_closest,
         params.n_ref_context
     )
+    versions = versions.mix(ASSIGN_CONTEXT_REFERENCES.out.versions)
+
     references =  sample_data
         .map{ [[id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 1)
@@ -60,6 +62,7 @@ workflow BUSCO_PHYLOGENY {
 
     // Download BUSCO datasets
     BUSCO_DOWNLOAD ( Channel.from( "eukaryota_odb10" ) )
+    versions = versions.mix(BUSCO_DOWNLOAD.out.versions)
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group
     BUSCO (
@@ -73,6 +76,7 @@ workflow BUSCO_PHYLOGENY {
         BUSCO_DOWNLOAD.out.download_dir.first(), // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
         []
     )
+    versions = versions.mix(BUSCO.out.versions)
 
     // Create Read2tree database
     grouped_busco_out = BUSCO.out.single_copy_fna
@@ -96,6 +100,7 @@ workflow BUSCO_PHYLOGENY {
         }
     messages = messages.mix(no_gene_warnings)
     MAKE_READ2TREE_DB ( grouped_busco_out, "eukaryota_odb10" )
+    versions = versions.mix(MAKE_READ2TREE_DB.out.versions)
 
     // group samples
     input_filtered = sample_data
@@ -145,6 +150,7 @@ workflow BUSCO_PHYLOGENY {
 
     // Run Read2tree
     READ2TREE ( r2t_input )
+    versions = versions.mix(READ2TREE.out.versions)
 
     emit:
     versions      = versions // versions.yml

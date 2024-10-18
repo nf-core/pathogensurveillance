@@ -12,9 +12,9 @@ process READ2TREE {
     tuple val(meta), val(pair_meta), path(paired_1), path(paired_2), val(single_meta), path(single), val(long_meta), path(long_reads), path(markers), path(dna_ref)
 
     output:
-    tuple val(meta), path("${prefix}_read2tree"), emit: out
+    tuple val(meta), path("${prefix}_read2tree")               , emit: out
     tuple val(meta), path("${prefix}_read2tree/tree_merge.nwk"), emit: tree
-    path "versions.yml"            , emit: versions
+    path "versions.yml"                                        , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
