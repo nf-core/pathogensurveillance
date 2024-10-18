@@ -32,12 +32,12 @@ workflow ALIGN_READS {
     // Revet combined metas back to seperate ones for sample and reference
     out_bam = PICARD_FORMAT.out.bam        // channel: [ val(ref_samp_meta), [ bam ] ]
         .map { [it[0].sample, it[0].ref, it[1]] }
-    out_bai = SAMTOOLS_INDEX.out.bai        // channel: [ val(ref_samp_meta), [ bai ] ]
+    out_csi = SAMTOOLS_INDEX.out.csi        // channel: [ val(ref_samp_meta), [ csi ] ]
         .map { [it[0].sample, it[0].ref, it[1]] }
 
     emit:
     bam      = out_bam        // channel: [ val(meta), val(ref_meta), [ bam ] ]
-    bai      = out_bai        // channel: [ val(meta), val(ref_meta), [ bai ] ]
+    csi      = out_csi        // channel: [ val(meta), val(ref_meta), [ csi ] ]
     versions = versions    // channel: [ versions.yml ]
 }
 

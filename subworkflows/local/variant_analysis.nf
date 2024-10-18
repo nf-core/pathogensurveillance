@@ -111,7 +111,7 @@ workflow VARIANT_ANALYSIS {
         input_with_indexes
             .map { [it[0], it[2], it[1]] + it[3..5] + [it[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard]
             .combine(ALIGN_READS.out.bam, by: 0..1)
-            .combine(ALIGN_READS.out.bai, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, bam, bai]
+            .combine(ALIGN_READS.out.csi, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, bam, csi]
             .map { [it[0], it[7], it[8], it[1]] + it[3..6] }
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)

@@ -25,6 +25,7 @@ process GRAPHTYPER_GENOTYPE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def bam_path_text = bam.join('\\n')
+    def bai_path_text = bam.collect{"${it}.csi"}.join('\\n')
     def region_text = region_file.size() > 0 ? "--region_file ${region_file}" : ""
     if (region_file.size() == 0 && ! args.contains("region")) {
         error "GRAPHTYPER_GENOTYPE requires either a region file or a region specified using '--region' in ext.args"
@@ -40,6 +41,7 @@ process GRAPHTYPER_GENOTYPE {
 
     # Make file of file names to pass BAM paths to graphtyper
     printf "$bam_path_text" > bam_list.txt
+    printf "$bai_path_text" > bai_list.txt
 
     # Call graphtyper genotype
     graphtyper \\
@@ -47,6 +49,7 @@ process GRAPHTYPER_GENOTYPE {
         __my__reference__.fasta \\
         $args \\
         --sams bam_list.txt \\
+        --sams_index bai_list.txt \\
         --threads $task.cpus \\
         $region_text
 
