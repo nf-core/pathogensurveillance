@@ -34,73 +34,73 @@ process READ2TREE {
         --output_path ${prefix}_read2tree
 
         cat <<-END_VERSIONS > versions.yml
-    	"${task.process}":
-        	read2tree: \$(echo \$(read2tree --version))
-    	END_VERSIONS
+        "${task.process}":
+            read2tree: \$(echo \$(read2tree --version))
+        END_VERSIONS
         """
     } else { // Otherwise, use multiple species mode
-    	"""
-    	# This creates the reference folder
-    	read2tree --standalone_path ${markers}/ --dna_reference ${dna_ref} --output_path ${prefix}_read2tree --reference
+        """
+        # This creates the reference folder
+        read2tree --standalone_path ${markers}/ --dna_reference ${dna_ref} --output_path ${prefix}_read2tree --reference
 
-    	# Add each paired end shortread sample
+        # Add each paired end shortread sample
         FORWARD=(${paired_1})
         REVERSE=(${paired_2})
         IDS=(${pair_meta.collect{it.id}.join(' ')})
-    	for i in \${!FORWARD[@]}; do
-        	read2tree \\
+        for i in \${!FORWARD[@]}; do
+            read2tree \\
             ${args} \\
             --threads $task.cpus \\
-        	--standalone_path ${markers}/ \\
+            --standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
-        	--output_path ${prefix}_read2tree \\
-        	--reads \${FORWARD[\$i]} \${REVERSE[\$i]} \\
+            --output_path ${prefix}_read2tree \\
+            --reads \${FORWARD[\$i]} \${REVERSE[\$i]} \\
             --species_name \${IDS[\$i]}
-    	done
+        done
 
-    	# Add each single end shortread sample
+        # Add each single end shortread sample
         SINGLE=(${single})
         IDS=(${single_meta.collect{it.id}.join(' ')})
-    	for i in \${!SINGLE[@]}; do
-        	read2tree \\
+        for i in \${!SINGLE[@]}; do
+            read2tree \\
             ${args} \\
             --threads $task.cpus \\
-        	--standalone_path ${markers}/ \\
+            --standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
-        	--output_path ${prefix}_read2tree \\
-        	--reads \${SINGLE[\$i]} \\
+            --output_path ${prefix}_read2tree \\
+            --reads \${SINGLE[\$i]} \\
             --species_name \${IDS[\$i]}
-    	done
+        done
 
-    	# Add each long read sample
+        # Add each long read sample
         LONG=(${long_reads})
         IDS=(${long_meta.collect{it.id}.join(' ')})
-    	for i in \${!LONG[@]}; do
-        	read2tree \\
+        for i in \${!LONG[@]}; do
+            read2tree \\
             ${args} \\
             --threads $task.cpus \\
-        	--standalone_path ${markers}/ \\
+            --standalone_path ${markers}/ \\
             --dna_reference ${dna_ref} \\
-        	--output_path ${prefix}_read2tree \\
+            --output_path ${prefix}_read2tree \\
             --read_type long \\
-        	--reads \${LONG[\$i]} \\
+            --reads \${LONG[\$i]} \\
             --species_name \${IDS[\$i]}
-    	done
+        done
 
-    	# Build tree
-    	read2tree \\
+        # Build tree
+        read2tree \\
         ${args} \\
         --threads $task.cpus \\
-    	--standalone_path ${markers}/ \\
+        --standalone_path ${markers}/ \\
         --dna_reference ${dna_ref} \\
-    	--output_path ${prefix}_read2tree -\\
-    	-merge_all_mappings \\
-    	--tree
+        --output_path ${prefix}_read2tree -\\
+        -merge_all_mappings \\
+        --tree
 
-    	cat <<-END_VERSIONS > versions.yml
-    	"${task.process}":
-        	read2tree: \$(echo \$(read2tree --version))
-    	END_VERSIONS
-    	"""
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            read2tree: \$(echo \$(read2tree --version))
+        END_VERSIONS
+        """
     }
 }
