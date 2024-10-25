@@ -3,8 +3,6 @@
 # This script takes 4 arguments:
 #   1. The path to the per-sample CSV input to the pipeline supplied by the user
 #   2. The path to the per-reference CSV input to the pipeline supplied by the user
-#   3. The path to the reformatted version of the CSV per-sample output by this script
-#   4. The path to the reformatted version of the CSV per-sample output by this script
 #
 # The first part of this script defines constants that might need to be changed in the future.
 
@@ -142,6 +140,7 @@ args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
 # args <- list("~/Downloads/ncbi_and_usda_3516_metadata.csv")
+# args <- list("test/data/metadata/mixed.csv", "test/data/metadata/mixed_references.csv")
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
     metadata_original_ref <- read.csv(args[[2]], check.names = FALSE)
@@ -341,6 +340,8 @@ if (nrow(metadata_ref) > 0) {
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
 has_ref_data <- apply(ref_in_samp_data[, unlist(required_input_columns_ref)], MARGIN = 1, function(x) any(is_present(x)))
 ref_data_addition <- ref_in_samp_data[has_ref_data, ]
+user_specific_ref_cols <- colnames(metadata_ref)[! colnames(metadata_ref) %in% colnames(ref_data_addition)]
+ref_data_addition[user_specific_ref_cols] <- rep('', nrow(ref_data_addition))
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- rbind(metadata_ref, ref_data_addition)
 
@@ -733,23 +734,24 @@ undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadat
 type_replace_key <- lapply(undefined_accessions, lookup_sequence_type)
 names(type_replace_key) <- undefined_accessions
 is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
-metadata_samp$sequence_type[is_undefined] <- type_replace_key[metadata_samp$ncbi_accession[is_undefined]]
+metadata_samp$sequence_type[is_undefined] <- unlist(type_replace_key[metadata_samp$ncbi_accession[is_undefined]])
 
 # Validate sequence_type column
 metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_type), function(index) {
+    user_value <- metadata_samp$sequence_type[index]
     is_seq_type <- unlist(lapply(known_read_types, function(type) {
-        grepl(metadata_samp$sequence_type[index], pattern = type, ignore.case = TRUE)
+        grepl(user_value, pattern = type, ignore.case = TRUE)
     }))
     if (sum(is_seq_type) == 0) {
         stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column on row ', index, ' ("', metadata_samp$sequence_type[index], '") does not contain a supported sequence type. ',
+            'The value in the "sequence_type" column ("', user_value, '") on row ', index, ' ("', metadata_samp$sequence_type[index], '") does not contain a supported sequence type. ',
             'The following sequencing types are supported (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
     }
     if (sum(is_seq_type) > 1) {
         stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column on row ', index, ' contains the names of multiple sequencing types. ',
+            'The value in the "sequence_type" column ("', user_value, '") on row ', index, ' contains the names of multiple sequencing types. ',
             'Exactly one of the following words must appear (case insensitive):\n',
             paste0('"', known_read_types, '"', collapse = ', '), '\n'
         ))
@@ -800,6 +802,10 @@ metadata_samp <- unique(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- unique(metadata_ref)
 }
+
+# Replace double quotes with single quotes to not conflict with the CSV format quoting values
+metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
+metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
 
 # Write output metadata
 write.csv(metadata_samp, file = 'sample_metadata.csv', row.names = FALSE, na = '')
