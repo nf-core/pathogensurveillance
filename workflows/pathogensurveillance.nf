@@ -110,7 +110,10 @@ workflow PATHOGENSURVEILLANCE {
     messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
     // Initial quick analysis of sequences and references based on sketchs
-    SKETCH_COMPARISON ( PREPARE_INPUT.out.sample_data )
+    SKETCH_COMPARISON (
+        PREPARE_INPUT.out.sample_data,
+        GENOME_ASSEMBLY.out.scaffolds
+    )
     versions = versions.mix(SKETCH_COMPARISON.out.versions)
     messages = messages.mix(SKETCH_COMPARISON.out.messages)
 

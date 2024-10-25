@@ -20,16 +20,21 @@ workflow GENOME_ASSEMBLY {
         .unique()
         .branch { meta, paths, type, kingdom ->
             short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "bacteria"
+                return [meta, paths]
             nanopore_prokaryote: type == "nanopore" && kingdom == "bacteria"
+                return [meta, paths]
             pacbio_prokaryote:   type == "pacbio" && kingdom == "bacteria"
+                return [meta, paths]
             short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "bacteria"
+                return [meta, paths]
             nanopore_eukaryote:  type == "nanopore" && kingdom != "bacteria"
+                return [meta, paths]
             pacbio_eukaryote:    type == "pacbio" && kingdom != "bacteria"
+                return [meta, paths]
+            other:               true
+                return [meta, paths]
         }
         .set { filtered_input }
-        .map { meta, paths, type, kingdom ->
-            [meta, paths]
-        }
 
     FASTP( filtered_input.short_prokaryote, [], false, false )
     versions = versions.mix(FASTP.out.versions)
@@ -70,6 +75,15 @@ workflow GENOME_ASSEMBLY {
             }
     )
     versions = versions.mix(QUAST.out.versions)
+
+    // Warn if a sample was not assembled
+    not_assembled_warnings = sample_data
+        .map { [[id: it.sample_id], it] }
+        .combine(filtered_input.other, by: 0)
+        .map{ sample_meta, sample_data, paths ->
+            [sample_meta, [id: sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
+        }
+    messages = messages.mix(not_assembled_warnings)
 
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]
