@@ -51,14 +51,20 @@ workflow SKETCH_COMPARISON {
         .combine(TRIM_AND_SKETCH.out.signatures, by:0)
         .map { sample_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
-    assem_sigs = sample_data
+    ref_sigs = sample_data
         .map{ [it.ref_metas, [id: it.report_group_ids]] }
         .transpose(by: 0)
         .map{ ref_meta, report_group_id -> [[id: ref_meta.ref_id], report_group_id] }
         .combine(SOURMASH_SKETCH.out.signatures, by: 0)
         .map{ ref_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
+    assem_sigs = sample_data
+        .map { [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(SOURMASH_SKETCH.out.signatures, by: 0)
+        .map{ sample_id, report_group_id, signature -> [report_group_id, signature]}
+        .unique()
     grouped_sigs = read_sigs
+        .mix(ref_sigs)
         .mix(assem_sigs)
         .groupTuple(by: 0, sort: 'hash')
     SOURMASH_COMPARE (

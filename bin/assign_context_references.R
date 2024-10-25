@@ -8,8 +8,8 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     'scratch/assign_context_refs_bug/species_group_1_comp.csv',
-#     'scratch/assign_context_refs_bug/species_group_1.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/db/03da7a3dc6394378a8cdc86e28060f/subgroup_comp.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/db/03da7a3dc6394378a8cdc86e28060f/subgroup.csv',
 #     '3',
 #     '5',
 #     'all_context_refs.csv'
@@ -49,7 +49,7 @@ rescale <- function(x) {
 ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
 ani_ref_v_samples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]
 ani_ref_v_samples[ani_ref_v_samples == 0] <- NA
-ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE))
+ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE), check.names = FALSE)
 
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
