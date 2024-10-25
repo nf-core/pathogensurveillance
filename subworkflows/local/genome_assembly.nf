@@ -19,17 +19,17 @@ workflow GENOME_ASSEMBLY {
         .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type, it.kingdom] }
         .unique()
         .branch { meta, paths, type, kingdom ->
-            short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "bacteria"
+            short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "Bacteria"
                 return [meta, paths]
-            nanopore_prokaryote: type == "nanopore" && kingdom == "bacteria"
+            nanopore_prokaryote: type == "nanopore" && kingdom == "Bacteria"
                 return [meta, paths]
-            pacbio_prokaryote:   type == "pacbio" && kingdom == "bacteria"
+            pacbio_prokaryote:   type == "pacbio" && kingdom == "Bacteria"
                 return [meta, paths]
-            short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "bacteria"
+            short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "Bacteria"
                 return [meta, paths]
-            nanopore_eukaryote:  type == "nanopore" && kingdom != "bacteria"
+            nanopore_eukaryote:  type == "nanopore" && kingdom != "Bacteria"
                 return [meta, paths]
-            pacbio_eukaryote:    type == "pacbio" && kingdom != "bacteria"
+            pacbio_eukaryote:    type == "pacbio" && kingdom != "Bacteria"
                 return [meta, paths]
             other:               true
                 return [meta, paths]

@@ -36,6 +36,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map{ sample_meta, report_meta, ref_meta ->
             [sample_meta, report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_primary_usage]
         }
+        .unique()
         .collectFile() { sample_meta, report_meta, ref_id, ref_path, usage ->
             [ "${report_meta.id}.csv", "${sample_meta.id},${ref_id.id},${usage}\n" ]
         }
@@ -102,7 +103,11 @@ workflow CORE_GENOME_PHYLOGENY {
     all_assem_data = ref_assem_data
         .mix(sample_assem_data)
     BAKTA_BAKTA (
-        all_assem_data.map { ref_meta, report_meta, assem_path -> [ref_meta, assem_path] },
+        all_assem_data
+            .map { ref_meta, report_meta, assem_path ->
+                [ref_meta, assem_path]
+            }
+            .unique(),
         bakta_db, // Bakta database
         [], // proteins (optional)
         [] // prodigal_tf (optional)
