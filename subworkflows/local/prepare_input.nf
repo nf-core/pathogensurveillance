@@ -185,6 +185,7 @@ workflow PREPARE_INPUT {
             [sample_meta, ref_meta]
         }
         .mix(local_references)
+        .unique()
         .groupTuple(by: 0, sort: 'hash')
 
     // Add reference metadata list to the sample metadata
