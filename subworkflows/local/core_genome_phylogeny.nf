@@ -102,7 +102,7 @@ workflow CORE_GENOME_PHYLOGENY {
     all_assem_data = ref_assem_data
         .mix(sample_assem_data)
     BAKTA_BAKTA (
-        all_assem_data.map { ref_meta, report_meta, assem_path -> [ref_meta, assem_path] },
+        all_assem_data.map { ref_meta, report_meta, assem_path -> [ref_meta, assem_path] }.unique(),
         bakta_db, // Bakta database
         [], // proteins (optional)
         [] // prodigal_tf (optional)
