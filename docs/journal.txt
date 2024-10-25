@@ -16,6 +16,13 @@ Desired attributes:
 - [x] different reference usages
 - [x] multiple report groups
 
+Started work on 'assemble_first' branch to make genome assembly the first step.
+I refactored the genome assembly code to be more flexible with multiple assembliers, but still have not chosen an assemblier for eukaryotes sequenced with short reads or tested the code yet.
+
+
+
+
+
 ## 2024-10-22
 
 Working on reference selection figure.

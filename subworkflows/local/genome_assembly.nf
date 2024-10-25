@@ -15,15 +15,23 @@ workflow GENOME_ASSEMBLY {
 
     versions = Channel.empty()
     messages = Channel.empty()
-    filtered_input = sample_data
-        .filter {it.kingdom == "Bacteria"}
-        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type] }
+    sample_data
+        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type, it.kingdom] }
         .unique()
+        .branch { meta, paths, type, kingdom ->
+            short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "bacteria"
+            nanopore_prokaryote: type == "nanopore" && kingdom == "bacteria"
+            pacbio_prokaryote:   type == "pacbio" && kingdom == "bacteria"
+            short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "bacteria"
+            nanopore_eukaryote:  type == "nanopore" && kingdom != "bacteria"
+            pacbio_eukaryote:    type == "pacbio" && kingdom != "bacteria"
+        }
+        .set { filtered_input }
+        .map { meta, paths, type, kingdom ->
+            [meta, paths]
+        }
 
-    shortreads = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" || seq_type == "bgiseq" }
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
-    FASTP( shortreads, [], false, false )
+    FASTP( filtered_input.short_prokaryote, [], false, false )
     versions = versions.mix(FASTP.out.versions)
 
     SPADES(
@@ -33,19 +41,13 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(SPADES.out.versions)
 
-    nanopore = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "nanopore"}
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_NANOPORE (
-        nanopore,
+        filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
         "--nano-hq"
     )
 
-    pacbio = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "pacbio"}
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_PACBIO (
-        pacbio,
+        filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
         "--pacbio-hifi"
     )
 

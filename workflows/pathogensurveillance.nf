@@ -102,6 +102,13 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(PREPARE_INPUT.out.versions)
     messages = messages.mix(PREPARE_INPUT.out.messages)
 
+    // Assemble and annotate genomes
+    GENOME_ASSEMBLY (
+        PREPARE_INPUT.out.sample_data
+    )
+    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
+    messages = messages.mix(GENOME_ASSEMBLY.out.messages)
+
     // Initial quick analysis of sequences and references based on sketchs
     SKETCH_COMPARISON ( PREPARE_INPUT.out.sample_data )
     versions = versions.mix(SKETCH_COMPARISON.out.versions)
@@ -119,13 +126,6 @@ workflow PATHOGENSURVEILLANCE {
     )
     versions = versions.mix(VARIANT_ANALYSIS.out.versions)
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
-
-    // Assemble and annotate bacterial genomes
-    GENOME_ASSEMBLY (
-        PREPARE_INPUT.out.sample_data
-    )
-    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
-    messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
     // Create core gene phylogeny for bacterial samples
     CORE_GENOME_PHYLOGENY (
