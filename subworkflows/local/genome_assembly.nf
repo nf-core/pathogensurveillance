@@ -36,7 +36,7 @@ workflow GENOME_ASSEMBLY {
         }
         .set { filtered_input }
 
-    FASTP( filtered_input.short_prokaryote, [], false, false )
+    FASTP( filtered_input.short_prokaryote.mix(filtered_input.short_eukaryote), [], false, false )
     versions = versions.mix(FASTP.out.versions)
 
     SPADES(
