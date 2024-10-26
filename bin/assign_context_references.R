@@ -8,22 +8,27 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/db/03da7a3dc6394378a8cdc86e28060f/subgroup_comp.csv',
-#     '/home/fosterz/projects/pathogensurveillance/work/db/03da7a3dc6394378a8cdc86e28060f/subgroup.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/6f/a0cee6f7bc72095001e3142499cedb/all_comp.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/6f/a0cee6f7bc72095001e3142499cedb/all.csv',
 #     '3',
-#     '5',
+#     '2',
+#     '10',
 #     'all_context_refs.csv'
 # )
-names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_contextual', 'output_path')
+names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
 ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
 rownames(ani_matrix) <- colnames(ani_matrix)
 n_refs_closest <- as.integer(args$n_refs_closest)
+n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
 
 # Read sample data with user-defined references
-sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
+sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
+sample_data <- unique(sample_data)
 sample_ids <- unique(sample_data$sample_id)
+ref_name_key <- stats::setNames(sample_data$ref_name, sample_data$ref_id)
+ref_desc_key <- stats::setNames(sample_data$ref_desc, sample_data$ref_id)
 
 # If 'exclusive' references are present for a sample, remove all other references. Also remove 'excluded' references
 sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), function(table) {
@@ -35,7 +40,7 @@ sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), 
     return(table)
 }))
 rownames(sample_data) <- NULL
-all_ids <- unique(c(sample_data$references, sample_data$sample_id))
+all_ids <- unique(c(sample_data$ref_id, sample_data$sample_id))
 ani_matrix <- ani_matrix[row.names(ani_matrix) %in% all_ids, names(ani_matrix) %in% all_ids, drop = FALSE]
 
 # Scale ANI values for each sample
@@ -48,15 +53,21 @@ rescale <- function(x) {
 }
 ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
 ani_ref_v_samples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]
-ani_ref_v_samples[ani_ref_v_samples == 0] <- NA
+ani_ref_v_samples[ani_ref_v_samples == 0] <- NA # stops zeros from skewing the scale
 ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE), check.names = FALSE)
+ani_scaled[is.na(ani_scaled)] <- 0
 
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
     rownames(ani_scaled)[tail(order(ani_scaled[, id]), n = n_refs_closest)]
 }))
+closest_named_refs <- unlist(lapply(sample_ids, function(id) {
+    ordered_ref_ids <- rownames(ani_scaled)[order(ani_scaled[, id])]
+    is_latin_binomial <- grepl(ref_name_key[ordered_ref_ids], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
+    return(tail(ordered_ref_ids[is_latin_binomial], n = n_refs_closest_named))
+}))
 required_refs <- unlist(lapply(sample_ids, function(id) {
-    sample_data$references[sample_data$sample_id == id & sample_data$usage %in% c('required', 'exclusive')]
+    sample_data$ref_id[sample_data$sample_id == id & sample_data$usage %in% c('required', 'exclusive')]
 }))
 selected_refs <- unique(c(closest_refs, required_refs))
 
@@ -87,7 +98,13 @@ bin_data <- filter_bins(bin_data, selected_refs)
 # Select reference that works for the most remaining bins and repeat until no bins are left
 while (nrow(bin_data) > 0) {
     bin_counts <- table(unlist(bin_data$refs))
-    best_ref <- names(bin_counts)[which.max(bin_counts)]
+    best_refs <- names(bin_counts)[bin_counts == max(bin_counts)]
+    is_latin_binomial <- grepl(ref_name_key[best_refs], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
+    if (any(is_latin_binomial)) {
+        best_ref <- best_refs[is_latin_binomial][1]
+    } else {
+        best_ref <- best_refs[1]
+    }
     selected_refs <- c(selected_refs, best_ref)
     bin_data <- filter_bins(bin_data, selected_refs)
 }

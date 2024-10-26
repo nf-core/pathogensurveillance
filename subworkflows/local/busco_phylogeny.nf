@@ -24,13 +24,14 @@ workflow BUSCO_PHYLOGENY {
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids], it.ref_metas] }
+        .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
         .transpose(by: 2)
-        .map{ sample_meta, report_meta, ref_meta ->
-            [sample_meta, report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_primary_usage]
+        .map{ sample_id, report_group_id, ref_meta ->
+            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_primary_usage]
         }
-        .collectFile() { sample_meta, report_meta, ref_id, ref_path, usage ->
-            [ "${report_meta.id}.csv", "${sample_meta.id},${ref_id.id},${usage}\n" ]
+        .unique()
+        .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
+            [ "${report_group_id}.csv", "${sample_id},${ref_id},${ref_name},${ref_desc},${usage}\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
 
@@ -38,6 +39,7 @@ workflow BUSCO_PHYLOGENY {
     ASSIGN_CONTEXT_REFERENCES (
         ani_matrix.combine(samp_ref_pairs, by: 0),
         params.n_ref_closest,
+        params.n_ref_closest_named,
         params.n_ref_context
     )
     versions = versions.mix(ASSIGN_CONTEXT_REFERENCES.out.versions)

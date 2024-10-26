@@ -10,6 +10,7 @@ process ASSIGN_CONTEXT_REFERENCES {
     input:
     tuple val(group_meta), path(ani_matrix), path(samp_ref_pairs)
     val n_ref_closest
+    val n_ref_closest_named
     val n_ref_context
 
     output:
@@ -23,7 +24,7 @@ process ASSIGN_CONTEXT_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_context} ${prefix}_context_refs.csv
+    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_closest_named} ${n_ref_context} ${prefix}_context_refs.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
