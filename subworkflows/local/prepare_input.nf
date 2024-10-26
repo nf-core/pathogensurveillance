@@ -124,7 +124,8 @@ workflow PREPARE_INPUT {
             .toSortedList(),
         params.n_ref_strains,
         params.n_ref_species,
-        params.n_ref_genera
+        params.n_ref_genera,
+        params.only_latin_binomial_refs
     )
     no_assemblies_found = PICK_ASSEMBLIES.out.line_count
         .filter { sample_id, line_count ->

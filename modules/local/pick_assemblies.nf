@@ -13,6 +13,7 @@ process PICK_ASSEMBLIES {
     val n_ref_strains
     val n_ref_species
     val n_ref_genera
+    val only_latin_binomial_refs
 
     output:
     tuple val(meta), path("${prefix}.tsv"), emit: stats
@@ -27,7 +28,7 @@ process PICK_ASSEMBLIES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${prefix}.tsv ${assem_data_tsvs}
+    pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix}.tsv ${assem_data_tsvs}
     COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml

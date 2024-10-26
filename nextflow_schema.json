@@ -100,6 +100,12 @@
                     "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
                     "fa_icon": "fas fa-align-center"
                 },
+                "only_latin_binomial_refs": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, only consider references with names that appear to be standard latin bionomials (i.e. no numbers or symbols in the first two words).",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
                 "n_ref_strains": {
                     "type": "number",
                     "default": 30,
@@ -144,7 +150,7 @@
                 },
                 "phylo_max_genes": {
                     "type": "number",
-                    "default": 300,
+                    "default": 200,
                     "description": "The maximum number of genes used to conduct a core gene phylogeny.",
                     "fa_icon": "fas fa-align-center"
                 },
