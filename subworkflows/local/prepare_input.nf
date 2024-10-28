@@ -262,7 +262,7 @@ def create_sample_metadata_channel(LinkedHashMap sample_meta) {
     }
     sample_meta = sample_meta.collectEntries { key, value -> [(key): value ?: null] }
     sample_meta.ref_ids = sample_meta.ref_ids ? sample_meta.ref_ids.split(";") as ArrayList : []
-    sample_meta.single_end = sample_meta.path_2 == ''
+    sample_meta.single_end = ! sample_meta.path_2
     def paths = null
     if (sample_meta.path) {
         paths = [file(sample_meta.path)]
