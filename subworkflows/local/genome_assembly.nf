@@ -66,7 +66,7 @@ workflow GENOME_ASSEMBLY {
 
     FLYE_PACBIO (
         filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
-        "--pacbio-hifi"
+        "--pacbio-raw"
     )
 
     FILTER_ASSEMBLY (
