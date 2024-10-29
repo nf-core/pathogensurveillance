@@ -4,7 +4,7 @@
   |\\ | |__  __ /  ` /  \\ |__) |__         }  {
   | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
                                         `._,._,'
-  nf-core/plantpathsurveil v${version}
+  nf-core/plantpathsurveil ${version}
 ----------------------------------------------------
 Run Name: $runName
 

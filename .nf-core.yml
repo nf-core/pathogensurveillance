@@ -1,1 +1,17 @@
+bump_version: null
+lint: null
+nf_core_version: 3.0.2
+org_path: null
 repository_type: pipeline
+template:
+  author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.\
+    \ Bocardo, Hung Phan, Je\uFB00 H. Chang, Niklaus J. Gr\xFCnwald"
+  description: Surveillance of plant pathogens using high-throughput sequencing
+  force: false
+  is_nfcore: true
+  name: plantpathsurveil
+  org: nf-core
+  outdir: .
+  skip_features: null
+  version: 1.0dev
+update: null

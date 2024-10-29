@@ -1,10 +1,10 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/master/nextflow_schema.json",
-    "title": "nf-core/pathogensurveillance pipeline parameters",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/plantpathsurveil/master/nextflow_schema.json",
+    "title": "nf-core/plantpathsurveil pipeline parameters",
     "description": "Surveillance of pathogens using high-throughput sequencing",
     "type": "object",
-    "definitions": {
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -15,6 +15,8 @@
                 "sample_data": {
                     "type": "string",
                     "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.[ct]sv$",
                     "schema": "assets/schema_input.json",
@@ -100,6 +102,7 @@
                     "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
                     "fa_icon": "fas fa-align-center"
                 },
+<<<<<<< HEAD
                 "only_latin_binomial_refs": {
                     "type": "boolean",
                     "description": "When selecting references automatically, only consider references with names that appear to be standard latin bionomials (i.e. no numbers or symbols in the first two words).",
@@ -159,6 +162,32 @@
                     "default": 0.85,
                     "description": "The minimum ANI between a sample and potential reference for that reference to be used for mapping reads from that sample. To force all the samples in a report group to use the same reference, set this value very low.",
                     "fa_icon": "fas fa-align-center"
+=======
+                "fasta": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
+                    "description": "Path to FASTA genome file.",
+                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                    "fa_icon": "far fa-file-code"
+                },
+                "igenomes_ignore": {
+                    "type": "boolean",
+                    "description": "Do not load the iGenomes reference config.",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The base path to the igenomes reference files",
+                    "fa_icon": "fas fa-ban",
+                    "hidden": true,
+                    "default": "s3://ngi-igenomes/igenomes/"
+>>>>>>> 240c46a01d4c364552f2ed2768e4f67f5a2be55c
                 }
             }
         },
@@ -274,9 +303,9 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
+                "version": {
                     "type": "boolean",
-                    "description": "Display help text.",
+                    "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
@@ -330,11 +359,12 @@
                     "type": "string",
                     "description": "Incoming hook URL for messaging service",
                     "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
+                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "multiqc_config": {
                     "type": "string",
+                    "format": "file-path",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
@@ -379,29 +409,33 @@
                 },
                 "hpc_queue": {
                     "type": "string",
-		    "default": "",
+		            "default": "",
                     "description": "Name of queue in HPC environment to run jobs.",
                     "hidden": true,
                     "fa_icon": "fas fa-cogs"
+                },
+                "pipelines_testdata_base_path": {
+                    "type": "string",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 }
             }
         }
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_output_options"
+            "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/analysis_parameters"
+            "$ref": "#/$defs/reference_genome_options"
         },
         {
-            "$ref": "#/definitions/institutional_config_options"
+            "$ref": "#/$defs/institutional_config_options"
         },
         {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/generic_options"
+            "$ref": "#/$defs/generic_options"
         }
     ]
 }
