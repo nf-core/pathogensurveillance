@@ -19,14 +19,15 @@ workflow VARIANT_ANALYSIS {
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids], it.ref_metas] }
+        .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
         .transpose(by: 2)
-        .map{ sample_meta, report_meta, ref_meta ->
-            [sample_meta, report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_primary_usage]
+        .map{ sample_id, report_group_id, ref_meta ->
+            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_primary_usage]
         }
+        .unique()
         .tap{ references }
-        .collectFile() { sample_meta, report_meta, ref_id, ref_path, usage ->
-            [ "${report_meta.id}.csv", "${sample_meta.id},${ref_id.id},${usage}\n" ]
+        .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
+            [ "${report_group_id}.csv", "${sample_id},${ref_id},${ref_name},${ref_desc},${usage}\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
 
@@ -35,6 +36,11 @@ workflow VARIANT_ANALYSIS {
         ani_matrix.join(samp_ref_pairs),
         params.ref_min_ani
     )
+    ref_paths = references
+        .map {sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
+            [[id: sample_id], [id:report_group_id], [id: ref_id], ref_path, usage]
+        }
+        .unique()
     sample_data_with_refs = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
@@ -42,7 +48,7 @@ workflow VARIANT_ANALYSIS {
         .map { report_meta, csv_contents ->
             [[id: csv_contents[0]], report_meta, [id: csv_contents[1]]]
         }
-        .join(references, by: 0..2)
+        .join(ref_paths, by: 0..2)
         .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type] }, by: 0..1)
         .branch { // Remove any samples that do not have reference information
             filtered: it[2] != null
