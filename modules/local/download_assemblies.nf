@@ -1,10 +1,6 @@
 process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
-    maxForks 5
-    errorStrategy { return task.attempt > 2 ? 'ignore' : 'retry' }
-    maxRetries 6
-    maxErrors 15
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 unzip"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
