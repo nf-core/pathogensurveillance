@@ -52,4 +52,4 @@ VCF_TO_TAB:
   vcftools: 0.1.16
 Workflow:
   Nextflow: 23.10.1
-  nf-core/plantpathsurveil: 1.0dev
+  nf-core/pathogensurveillance: 1.0dev

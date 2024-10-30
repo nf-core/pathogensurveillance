@@ -1,5 +1,5 @@
 //
-// Subworkflow with functionality specific to the nf-core/plantpathsurveil pipeline
+// Subworkflow with functionality specific to the nf-core/pathogensurveillance pipeline
 //
 
 /*
