@@ -140,7 +140,7 @@ args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
 # args <- list("~/Downloads/ncbi_and_usda_3516_metadata.csv")
-# args <- list("test/data/metadata/mixed.csv", "test/data/metadata/mixed_references.csv")
+
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
     metadata_original_ref <- read.csv(args[[2]], check.names = FALSE)
@@ -449,6 +449,74 @@ metadata_samp <- rbind(
     metadata_samp[! is_present(metadata_samp$ncbi_query), ],
     new_sample_data
 )
+
+# Add the function to retrieve SRA Run IDs from BioSample IDs
+get_sra_from_biosamples <- function(biosample_id) {
+  # Create an empty data frame to store biosample_id to SRA mapping
+  sra_data <- data.frame(biosample_id = character(),
+                         SRR = character(),
+                         stringsAsFactors = FALSE)
+  
+  message("Processing biosample_id:", biosample_id, "\n")
+  
+  # Step 1: Search for biosample_id in the NCBI database to get its internal ID
+  search_result <- tryCatch({
+    rentrez::entrez_search(db = "biosample", term = biosample_id)
+  }, error = function(e) {
+    stop("Error while searching for biosample_id:", biosample_id, "\n")
+  })
+  
+  genbank_id <- search_result$ids[1]
+  
+  # Step 2: Use elink to find linked SRA records
+  link_result <- tryCatch({
+    rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
+  }, error = function(e) {
+    stop("Error while linking biosample_id to SRA:", genbank_id, "\n")
+  })
+  
+  sra_id <- link_result$links$biosample_sra
+  if (is.null(sra_id)) {
+    stop('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
+  }
+  # Step 3: Retrieve the SRA Run IDs
+  # Retrieve detailed information about the SRA run
+  sra_record <- tryCatch({
+    rentrez::entrez_summary(db = "sra", id = sra_id)
+  }, error = function(e) {
+    stop("Error retrieving SRA record for:", sra_id, "\n")
+  })
+  
+  # Extract run IDs
+  if (!is.null(sra_record$runs)) {
+    # Extract only the Run ID from the XML-like string
+    runs <- unlist(strsplit(sra_record$runs, split = ";"))
+    run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
+  }
+  
+  return(run_ids)
+}
+
+
+biosample_ids <- unique(metadata_samp$ncbi_accession[grepl("^SAM[ND|E]", metadata_samp$ncbi_accession)])
+run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
+names(run_id_key) = biosample_ids
+
+
+split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
+  current <- metadata_samp$ncbi_accession[i]
+  if (current %in% names(run_id_key)) {
+    out <- metadata_samp[rep(i,length(run_id_key[[current]])), , drop = FALSE]
+    rownames(out) <- NULL
+    out$ncbi_accession <- run_id_key[[current]]
+  } else {
+    out <- metadata_samp[i, , drop = FALSE]
+  }
+  return(out)
+})
+
+metadata_samp <- do.call(rbind, split_metadata)
+rownames(metadata_samp) <- NULL
 
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
