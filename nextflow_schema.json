@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["sample_data", "out_dir"],
+            "required": ["sample_data", "outdir"],
             "properties": {
                 "sample_data": {
                     "type": "string",
@@ -19,7 +19,6 @@
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.[ct]sv$",
-                    "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about samples.",
                     "help_text": "This CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
@@ -34,7 +33,7 @@
                     "help_text": "This CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
-                "out_dir": {
+                "outdir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage if running on Cloud infrastructure.",
@@ -102,7 +101,6 @@
                     "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
                     "fa_icon": "fas fa-align-center"
                 },
-<<<<<<< HEAD
                 "only_latin_binomial_refs": {
                     "type": "boolean",
                     "description": "When selecting references automatically, only consider references with names that appear to be standard latin bionomials (i.e. no numbers or symbols in the first two words).",
@@ -162,32 +160,6 @@
                     "default": 0.85,
                     "description": "The minimum ANI between a sample and potential reference for that reference to be used for mapping reads from that sample. To force all the samples in a report group to use the same reference, set this value very low.",
                     "fa_icon": "fas fa-align-center"
-=======
-                "fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
-                },
-                "igenomes_ignore": {
-                    "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
-                },
-                "igenomes_base": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "The base path to the igenomes reference files",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "default": "s3://ngi-igenomes/igenomes/"
->>>>>>> 240c46a01d4c364552f2ed2768e4f67f5a2be55c
                 }
             }
         },
@@ -383,7 +355,7 @@
                 "trace_dir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.out_dir}/pipeline_info",
+                    "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
@@ -427,9 +399,6 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
-        },
-        {
-            "$ref": "#/$defs/reference_genome_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

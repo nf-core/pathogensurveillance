@@ -17,9 +17,9 @@ process MULTIQC {
 
     output:
     tuple val(meta), path("${prefix}_multiqc"), emit: outdir
-    //tuple val(meta), path("*multiqc_report.html"), emit: report
-    //tuple val(meta), path("*_data")              , emit: data
-    //tuple val(meta), path("*_plots")             , optional:true, emit: plots
+    tuple val(meta), path("*multiqc_report.html"), emit: report
+    tuple val(meta), path("*_data")              , emit: data
+    tuple val(meta), path("*_plots")             , optional:true, emit: plots
     path "versions.yml"        , emit: versions
 
     when:

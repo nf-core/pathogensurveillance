@@ -1,86 +1,24 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
-// Validate input parameters
-WorkflowPathogensurveillance.initialise(params, log)
-
-// Check input path parameters to see if they exist
-def checkPathParamList = [
-    params.sample_data,
-    params.reference_data,
-    params.multiqc_config
-]
-for (param in checkPathParamList) {
-    if (param) { file(param, checkIfExists: true) }
-}
-
-// Check mandatory parameters
-if (params.sample_data) {
-    sample_data_csv = file(params.sample_data)
-} else {
-    exit 1, 'Sample metadata CSV not specified.'
-}
-if (params.reference_data) {
-    reference_data_csv = file(params.reference_data)
-} else {
-    reference_data_csv = []
-}
-if (!params.bakta_db && !params.download_bakta_db ) {
-    exit 1, "No bakta database specified. Use either '--bakta_db' to point to a local bakta database or use '--download_bakta_db true' to download the Bakta database."
-}
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-include { PREPARE_INPUT            } from '../subworkflows/local/prepare_input'
-include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
-include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
-include { VARIANT_ANALYSIS         } from '../subworkflows/local/variant_analysis'
-include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
-include { SKETCH_COMPARISON        } from '../subworkflows/local/sketch_comparison'
-include { GENOME_ASSEMBLY          } from '../subworkflows/local/genome_assembly'
-include { BUSCO_PHYLOGENY          } from '../subworkflows/local/busco_phylogeny'
-include { INITIAL_QC_CHECKS        } from '../subworkflows/local/initial_qc_checks'
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// MODULE: Installed directly from nf-core/modules
-//
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { PREPARE_INPUT               } from '../subworkflows/local/prepare_input'
+include { COARSE_SAMPLE_TAXONOMY      } from '../subworkflows/local/coarse_sample_taxonomy'
+include { CORE_GENOME_PHYLOGENY       } from '../subworkflows/local/core_genome_phylogeny'
+include { VARIANT_ANALYSIS            } from '../subworkflows/local/variant_analysis'
+include { DOWNLOAD_REFERENCES         } from '../subworkflows/local/download_references'
+include { SKETCH_COMPARISON           } from '../subworkflows/local/sketch_comparison'
+include { GENOME_ASSEMBLY             } from '../subworkflows/local/genome_assembly'
+include { BUSCO_PHYLOGENY             } from '../subworkflows/local/busco_phylogeny'
+include { INITIAL_QC_CHECKS           } from '../subworkflows/local/initial_qc_checks'
 include { MAIN_REPORT                 } from '../modules/local/main_report'
 include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
 include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_input'
+include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,10 +26,14 @@ include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_in
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
-
 workflow PATHOGENSURVEILLANCE {
+
+    take:
+    sample_data_csv
+    reference_data_csv
+
+    main:
+
 
     // Initalize channel to accumulate information about software versions used
     versions = Channel.empty()
@@ -147,14 +89,20 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
-    // Save version info
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        versions
-            .unique()
-            .collectFile(name: 'collated_versions.yml')
-    )
+    // Collate and save software versions
+    softwareVersionsToYAML(versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { collated_versions }
 
     // MultiQC
+    multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
+    multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+    multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
     fastqc_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
@@ -176,7 +124,7 @@ workflow PATHOGENSURVEILLANCE {
     multiqc_files = fastqc_results
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .combine(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(sort: true))
+        .combine(collated_versions)
         .map { report_meta, fastqc, nanoplot, quast, versions ->
             files = fastqc ?: [] + nanoplot ?: [] + quast ?: [] + [versions]
             [report_meta, files.flatten()]
@@ -185,7 +133,9 @@ workflow PATHOGENSURVEILLANCE {
         multiqc_files,
         multiqc_config.collect(sort: true).ifEmpty([]),
         multiqc_custom_config.collect(sort: true).ifEmpty([]),
-        multiqc_logo.collect(sort: true).ifEmpty([])
+        multiqc_logo.collect(sort: true).ifEmpty([]),
+        [],
+        []
     )
     versions = versions.mix(MULTIQC.out.versions)
 
@@ -288,7 +238,7 @@ workflow PATHOGENSURVEILLANCE {
 
     PREPARE_REPORT_INPUT (
         report_inputs,
-        CUSTOM_DUMPSOFTWAREVERSIONS.out.yml.first() // .first converts it to a value channel so it can be reused for multiple reports.
+        collated_versions.first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
     MAIN_REPORT (
@@ -296,35 +246,6 @@ workflow PATHOGENSURVEILLANCE {
         Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
+    emit:
+    multiqc_report = MULTIQC.out.report
 }
-
-
-
-
-
-
-
-
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
-    }
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/

@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/PATHOGENDX
+    nf-core/PATHOGENSURVEILLANCE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/plantpathsurveil
-    Website: https://nf-co.re/plantpathsurveil
-    Slack  : https://nfcore.slack.com/channels/plantpathsurveil
+    Github : https://github.com/nf-core/pathogensurveillance
+    Website: https://nf-co.re/pathogensurveillance
+    Slack  : https://nfcore.slack.com/channels/pathogensurveillance
 ----------------------------------------------------------------------------------------
 */
 
@@ -16,35 +16,9 @@
 */
 
 include { PATHOGENSURVEILLANCE    } from './workflows/pathogensurveillance'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOWS FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// WORKFLOW: Run main analysis pipeline depending on type of input
-//
-workflow NFCORE_PLANTPATHSURVEIL {
-
-    take:
-    samplesheet // channel: samplesheet read in from --input
-
-    main:
-
-    //
-    // WORKFLOW: Run pipeline
-    //
-    PLANTPATHSURVEIL (
-        samplesheet
-    )
-    emit:
-    multiqc_report = PLANTPATHSURVEIL.out.multiqc_report // channel: /path/to/multiqc_report.html
-}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,14 +38,16 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.input
+        params.sample_data,
+        params.reference_data
     )
 
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_PLANTPATHSURVEIL (
-        PIPELINE_INITIALISATION.out.samplesheet
+    PATHOGENSURVEILLANCE (
+        PIPELINE_INITIALISATION.out.sample_data_csv,
+        PIPELINE_INITIALISATION.out.reference_data_csv
     )
 
     //
@@ -84,7 +60,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        NFCORE_PLANTPATHSURVEIL.out.multiqc_report
+        PATHOGENSURVEILLANCE.out.multiqc_report
     )
 }
 

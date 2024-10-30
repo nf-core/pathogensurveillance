@@ -9,7 +9,7 @@ template:
   description: Surveillance of plant pathogens using high-throughput sequencing
   force: false
   is_nfcore: true
-  name: plantpathsurveil
+  name: pathogensurveillance
   org: nf-core
   outdir: .
   skip_features: null
