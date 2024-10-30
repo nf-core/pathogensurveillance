@@ -61,7 +61,7 @@ workflow GENOME_ASSEMBLY {
 
     FLYE_NANOPORE (
         filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
-        "--nano-hq"
+        "--nano-raw"
     )
 
     FLYE_PACBIO (
