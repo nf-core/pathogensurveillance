@@ -6,10 +6,8 @@
 
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { PREPARE_INPUT               } from '../subworkflows/local/prepare_input'
-include { COARSE_SAMPLE_TAXONOMY      } from '../subworkflows/local/coarse_sample_taxonomy'
 include { CORE_GENOME_PHYLOGENY       } from '../subworkflows/local/core_genome_phylogeny'
 include { VARIANT_ANALYSIS            } from '../subworkflows/local/variant_analysis'
-include { DOWNLOAD_REFERENCES         } from '../subworkflows/local/download_references'
 include { SKETCH_COMPARISON           } from '../subworkflows/local/sketch_comparison'
 include { GENOME_ASSEMBLY             } from '../subworkflows/local/genome_assembly'
 include { BUSCO_PHYLOGENY             } from '../subworkflows/local/busco_phylogeny'
