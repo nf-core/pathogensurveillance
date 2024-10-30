@@ -1,0 +1,5 @@
+ref_group_ids,ref_id,ref_name,ref_primary_usage,ref_contextual_usage,ref_ncbi_accession,ref_path,ref_ncbi_query,ref_ncbi_query_max
+p_oryzae_refs,GCF_000002495.2,Pyricularia oryzae 70-15,exclusive,required,GCF_000002495.2,,,
+p_oryzae_refs,,Pyricularia grisea PgNI,excluded,required,,path_surveil_data/assemblies/GCF_004355905.1.fasta.gz,,
+p_oryzae_refs,,,excluded,optional,,,"""Pyricularia oryzae""[Organism]",5
+e_coli_refs,,,required,optional,GCF_000005845.2,,,

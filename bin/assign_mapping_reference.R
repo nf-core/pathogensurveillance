@@ -3,16 +3,16 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/96/ff75e7540756721ef4a41543c19b9d/other_comp.csv',
-#     '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/96/ff75e7540756721ef4a41543c19b9d/other.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/8c/3a11d9f2fa629a1ac0e9ecb48fc419/all_comp.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/8c/3a11d9f2fa629a1ac0e9ecb48fc419/all.csv',
 #     'deleteme.csv',
-#     '0.9'
+#     '0.85'
 # )
 args <- as.list(args)
 names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani")
 ani_matrix <- read.csv(args$ani_matrix, check.names = FALSE)
 rownames(ani_matrix) <- as.character(colnames(ani_matrix))
-samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "reference_id", "usage"))
+samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "ref_id", "ref_name", "ref_desc", "usage"))
 samp_ref_pairs$sample_id <- as.character(samp_ref_pairs$sample_id) 
 start_min_ani <- as.numeric(args$start_min_ani) # The minimum ANI for a reference to be assigned to a samples
 end_min_ani <- max(c(0, start_min_ani - 0.3)) # How low the minimum can go if no samples can be assigned
@@ -33,12 +33,12 @@ samp_ref_pairs <- do.call(rbind, lapply(split(samp_ref_pairs, samp_ref_pairs$sam
 rownames(samp_ref_pairs) <- NULL
 
 # Function to assign references given a minimum ANI
-reference_ids <- unique(samp_ref_pairs$reference_id)
+reference_ids <- unique(samp_ref_pairs$ref_id)
 assign_ref <- function(sample_ids, min_ani) {
     valid_samples_for_ref <- lapply(reference_ids, function(ref_id) {
         good_ani <- ani_matrix[ref_id, sample_ids] >= min_ani
         can_use_ref <- unlist(lapply(sample_ids, function(sample_id) {
-            any(samp_ref_pairs$sample_id == sample_id & samp_ref_pairs$reference_id == ref_id)
+            any(samp_ref_pairs$sample_id == sample_id & samp_ref_pairs$ref_id == ref_id)
         }))
         sample_ids[good_ani & can_use_ref]
     })
@@ -48,7 +48,10 @@ assign_ref <- function(sample_ids, min_ani) {
         return(NULL)
     }
     best_refs <- reference_ids[n_samples == max(n_samples)]
-    best_ref <- best_refs[which.max(rowMeans(ani_matrix[best_refs, sample_ids, drop = FALSE]))]
+    mean_ani <- vapply(best_refs, function(ref_id) {
+        mean(unlist(ani_matrix[ref_id, valid_samples_for_ref[[ref_id]], drop = FALSE]))
+    }, FUN.VALUE = numeric(1))
+    best_ref <- best_refs[which.max(mean_ani)]
     return(data.frame(sample_id = valid_samples_for_ref[[best_ref]], reference_id = best_ref))
 }
 

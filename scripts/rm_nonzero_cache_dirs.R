@@ -1,4 +1,4 @@
-# Deletes all task working directories in the "work" directory that had a non-zero exit code.
+# Creates bash code to delete all task working directories in the "work" directory that had a non-zero exit code.
 
 
 # Check that work directory exists
@@ -22,7 +22,7 @@ exitcodes <- vapply(exitcode_paths, function(p) {
 # Filter for non-zero exit codes
 non_zero_exitcodes <- exitcodes[is.na(exitcodes) | exitcodes != "0"]
 
-# Delete directories with non-zero exit codes
+# Create code to delete directories with non-zero exit codes
 for (path in names(non_zero_exitcodes)) {
     cat(paste0('rm -rf ', dirname(path), '\n'))
 }

@@ -124,7 +124,8 @@ workflow PREPARE_INPUT {
             .toSortedList(),
         params.n_ref_strains,
         params.n_ref_species,
-        params.n_ref_genera
+        params.n_ref_genera,
+        params.only_latin_binomial_refs
     )
     no_assemblies_found = PICK_ASSEMBLIES.out.line_count
         .filter { sample_id, line_count ->
@@ -185,6 +186,7 @@ workflow PREPARE_INPUT {
             [sample_meta, ref_meta]
         }
         .mix(local_references)
+        .unique()
         .groupTuple(by: 0, sort: 'hash')
 
     // Add reference metadata list to the sample metadata
@@ -260,7 +262,7 @@ def create_sample_metadata_channel(LinkedHashMap sample_meta) {
     }
     sample_meta = sample_meta.collectEntries { key, value -> [(key): value ?: null] }
     sample_meta.ref_ids = sample_meta.ref_ids ? sample_meta.ref_ids.split(";") as ArrayList : []
-    sample_meta.single_end = sample_meta.path_2 == ''
+    sample_meta.single_end = ! sample_meta.path_2
     def paths = null
     if (sample_meta.path) {
         paths = [file(sample_meta.path)]

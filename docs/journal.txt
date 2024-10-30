@@ -1,3 +1,47 @@
+## 2024-10-24
+
+Working on test dataset for Jeff's proposal.
+Desired attributes:
+- [x] Illumina
+- [x] pacbio
+- [x] nanopore
+- [x] prokaryotes
+- [x] fungi
+- [x] sample by query
+- [x] sample by path
+- [x] sample by accession
+- [x] reference by query
+- [x] reference by file
+- [x] reference by accession
+- [x] different reference usages
+- [x] multiple report groups
+
+Started work on 'assemble_first' branch to make genome assembly the first step.
+I refactored the genome assembly code to be more flexible with multiple assembliers, but still have not chosen an assemblier for eukaryotes sequenced with short reads or tested the code yet.
+
+
+
+
+
+## 2024-10-22
+
+Working on reference selection figure.
+
+Shared steps in reference selection:
+* Sendsketch
+* download metadata for all refseq entries for each family encountered
+* Select references to download based on Sendsketch results, some for each taxonomic rank
+* Make sketches of all reads and references
+* All vs all comparison of sketches
+
+Contextual reference selection:
+* Select references such that each sample in a tree has a references for each ANI bin as well as the most similar referneces.
+
+Primary reference selection:
+* Select a minimum number of references such that samples are within a ANI threshold of their refernece
+
+
+
 [2024-05-24 09:40:59 AM] Planning new reference group input
 The goal is to allow users to specify multiple references per sample to be used for both variant calling and phylogenetic analyses.
 

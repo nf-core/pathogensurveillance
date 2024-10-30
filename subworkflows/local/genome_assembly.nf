@@ -15,15 +15,30 @@ workflow GENOME_ASSEMBLY {
 
     versions = Channel.empty()
     messages = Channel.empty()
-    filtered_input = sample_data
-        .filter {it.kingdom == "Bacteria"}
-        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type] }
+    sample_data
+        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type, it.kingdom] }
         .unique()
+        .branch { meta, paths, type, kingdom ->
+            short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "Bacteria"
+                return [meta, paths]
+            nanopore_prokaryote: type == "nanopore" && kingdom == "Bacteria"
+                return [meta, paths]
+            pacbio_prokaryote:   type == "pacbio" && kingdom == "Bacteria"
+                return [meta, paths]
+            short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "Bacteria"
+                return [meta, paths]
+            nanopore_eukaryote:  type == "nanopore" && kingdom != "Bacteria"
+                return [meta, paths]
+            pacbio_eukaryote:    type == "pacbio" && kingdom != "Bacteria"
+                return [meta, paths]
+            other:               true
+                return [meta, paths]
+        }
+        .set { filtered_input }
 
-    shortreads = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "illumina" || seq_type == "bgiseq" }
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
-    FASTP( shortreads, [], false, false )
+    spades_input = filtered_input.short_prokaryote
+        .mix(filtered_input.short_eukaryote)
+    FASTP( spades_input, [], false, false )
     versions = versions.mix(FASTP.out.versions)
 
     SPADES(
@@ -33,20 +48,25 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(SPADES.out.versions)
 
-    nanopore = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "nanopore"}
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
+    // Warn about any failed Spades assemblies
+    spades_warnings = spades_input
+        .join(SPADES.out.scaffolds, remainder: true)
+        .filter { sample_meta, read_paths, scaffolds ->
+            ! scaffolds
+        }
+        .combine(sample_data.map{ [[id: it.sample_id, single_end: it.single_end], [id: it.report_group_ids]] }, by: 0)
+        .map { sample_meta, read_paths, scaffolds, report_meta ->
+            [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assebled, possibly due to short read lengh or low quality. Check Spades' logs for more details."]
+        }
+
     FLYE_NANOPORE (
-        nanopore,
+        filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
         "--nano-hq"
     )
 
-    pacbio = filtered_input
-        .filter{ sample_meta, read_paths, seq_type -> seq_type == "pacbio"}
-        .map{ sample_meta, read_paths, seq_type -> [sample_meta, read_paths] }
     FLYE_PACBIO (
-        pacbio,
-        "--pacbio-hifi"
+        filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
+        "--pacbio-raw"
     )
 
     FILTER_ASSEMBLY (
@@ -68,6 +88,15 @@ workflow GENOME_ASSEMBLY {
             }
     )
     versions = versions.mix(QUAST.out.versions)
+
+    // Warn if a sample was not assembled
+    not_assembled_warnings = sample_data
+        .map { [[id: it.sample_id], it] }
+        .combine(filtered_input.other, by: 0)
+        .map{ sample_meta, sample_data, paths ->
+            [sample_meta, [id: sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
+        }
+    messages = messages.mix(not_assembled_warnings)
 
     emit:
     reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]

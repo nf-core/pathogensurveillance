@@ -9,7 +9,7 @@ args <- commandArgs(trailingOnly = TRUE)
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
-metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'references', 'usage'))
+metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
 raw_gene_data1 <- raw_gene_data

@@ -8,45 +8,64 @@ workflow SKETCH_COMPARISON {
 
     take:
     sample_data
+    assemblies
 
     main:
     versions = Channel.empty()
     messages = Channel.empty()
 
-    // Trim rare k-mers from raw reads
+    // Combine sample data with reads and assemblies to idenify which samples were not assembled
+    sample_data
+        .map { [[id: it.sample_id], it.paths] }
+        .unique()
+        .join(assemblies, remainder: true)
+        .branch { sample_meta, read_paths, assembly ->
+            reads: ! assembly
+                return [sample_meta, read_paths]
+            assemblies: assembly
+                return [sample_meta, assembly]
+        }
+        .set { input }
+
+    // Trim rare k-mers from raw reads and sketch
     TRIM_AND_SKETCH (
-        sample_data
-            .map { [[id: it.sample_id], it.paths] }
-            .unique(),
+        input.reads
     )
     versions = versions.mix(TRIM_AND_SKETCH.out.versions)
 
     // Create signature for each reference genome
-    references = sample_data
+    assemblies_to_sketch = sample_data
         .map{ [it.ref_metas] }
         .transpose(by: 0)
         .map{ ref_meta -> [[id: ref_meta[0].ref_id], ref_meta[0].ref_path] }
         .unique()
+        .mix(input.assemblies)
     SOURMASH_SKETCH (
-        references
+        assemblies_to_sketch
     )
     versions = versions.mix(SOURMASH_SKETCH.out.versions)
 
     // Compare all genomes/samples to eachother to create an ANI matrix
-    grouped_sample_sigs = sample_data
+    read_sigs = sample_data
         .map { [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(TRIM_AND_SKETCH.out.signatures, by:0)
         .map { sample_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
-    grouped_ref_sigs = sample_data
+    ref_sigs = sample_data
         .map{ [it.ref_metas, [id: it.report_group_ids]] }
         .transpose(by: 0)
         .map{ ref_meta, report_group_id -> [[id: ref_meta.ref_id], report_group_id] }
         .combine(SOURMASH_SKETCH.out.signatures, by: 0)
         .map{ ref_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
-    grouped_sigs = grouped_sample_sigs
-        .mix(grouped_ref_sigs)
+    assem_sigs = sample_data
+        .map { [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(SOURMASH_SKETCH.out.signatures, by: 0)
+        .map{ sample_id, report_group_id, signature -> [report_group_id, signature]}
+        .unique()
+    grouped_sigs = read_sigs
+        .mix(ref_sigs)
+        .mix(assem_sigs)
         .groupTuple(by: 0, sort: 'hash')
     SOURMASH_COMPARE (
         grouped_sigs,
