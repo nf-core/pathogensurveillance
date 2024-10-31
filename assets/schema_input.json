@@ -32,8 +32,8 @@
             },
             "ncbi_accession": {
                 "type": "string",
-                "pattern": "^[A-Z]{3}[0-9]+$",
-                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (3 captial letters followed by numbers)."
+                "pattern": "^[A-Z]{3,6}[0-9]+$",
+                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (captial letters followed by numbers)."
             },
             "ncbi_query": {
                 "type": "string"
