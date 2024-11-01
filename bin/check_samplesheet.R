@@ -139,7 +139,7 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
-# args <- list("~/Downloads/ncbi_and_usda_3516_metadata.csv")
+#args <- list("/Users/paradarc/Library/CloudStorage/Box-Box/00_projects/ongoing/00side/02_nexflow_pipeline/validation/sample_data.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -450,6 +450,7 @@ metadata_samp <- rbind(
     new_sample_data
 )
 
+
 # Add the function to retrieve SRA Run IDs from BioSample IDs
 get_sra_from_biosamples <- function(biosample_id) {
   # Create an empty data frame to store biosample_id to SRA mapping
@@ -463,7 +464,8 @@ get_sra_from_biosamples <- function(biosample_id) {
   search_result <- tryCatch({
     rentrez::entrez_search(db = "biosample", term = biosample_id)
   }, error = function(e) {
-    stop("Error while searching for biosample_id:", biosample_id, "\n")
+    warning("Error while searching for biosample_id:", biosample_id, "\n")
+    return(NULL)
   })
   
   genbank_id <- search_result$ids[1]
@@ -472,19 +474,22 @@ get_sra_from_biosamples <- function(biosample_id) {
   link_result <- tryCatch({
     rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
   }, error = function(e) {
-    stop("Error while linking biosample_id to SRA:", genbank_id, "\n")
+    warning("Error while linking biosample_id to SRA:", genbank_id, "\n")
+    return(NULL)
   })
   
   sra_id <- link_result$links$biosample_sra
   if (is.null(sra_id)) {
-    stop('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
+    warning('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
+    return(NULL)
   }
   # Step 3: Retrieve the SRA Run IDs
   # Retrieve detailed information about the SRA run
   sra_record <- tryCatch({
     rentrez::entrez_summary(db = "sra", id = sra_id)
   }, error = function(e) {
-    stop("Error retrieving SRA record for:", sra_id, "\n")
+    warning("Error retrieving SRA record for:", sra_id, "\n")
+    return(NULL)
   })
   
   # Extract run IDs
@@ -492,16 +497,32 @@ get_sra_from_biosamples <- function(biosample_id) {
     # Extract only the Run ID from the XML-like string
     runs <- unlist(strsplit(sra_record$runs, split = ";"))
     run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
+  } else {
+    warning("Error retrieving runs for SRA record:", sra_id, "\n")
+    return(NULL)
   }
   
   return(run_ids)
 }
 
-
 biosample_ids <- unique(metadata_samp$ncbi_accession[grepl("^SAM[ND|E]", metadata_samp$ncbi_accession)])
 run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
-names(run_id_key) = biosample_ids
+names(run_id_key) <- biosample_ids
 
+no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
+
+# Write biosamples with no reads to a file
+#if (length(no_runs_found) > 0) {
+#  writeLines(paste("The following biosamples do not have reads associated with them:\n", 
+#                   paste(no_runs_found, collapse = "\n")),
+#             con = "missing_reads_biosamples.txt")
+#  stop("Some biosamples do not have reads associated with them. See 'missing_reads_biosamples.txt' for details.")
+#}
+
+if (length(no_runs_found) > 0) {
+  stop('The following biosamples do not have reads associated with them:\n',
+       paste0(no_runs_found, collapse = '\n'), '\n')
+}
 
 split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
   current <- metadata_samp$ncbi_accession[i]
