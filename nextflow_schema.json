@@ -157,7 +157,7 @@
                 },
                 "ref_min_ani": {
                     "type": "number",
-                    "default": 0.85,
+                    "default": 0.95,
                     "description": "The minimum ANI between a sample and potential reference for that reference to be used for mapping reads from that sample. To force all the samples in a report group to use the same reference, set this value very low.",
                     "fa_icon": "fas fa-align-center"
                 }
