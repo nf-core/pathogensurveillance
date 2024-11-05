@@ -10,12 +10,28 @@ include { ASSIGN_MAPPING_REFERENCE } from '../../modules/local/assign_mapping_re
 workflow VARIANT_ANALYSIS {
 
     take:
-    sample_data // sample_meta
-    ani_matrix // report_group_id, ani_matrix
+    original_sample_data
+    ani_matrix
 
     main:
     versions = Channel.empty()
     messages = Channel.empty()
+
+    // Remove samples belonging to groups with only one sample
+    grouped_sample_data = original_sample_data
+        .map{[[id: it.report_group_ids], it]}
+        .groupTuple(by: 0)
+    sample_data = grouped_sample_data
+        .filter{ it[1].size() > 1 }
+        .transpose(by: 1)
+        .map{ it[1] }
+    messages = messages.mix(
+        grouped_sample_data
+            .filter{ it[1].size() == 1 }
+            .map{ report_meta, samp_metas ->
+                [[id: samp_metas[0].sample_id], report_meta, null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because it is the only sample in its report group."]
+            }
+    )
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data

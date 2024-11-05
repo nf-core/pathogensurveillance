@@ -1,14 +1,17 @@
 include { BUSCO                     } from '../../modules/nf-core/busco/main'
 include { BUSCO_DOWNLOAD            } from '../../modules/local/busco_download'
-include { READ2TREE                 } from '../../modules/local/read2tree/main'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
-include { MAKE_READ2TREE_DB         } from '../../modules/local/make_read2tree_db'
+include { MAFFT as MAFFT_SMALL      } from '../../modules/nf-core/mafft/main'
+include { IQTREE2 as IQTREE2_CORE   } from '../../modules/local/iqtree2'
+include { SUBSET_BUSCO_GENES        } from '../../modules/local/subset_busco_genes'
+include { FILES_IN_DIR              } from '../../modules/local/files_in_dir'
 
 workflow BUSCO_PHYLOGENY {
 
     take:
     original_sample_data
     ani_matrix // report_group_id, ani_matrix
+    sample_assemblies
 
     main:
 
@@ -41,6 +44,7 @@ workflow BUSCO_PHYLOGENY {
     )
     versions = versions.mix(ASSIGN_CONTEXT_REFERENCES.out.versions)
 
+    // Create channel with required reference metadata and genomes from selected references
     references =  sample_data
         .map{ [[id: it.report_group_ids], it.ref_metas] }
         .transpose(by: 1)
@@ -59,15 +63,21 @@ workflow BUSCO_PHYLOGENY {
             [[id: ref_meta.id], report_meta, ref_path]
         }
 
+    // Combine selected reference data with analogous sample metadata and assembled genomes
+    busco_input = sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(sample_assemblies, by: 0)
+        .mix(selected_ref_data)
+
     // Download BUSCO datasets
     BUSCO_DOWNLOAD ( Channel.from( "eukaryota_odb10" ) )
     versions = versions.mix(BUSCO_DOWNLOAD.out.versions)
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group
     BUSCO (
-        selected_ref_data
-            .map{ ref_meta, report_meta, ref_path ->
-                [ref_meta, ref_path]
+        busco_input
+            .map{ meta, report_meta, path ->
+                [meta, path]
             }
             .unique(),
         "genome",
@@ -77,85 +87,50 @@ workflow BUSCO_PHYLOGENY {
     )
     versions = versions.mix(BUSCO.out.versions)
 
-    // Create Read2tree database
-    grouped_busco_out = BUSCO.out.single_copy_fna
-        .filter{ ref_meta, gene_paths ->
-            gene_paths.size() > 0
-        }
-        .join(BUSCO.out.busco_dir)
-        .combine(selected_ref_data, by: 0)
-        .map { ref_meta, gene_paths, busco_dir, report_meta, ref_path ->
+
+    // Combine BUSCO output by gene for each report group
+    sorted_busco_data = busco_input
+        .combine(BUSCO.out.busco_dir, by: 0)
+        .map{ meta, report_meta, path, busco_dir ->
             [report_meta, busco_dir]
         }
-        .unique()
         .groupTuple(by: 0, sort: 'hash')
-    no_gene_warnings = BUSCO.out.single_copy_fna
-        .filter{ ref_meta, gene_paths ->
-            gene_paths.size() == 0
-        }
-        .combine(selected_ref_data, by: 0)
-        .map { ref_meta, gene_paths, report_meta, ref_path ->
-            [null, report_meta, ref_meta, "BUSCO_PHYLOGENY", "WARNING", "Reference excluded from BUSCO phylogeny because no single copy busco genes were found."]
-        }
-    messages = messages.mix(no_gene_warnings)
-    MAKE_READ2TREE_DB ( grouped_busco_out, "eukaryota_odb10" )
-    versions = versions.mix(MAKE_READ2TREE_DB.out.versions)
+        .combine(samp_ref_pairs, by: 0)
+    SUBSET_BUSCO_GENES (
+        sorted_busco_data,
+        params.phylo_min_genes,
+        params.phylo_max_genes
+    )
 
-    // group samples
-    input_filtered = sample_data
-        .map{ sample_meta ->
-            [[id: sample_meta.sample_id], sample_meta.paths, [id: sample_meta.report_group_ids], sample_meta.sequence_type]
-        }.unique()
-    paired_end = input_filtered
-        .filter { sample_meta, read_paths, report_meta, type ->
-            (type == "illumina" || type == "bgiseq") && read_paths.size() == 2
-        }
-        .groupTuple(by: 2, sort: 'hash')
-        .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, sample_metas, read_paths.collect{it[0]}, read_paths.collect{it[1]}]
-        }
-    single_end = input_filtered
-        .filter { sample_meta, read_paths, report_meta, type ->
-            (type == "illumina" || type == "bgiseq") && read_paths.size() == 1
-        }
-        .groupTuple(by: 2, sort: 'hash')
-        .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, sample_metas, read_paths.collect{it[0]}]
-        }
-    longread = input_filtered
-        .filter { sample_meta, read_paths, report_meta, type ->
-            (type == "nanopore" || type == "pacbio") && read_paths.size() == 1
-        }
-        .groupTuple(by: 2, sort: 'hash')
-        .map { sample_metas, read_paths, report_meta, types ->
-            [report_meta, sample_metas, read_paths.collect{it[0]}]
-        }
+    //// Report any sample or references that have been removed from the analysis
+    //removed_refs = SUBSET_BUSCO_GENES.out.removed_ref_ids
+    //    .splitText()
+    //    .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    //removed_samps = SUBSET_BUSCO_GENES.out.removed_sample_ids
+    //    .splitText()
+    //    .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    //messages = messages.mix(removed_refs)
+    //messages = messages.mix(removed_samps)
 
-    // NOTE: This annoying way of adding parts of tuple channels one part at a time is becuase when a channel is empty,
-    //   only one null is added, not the number of nulls equal to the the number of elements that should be in the tuple.
-    r2t_input = MAKE_READ2TREE_DB.out.ref_aa
-        .join(MAKE_READ2TREE_DB.out.ref_dna)
-        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, sample_metas]}, remainder:true)
-        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, read_1]}, remainder:true)
-        .join(paired_end.map{report_meta, sample_metas, read_1, read_2 -> [report_meta, read_2]}, remainder:true)
-        .join(single_end.map{report_meta, sample_metas, read_paths -> [report_meta, sample_metas]}, remainder:true)
-        .join(single_end.map{report_meta, sample_metas, read_paths -> [report_meta, read_paths]}, remainder:true)
-        .join(longread.map{report_meta, sample_metas, read_paths -> [report_meta, sample_metas]}, remainder:true)
-        .join(longread.map{report_meta, sample_metas, read_paths -> [report_meta, read_paths]}, remainder:true)
-        .map {report_meta, ref_aa, ref_dna, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads ->
-            [report_meta, pair_meta, pair_1, pair_2, single_meta, single, long_meta, longreads, ref_aa, ref_dna]
-        }
-        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+    //// Align each gene family with mafft
+    //core_genes = SUBSET_BUSCO_GENES.out.gene_seqs // group_meta, [gene_dirs]
+    //    .transpose() // group_meta, gene_dir
+    //    .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
+    //FILES_IN_DIR ( core_genes )
+    //MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    //versions = versions.mix(MAFFT_SMALL.out.versions)
 
-    // Run Read2tree
-    READ2TREE ( r2t_input )
-    versions = versions.mix(READ2TREE.out.versions)
+    //// Inferr phylogenetic tree from aligned core genes
+    //IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
+    //versions = versions.mix(IQTREE2_CORE.out.versions)
+    //trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+    //    .map { [it[0].group_id, it[1]] } // group_meta, tree
+    //    .groupTuple(sort: 'hash') // group_meta, [trees]
 
     emit:
     versions      = versions // versions.yml
     messages      = messages // meta, group_meta, ref_meta, workflow, level, message
     selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references
-    tree          = READ2TREE.out.tree // group_meta, tree
-    r2t_ref_meta  = MAKE_READ2TREE_DB.out.ref_meta
+    // tree          = READ2TREE.out.tree // group_meta, tree
 
 }

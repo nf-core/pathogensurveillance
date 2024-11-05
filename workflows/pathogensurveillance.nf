@@ -82,7 +82,8 @@ workflow PATHOGENSURVEILLANCE {
     // Read2tree BUSCO phylogeny for eukaryotes
     BUSCO_PHYLOGENY (
         PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.ani_matrix
+        SKETCH_COMPARISON.out.ani_matrix,
+        GENOME_ASSEMBLY.out.scaffolds
     )
     versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
@@ -135,112 +136,112 @@ workflow PATHOGENSURVEILLANCE {
     )
     versions = versions.mix(MULTIQC.out.versions)
 
-    // Gather sample data for each report
-    sample_data_csvs = PREPARE_INPUT.out.sample_data
-        .map{ sample_meta ->
-            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
-        }
-        .unique()
-        .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.csv", sample_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
-        }
-        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+    //// Gather sample data for each report
+    //sample_data_csvs = PREPARE_INPUT.out.sample_data
+    //    .map{ sample_meta ->
+    //        [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
+    //    }
+    //    .unique()
+    //    .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
+    //        [ "${report_meta.id}_sample_data.csv", sample_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+    //    }
+    //    .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
 
-    // Gather reference data for each report
-    reference_data_csvs = PREPARE_INPUT.out.sample_data
-        .map { sample_meta ->
-            [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
-        }
-        .transpose(by: 1)
-        .map { report_meta, ref_meta ->
-            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
-        }
-        .unique()
-        .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.csv", ref_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
-        }
-        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+    //// Gather reference data for each report
+    //reference_data_csvs = PREPARE_INPUT.out.sample_data
+    //    .map { sample_meta ->
+    //        [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
+    //    }
+    //    .transpose(by: 1)
+    //    .map { report_meta, ref_meta ->
+    //        [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+    //    }
+    //    .unique()
+    //    .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
+    //        [ "${report_meta.id}_reference_data.csv", ref_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+    //    }
+    //    .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
-    // Gather sendsketch signatures
-    sendsketch_hits = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
-        .combine(PREPARE_INPUT.out.sendsketch, by: 0)
-        .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
-        .unique()
-        .groupTuple(sort: 'hash')
+    //// Gather sendsketch signatures
+    //sendsketch_hits = PREPARE_INPUT.out.sample_data
+    //    .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+    //    .combine(PREPARE_INPUT.out.sendsketch, by: 0)
+    //    .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
+    //    .unique()
+    //    .groupTuple(sort: 'hash')
 
-    // Gather NCBI reference metadata for all references considered
-    family = PREPARE_INPUT.out.families
-        .splitText(elem: 1)
-        .map { sample_meta, families ->
-            [families.replace('\n', ''), sample_meta]
-        }
-    ncbi_ref_meta = PREPARE_INPUT.out.ncbi_ref_meta
-        .combine(family, by: 0)
-        .map { family, ref_stats, sample_meta -> [sample_meta, ref_stats]}
-        .combine(PREPARE_INPUT.out.sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids]] }, by: 0)
-        .map { sample_meta, ref_stats, report_meta -> [report_meta, ref_stats] }
-        .unique()
-        .groupTuple(sort: 'hash')
+    //// Gather NCBI reference metadata for all references considered
+    //family = PREPARE_INPUT.out.families
+    //    .splitText(elem: 1)
+    //    .map { sample_meta, families ->
+    //        [families.replace('\n', ''), sample_meta]
+    //    }
+    //ncbi_ref_meta = PREPARE_INPUT.out.ncbi_ref_meta
+    //    .combine(family, by: 0)
+    //    .map { family, ref_stats, sample_meta -> [sample_meta, ref_stats]}
+    //    .combine(PREPARE_INPUT.out.sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids]] }, by: 0)
+    //    .map { sample_meta, ref_stats, report_meta -> [report_meta, ref_stats] }
+    //    .unique()
+    //    .groupTuple(sort: 'hash')
 
-    // Gather selected reference metadata
-    selected_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
-        .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
-        .map{ sample_meta, report_meta, ref_meta -> [report_meta, ref_meta] }
-        .unique()
-        .groupTuple(sort: 'hash')
+    //// Gather selected reference metadata
+    //selected_ref_meta = PREPARE_INPUT.out.sample_data
+    //    .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+    //    .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
+    //    .map{ sample_meta, report_meta, ref_meta -> [report_meta, ref_meta] }
+    //    .unique()
+    //    .groupTuple(sort: 'hash')
 
-    // Gather SNP alignments from the variant analysis
-    snp_align = VARIANT_ANALYSIS.out.snp_align
-        .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
-        .groupTuple(sort: 'hash')
+    //// Gather SNP alignments from the variant analysis
+    //snp_align = VARIANT_ANALYSIS.out.snp_align
+    //    .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
+    //    .groupTuple(sort: 'hash')
 
-    // Gather phylogenies from the variant analysis
-    snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
-        .map { report_meta, ref_meta, tree -> [report_meta, tree] }
-        .groupTuple(sort: 'hash')
+    //// Gather phylogenies from the variant analysis
+    //snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+    //    .map { report_meta, ref_meta, tree -> [report_meta, tree] }
+    //    .groupTuple(sort: 'hash')
 
-    // Gather status messages for each group
-    group_messages = messages
-        .unique()
-        .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.csv", "\"sample_id\",\"reference_id\",\"workflow\",\"level\",\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\",\"${ref_meta ? ref_meta.id : 'NA'}\",\"${workflow}\",\"${level}\",\"${message}\"\n" ]
-        }
-        .map {[[id: it.getSimpleName()], it]}
-        .ifEmpty([])
+    //// Gather status messages for each group
+    //group_messages = messages
+    //    .unique()
+    //    .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
+    //        [ "${report_meta.id}.csv", "\"sample_id\",\"reference_id\",\"workflow\",\"level\",\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\",\"${ref_meta ? ref_meta.id : 'NA'}\",\"${workflow}\",\"${level}\",\"${message}\"\n" ]
+    //    }
+    //    .map {[[id: it.getSimpleName()], it]}
+    //    .ifEmpty([])
 
-    // Combine components into a single channel for the main report_meta
-    report_inputs = sample_data_csvs
-        .join(reference_data_csvs, remainder: true)
-        .join(sendsketch_hits, remainder: true)
-        .join(ncbi_ref_meta, remainder: true)
-        .join(selected_ref_meta, remainder: true)
-        .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
-        .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
-        .join(snp_align, remainder: true)
-        .join(snp_phylogeny, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.r2t_ref_meta, remainder: true)
-        .join(MULTIQC.out.outdir, remainder: true)
-        .join(group_messages, remainder: true)
-        .filter{it[0] != null} // remove extra item if messages is empty
-        .map{ it.size() == 17 ? it + [null] : it } // adds placeholder if messages is empty
-        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+    //// Combine components into a single channel for the main report_meta
+    //report_inputs = sample_data_csvs
+    //    .join(reference_data_csvs, remainder: true)
+    //    .join(sendsketch_hits, remainder: true)
+    //    .join(ncbi_ref_meta, remainder: true)
+    //    .join(selected_ref_meta, remainder: true)
+    //    .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
+    //    .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
+    //    .join(snp_align, remainder: true)
+    //    .join(snp_phylogeny, remainder: true)
+    //    .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
+    //    .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
+    //    .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
+    //    .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
+    //    .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
+    //    .join(BUSCO_PHYLOGENY.out.r2t_ref_meta, remainder: true)
+    //    .join(MULTIQC.out.outdir, remainder: true)
+    //    .join(group_messages, remainder: true)
+    //    .filter{it[0] != null} // remove extra item if messages is empty
+    //    .map{ it.size() == 17 ? it + [null] : it } // adds placeholder if messages is empty
+    //    .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
-    PREPARE_REPORT_INPUT (
-        report_inputs,
-        collated_versions.first() // .first converts it to a value channel so it can be reused for multiple reports.
-    )
+    //PREPARE_REPORT_INPUT (
+    //    report_inputs,
+    //    collated_versions.first() // .first converts it to a value channel so it can be reused for multiple reports.
+    //)
 
-    MAIN_REPORT (
-        PREPARE_REPORT_INPUT.out.report_input,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
-    )
+    //MAIN_REPORT (
+    //    PREPARE_REPORT_INPUT.out.report_input,
+    //    Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+    //)
 
     emit:
     multiqc_report = MULTIQC.out.report
