@@ -102,35 +102,35 @@ workflow BUSCO_PHYLOGENY {
         params.phylo_max_genes
     )
 
-    //// Report any sample or references that have been removed from the analysis
-    //removed_refs = SUBSET_BUSCO_GENES.out.removed_ref_ids
-    //    .splitText()
-    //    .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    //removed_samps = SUBSET_BUSCO_GENES.out.removed_sample_ids
-    //    .splitText()
-    //    .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    //messages = messages.mix(removed_refs)
-    //messages = messages.mix(removed_samps)
+    // Report any sample or references that have been removed from the analysis
+    removed_refs = SUBSET_BUSCO_GENES.out.removed_ref_ids
+        .splitText()
+        .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    removed_samps = SUBSET_BUSCO_GENES.out.removed_sample_ids
+        .splitText()
+        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+    messages = messages.mix(removed_refs)
+    messages = messages.mix(removed_samps)
 
-    //// Align each gene family with mafft
-    //core_genes = SUBSET_BUSCO_GENES.out.gene_seqs // group_meta, [gene_dirs]
-    //    .transpose() // group_meta, gene_dir
-    //    .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
-    //FILES_IN_DIR ( core_genes )
-    //MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
-    //versions = versions.mix(MAFFT_SMALL.out.versions)
+    // Align each gene family with mafft
+    core_genes = SUBSET_BUSCO_GENES.out.feat_seqs
+        .transpose()
+        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] }
+    FILES_IN_DIR ( core_genes )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    versions = versions.mix(MAFFT_SMALL.out.versions)
 
-    //// Inferr phylogenetic tree from aligned core genes
-    //IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
-    //versions = versions.mix(IQTREE2_CORE.out.versions)
-    //trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
-    //    .map { [it[0].group_id, it[1]] } // group_meta, tree
-    //    .groupTuple(sort: 'hash') // group_meta, [trees]
+    // Inferr phylogenetic tree from aligned core genes
+    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
+    versions = versions.mix(IQTREE2_CORE.out.versions)
+    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .groupTuple(sort: 'hash') // group_meta, [trees]
 
     emit:
     versions      = versions // versions.yml
     messages      = messages // meta, group_meta, ref_meta, workflow, level, message
     selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references
-    // tree          = READ2TREE.out.tree // group_meta, tree
+    tree          = trees
 
 }
