@@ -9,7 +9,7 @@ SRR11174078,illumina,Rhizobium rhizogenes,TRUE,bacteria,PRJNA607555,10.1126/scie
 SRR11174066,illumina,Agrobacterium vitis,TRUE,bacteria,PRJNA607555,10.1126/science.aba532,T60/94,Grape,1994,,,,,agro;mixed,bact,,,,,,,,,Ti,Nopaline,,
 SRR11174123,illumina,Agrobacterium rubi,TRUE,bacteria,PRJNA607555,10.1126/science.aba561,Eu3-2RS,Euonymous,,,,,,agro;mixed,bact,,,,,,,,,Ti,Agrocinopine/Other,,
 SRR11174106,illumina,Agrobacterium salinitolerans,TRUE,bacteria,PRJNA607555,10.1126/science.aba594,NCPPB_2657,Cucumber,1974,,,,,agro;mixed,bact,,,,,,,,,Ri,Cucumopine,,
-ERR3842627,illumina,Meloidogyne enterolobii,TRUE,nematode,PRJEB36431,,,,2020,,,Client3,,meloidegyne;mixed,mixed,nematode,,,,,,,,,,,
+ERR3842627,illumina,Meloidogyne enterolobii,FALSE,nematode,PRJEB36431,,,,2020,,,Client3,,meloidegyne;mixed,mixed,nematode,,,,,,,,,,,
 SRR14552458,pacbio,Aphis_gossypii,TRUE,insect,PRJNA719918,10.1111/1755-0998.13521,cma_hap1,cotton,,,,Client4,,aphid;mixed,mixed,insect,,,,,,,,,,,
 SRR29399310,illumina,Pythium insidiosum,TRUE,oomycete,PRJNA1123314,,,,,,,,,oomycetes;mixed,mixed,,,,,,,,,,,,
 SRR26197583,pacbio,Phytophthora cinnamomi,TRUE,oomycete,PRJNA1019754,,Pc2109,,,,,,,oomycetes;mixed,mixed,,,,,,,,,,,,

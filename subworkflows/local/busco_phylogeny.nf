@@ -51,6 +51,8 @@ workflow BUSCO_PHYLOGENY {
         .map{ report_meta, ref_meta ->
             [report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_name]
         }
+        .unique()
+
     selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
