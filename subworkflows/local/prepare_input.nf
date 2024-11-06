@@ -144,7 +144,7 @@ workflow PREPARE_INPUT {
         }
         .join(new_reference_data.groupTuple(by: 0, sort: 'hash'), by: 0, remainder: true)
         .map { sample_id, sample_meta, ref_metas_user, ref_metas_to_download ->
-            [sample_meta, ref_metas_user + ref_metas_to_download ?: []]
+            [sample_meta, ref_metas_user + (ref_metas_to_download ?: [])]
         }
     reference_data = new_reference_data
         .map{ sample_id, ref_meta -> ref_meta }
