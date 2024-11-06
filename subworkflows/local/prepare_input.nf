@@ -115,10 +115,16 @@ workflow PREPARE_INPUT {
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
     // Choose reference sequences to provide context for each sample
+    taxon_data = sample_data
+        .filter { sample_meta, ref_metas ->
+            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') && ref_metas.collect{it.ref_contextual_usage}.contains('exclusive'))
+        }
+        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }  // Joining with a subset of samples acts like a filter
+        .join(INITIAL_CLASSIFICATION.out.families)
+        .join(INITIAL_CLASSIFICATION.out.genera)
+        .join(INITIAL_CLASSIFICATION.out.species)
     PICK_ASSEMBLIES (
-        INITIAL_CLASSIFICATION.out.families
-            .join(INITIAL_CLASSIFICATION.out.genera)
-            .join(INITIAL_CLASSIFICATION.out.species),
+        taxon_data,
         FIND_ASSEMBLIES.out.stats
             .map { taxon, assembly_meta -> assembly_meta }
             .toSortedList(),
@@ -127,32 +133,33 @@ workflow PREPARE_INPUT {
         params.n_ref_genera,
         params.only_latin_binomial_refs
     )
-    no_assemblies_found = PICK_ASSEMBLIES.out.line_count
-        .filter { sample_id, line_count ->
-            line_count == "1"
-        }
-        .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
-        .map { sample_id, line_count, sample_meta, ref_metas ->
-            [sample_meta, ref_metas]
-        }
-    sample_data = PICK_ASSEMBLIES.out.stats
+    new_reference_data =  PICK_ASSEMBLIES.out.stats
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
             [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
         }
-        .tap{ new_reference_data }
-        .groupTuple(by: 0, sort: 'hash')
-        .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
-        .map{ sample_id, new_ref_metas, sample_meta, ref_metas ->
-            [sample_meta, ref_metas + new_ref_metas]
+    sample_data = sample_data
+        .map { sample_meta, ref_metas ->
+            [[id: sample_meta.sample_id], sample_meta, ref_metas]
         }
-        .mix(no_assemblies_found)
+        .join(new_reference_data.groupTuple(by: 0, sort: 'hash'), by: 0, remainder: true)
+        .map { sample_id, sample_meta, ref_metas_user, ref_metas_to_download ->
+            [sample_meta, ref_metas_user + ref_metas_to_download ?: []]
+        }
     reference_data = new_reference_data
         .map{ sample_id, ref_meta -> ref_meta }
         .mix(reference_data)
 
     // Warn of samples for which no reference information could be found
-    no_ref_warnings = no_assemblies_found
+   no_assemblies_found = PICK_ASSEMBLIES.out.line_count
+       .filter { sample_id, line_count ->
+           line_count == "1"
+       }
+       .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
+       .map { sample_id, line_count, sample_meta, ref_metas ->
+           [sample_meta, ref_metas]
+       }
+   no_ref_warnings = no_assemblies_found
         .map{ sample_meta, ref_metas ->
             [sample_meta, [id: sample_meta.report_group_ids], null, "PREPARE_INPUT", "WARNING", "Could not find any references to download."]
         }
