@@ -31,7 +31,11 @@ workflow GENOME_ASSEMBLY {
 
     spades_input = filtered_input.short_prokaryote
         .mix(filtered_input.short_eukaryote)
-    FASTP( spades_input, [], false, false )
+    fastp_input = spades_input
+        .map{ sample_meta, read_paths ->    // If there are both single and paired in reads, just use the paired end reads
+            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }]
+        }
+    FASTP( fastp_input, [], false, false )
     versions = versions.mix(FASTP.out.versions)
 
     SPADES(
