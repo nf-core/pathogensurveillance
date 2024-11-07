@@ -1,9 +1,7 @@
 process SRATOOLS_FASTERQDUMP {
     tag "$meta.id"
     label 'process_low'
-    maxForks 3
     errorStrategy { return task.attempt > 3 ? 'finish' : 'ignore' }
-    maxRetries 5
 
     conda "bioconda::sra-tools=3.0.8 conda-forge::pigz=2.6"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
