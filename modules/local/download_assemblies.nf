@@ -51,7 +51,8 @@ process DOWNLOAD_ASSEMBLIES {
 
     # Delete unneeded files
     rm ${prefix}.zip
-    rm  -rf ncbi_dataset
+    rm -rf ncbi_dataset
+    rm README.md md5sum.txt
 
     # Compress output files
     bgzip ${prefix}.fasta
