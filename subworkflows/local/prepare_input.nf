@@ -111,7 +111,12 @@ workflow PREPARE_INPUT {
         .unique()
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
-    FIND_ASSEMBLIES ( all_families, params.allow_non_refseq, params.allow_partial_refs )
+    FIND_ASSEMBLIES (
+        all_families,
+        params.allow_non_refseq,
+        params.allow_partial_refs,
+        params.allow_unannotated
+    )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
     // Choose reference sequences to provide context for each sample

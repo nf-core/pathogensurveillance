@@ -11,10 +11,11 @@ process FIND_ASSEMBLIES {
     val taxon // There is no meta because we dont want to cache based only the taxon
     val allow_non_refseq
     val allow_partial_refs
+    val allow_unannotated
 
     output:
-    tuple val(taxon), path("${prefix}.tsv"), emit: stats
-    path "versions.yml"                    , emit: versions
+    tuple val(taxon), path("${output_path}"), emit: stats
+    path "versions.yml"                     , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -23,11 +24,16 @@ process FIND_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${taxon}".replaceAll(' ', '_')
     def args = task.ext.args ?: ''
     output_path = "${prefix}"
-    def filter_args = 'latest[PROP] AND has-annotation[PROP]'
+    def filter_args = 'latest[PROP]'
     if (allow_partial_refs) {
         output_path = "${output_path}--partial"
     } else {
         filter_args = "${filter_args} AND full-genome-representation[PROP]"
+    }
+    if (allow_unannotated) {
+        output_path = "${output_path}--unannotated"
+    } else {
+        filter_args = "${filter_args} AND has-annotation[PROP]"
     }
     if (allow_non_refseq) {
         output_path = "${output_path}--non_refseq"
@@ -41,10 +47,10 @@ process FIND_ASSEMBLIES {
           PartialGenomeRepresentation ReleaseLevel ReleaseType RefSeq_category \\
           SubmissionDate LastUpdateDate ContigN50 ScaffoldN50"
 
-    echo \$COLS | sed 's/ /\\t/g' > ${prefix}.tsv
+    echo \$COLS | sed 's/ /\\t/g' > ${output_path}
     esearch -db taxonomy -query "${taxon} OR ${taxon}[subtree]" | \\
         elink -target assembly | \\
-        efilter -query "latest[PROP] AND full-genome-representation[PROP] AND has-annotation[PROP] NOT excluded-from-refseq[PROP]" | \\
+        efilter -query "${filter_args}" | \\
         efetch -format docsum | \\
         xtract -pattern DocumentSummary -def 'NA' -element \$COLS >> \\
         ${output_path}

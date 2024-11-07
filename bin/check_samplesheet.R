@@ -139,7 +139,7 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
-# args <- list("/home/fosterz/projects/pathogensurveillance/test_data.csv")
+# args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/complex_small.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -156,7 +156,7 @@ remove_empty_rows <- function(metadata) {
         return(metadata)
     }
     is_empty <- apply(metadata, MARGIN = 1, function(row) all(! is_present(row)))
-    metadata[! is_empty, drop = FALSE]
+    metadata[! is_empty, , drop = FALSE]
 }
 metadata_samp <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {

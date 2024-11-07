@@ -113,6 +113,12 @@
                     "fa_icon": "fas fa-download",
                     "default": false
                 },
+                "allow_unannotated": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that do not have annotations. The pipleine will attempt to annotate these references as needed.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
                 "allow_partial_refs": {
                     "type": "boolean",
                     "description": "When selecting references automatically, allow assemblies that do not represent full genomes.",
