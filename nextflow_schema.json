@@ -107,6 +107,18 @@
                     "fa_icon": "fas fa-download",
                     "default": false
                 },
+                "allow_non_refseq": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies not in RegSeq.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "allow_partial_refs": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that do not represent full genomes.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
                 "n_ref_strains": {
                     "type": "number",
                     "default": 30,
@@ -115,7 +127,7 @@
                 },
                 "n_ref_species": {
                     "type": "number",
-                    "default": 20,
+                    "default": 30,
                     "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },

@@ -25,7 +25,7 @@ process RENAME_CORE_GENE_HEADERS {
     # Rename headers to just sample ID
     for file in ${feat_seqs}/*.fasta
     do
-        sed 's/>.*genome:\\(.*\\)gene.*/>\\1/g' \$file > ${prefix}_feat_seqs_renamed/\$(basename \$file)
+        sed 's/>.*genome:\\(.*\\)gene:.*/>\\1/g' \$file > ${prefix}_feat_seqs_renamed/\$(basename \$file)
     done
     """
 }

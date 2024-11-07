@@ -2,10 +2,10 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('~/projects/pathogensurveillance/work/e0/d3250f4d003ec0bfcf85d0f6ba1607/_no_group_defined_.tsv',
-#           '~/projects/pathogensurveillance/work/e0/d3250f4d003ec0bfcf85d0f6ba1607/_no_group_defined__feat_seqs_renamed',
-#           '~/projects/pathogensurveillance/work/e0/d3250f4d003ec0bfcf85d0f6ba1607/_no_group_defined_.csv',
-#           '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
+# args <- c('/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined_.tsv',
+#           '/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined__feat_seqs_renamed',
+#           '/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined_.csv',
+#           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
