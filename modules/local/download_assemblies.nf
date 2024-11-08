@@ -30,7 +30,7 @@ process DOWNLOAD_ASSEMBLIES {
     # unzip --version
 
     # Download assemblies as zip archives
-    datasets download genome accession $id --include gff3,rna,cds,protein,genome,seq-report --filename ${prefix}.zip
+    datasets download genome accession $id --include gff3,genome --filename ${prefix}.zip
 
     # Unzip
     unzip ${prefix}.zip
