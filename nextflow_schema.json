@@ -127,20 +127,20 @@
                 },
                 "n_ref_strains": {
                     "type": "number",
-                    "default": 30,
-                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "default": 10,
+                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_species": {
                     "type": "number",
-                    "default": 30,
-                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "default": 20,
+                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_genera": {
                     "type": "number",
-                    "default": 10,
-                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "default": 20,
+                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_closest": {

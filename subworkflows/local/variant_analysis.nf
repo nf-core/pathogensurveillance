@@ -71,8 +71,26 @@ workflow VARIANT_ANALYSIS {
             no_ref: it[2] == null
         } // sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type
 
+    // Remove samples belonging to groups with only one sample
+    grouped_sample_data_with_refs = sample_data_with_refs.filtered
+        .map{sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            [report_meta, ref_meta, [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type]]
+        }
+        .groupTuple(by: [0,1])
+    filtered_sample_data_with_refs = grouped_sample_data_with_refs
+        .filter{ it[2].size() > 2 }
+        .transpose(by: 2)
+        .map{ it[2] }
+    messages = messages.mix(
+        grouped_sample_data_with_refs
+            .filter{ it[2].size() <= 2 }
+            .map{ report_meta, ref_meta, data ->
+                [data[0][0], report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because there are too few samples aligned to this reference to make a tree."]
+            }
+    )
+
     // Cutting up long reads
-    longreads = sample_data_with_refs.filtered
+    longreads = filtered_sample_data_with_refs
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             sequence_type == "nanopore" || sequence_type == "pacbio"
         }

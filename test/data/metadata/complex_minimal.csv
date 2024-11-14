@@ -1,15 +1,14 @@
-ncbi_accession,sequence_type,taxonomic_classification,enabled,category,bioproject,ref,Strain,Host,Collection_date,Location_collection,US_State,Client_MAS,Submission_ID_MAS,report_groups_ids,Field #,Farm,Transplant facility,Cultivar,Seed producer,Operation,County,Region,Class_of oncogenic_plasmid,Opine_Type,virD2,unknown1,unknown2
-ERR2612748,nanopore,magnaporthe_oryzae,TRUE,fungi,PRJEB27137,,BTJP4-1,wheat,2016,Bangladesh,,Client1,,magn_or;mixed,mixed,fungi,,,,,,,,,,,
-ERR2612749,nanopore,magnaporthe_oryzae,TRUE,fungi,PRJEB27137,,FR13,wheat,1998,USA,,Client1,,magn_or;mixed,mixed,fungi,,,,,,,,,,,
-ERR2612750,nanopore,magnaporthe_oryzae,TRUE,fungi,PRJEB27137,,US71,wheat,1998,France,,Client1,,magn_or;mixed,fungi,,,,,,,,,,,,
-SRR12888961,illumina,xanthomonas_perforans,TRUE,bacteria,PRJNA668343,10.1038/s41396-021-01104-8,JK1-1,tomato,2021,USA,FL,Client2,,xan_FL;mixed,mixed,bact,1,dd,ZZ,9,D,AA,c,CW,,,
-SRR12888960,illumina,xanthomonas_perforans,TRUE,bacteria,PRJNA668343,10.1038/s41396-021-01104-9,JK1-2,tomato,2021,USA,FL,Client2,,xan_FL;mixed,mixed,bact,1,dd,ZZ,9,D,AA,c,CW,,,
-SRR12888760,illumina,xanthomonas_perforans,TRUE,bacteria,PRJNA668343,10.1038/s41396-021-01104-10,JK1-3,tomato,2021,USA,FL,Client2,,xan_FL;mixed,mixed,bact,1,dd,ZZ,9,D,AA,c,CW,,,
-SRR11174078,illumina,Rhizobium rhizogenes,TRUE,bacteria,PRJNA607555,10.1126/science.aba531,PVM_10.5,Peach,2009,,,,,agro;mixed,bact,,,,,,,,,Ti,Nopaline,,
-SRR11174066,illumina,Agrobacterium vitis,TRUE,bacteria,PRJNA607555,10.1126/science.aba532,T60/94,Grape,1994,,,,,agro;mixed,bact,,,,,,,,,Ti,Nopaline,,
-SRR11174123,illumina,Agrobacterium rubi,TRUE,bacteria,PRJNA607555,10.1126/science.aba561,Eu3-2RS,Euonymous,,,,,,agro;mixed,bact,,,,,,,,,Ti,Agrocinopine/Other,,
-SRR11174106,illumina,Agrobacterium salinitolerans,TRUE,bacteria,PRJNA607555,10.1126/science.aba594,NCPPB_2657,Cucumber,1974,,,,,agro;mixed,bact,,,,,,,,,Ri,Cucumopine,,
-ERR3842627,illumina,Meloidogyne enterolobii,FALSE,nematode,PRJEB36431,,,,2020,,,Client3,,meloidegyne;mixed,mixed,nematode,,,,,,,,,,,
-SRR14552458,pacbio,Aphis_gossypii,TRUE,insect,PRJNA719918,10.1111/1755-0998.13521,cma_hap1,cotton,,,,Client4,,aphid;mixed,mixed,insect,,,,,,,,,,,
-SRR29399310,illumina,Pythium insidiosum,TRUE,oomycete,PRJNA1123314,,,,,,,,,oomycetes;mixed,mixed,,,,,,,,,,,,
-SRR26197583,pacbio,Phytophthora cinnamomi,TRUE,oomycete,PRJNA1019754,,Pc2109,,,,,,,oomycetes;mixed,mixed,,,,,,,,,,,,
+name,description,report_group_ids,enabled,ncbi_accession,sequence_type,taxonomic_classification,category,bioproject,ref,Strain,Host,Collection_date,Location_collection,US_State,Client_MAS,Submission_ID_MAS,Field #,Farm,Transplant facility,Cultivar,Seed producer,Operation,County,Region,Class_of oncogenic_plasmid,Opine_Type
+Should be M. oryzae,"ERR2612748 (M. oryzae, nanopore)",magn_or;mixed,TRUE,ERR2612748,nanopore,Magnaporthe oryzae,fungi,PRJEB27137,NA,BTJP4-1,wheat,2016,Bangladesh,NA,Client1,NA,mixed,fungi,NA,NA,NA,NA,NA,NA,NA,NA
+Should be M. oryzae,"ERR2612749 (M. oryzae, nanopore)",magn_or;mixed,TRUE,ERR2612749,nanopore,Magnaporthe oryzae,fungi,PRJEB27137,NA,FR13,wheat,1998,USA,NA,Client1,NA,mixed,fungi,NA,NA,NA,NA,NA,NA,NA,NA
+Should be M. oryzae,"ERR2612750 (M. oryzae, nanopore)",magn_or;mixed,TRUE,ERR2612750,nanopore,Magnaporthe oryzae,fungi,PRJEB27137,NA,US71,wheat,1998,France,NA,Client1,NA,fungi,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Should be X. perforans,"SRR12888961 (X. perforans, illumina)",xan_FL;mixed,TRUE,SRR12888961,illumina,Xanthomonas perforans,bacteria,PRJNA668343,10.1038/s41396-021-01104-8,JK1-1,tomato,2021,USA,FL,Client2,NA,mixed,bact,1,dd,ZZ,9,D,AA,c,CW
+Should be X. perforans,"SRR12888960 (X. perforans, illumina)",xan_FL;mixed,TRUE,SRR12888960,illumina,Xanthomonas perforans,bacteria,PRJNA668343,10.1038/s41396-021-01104-9,JK1-2,tomato,2021,USA,FL,Client2,NA,mixed,bact,1,dd,ZZ,9,D,AA,c,CW
+Should be X. perforans,"SRR12888760 (X. perforans, illumina)",xan_FL;mixed,TRUE,SRR12888760,illumina,Xanthomonas perforans,bacteria,PRJNA668343,10.1038/s41396-021-01104-10,JK1-3,tomato,2021,USA,FL,Client2,NA,mixed,bact,1,dd,ZZ,9,D,AA,c,CW
+Should be R. rhizogenes,"SRR11174078 (R. rhizogenes, illumina)",agro;mixed,TRUE,SRR11174078,illumina,Rhizobium rhizogenes,bacteria,PRJNA607555,10.1126/science.aba531,PVM_10.5,Peach,2009,NA,NA,NA,NA,bact,NA,NA,NA,NA,NA,NA,NA,NA,Ti
+Should be A. vitis,"SRR11174066 (A. vitis, illumina)",agro;mixed,TRUE,SRR11174066,illumina,Agrobacterium vitis,bacteria,PRJNA607555,10.1126/science.aba532,T60/94,Grape,1994,NA,NA,NA,NA,bact,NA,NA,NA,NA,NA,NA,NA,NA,Ti
+Should be A. rubi,"SRR11174123 (A. rubi, illumina)",agro;mixed,TRUE,SRR11174123,illumina,Agrobacterium rubi,bacteria,PRJNA607555,10.1126/science.aba561,Eu3-2RS,Euonymous,NA,NA,NA,NA,NA,bact,NA,NA,NA,NA,NA,NA,NA,NA,Ti
+Should be A. salinitolerans,"SRR11174106 (A. salinitolerans, illumina)",agro;mixed,TRUE,SRR11174106,illumina,Agrobacterium salinitolerans,bacteria,PRJNA607555,10.1126/science.aba594,NCPPB_2657,Cucumber,1974,NA,NA,NA,NA,bact,NA,NA,NA,NA,NA,NA,NA,NA,Ri
+Should be A. gossypii,"SRR14552458 (A. gossypii, pacbio)",aphid;mixed,TRUE,SRR14552458,pacbio,Aphis gossypii,insect,PRJNA719918,10.1111/1755-0998.13521,cma_hap1,cotton,NA,NA,NA,Client27,NA,mixed,insect,NA,NA,NA,NA,NA,NA,NA,NA
+Should be P. insidiosum,"SRR29399310 (P. insidiosum, illumina)",oomycetes;mixed,TRUE,SRR29399310,illumina,Pythium insidiosum,oomycete,PRJNA1123314,NA,NA,NA,NA,NA,NA,NA,NA,mixed,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Should be P. cinnamomi,"SRR26197583 (P. cinnamomi, pacbio)",oomycetes;mixed,TRUE,SRR26197583,pacbio,Phytophthora cinnamomi,oomycete,PRJNA1019754,NA,Pc2109,NA,NA,NA,NA,NA,NA,mixed,NA,NA,NA,NA,NA,NA,NA,NA,NA

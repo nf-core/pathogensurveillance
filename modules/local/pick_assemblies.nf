@@ -8,8 +8,7 @@ process PICK_ASSEMBLIES {
         'quay.io/biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(meta), path(families), path(genera), path(species)
-    path assem_data_tsvs
+    tuple val(meta), path(families), path(genera), path(species), path(assem_data_tsvs)
     val n_ref_strains
     val n_ref_species
     val n_ref_genera
