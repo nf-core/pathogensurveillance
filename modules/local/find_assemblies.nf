@@ -55,9 +55,9 @@ process FIND_ASSEMBLIES {
         xtract -pattern DocumentSummary -def 'NA' -element \$COLS >> \\
         ${output_path}
 
-    # if [[ \$(wc -l <${output_path}) -le 1 ]]; then
-    #     exit 1
-    # fi
+    if grep -q 'ERROR' .command.log; then
+        exit 1
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
