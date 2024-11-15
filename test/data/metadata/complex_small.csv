@@ -33,3 +33,11 @@ Should be B. cinerea,"SRR11527084 (B. cinerea, illumina)",botrytis,TRUE,SRR11527
 Should be P. insidiosum,"SRR29399310 (P. insidiosum, illumina)",oomycetes;mixed,TRUE,SRR29399310,illumina,Pythium insidiosum,oomycete,PRJNA1123314,NA,NA,NA,NA,NA,NA,NA,NA,mixed,NA,NA,NA,NA,NA,NA,NA,NA,NA
 Should be P. cinnamomi,"SRR26197583 (P. cinnamomi, pacbio)",oomycetes;mixed,TRUE,SRR26197583,pacbio,Phytophthora cinnamomi,oomycete,PRJNA1019754,NA,Pc2109,NA,NA,NA,NA,NA,NA,mixed,NA,NA,NA,NA,NA,NA,NA,NA,NA
 Should be P. effusa,"SRR16542347 (P. effusa, illumina)",oomycetes;mixed,TRUE,SRR16542347,illumina,Pernospora effusa,oomycete,PRJNA772192,NA,NA,spinach,NA,NA,NA,NA,NA,mixed,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Should be C. botulinum,"SRR29831631 (C. botulinum, illumina)",human_pathogens;mixed,FALSE,SRR29831631 ,illumina,Clostridium botulinum,bacteria,PRJNA290487,,,,,,,,,,,,,,,,,,
+Should be M. tuberculosis,"SRR31315903 (M. tuberculosis, illumina)",human_pathogens;mixed,FALSE,SRR31315903,illumina,Mycobacterium Tuberculosis,bacteria,PRJNA1080563,,,,,,,,,,,,,,,,,,
+Should be V. cholerae,"SRR31285044 (V. cholerae, illumina)",human_pathogens;mixed,FALSE,SRR31285044,illumina,Vibrio cholerae,bacteria,PRJNA590944,,,,,,,,,,,,,,,,,,
+Should be B. burgdorferi,"SRR25420531 (B. burgdorferi, illumina)",human_pathogens;mixed,FALSE,SRR25420531,illumina,Borreliella burgdorferi,bacteria,PRJNA998043,,,,,,,,,,,,,,,,,,
+Should be A. lumbricoides,"SRR8419293 (A. lumbricoides, illumina)",human_pathogens;mixed,FALSE,SRR8419293,illumina,Ascaris lumbricoides,helminths,PRJNA511012,,,,,,,,,,,,,,,,,,
+Should be N. americanus,"SRR25712679 (N. americanus, illumina)",human_pathogens;mixed,FALSE,SRR25712679,nanopore,Necator americanus,helminths,PRJNA1007425,,,,,,,,,,,,,,,,,,
+Should be C. immitis,"SRR21292664 (C. immitis, illumina)",human_pathogens;mixed,FALSE,SRR21292664 ,illumina,Coccidioides immitis,fungi,PRJNA274372,,,,,,,,,,,,,,,,,,
+Should be C. posadasii,"SRR9644375 (C. posadasii, pacbio)",human_pathogens;mixed,FALSE,SRR9644375,pacbio,Coccidioides posadasii,fungi,PRJNA494320,,,,,,,,,,,,,,,,,,
