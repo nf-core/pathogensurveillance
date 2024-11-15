@@ -78,12 +78,12 @@ workflow VARIANT_ANALYSIS {
         }
         .groupTuple(by: [0,1])
     filtered_sample_data_with_refs = grouped_sample_data_with_refs
-        .filter{ it[2].size() > 2 }
+        .filter{ it[2].size() >= 3 }
         .transpose(by: 2)
         .map{ it[2] }
     messages = messages.mix(
         grouped_sample_data_with_refs
-            .filter{ it[2].size() <= 2 }
+            .filter{ it[2].size() < 3 }
             .map{ report_meta, ref_meta, data ->
                 [data[0][0], report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because there are too few samples aligned to this reference to make a tree."]
             }
@@ -105,7 +105,7 @@ workflow VARIANT_ANALYSIS {
         .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             [sample_meta, report_meta, ref_meta, ref_path, usage, chopped_reads, sequence_type]
         }
-    filtered_input = sample_data_with_refs.filtered
+    filtered_input = filtered_sample_data_with_refs
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             sequence_type == "illumina" || sequence_type == "bgiseq"
         }

@@ -73,7 +73,8 @@
                 "download_bakta_db": {
                     "type": "boolean",
                     "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-download",
+                    "default":"true"
                 },
                 "bakta_db_type": {
                     "type": "string",
@@ -145,19 +146,19 @@
                 },
                 "n_ref_closest": {
                     "type": "number",
-                    "default": 3,
+                    "default": 2,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_closest_named": {
                     "type": "number",
-                    "default": 2,
+                    "default": 1,
                     "description": "Same as the 'n_ref_closest' option except that it only applies to referneces with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_context": {
                     "type": "number",
-                    "default": 7,
+                    "default": 5,
                     "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
                     "fa_icon": "fas fa-download"
                 },
@@ -169,7 +170,7 @@
                 },
                 "phylo_max_genes": {
                     "type": "number",
-                    "default": 200,
+                    "default": 300,
                     "description": "The maximum number of genes used to conduct a core gene phylogeny.",
                     "fa_icon": "fas fa-align-center"
                 },
@@ -399,7 +400,6 @@
                 },
                 "hpc_queue": {
                     "type": "string",
-		            "default": "",
                     "description": "Name of queue in HPC environment to run jobs.",
                     "hidden": true,
                     "fa_icon": "fas fa-cogs"
