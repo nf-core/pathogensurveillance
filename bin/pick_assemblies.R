@@ -3,18 +3,24 @@
 # Set random number generator seed
 set.seed(1)
 
-# Options
-min_coverage <- 30
-
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#      '/home/fosterz/projects/pathogensurveillance/work/89/4783abdabcd047b62353d024d35b99/SRR11174109_families.txt',
-#      '/home/fosterz/projects/pathogensurveillance/work/89/4783abdabcd047b62353d024d35b99/SRR11174109_genera.txt',
-#      '/home/fosterz/projects/pathogensurveillance/work/89/4783abdabcd047b62353d024d35b99/SRR11174109_species.txt',
-#      '30', '20', '10', 'false',
-#      'SRR11174109.tsv',
-#      '/home/fosterz/projects/pathogensurveillance/path_surveil_data/assembly_metadata/Rhizobiaceae.tsv' )
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/SRR26197583_families.txt',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/SRR26197583_genera.txt',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/SRR26197583_species.txt',
+#      '5', '10', '10', 'false',
+#      'SRR26197583.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Anatidae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Asteraceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Convolvulaceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Fabaceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Juglandaceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Peronosporaceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Rhincodontidae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Saprolegniaceae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Struthionidae.tsv',
+#      '/home/fosterz/projects/pathogensurveillance/work/ba/ca116511d1cdbecae3adc8ae252d5b/Theridiidae.tsv')
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -99,9 +105,6 @@ select_references <- function(ref_data, n = 1) {
     )
     return(ref_data[priority[seq_len(n)], ])
 }
-
-# Quality control
-assem_data <- assem_data[! is.na(assem_data$Coverage) & assem_data$Coverage >= min_coverage, , drop = FALSE]
 
 # Pick representatives for each species
 sp_stats <- assem_data[assem_data$SpeciesName %in% species, , drop = FALSE]

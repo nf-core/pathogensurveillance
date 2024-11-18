@@ -134,7 +134,7 @@
                 },
                 "n_ref_species": {
                     "type": "number",
-                    "default": 20,
+                    "default": 30,
                     "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
