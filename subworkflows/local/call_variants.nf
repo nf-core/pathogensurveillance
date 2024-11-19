@@ -55,10 +55,9 @@ workflow CALL_VARIANTS {
         .join(BGZIP_MAKE_GZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
-        vf_input.map { it[3] },
-        vf_input.map { it[4] },
-        vf_input.map { it[5] },
-        vf_input.map { it[6] }
+        vf_input.map { [it[0], it[3]] },
+        vf_input.map { [it[0], it[4]] },
+        vf_input.map { [it[0], it[5]] }
     )
     versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 

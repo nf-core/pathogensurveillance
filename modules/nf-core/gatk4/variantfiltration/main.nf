@@ -2,17 +2,16 @@ process GATK4_VARIANTFILTRATION {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::gatk4=4.3.0.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/gatk4:4.3.0.0--py36hdfd78af_0':
-        'quay.io/biocontainers/gatk4:4.3.0.0--py36hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/gatk4:4.5.0.0--py36hdfd78af_0':
+        'biocontainers/gatk4:4.5.0.0--py36hdfd78af_0' }"
 
     input:
     tuple val(meta), path(vcf), path(tbi)
-    path  fasta
-    path  fai
-    path  dict
-    path  gzi // only needed if reference is gzipped
+    tuple val(meta2), path(fasta)
+    tuple val(meta3), path(fai)
+    tuple val(meta4), path(dict)
 
     output:
     tuple val(meta), path("*.vcf.gz"), emit: vcf
@@ -25,27 +24,16 @@ process GATK4_VARIANTFILTRATION {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    
-    // Infer .dict file name that gatk expects, even if ends in .fasta.gz
-    def dict_name = fasta.getBaseName()
-    if (dict_name ==~ /^.*\.(fasta|fna|fa)$/) {
-        dict_name = dict_name.replaceAll(/\.(fasta|fna|fa)$/, "")
-    }
-    dict_name = "${dict_name}.dict"
-    
-    def avail_mem = 3
+
+    def avail_mem = 3072
     if (!task.memory) {
         log.info '[GATK VariantFiltration] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this.'
     } else {
-        avail_mem = task.memory.toGiga()
+        avail_mem = (task.memory.mega*0.8).intValue()
     }
     """
-    # Make sure the .dict file is named correctly
-    if [[ $dict_name != $dict ]]; then
-        ln -s $dict $dict_name
-    fi
-
-    gatk --java-options "-Xmx${avail_mem}G" VariantFiltration \\
+    gatk --java-options "-Xmx${avail_mem}M -XX:-UsePerfData" \\
+        VariantFiltration \\
         --variant $vcf \\
         --output ${prefix}.vcf.gz \\
         --reference $fasta \\
