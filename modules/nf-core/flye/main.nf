@@ -4,8 +4,8 @@ process FLYE {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/flye:2.9.5--eb07d7b7094f222c' :
-        'community.wave.seqera.io/library/flye:2.9.5--0221998e9c3ec606' }"
+        'oras://community.wave.seqera.io/library/flye:2.9.5--d577924c8416ccd8' :
+        'community.wave.seqera.io/library/flye:2.9.5--d577924c8416ccd8' }"
 
     input:
     tuple val(meta), path(reads)
