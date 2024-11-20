@@ -1,0 +1,39 @@
+sample_id,ncbi_accession,Genome_id_in_tree,taxonomic_classification,sequence_type
+sample1,ERR3566430,26968_7_10,Serratia ficaria,illumina
+sample2,ERR3566537,26968_7_117,Serratia entomophila,illumina
+sample3,ERR3566540,26968_7_120,Serratia entomophila,illumina
+sample4,ERR3566540,26968_7_123,Serratia ficaria,illumina
+sample5,ERR3566561,26968_7_141,Serratia entomophila,illumina
+sample6,ERR3566570,26968_7_150,Unknown,illumina
+sample7,ERR3566438,26968_7_18,Serratia ficaria,illumina
+sample8,ERR3566439,26968_7_19,Serratia fonticola,illumina
+sample9,ERR3566441,26968_7_21,Serratia entomophila,illumina
+sample10,ERR3566442,26968_7_22,Serratia liquefaciens,illumina
+sample11,ERR3566452,26968_7_32,Serratia fonticola,illumina
+sample12,ERR3566456,26968_7_36,Serratia liquefaciens,illumina
+sample13,ERR3566459,26968_7_39,Serratia fonticola,illumina
+sample14,ERR3566424,26968_7_4,Serratia proteamaculans subs. quinovorans,illumina
+sample15,ERR3566460,26968_7_40,Serratia fonticola,illumina
+sample16,ERR3566463,26968_7_43,Serratia liquefaciens,illumina
+sample17,ERR3566466,26968_7_46,Serratia ficaria,illumina
+sample18,ERR3566467,26968_7_47,Serratia fonticola,illumina
+sample19,ERR3566472,26968_7_52,Serratia proteamaculans,illumina
+sample20,ERR3566487,26968_7_67,Serratia proteamaculans subs. quinovorans,illumina
+sample21,ERR3566498,26968_7_78,Serratia grimesii,illumina
+sample22,ERR3566508,26968_7_88,Serratia entomophila,illumina
+sample23,ERR3566509,26968_7_89,Serratia entomophila,illumina
+sample24,ERR3566510,26968_7_90,Serratia entomophila,illumina
+sample25,ERR3566511,26968_7_91,Serratia sp.,illumina
+sample26,ERR3566513,26968_7_93,Serratia proteamaculans,illumina
+sample27,SRR12123470,GCA_003182655.1_ASM318265v1_genomic,Serratia marcescens,pacbio
+sample28,SRR7135404,GCA_003634415.1_ASM363441v1_genomic,Serratia plymuthica,pacbio
+sample29,SRR8217809,GCA_003641105.1_ASM364110v1_genomic,Serratia sp. 1D1416,pacbio
+sample30,SRR5160927,GCA_002220535.1_ASM222053v1_genomic,Serratia marcescens,pacbio
+sample31,SRR5160947,GCA_002220555.1_ASM222055v1_genomic,Serratia marcescens,pacbio
+sample32,SRR5160928,GCA_002220575.1_ASM222057v1_genomic,Serratia marcescens,pacbio
+sample33,SRR5160940,GCA_002220595.1_ASM222059v1_genomic,Serratia marcescens,pacbio
+sample34,SRR5160938,GCA_002220615.1_ASM222061v1_genomic,Serratia marcescens,pacbio
+sample35,SRR5160949,GCA_002220635.1_ASM222063v1_genomic,Serratia marcescens,pacbio
+sample36,SRR5160937,GCA_002220655.1_ASM222065v1_genomic,Serratia marcescens,pacbio
+sample37,SRR5160941,GCA_002220675.1_ASM222067v1_genomic,Serratia marcescens,pacbio
+sample38,SRR5160929,GCA_002220695.1_ASM222069v1_genomic,Serratia marcescens,pacbio
