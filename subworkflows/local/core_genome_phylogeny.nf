@@ -34,7 +34,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_group_id, ref_meta ->
-            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_primary_usage]
+            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_contextual_usage]
         }
         .unique()
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
@@ -194,7 +194,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .transpose() // group_meta, gene_dir
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
-    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
     versions = versions.mix(MAFFT_SMALL.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes

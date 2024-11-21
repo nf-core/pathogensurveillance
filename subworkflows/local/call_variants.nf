@@ -57,7 +57,8 @@ workflow CALL_VARIANTS {
         vf_input.map { it[0..2] },
         vf_input.map { [it[0], it[3]] },
         vf_input.map { [it[0], it[4]] },
-        vf_input.map { [it[0], it[5]] }
+        vf_input.map { [it[0], it[5]] },
+        vf_input.map { [it[0], it[6]] }
     )
     versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 

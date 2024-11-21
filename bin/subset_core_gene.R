@@ -2,9 +2,9 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined_.tsv',
-#           '/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined__feat_seqs_renamed',
-#           '/home/fosterz/projects/pathogensurveillance/work/47/94e2107afcec539f1ae103ed35a34a/_no_group_defined_.csv',
+# args <- c('/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.tsv',
+#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test_feat_seqs_renamed',
+#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.csv',
 #           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
@@ -188,7 +188,8 @@ for (index in seq_along(output_clusters)) {
         out_path <- file.path(out_dir_path, paste0(gene_id, '.fasta'))
         seqs <- read_fasta(in_path)
         names(seqs) <- trimws(names(seqs))
-        seqs <- seqs[c(sample_ids, ref_ids)]
+        samples_in_subset <- names(output_clusters[[index]])[names(output_clusters[[index]]) %in% c(sample_ids, ref_ids)]
+        seqs <- seqs[samples_in_subset]
         seqs <- seqs[!is.na(seqs)]
         write_fasta(seqs, out_path)
     }

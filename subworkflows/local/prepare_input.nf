@@ -112,10 +112,7 @@ workflow PREPARE_INPUT {
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES (
-        all_families,
-        params.allow_non_refseq,
-        params.allow_partial_refs,
-        params.allow_unannotated
+        all_families
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 

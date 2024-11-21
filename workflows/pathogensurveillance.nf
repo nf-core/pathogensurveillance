@@ -132,7 +132,9 @@ workflow PATHOGENSURVEILLANCE {
         multiqc_files,
         multiqc_config.collect(sort: true).ifEmpty([]),
         multiqc_custom_config.collect(sort: true).ifEmpty([]),
-        multiqc_logo.collect(sort: true).ifEmpty([])
+        multiqc_logo.collect(sort: true).ifEmpty([]),
+        [],
+        []
     )
     versions = versions.mix(MULTIQC.out.versions)
 

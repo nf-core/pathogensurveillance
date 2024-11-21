@@ -1,4 +1,4 @@
-include { BUSCO                     } from '../../modules/nf-core/busco/main'
+include { BUSCO                     } from '../../modules/nf-core/busco/busco/main'
 include { BUSCO_DOWNLOAD            } from '../../modules/local/busco_download'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
 include { MAFFT as MAFFT_SMALL      } from '../../modules/nf-core/mafft/main'
@@ -119,7 +119,7 @@ workflow BUSCO_PHYLOGENY {
         .transpose()
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] }
     FILES_IN_DIR ( core_genes )
-    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []] )
+    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
     versions = versions.mix(MAFFT_SMALL.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes

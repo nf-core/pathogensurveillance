@@ -2,10 +2,10 @@ process PICK_ASSEMBLIES {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::r-base=4.2.1"
+    conda "conda-forge::r-jsonlite=1.8.9"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
-        'quay.io/biocontainers/r-base:4.2.1' }"
+        'https://depot.galaxyproject.org/singularity/r-jsonlite:0.9.19--r3.2.2_0' :
+        'quay.io/biocontainers/r-jsonlite:0.9.19--r3.2.2_0' }"
 
     input:
     tuple val(meta), path(families), path(genera), path(species), path(assem_data_tsvs)
