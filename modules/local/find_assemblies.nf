@@ -4,7 +4,7 @@ process FIND_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=16.35.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'library://logan-blair/collection/ncbi-datasets-cli:latest':
+        'docker.io/staphb/ncbi-datasets:16.35.0':
         'docker.io/staphb/ncbi-datasets:16.35.0' }"
 
     input:
