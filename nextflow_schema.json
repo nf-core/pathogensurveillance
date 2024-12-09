@@ -140,7 +140,7 @@
                 },
                 "n_ref_genera": {
                     "type": "number",
-                    "default": 20,
+                    "default": 10,
                     "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-library(jsonlite)
+library(RcppSimdJson)
 
 # Set random number generator seed
 set.seed(1)
@@ -8,14 +8,12 @@ set.seed(1)
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/SRR29399310_families.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/SRR29399310_genera.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/SRR29399310_species.txt',
+#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_families.txt',
+#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_genera.txt',
+#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_species.txt',
 #     '5', '10', '10', 'false', 'output.tsv',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/Saprolegniaceae.json',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/Peronosporaceae.json',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/Pythiaceae.json',
-#     '/home/fosterz/projects/pathogensurveillance/work/cc/3bffaedde209f7e754c9c9dc960994/Staphylococcaceae.json'
+#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/Enterobacteriaceae.json',
+#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/Ancylostomatidae.json'
 # )
 args <- as.list(args)
 families <- readLines(args[[1]])
@@ -34,7 +32,7 @@ if (length(args) < 9) {
 json_paths <- unlist(args[9:length(args)])
 json_families <- gsub(basename(json_paths), pattern = '.json', replacement = '', fixed = TRUE)
 json_data <- lapply(seq_along(json_paths), function(index) {
-    parsed_json <- lapply(readLines(json_paths[index]), jsonlite::fromJSON)
+    parsed_json <- RcppSimdJson::fparse(readLines(json_paths[index]), always_list = TRUE)
     output <- do.call(rbind, lapply(parsed_json, function(assem_data) {
         attributes <- assem_data$assembly_info$biosample$attributes
         hosts <- paste0(attributes$value[attributes$name == 'host'], collapse = ';')
@@ -82,9 +80,57 @@ if (is.null(assem_data)) {
         source_database = character(0),
         is_type = logical(0),
         is_annotated = logical(0),
-        is_atypical = logical(0)
+        is_atypical = logical(0),
+        family = character(0)
     )
 }
+
+
+
+# json_data <- lapply(seq_along(json_paths), function(index) {
+#     parsed_json <- RcppSimdJson::fload(json_paths[index])
+#     type_material_data <- parsed_json$reports$type_material
+#     if (is.null(type_material_data)) {
+#         is_type_material = rep(FALSE, length(parsed_json$reports$accession))
+#     } else {
+#         is_type_material = vapply(type_material_data, FUN.VALUE = logical(1), function(x) "type_label" %in% names(x))
+#     }
+#     annotation_data <- parsed_json$reports$annotation_info
+#     if (is.null(annotation_data)) {
+#         is_annotated = rep(FALSE, length(parsed_json$reports$accession))
+#     } else {
+#         is_annotated = ! vapply(annotation_data, FUN.VALUE = logical(1), function(x) length(x) == 1 && is.na(x))
+#     }
+#     output <- data.frame(
+#         accession = parsed_json$reports$accession,
+#         assembly_level = vapply(parsed_json$reports$assembly_info, function(x) x$assembly_level, FUN.VALUE = character(1)),
+#         assembly_status = vapply(parsed_json$reports$assembly_info, function(x) x$assembly_status, FUN.VALUE = character(1)),
+#         assembly_type = vapply(parsed_json$reports$assembly_info, function(x) x$assembly_type, FUN.VALUE = character(1)),
+#         hosts = vapply(parsed_json$reports$assembly_info, FUN.VALUE = character(1), function(x) {
+#             attributes <- x$biosample$attributes
+#             hosts <- paste0(attributes$value[attributes$name == 'host'], collapse = ';')
+#             if (nchar(hosts) == 0 || hosts == "NA") {
+#                 return(NA_character_)
+#             } else {
+#                 return(hosts)
+#             }
+#         }),
+#         organism_name = vapply(parsed_json$reports$organism, function(x) x$organism_name, FUN.VALUE = character(1)),
+#         tax_id = vapply(parsed_json$reports$organism, function(x) as.character(x$tax_id), FUN.VALUE = character(1)),
+#         contig_l50 = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$contig_l50), FUN.VALUE = numeric(1)),
+#         contig_n50 = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$contig_n50), FUN.VALUE = numeric(1)),
+#         number_of_component_sequences = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$number_of_component_sequences), FUN.VALUE = numeric(1)),
+#         number_of_contigs = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$number_of_contigs), FUN.VALUE = numeric(1)),
+#         total_ungapped_length = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$total_ungapped_length), FUN.VALUE = numeric(1)),
+#         total_sequence_length = vapply(parsed_json$reports$assembly_stats, function(x) as.numeric(x$total_sequence_length), FUN.VALUE = numeric(1)),
+#         source_database = parsed_json$reports$source_database,
+#         is_type = is_type_material,
+#         is_annotated = is_annotated,
+#         is_atypical = vapply(parsed_json$reports$assembly_info, FUN.VALUE = logical(1), function(x) "atypical" %in% names(x) && x$atypical$is_atypical)
+#     )
+#     return(output)
+# })
+
 
 # Add column for modified ID
 modified_id <- gsub(assem_data$accession, pattern = '[\\/:*?"<>| .]', replacement = '_')
