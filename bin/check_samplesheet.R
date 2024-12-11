@@ -139,7 +139,7 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
-# args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/complex_small.csv")
+# args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/small_genome.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -339,11 +339,18 @@ if (nrow(metadata_ref) > 0) {
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
 has_ref_data <- apply(ref_in_samp_data[, unlist(required_input_columns_ref)], MARGIN = 1, function(x) any(is_present(x)))
+
+needs_new_ref_id <- has_ref_data & (ref_in_samp_data$ref_id == '' | is.na(ref_in_samp_data$ref_id == ''))
+ref_group_id_proxy <- apply(metadata_samp[needs_new_ref_id, unlist(required_input_columns_ref), drop = FALSE], MARGIN = 1, FUN = paste, collapse = "")
+new_ref_group_ids <- paste0('_ref_group_', as.numeric(factor(ref_group_id_proxy)))
+ref_in_samp_data$ref_group_ids[needs_new_ref_id] <- new_ref_group_ids
+metadata_samp$ref_group_ids[needs_new_ref_id] <- new_ref_group_ids
+
 ref_data_addition <- ref_in_samp_data[has_ref_data, ]
 user_specific_ref_cols <- colnames(metadata_ref)[! colnames(metadata_ref) %in% colnames(ref_data_addition)]
 ref_data_addition[user_specific_ref_cols] <- rep('', nrow(ref_data_addition))
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
-metadata_ref <- rbind(metadata_ref, ref_data_addition)
+metadata_ref <- unique(rbind(metadata_ref, ref_data_addition))
 
 # Validate usage columns
 validate_usage_col <- function(metadata, col) {
