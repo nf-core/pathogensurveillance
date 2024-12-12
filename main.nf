@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/plantpathsurveil
+    nf-core/pathogensurveillance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/plantpathsurveil
-    Website: https://nf-co.re/plantpathsurveil
-    Slack  : https://nfcore.slack.com/channels/plantpathsurveil
+    Github : https://github.com/nf-core/pathogensurveillance
+    Website: https://nf-co.re/pathogensurveillance
+    Slack  : https://nfcore.slack.com/channels/pathogensurveillance
 ----------------------------------------------------------------------------------------
 */
 
@@ -15,10 +15,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PLANTPATHSURVEIL  } from './workflows/plantpathsurveil'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_plantpathsurveil_pipeline'
+include { PATHOGENSURVEILLANCE  } from './workflows/pathogensurveillance'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,7 +40,7 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow NFCORE_PLANTPATHSURVEIL {
+workflow NFCORE_PATHOGENSURVEILLANCE {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -50,11 +50,11 @@ workflow NFCORE_PLANTPATHSURVEIL {
     //
     // WORKFLOW: Run pipeline
     //
-    PLANTPATHSURVEIL (
+    PATHOGENSURVEILLANCE (
         samplesheet
     )
     emit:
-    multiqc_report = PLANTPATHSURVEIL.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = PATHOGENSURVEILLANCE.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +80,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_PLANTPATHSURVEIL (
+    NFCORE_PATHOGENSURVEILLANCE (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -93,7 +93,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        NFCORE_PLANTPATHSURVEIL.out.multiqc_report
+        NFCORE_PATHOGENSURVEILLANCE.out.multiqc_report
     )
 }
 
