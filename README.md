@@ -65,9 +65,17 @@ Now, you can run the pipeline using:
    nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL -resume --sample_data <CSV> --out_dir <OUTDIR> --download_bakta_db
    ```
 
+```bash
+nextflow run nf-core/pathogensurveillance \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR>
+```
 
 
 ## Documentation
+
+For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/pathogensurveillance/usage) and the [parameter documentation](https://nf-co.re/pathogensurveillance/parameters).
 
 Documentation is currently under development, but can be found here:
 
@@ -120,6 +128,14 @@ The reference metadata CSV or the sample metadata CSV can have the following col
 ## Credits
 
 nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Camilo Parada-Rojas, Logan Blair, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald
+
+To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/pathogensurveillance/results) tab on the nf-core website pipeline page.
+For more details about the output files and reports, please refer to the
+[output documentation](https://nf-co.re/pathogensurveillance/output).
+
+## Credits
+
+nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald.
 
 
 ## Contributions and Support
