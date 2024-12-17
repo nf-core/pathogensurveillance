@@ -13,6 +13,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  skip_features: null
   version: 1.0dev
-update: null

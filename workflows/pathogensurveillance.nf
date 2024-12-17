@@ -17,6 +17,9 @@ include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
 include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_input'
 include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { paramsSummaryMap            } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
