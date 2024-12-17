@@ -2,10 +2,10 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other.tsv',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other_feat_seqs_renamed',
-#           '/media/fosterz/external_primary/files/projects/work/current/pathogensurveillance/work/58/c793d3a7c13d6c5fa39895caccbccd/other.csv',
-#           '10', '100', 'subgroup_core_genes', 'subgroup_feat_seqs')
+# args <- c('/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.tsv',
+#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test_feat_seqs_renamed',
+#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.csv',
+#           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
@@ -141,24 +141,34 @@ writeLines(removed_sample_ids, con = 'removed_sample_ids.txt')
 writeLines(removed_ref_ids, con = 'removed_ref_ids.txt')
 
 # Copy sequences for selected genes and samples and put in new folder
-read_fasta <- function(path) {
-    # Read file as a single character
-    raw <- paste0(base::readLines(path), collapse = "\n")
-
-    # Split by header
-    raw_seqs <- strsplit(raw, split = '\n>')[[1]]
-
-    # Split header and sequence
-    split_seqs <- strsplit(raw_seqs, split = '\n')
-
-    # Format as character vector named by header
-    seqs <- unlist(lapply(split_seqs, function(x) gsub(x[2], pattern = '\n', replacement = '')))
-    names(seqs) <- unlist(lapply(split_seqs, function(x) { # Some headers have tabs separated values and some just have the ID. Not sure if that's a bug in a previous step, but it is handled here anyway
-        trimws(strsplit(split = '\t', x[1])[[1]][1])
-    }))
-    names(seqs)[1] <- sub(names(seqs)[1], pattern = '^>', replacement = '')
-
-    return(seqs)
+read_fasta <- function(file_path) {
+    # Read raw string
+    raw_data <- paste0(readLines(file_path), collapse = '\n')
+    
+    # Return an empty vector an a warning if no sequences are found
+    if (raw_data == "") {
+        warning(paste0("No sequences found in the file: ", file_path))
+        return(character(0))
+    }
+    
+    # Find location of every header start 
+    split_data <- strsplit(raw_data, "\n>")[[1]]
+    
+    # Split the data for each sequence into lines
+    split_data <- strsplit(split_data, split = "\n")
+    
+    # The first lines are headers, so remove those
+    headers <- vapply(split_data, FUN = `[`, FUN.VALUE = character(1), 1)
+    split_data <- lapply(split_data, FUN = `[`, -1)
+    
+    # Remove the > from the first sequence. The others were removed by the split
+    headers[1] <- sub(headers[1], pattern = "^>", replacement = "")
+    
+    # Combine multiple lines into single sequences
+    seqs <- vapply(split_data, FUN = paste0, FUN.VALUE = character(1), collapse = "")
+    
+    # Combine and return results 
+    return(stats::setNames(seqs, headers))
 }
 
 write_fasta <- function(seqs, path) {
@@ -177,10 +187,11 @@ for (index in seq_along(output_clusters)) {
         in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))
         out_path <- file.path(out_dir_path, paste0(gene_id, '.fasta'))
         seqs <- read_fasta(in_path)
-        seqs <- seqs[c(sample_ids, ref_ids)]
+        names(seqs) <- trimws(names(seqs))
+        samples_in_subset <- names(output_clusters[[index]])[names(output_clusters[[index]]) %in% c(sample_ids, ref_ids)]
+        seqs <- seqs[samples_in_subset]
         seqs <- seqs[!is.na(seqs)]
         write_fasta(seqs, out_path)
-        paste(seqs, out_path)
     }
 }
 

@@ -2,14 +2,13 @@ process PICK_ASSEMBLIES {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::r-base=4.2.1"
+    conda "conda-forge::r-rcppsimdjson=0.1.12"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
-        'quay.io/biocontainers/r-base:4.2.1' }"
+        '' :
+        'docker.io/zacharyfoster/rcppsimdjson:0.2' }"
 
     input:
-    tuple val(meta), path(families), path(genera), path(species)
-    path assem_data_tsvs
+    tuple val(meta), path(families), path(genera), path(species), path(assem_data_tsvs)
     val n_ref_strains
     val n_ref_species
     val n_ref_genera

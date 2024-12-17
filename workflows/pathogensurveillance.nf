@@ -17,6 +17,9 @@ include { RECORD_MESSAGES             } from '../modules/local/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
 include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_input'
 include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { paramsSummaryMap            } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +85,8 @@ workflow PATHOGENSURVEILLANCE {
     // Read2tree BUSCO phylogeny for eukaryotes
     BUSCO_PHYLOGENY (
         PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.ani_matrix
+        SKETCH_COMPARISON.out.ani_matrix,
+        GENOME_ASSEMBLY.out.scaffolds
     )
     versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
@@ -131,7 +135,9 @@ workflow PATHOGENSURVEILLANCE {
         multiqc_files,
         multiqc_config.collect(sort: true).ifEmpty([]),
         multiqc_custom_config.collect(sort: true).ifEmpty([]),
-        multiqc_logo.collect(sort: true).ifEmpty([])
+        multiqc_logo.collect(sort: true).ifEmpty([]),
+        [],
+        []
     )
     versions = versions.mix(MULTIQC.out.versions)
 
@@ -225,11 +231,10 @@ workflow PATHOGENSURVEILLANCE {
         .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.r2t_ref_meta, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
         .filter{it[0] != null} // remove extra item if messages is empty
-        .map{ it.size() == 17 ? it + [null] : it } // adds placeholder if messages is empty
+        .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (

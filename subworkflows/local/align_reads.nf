@@ -14,9 +14,9 @@ workflow ALIGN_READS {
     samp_ref_combo = ch_input
         .map { [[id: "${it[2].id}_${it[0].id}", ref: it[2], sample: it[0]]] + it } // make composite ID for read/ref combos
     ch_reads = samp_ref_combo
-        .map { [it[0], it[2] instanceof Collection && it[2].size() > 2 ? it[2][0..1] : it[2]] } // NOTE: not sure why there are sometimes more than 2 read files. Might need to change once long reads are fullly supported
+        .map { [it[0], it[2] instanceof Collection && it[2].size() > 2 ? it[2][0..1] : it[2]] }
     ch_bwa_index = samp_ref_combo.map { [it[0], it[6]] }
-    BWA_MEM ( ch_reads, ch_bwa_index, false )
+    BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
     versions = versions.mix(BWA_MEM.out.versions)
 
     ch_reference = samp_ref_combo.map { [it[0], it[4]] } // channel: [ val(ref_samp_meta), file(reference) ]

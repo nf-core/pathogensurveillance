@@ -4,15 +4,15 @@ process SEQKIT_SLIDING {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/seqkit:2.1.0--h9ee0642_0':
-        'biocontainers/seqkit:2.1.0--h9ee0642_0' }"
+        'https://depot.galaxyproject.org/singularity/seqkit:2.8.1--h9ee0642_0':
+        'biocontainers/seqkit:2.8.1--h9ee0642_0' }"
 
     input:
     tuple val(meta), path(fastx)
 
     output:
-    tuple val(meta), path("*.fast*.gz"), emit: fastx
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("*.fast*"), emit: fastx
+    path "versions.yml"             , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,7 +30,7 @@ process SEQKIT_SLIDING {
         ${fastx} \\
         ${args} \\
         --threads ${task.cpus} \\
-        -o ${prefix}.${extension}.gz
+        -o ${prefix}.${extension}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

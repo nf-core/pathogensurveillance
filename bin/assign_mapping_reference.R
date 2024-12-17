@@ -3,10 +3,10 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/8c/3a11d9f2fa629a1ac0e9ecb48fc419/all_comp.csv',
-#     '/home/fosterz/projects/pathogensurveillance/work/8c/3a11d9f2fa629a1ac0e9ecb48fc419/all.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/6f/a8638157f5028f753f9ff512bb3de0/subgroup_comp.csv',
+#     '/home/fosterz/projects/pathogensurveillance/work/6f/a8638157f5028f753f9ff512bb3de0/subgroup.csv',
 #     'deleteme.csv',
-#     '0.85'
+#     '0.95'
 # )
 args <- as.list(args)
 names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani")

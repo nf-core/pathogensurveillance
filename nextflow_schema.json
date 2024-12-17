@@ -73,7 +73,8 @@
                 "download_bakta_db": {
                     "type": "boolean",
                     "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-download",
+                    "default":"true"
                 },
                 "bakta_db_type": {
                     "type": "string",
@@ -107,57 +108,75 @@
                     "fa_icon": "fas fa-download",
                     "default": false
                 },
+                "allow_non_refseq": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies not in RegSeq.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "allow_unannotated": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that do not have annotations. The pipleine will attempt to annotate these references as needed.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "allow_atypical_refs": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that NCBI considers atypical.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
                 "n_ref_strains": {
                     "type": "number",
-                    "default": 30,
-                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "default": 5,
+                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_species": {
                     "type": "number",
                     "default": 20,
-                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_genera": {
                     "type": "number",
                     "default": 10,
-                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_closest": {
                     "type": "number",
-                    "default": 3,
+                    "default": 2,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_closest_named": {
                     "type": "number",
-                    "default": 2,
+                    "default": 1,
                     "description": "Same as the 'n_ref_closest' option except that it only applies to referneces with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
                     "fa_icon": "fas fa-download"
                 },
                 "n_ref_context": {
                     "type": "number",
-                    "default": 7,
+                    "default": 5,
                     "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
                     "fa_icon": "fas fa-download"
                 },
                 "phylo_min_genes": {
                     "type": "number",
-                    "default": 10,
+                    "default": 30,
                     "description": "The minimum number of genes needed to conduct a core gene phylogeny. Samples and references will be removed (as allowed by the `min_core_samps` and `min_core_refs` options) until this minimum is met.",
                     "fa_icon": "fas fa-align-center"
                 },
                 "phylo_max_genes": {
                     "type": "number",
-                    "default": 200,
+                    "default": 300,
                     "description": "The maximum number of genes used to conduct a core gene phylogeny.",
                     "fa_icon": "fas fa-align-center"
                 },
                 "ref_min_ani": {
                     "type": "number",
-                    "default": 0.85,
+                    "default": 0.95,
                     "description": "The minimum ANI between a sample and potential reference for that reference to be used for mapping reads from that sample. To force all the samples in a report group to use the same reference, set this value very low.",
                     "fa_icon": "fas fa-align-center"
                 }
@@ -381,7 +400,6 @@
                 },
                 "hpc_queue": {
                     "type": "string",
-		            "default": "",
                     "description": "Name of queue in HPC environment to run jobs.",
                     "hidden": true,
                     "fa_icon": "fas fa-cogs"
@@ -391,6 +409,12 @@
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }

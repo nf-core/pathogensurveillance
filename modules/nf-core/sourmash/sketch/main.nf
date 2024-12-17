@@ -28,7 +28,6 @@ process SOURMASH_SKETCH {
         --output '${prefix}.sig' \\
         $sequence
 
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         sourmash: \$(echo \$(sourmash --version 2>&1) | sed 's/^sourmash //' )

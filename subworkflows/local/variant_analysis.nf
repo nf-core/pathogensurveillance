@@ -10,12 +10,28 @@ include { ASSIGN_MAPPING_REFERENCE } from '../../modules/local/assign_mapping_re
 workflow VARIANT_ANALYSIS {
 
     take:
-    sample_data // sample_meta
-    ani_matrix // report_group_id, ani_matrix
+    original_sample_data
+    ani_matrix
 
     main:
     versions = Channel.empty()
     messages = Channel.empty()
+
+    // Remove samples belonging to groups with only one sample
+    grouped_sample_data = original_sample_data
+        .map{[[id: it.report_group_ids], it]}
+        .groupTuple(by: 0)
+    sample_data = grouped_sample_data
+        .filter{ it[1].size() > 1 }
+        .transpose(by: 1)
+        .map{ it[1] }
+    messages = messages.mix(
+        grouped_sample_data
+            .filter{ it[1].size() == 1 }
+            .map{ report_meta, samp_metas ->
+                [[id: samp_metas[0].sample_id], report_meta, null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because it is the only sample in its report group."]
+            }
+    )
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
@@ -55,8 +71,26 @@ workflow VARIANT_ANALYSIS {
             no_ref: it[2] == null
         } // sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type
 
+    // Remove samples belonging to groups with only one sample
+    grouped_sample_data_with_refs = sample_data_with_refs.filtered
+        .map{sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            [report_meta, ref_meta, [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type]]
+        }
+        .groupTuple(by: [0,1])
+    filtered_sample_data_with_refs = grouped_sample_data_with_refs
+        .filter{ it[2].size() >= 3 }
+        .transpose(by: 2)
+        .map{ it[2] }
+    messages = messages.mix(
+        grouped_sample_data_with_refs
+            .filter{ it[2].size() < 3 }
+            .map{ report_meta, ref_meta, data ->
+                [data[0][0], report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because there are too few samples aligned to this reference to make a tree."]
+            }
+    )
+
     // Cutting up long reads
-    longreads = sample_data_with_refs.filtered
+    longreads = filtered_sample_data_with_refs
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             sequence_type == "nanopore" || sequence_type == "pacbio"
         }
@@ -71,7 +105,7 @@ workflow VARIANT_ANALYSIS {
         .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             [sample_meta, report_meta, ref_meta, ref_path, usage, chopped_reads, sequence_type]
         }
-    filtered_input = sample_data_with_refs.filtered
+    filtered_input = filtered_sample_data_with_refs
         .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
             sequence_type == "illumina" || sequence_type == "bgiseq"
         }

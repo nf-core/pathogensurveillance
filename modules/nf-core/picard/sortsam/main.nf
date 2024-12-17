@@ -4,8 +4,8 @@ process PICARD_SORTSAM {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/picard:3.1.1--hdfd78af_0' :
-        'biocontainers/picard:3.1.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/picard:3.3.0--hdfd78af_0' :
+        'biocontainers/picard:3.3.0--hdfd78af_0' }"
 
     input:
     tuple val(meta), path(bam)
@@ -13,7 +13,7 @@ process PICARD_SORTSAM {
 
     output:
     tuple val(meta), path("*.bam"), emit: bam
-    path "versions.yml"           , emit: versions
+    path "versions.yml"                  , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -36,8 +36,7 @@ process PICARD_SORTSAM {
         -Xmx${avail_mem}M \\
         --INPUT $bam \\
         --OUTPUT ${prefix}.bam \\
-        --SORT_ORDER $sort_order \\
-        $args
+        --SORT_ORDER $sort_order
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

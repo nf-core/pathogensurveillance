@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/master/assets/schema_input.json",
-    "title": "nf-core/pathogensurveillance pipeline - params.sample_data schema",
-    "description": "Schema for the file provided with params.sample_data",
+    "title": "nf-core/pathogensurveillance pipeline - params.input schema",
+    "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
         "type": "object",
@@ -32,8 +32,8 @@
             },
             "ncbi_accession": {
                 "type": "string",
-                "pattern": "^[A-Z]{3}[0-9]+$",
-                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (3 captial letters followed by numbers)."
+                "pattern": "^[A-Z]{3,6}[0-9]+$",
+                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (captial letters followed by numbers)."
             },
             "ncbi_query": {
                 "type": "string"

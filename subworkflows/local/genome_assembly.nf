@@ -16,29 +16,26 @@ workflow GENOME_ASSEMBLY {
     versions = Channel.empty()
     messages = Channel.empty()
     sample_data
-        .map{ [[id: it.sample_id, single_end: it.single_end], it.paths, it.sequence_type, it.kingdom] }
+        .map{ [[id: it.sample_id, single_end: it.single_end, kingdom: it.kingdom, type: it.sequence_type], it.paths] }
         .unique()
-        .branch { meta, paths, type, kingdom ->
-            short_prokaryote:    (type == "illumina" || type == "bgiseq") && kingdom == "Bacteria"
-                return [meta, paths]
-            nanopore_prokaryote: type == "nanopore" && kingdom == "Bacteria"
-                return [meta, paths]
-            pacbio_prokaryote:   type == "pacbio" && kingdom == "Bacteria"
-                return [meta, paths]
-            short_eukaryote:     (type == "illumina" || type == "bgiseq") && kingdom != "Bacteria"
-                return [meta, paths]
-            nanopore_eukaryote:  type == "nanopore" && kingdom != "Bacteria"
-                return [meta, paths]
-            pacbio_eukaryote:    type == "pacbio" && kingdom != "Bacteria"
-                return [meta, paths]
+        .branch { meta, paths->
+            short_prokaryote:    (meta.type == "illumina" || meta.type == "bgiseq") && meta.kingdom == "Bacteria"
+            nanopore_prokaryote: meta.type == "nanopore" && meta.kingdom == "Bacteria"
+            pacbio_prokaryote:   meta.type == "pacbio" && meta.kingdom == "Bacteria"
+            short_eukaryote:     (meta.type == "illumina" || meta.type == "bgiseq") && meta.kingdom != "Bacteria"
+            nanopore_eukaryote:  meta.type == "nanopore" && meta.kingdom != "Bacteria"
+            pacbio_eukaryote:    meta.type == "pacbio" && meta.kingdom != "Bacteria"
             other:               true
-                return [meta, paths]
         }
         .set { filtered_input }
 
     spades_input = filtered_input.short_prokaryote
         .mix(filtered_input.short_eukaryote)
-    FASTP( spades_input, [], false, false )
+    fastp_input = spades_input
+        .map{ sample_meta, read_paths ->    // If there are both single and paired in reads, just use the paired end reads
+            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }]
+        }
+    FASTP( fastp_input, [], false, false, false )
     versions = versions.mix(FASTP.out.versions)
 
     SPADES(

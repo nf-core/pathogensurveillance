@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/home/fosterz/projects/pathogensurveillance/test/output/xanthomonas/prepare_report_input/xan_test_inputs"
+  inputs: "/home/fosterz/projects/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/xan_test_inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -380,7 +380,7 @@ See staus messages at the start of the report for details.
 
 ## Minimum spanning network
 
-```{r}
+```{r eval = length(variant_align_path(params$inputs)) > 0}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
 align_data <- variant_align_path_data(params$inputs)
 alignments <- variant_align_parsed(params$inputs)
@@ -391,7 +391,7 @@ sample_data <- sample_meta_parsed(params$inputs)
 ref_data <- ref_meta_parsed(params$inputs)
 ```
 
-```{r plot_msns, results='asis', eval = length(alignments) > 0}
+```{r plot_msns, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
 # Find which columns are used to provide colors to the trees, if any
 ids_used <- unique(unlist(lapply(alignments, function(a) {
   if (is.null(a)) {
@@ -420,7 +420,7 @@ print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn
 ```
 
 
-```{r, results='asis', eval = length(alignments) > 0}
+```{r, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 
@@ -436,7 +436,7 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
  ')
 ```
 
-```{r, results='asis', eval = length(alignments) <= 0}
+```{r, results='asis', eval = length(variant_align_path(params$inputs)) <= 0}
 cat('
 Could not generate minimum spanning networks.
 This can happen when there are too few samples or too few SNPs.

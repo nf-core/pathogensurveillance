@@ -1,7 +1,4 @@
-bump_version: null
-lint: null
-nf_core_version: 3.0.2
-org_path: null
+nf_core_version: 3.1.0
 repository_type: pipeline
 template:
   author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.\
@@ -12,6 +9,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  skip_features: null
   version: 1.0dev
-update: null

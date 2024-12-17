@@ -4,7 +4,7 @@ process DOWNLOAD_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 unzip"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'library://logan-blair/collection/ncbi-datasets-cli:latest':
+        'docker.io/zacharyfoster/ncbi-datasets-cli:0.1':
         'docker.io/zacharyfoster/ncbi-datasets-cli:0.1' }"
 
     input:
@@ -30,7 +30,7 @@ process DOWNLOAD_ASSEMBLIES {
     # unzip --version
 
     # Download assemblies as zip archives
-    datasets download genome accession $id --include gff3,rna,cds,protein,genome,seq-report --filename ${prefix}.zip
+    datasets download genome accession $id --include gff3,genome --filename ${prefix}.zip
 
     # Unzip
     unzip ${prefix}.zip
@@ -51,7 +51,8 @@ process DOWNLOAD_ASSEMBLIES {
 
     # Delete unneeded files
     rm ${prefix}.zip
-    rm  -rf ncbi_dataset
+    rm -rf ncbi_dataset
+    rm README.md md5sum.txt
 
     # Compress output files
     bgzip ${prefix}.fasta
