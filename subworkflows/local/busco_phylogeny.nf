@@ -110,7 +110,7 @@ workflow BUSCO_PHYLOGENY {
         .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
     removed_samps = SUBSET_BUSCO_GENES.out.removed_sample_ids
         .splitText()
-        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
+        .map { [[id: it[1].replace('\n', '')], it[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(removed_refs)
     messages = messages.mix(removed_samps)
 
