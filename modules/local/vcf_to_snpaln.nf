@@ -21,11 +21,10 @@ process VCF_TO_SNPALN {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    vcftab_to_snpaln_nodel.pl --output_ref -i ${tab} > ${prefix}.fasta
+    vcftab_to_snpaln_nodel.pl --output_ref -i ${tab} > ${prefix}_unfiltered.fasta
 
     # Remove samples with all missing data since IQtree complains
-    # NOTE: The below code does not work with multi-line fastas. Its functionality should be replaced when rewriting vcftab_to_snpaln_nodel.pl
-    #grep -n -E '^-+\$' -B 1 ${prefix}_unfiltered.fasta | sed -n 's/^\\([0-9]\\{1,\\}\\).*/\\1d/p' | sed -f - ${prefix}_unfiltered.fasta > ${prefix}.fasta
+    cat ${prefix}_unfiltered.fasta | tr -d '\r' |  tr '\n' '\f' | sed -r 's/(>[^\f]+\f[-\f]+)(>|$)/\2/g' | tr '\f' '\n' > ${prefix}.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
