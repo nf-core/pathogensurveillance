@@ -24,7 +24,11 @@ process VCF_TO_SNPALN {
     vcftab_to_snpaln_nodel.pl --output_ref -i ${tab} > ${prefix}_unfiltered.fasta
 
     # Remove samples with all missing data since IQtree complains
-    cat ${prefix}_unfiltered.fasta | tr -d '\\r' |  tr '\\n' '\\f' | sed -r 's/(>[^\\f]+\\f[-\\f]+)(>|\$)/\\2/g' | tr '\\f' '\\n' > ${prefix}.fasta
+    if grep -q '@' ${prefix}_unfiltered.fasta; then
+      echo "Input sequence file cannot contain the @ character"
+      exit 1
+    fi
+    cat ${prefix}_unfiltered.fasta | tr -d '\\r' |  tr '\\n' '@' | sed -r 's/(>[^@]+@[-@]+)(>|\$)/\\2/g' | tr '@' '\\n' > ${prefix}.fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
