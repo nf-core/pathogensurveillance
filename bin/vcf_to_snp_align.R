@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
 
+# Constants
+missing_data_char <- '-'
+max_missing_data_prop <- 0.5  # SNPs are removed if the proportion of samples with data is greater than this. Set to 1 or NA to disable SNP filtering.
+remove_missing_samples <- TRUE # Whether to remove samples with only missing data
+missing_sample_file_path <- 'removed_sample_ids.txt'
+
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
@@ -68,11 +74,27 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
 })
 
 # Remove variants with missing data
-is_missing <- apply(vcf_data[sample_ids], MARGIN = 1, simplify = TRUE, function(x) any(is.na(x)))
-vcf_data <- vcf_data[! is_missing, ]
+if (! is.na(max_missing_data_prop) && max_missing_data_prop < 1) {
+    prop_missing <- apply(vcf_data[sample_ids], MARGIN = 1, simplify = TRUE,
+                          function(x) sum(is.na(x)) / length(x))
+    vcf_data <- vcf_data[prop_missing <= max_missing_data_prop, , drop = FALSE]
+}
+
+# Remove samples with only missing data
+if (remove_missing_samples) {
+    is_only_missing_data <- vapply(vcf_data[sample_ids], FUN.VALUE = logical(1),
+                                  function(x) all(is.na(x)))
+    samples_to_remove <- sample_ids[is_only_missing_data]
+    vcf_data[samples_to_remove] <- NULL
+    sample_ids <- sample_ids[! sample_ids %in% samples_to_remove]
+    writeLines(samples_to_remove, missing_sample_file_path)
+}
+
+# Convert missing data to a character
+vcf_data[sample_ids] <- lapply(vcf_data[sample_ids], function(x) ifelse(is.na(x), missing_data_char, x))
 
 # Remove indels relative to the reference
-vcf_data <- vcf_data[nchar(vcf_data$REF) == 1, ]
+vcf_data <- vcf_data[nchar(vcf_data$REF) == 1, , drop = FALSE]
 
 # Convert to sequences
 reference_seq <- paste0(vcf_data$REF, collapse = '')

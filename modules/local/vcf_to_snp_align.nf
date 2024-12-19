@@ -11,8 +11,9 @@ process VCF_TO_SNP_ALIGN {
     tuple val(ref_meta), path(vcf)
 
     output:
-    tuple val(ref_meta), path("${prefix}.fasta"), emit: fasta
-    path "versions.yml"                         , emit: versions
+    tuple val(ref_meta), path("${prefix}.fasta")       , emit: fasta
+    tuple val(ref_meta), path("removed_sample_ids.txt"), emit: removed_sample_ids
+    path "versions.yml"                                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
