@@ -8,12 +8,12 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/6f/a0cee6f7bc72095001e3142499cedb/all_comp.csv',
-#     '/home/fosterz/projects/pathogensurveillance/work/6f/a0cee6f7bc72095001e3142499cedb/all.csv',
-#     '3',
-#     '2',
-#     '10',
-#     'all_context_refs.csv'
+#   '../smarcescens_comp.csv',
+#   '../smarcescens.csv',
+#   '0',
+#   '0',
+#   '0',
+#   'all_context_refs.csv'
 # )
 names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
@@ -22,6 +22,13 @@ rownames(ani_matrix) <- colnames(ani_matrix)
 n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
+
+
+#Check if user does not want references selected
+if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) {
+  writeLines(character(0), args$output_path)
+  quit(save = 'no')
+}
 
 # Read sample data with user-defined references
 sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
