@@ -2,10 +2,10 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c(
-    '/home/fosterz/projects/pathogensurveillance/work/cd/abe1a4b6a80d0f2d2598047d9c9104/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
-    'deleteme.fasta'
-)
+# args <- c(
+#     '/home/fosterz/projects/pathogensurveillance/work/cd/abe1a4b6a80d0f2d2598047d9c9104/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
+#     'deleteme.fasta'
+# )
 names(args) <- c("vcf_path", "out_path")
 args <- as.list(args)
 

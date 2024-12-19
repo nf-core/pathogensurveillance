@@ -2,8 +2,7 @@ include { REFERENCE_INDEX          } from './reference_index'  // this is being 
 include { ALIGN_READS              } from './align_reads'
 include { CALL_VARIANTS            } from './call_variants'
 include { IQTREE2 as IQTREE2_SNP   } from '../../modules/local/iqtree2'
-include { VCF_TO_TAB               } from '../../modules/local/vcf_to_tab'
-include { VCF_TO_SNPALN            } from '../../modules/local/vcf_to_snpaln'
+include { VCF_TO_SNP_ALIGN         } from '../../modules/local/vcf_to_snp_align'
 include { SEQKIT_SLIDING           } from '../../modules/nf-core/seqkit/sliding/main'
 include { ASSIGN_MAPPING_REFERENCE } from '../../modules/local/assign_mapping_reference'
 
@@ -156,14 +155,11 @@ workflow VARIANT_ANALYSIS {
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)
 
-    VCF_TO_TAB ( CALL_VARIANTS.out.vcf )
-    versions = versions.mix(VCF_TO_TAB.out.versions)
-
-    VCF_TO_SNPALN ( VCF_TO_TAB.out.tab )
-    versions = versions.mix(VCF_TO_SNPALN.out.versions)
+    VCF_TO_SNP_ALIGN ( CALL_VARIANTS.out.vcf )
+    versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
 
     // Dont make trees for groups with less than 3 samples
-    align_with_samp_meta = VCF_TO_SNPALN.out.fasta // val(ref+report_meta), fasta
+    align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta // val(ref+report_meta), fasta
         .combine(CALL_VARIANTS.out.samples, by:0) // val(ref+report_meta), fasta, [meta]
     align_for_tree = align_with_samp_meta
         .filter { it[2].size() >= 3 }
@@ -177,11 +173,11 @@ workflow VARIANT_ANALYSIS {
     versions = versions.mix(IQTREE2_SNP.out.versions)
 
     phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
-    snp_align = VCF_TO_SNPALN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
+    snp_align = VCF_TO_SNP_ALIGN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
     vcf = CALL_VARIANTS.out.vcf.map{ [it[0].group, it[0].ref, it[1]] }
 
     results = CALL_VARIANTS.out.vcf // ref+report_meta, vcf
-        .combine(VCF_TO_SNPALN.out.fasta, by:0) // ref+report_meta, vcf, align
+        .combine(VCF_TO_SNP_ALIGN.out.fasta, by:0) // ref+report_meta, vcf, align
         .join(IQTREE2_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
         .map{ [it[0].group, it[0].ref] + it[1..3] } // report_meta, ref_meta, vcf, align, tree
 
