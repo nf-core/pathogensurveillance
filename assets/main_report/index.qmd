@@ -491,11 +491,9 @@ The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, 
 ## {{< bi wallet2 >}} Funding
  This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D. 
 
-::: callout-tip
-## Feedback
+## {{< bi github >}} Contribute
 
 To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
-:::
 
 ## {{< ai open-access >}} Citations
 

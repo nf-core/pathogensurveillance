@@ -18,10 +18,6 @@ website:
   sidebar:
     style: "docked"
     logo: "images/logo.png"
-    tools:
-      - icon: github
-        href: https://github.com/nf-core/pathogensurveillance
-        text: Nf-core PathogenSurveillance GitHub
 
 format:
   html:
