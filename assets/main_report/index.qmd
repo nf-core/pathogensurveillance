@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "/home/fosterz/projects/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/xan_test_inputs"
+  inputs: "~/Documents/Github/_no_group_defined__inputs"
 execute:
   echo: false
 bibliography: references.bib
@@ -74,7 +74,7 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 * **Last updated:** `r format(Sys.time(), '%B %d , %Y')`
 * **Pipeline version:** {{< var version >}}
 
-## Pipeline Status Report
+## {{< bi info-circle >}} Pipeline Status Report
 
 Overview of pipeline status messages produced by the pipeline during execution.
 These generally consist of warning or error messages describing problems encountered in analysis.
@@ -133,7 +133,7 @@ sample_meta_table(params$inputs)
 
 # Identification
 
-## Initial identification
+## {{< fa question-circle >}}  Initial identification
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
 These are intended to be preliminary identifications.
@@ -201,7 +201,7 @@ Included metrics can provide insights into how each sample compares with referen
 
 :::
 
-## Most similar organisms
+## {{< iconify fluent-emoji-high-contrast id-button >}} Most similar organisms
 
 ::: panel-tabset
 ### ANI top matches
@@ -297,11 +297,10 @@ POPC not calculated.
 
 :::
 
-## Phylogenetic context
+## {{< bi check-lg >}} Phylogenetic context
 
-This section includes phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
+Shown are phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
 The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
-
 
 ### Multigene phylogeny
 
@@ -323,8 +322,8 @@ cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This a multgene phylogeny of samples with reference genomes for context.
-It is the most robust identification provided by this pipeline, but its precision is still limited by the availability of similar reference sequences.
+This a multigene phylogeny of samples with reference genomes for context.
+It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
 :::
 ')
 ```
@@ -335,10 +334,9 @@ Could not generate core genome phylogeny.
 ')
 ```
 
-
 # Genetic diversity
 
-## SNP trees
+## {{< iconify healthicons dna-outline >}} SNP trees
 
 ```{r}
 snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
@@ -378,7 +376,7 @@ See staus messages at the start of the report for details.
 ```
 
 
-## Minimum spanning network
+## {{< iconify ph share-network-duotone >}} Minimum spanning network
 
 ```{r eval = length(variant_align_path(params$inputs)) > 0}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
@@ -480,16 +478,18 @@ knitr::write_bib(c(
 sessionInfo()
 ```
 
-## References
+## {{< bi file-earmark-pdf >}} References
 
 ::: {#refs}
 :::
 
 # About
 
-{{< bi file-earmark-person >}} The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grunwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+## {{< bi file-earmark-person >}} Authors
+The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alex Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
-Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ...
+## {{< bi wallet2 >}} Funding
+ This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D. 
 
 ::: callout-tip
 ## Feedback
@@ -497,10 +497,14 @@ Other contributors include: [Alex Weisberg](https://alexandra-weisberg.com/), ..
 To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
 :::
 
+## {{< ai open-access >}} Citations
+
 Please cite this pipeline and nf-core in publications as follows:
 
-{{< bi file-earmark-pdf-fill >}} Foster et al. 2024. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+{{< bi file-earmark-pdf-fill >}} Foster et al. 2025. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
 
-{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35 (4): 316--19. https://doi.org/10.1038/nbt.3820.
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35: 316--19. [https://doi.org/10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820).
 
-Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com).
+## {{< bi wrench-adjustable >}} Other tools
+
+Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Iconify](https://icon-sets.iconify.design), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com) and the report was rendered in quarto {{< iconify simple-icons:quarto >}}.

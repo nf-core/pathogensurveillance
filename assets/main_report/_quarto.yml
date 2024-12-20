@@ -11,9 +11,6 @@ website:
     center: |
         [![](images/usda-logo-color.png){height=30px}](https://www.usda.gov/style-guide/logo)  [![](images/OSU_horizontal_2C_O_over_B.png){height=30px}](https://oregonstate.edu)
     right:
-      - icon: twitter
-        href: https://twitter.com/PhytophthoraLab
-        aria-label: PhytophthoraLab
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         aria-label: Nf-core PathogenSurveillance GitHub
@@ -22,9 +19,6 @@ website:
     style: "docked"
     logo: "images/logo.png"
     tools:
-      - icon: twitter
-        href: https://twitter.com/phytophthoralab
-        text: PhytophthoraLab
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
         text: Nf-core PathogenSurveillance GitHub
