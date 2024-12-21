@@ -67,7 +67,7 @@ group <- run_info$group_id
 sample_data <- sample_meta_parsed(params$inputs)
 ```
 
-This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
+This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-co.re/pathogensurveillance/dev/) pipeline.
 
 * **Report group:** `r group`
 * **Sample count:** `r nrow(sample_data)`
@@ -76,8 +76,8 @@ This report is produced by the **`nf-core/pathogensurveillance` pipeline**.
 
 ## {{< bi info-circle >}} Pipeline status
 
-Overview of messages produced by the pipeline during execution.
-These generally consist of warning or error messages describing problems encountered in analysis.
+The pipeline finished excution. 
+Warning or error messages describing problems encountered in the analysis might be provided below.
 
 ```{r}
 no_messages = nrow(status_message_parsed(params$inputs)) == 0
