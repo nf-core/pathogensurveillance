@@ -8,10 +8,10 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-#args <- c(
-#    '/home/fosterz/projects/pathogensurveillance/work/cd/abe1a4b6a80d0f2d2598047d9c9104/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
+# args <- c(
+#    '/home/fosterz/projects/pathogensurveillance/work/e9/79b957f28752a68c3f033ef5b3e856/_no_group_defined__GCF_029962605_1.vcffilter.vcf.gz',
 #    'deleteme.fasta'
-#)
+# )
 names(args) <- c("vcf_path", "out_path")
 args <- as.list(args)
 
@@ -73,21 +73,21 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
     })
 })
 
+# Remove samples with only missing data
+if (remove_missing_samples) {
+    is_only_missing_data <- vapply(vcf_data[sample_ids], FUN.VALUE = logical(1),
+                                   function(x) all(is.na(x)))
+    samples_to_remove <- sample_ids[is_only_missing_data]
+    vcf_data[samples_to_remove] <- NULL
+    sample_ids <- sample_ids[! sample_ids %in% samples_to_remove]
+    writeLines(samples_to_remove, missing_sample_file_path)
+}
+
 # Remove variants with missing data
 if (! is.na(max_missing_data_prop) && max_missing_data_prop < 1) {
     prop_missing <- apply(vcf_data[sample_ids], MARGIN = 1, simplify = TRUE,
                           function(x) sum(is.na(x)) / length(x))
     vcf_data <- vcf_data[prop_missing <= max_missing_data_prop, , drop = FALSE]
-}
-
-# Remove samples with only missing data
-if (remove_missing_samples) {
-    is_only_missing_data <- vapply(vcf_data[sample_ids], FUN.VALUE = logical(1),
-                                  function(x) all(is.na(x)))
-    samples_to_remove <- sample_ids[is_only_missing_data]
-    vcf_data[samples_to_remove] <- NULL
-    sample_ids <- sample_ids[! sample_ids %in% samples_to_remove]
-    writeLines(samples_to_remove, missing_sample_file_path)
 }
 
 # Convert missing data to a character
