@@ -8,10 +8,10 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/cd/abe1a4b6a80d0f2d2598047d9c9104/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
-#     'deleteme.fasta'
-# )
+#args <- c(
+#    '/home/fosterz/projects/pathogensurveillance/work/cd/abe1a4b6a80d0f2d2598047d9c9104/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
+#    'deleteme.fasta'
+#)
 names(args) <- c("vcf_path", "out_path")
 args <- as.list(args)
 
@@ -36,21 +36,21 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
 
 # Convert allele numeric codes to AGCT + IUPAC ambiguity codes
 iupac_key <- c(
-    A="A",
-    C="C",
-    G="G",
-    T="T",
-    M="AC",
-    R="AG",
-    W="AT",
-    S="CG",
-    Y="CT",
-    K="GT",
-    V="ACG",
-    H="ACT",
-    D="AGT",
-    B="CGT",
-    N="ACGT"
+    A='A',
+    C='C',
+    G='G',
+    T='T',
+    AC='M',
+    AG='R',
+    AT='W',
+    CG='S',
+    CT='Y',
+    GT='K',
+    ACG='V',
+    ACT='H',
+    AGT='D',
+    CGT='B',
+    ACGT='N'
 )
 vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
     vapply(seq_len(nrow(vcf_data)), FUN.VALUE = character(1), function(index) {
@@ -58,16 +58,16 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
         allele_codes <- strsplit(vcf_data[index, samp_id], split = '/')[[1]]
         allele_codes <- allele_codes[allele_codes != '.']
         allele_codes <- as.numeric(allele_codes)
-        
+
         # Convert allele codes to sequence
         allele_code_key <- c(vcf_data$REF[index], strsplit(vcf_data$ALT[index], split = ',')[[1]])
         alleles <- allele_code_key[allele_codes + 1]
-        
+
         # Return NA if not a simple SNP
         if (any(nchar(alleles) != 1)) {
             return(NA_character_)
         }
-        
+
         # Convert alleles to a single sequence, using IUPAC ambiguity codes as needed
         return(iupac_key[paste0(sort(unique(alleles)), collapse = '')])
     })

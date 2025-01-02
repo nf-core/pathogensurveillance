@@ -157,6 +157,9 @@ workflow VARIANT_ANALYSIS {
 
     VCF_TO_SNP_ALIGN ( CALL_VARIANTS.out.vcf )
     versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
+    removed_samps = VCF_TO_SNP_ALIGN.out.removed_sample_ids
+        .splitText()
+        .map { [[id: it[1].replace('\n', '')], it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
 
     // Dont make trees for groups with less than 3 samples
     align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta // val(ref+report_meta), fasta
