@@ -1,0 +1,7 @@
+BUSCO_DOWNLOAD:
+  busco: 5.5.0
+SAMPLESHEET_CHECK:
+  r-base: 4.4.1
+Workflow:
+    nf-core/pathogensurveillance: v1.0dev
+    Nextflow: 24.10.3

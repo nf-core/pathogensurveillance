@@ -1,0 +1,1691 @@
+Jan-03 14:49:17.901 [main] DEBUG nextflow.cli.Launcher - $> nextflow -quiet -log /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/meta/nextflow.log run /home/fosterz/projects/pathogensurveillance/tests/../main.nf -c /home/fosterz/projects/pathogensurveillance/nextflow.config -c /home/fosterz/projects/pathogensurveillance/tests/nextflow.config -params-file /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/meta/params.json -ansi-log false -profile docker,test -with-trace /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/meta/trace.csv -w /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work
+Jan-03 14:49:18.012 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 24.10.3
+Jan-03 14:49:18.031 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/fosterz/.nextflow/plugins; core-plugins: nf-amazon@2.9.2,nf-azure@1.10.2,nf-cloudcache@0.4.2,nf-codecommit@0.2.2,nf-console@1.1.4,nf-google@1.15.3,nf-tower@1.9.3,nf-wave@1.7.4
+Jan-03 14:49:18.045 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jan-03 14:49:18.046 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jan-03 14:49:18.049 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jan-03 14:49:18.062 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jan-03 14:49:18.085 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /home/fosterz/projects/pathogensurveillance/nextflow.config
+Jan-03 14:49:18.089 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /home/fosterz/projects/pathogensurveillance/nextflow.config
+Jan-03 14:49:18.090 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /home/fosterz/projects/pathogensurveillance/tests/nextflow.config
+Jan-03 14:49:18.091 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/fosterz/projects/pathogensurveillance/nextflow.config
+Jan-03 14:49:18.091 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/fosterz/projects/pathogensurveillance/nextflow.config
+Jan-03 14:49:18.092 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/fosterz/projects/pathogensurveillance/tests/nextflow.config
+Jan-03 14:49:18.117 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/fosterz/.nextflow/secrets/store.json
+Jan-03 14:49:18.121 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@52b6319f] - activable => nextflow.secret.LocalSecretsProvider@52b6319f
+Jan-03 14:49:18.143 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker,test`
+Jan-03 14:49:20.131 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker,test`
+Jan-03 14:49:20.555 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `docker,test`
+Jan-03 14:49:20.565 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [complex_minimal, bih, cfc_dev, uzl_omics, ifb_core, embl_hd, denbi_qbic, alice, mycobacteroides_small, ppluvialis, mjolnir_globe, uppmax, giga, incliva, ilifu, uge, rosalind_uge, complex, lugh, mccleary, wagner_2023, unibe_ibu, mycobacteroides, vai, czbiohub_aws, jax, roslin, chaos, ccga_med, tes, scw, unc_longleaf, tigem, tubingen_apg, google, apollo, wagner_2023_small, ipop_up, vsc_calcua, pdc_kth, googlels, ceci_nic5, stjude, daisybio, eddie, medair, biowulf, apptainer, bi, bigpurple, adcra, cedars, pawsey_setonix, vsc_kul_uhasselt, pawsey_nimbus, ucl_myriad, utd_ganymede, charliecloud, high_complexity_kpneumoniae, cqls, icr_davros, ceres, arm, munin, rosalind, hasta, cfc, uzh, shu_bmrc, ebi_codon_slurm, ebc, ccga_dx, crick, ku_sund_danhead, marvin, shifter, biohpc_gen, mana, mamba, york_viking, unc_lccc, wehi, awsbatch, wustl_htcf, arcc, ceci_dragon2, imperial, maestro, software_license, genotoul, nci_gadi, mixed_bacteria, abims, janelia, nu_genomics, googlebatch, oist, sahmri, kaust, testserratia_38, mpcdf, leicester, vsc_ugent, create, sage, cambridge, jex, podman, aps_workshop, ebi_codon, cheaha, xanadu, nyu_hpc, test, marjorie, computerome, ucd_sonic, seg_globe, sanger, dkfz, bluebear, pasteur, einstein, ethz_euler, m3c, test_full, xanthomonas_small, imb, complex_small, ucl_cscluster, tuos_stanage, azurebatch, hki, mixed, crukmi, csiro_petrichor, qmul_apocrita, wave, docker, ramorum_small, engaging, gis, hypatia, psmn, eva, unity, nygc, xanthomonas, fgcz, conda, crg, singularity, mpcdf_viper, pe2, self_hosted_runner, tufts, uw_hyak_pedslabs, debug, genouest, cbe, unsw_katana, slurm, gitpod, phoenix, seawulf, uod_hpc, fub_curta, small_genome, uct_hpc, aws_tower, binac]
+Jan-03 14:49:20.607 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 by global default
+Jan-03 14:49:20.622 [main] INFO  nextflow.cli.CmdRun - Launching `/home/fosterz/projects/pathogensurveillance/tests/../main.nf` [elated_engelbart] DSL2 - revision: ff781ec5e4
+Jan-03 14:49:20.625 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins declared=[nf-schema@2.1.1]
+Jan-03 14:49:20.626 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jan-03 14:49:20.627 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[nf-schema@2.1.1]
+Jan-03 14:49:20.628 [main] DEBUG nextflow.plugin.PluginUpdater - Installing plugin nf-schema version: 2.1.1
+Jan-03 14:49:20.638 [main] INFO  org.pf4j.AbstractPluginManager - Plugin 'nf-schema@2.1.1' resolved
+Jan-03 14:49:20.638 [main] INFO  org.pf4j.AbstractPluginManager - Start plugin 'nf-schema@2.1.1'
+Jan-03 14:49:20.644 [main] DEBUG nextflow.plugin.BasePlugin - Plugin started nf-schema@2.1.1
+Jan-03 14:49:20.715 [main] DEBUG nextflow.Session - Session UUID: bd06a1ec-d220-4293-9067-b81281e885c0
+Jan-03 14:49:20.716 [main] DEBUG nextflow.Session - Run name: elated_engelbart
+Jan-03 14:49:20.716 [main] DEBUG nextflow.Session - Executor pool size: 28
+Jan-03 14:49:20.733 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Jan-03 14:49:20.741 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=84; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jan-03 14:49:20.769 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 24.10.3 build 5933
+  Created: 16-12-2024 15:34 UTC (07:34 PDT)
+  System: Linux 6.9.3-76060903-generic
+  Runtime: Groovy 4.0.23 on OpenJDK 64-Bit Server VM 11.0.13+7-b1751.21
+  Encoding: UTF-8 (UTF-8)
+  Process: 2912394@pop-os [127.0.1.1]
+  CPUs: 28 - Mem: 125.5 GB (82.8 GB) - Swap: 20 GB (20 GB)
+Jan-03 14:49:20.801 [main] DEBUG nextflow.Session - Work-dir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work [ext2/ext3]
+Jan-03 14:49:20.848 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jan-03 14:49:20.859 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Jan-03 14:49:20.907 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jan-03 14:49:20.919 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 29; maxThreads: 1000
+Jan-03 14:49:20.988 [main] DEBUG nextflow.Session - Session start
+Jan-03 14:49:20.991 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/meta/trace.csv
+Jan-03 14:49:21.134 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jan-03 14:49:25.920 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jan-03 14:49:26.062 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog]; plugin Id: nf-schema
+Jan-03 14:49:26.062 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters]; plugin Id: nf-schema
+Jan-03 14:49:26.064 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jan-03 14:49:26.065 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [samplesheetToList:samplesheetToList]; plugin Id: nf-schema
+Jan-03 14:49:26.197 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryLog:paramsSummaryLog]; plugin Id: nf-schema
+Jan-03 14:49:26.198 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [validateParameters:validateParameters]; plugin Id: nf-schema
+Jan-03 14:49:26.200 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [paramsSummaryMap:paramsSummaryMap]; plugin Id: nf-schema
+Jan-03 14:49:26.200 [main] DEBUG nextflow.script.IncludeDef - Loading included plugin extensions with names: [samplesheetToList:samplesheetToList]; plugin Id: nf-schema
+Jan-03 14:49:26.348 [main] INFO  nextflow.Nextflow - 
+-[2m----------------------------------------------------[0m-
+                                        [0;32m,--.[0;30m/[0;32m,-.[0m
+[0;34m        ___     __   __   __   ___     [0;32m/,-._.--~'[0m
+[0;34m  |\ | |__  __ /  ` /  \ |__) |__         [0;33m}  {[0m
+[0;34m  | \| |       \__, \__/ |  \ |___     [0;32m\`-._,-`-,[0m
+                                        [0;32m`._,._,'[0m
+[0;35m  nf-core/pathogensurveillance 1.0dev[0m
+-[2m----------------------------------------------------[0m-
+[1mInput/output options[0m
+  [0;34msample_data               : [0;32mhttps://raw.githubusercontent.com/grunwaldlab/pathogensurveillance/refs/heads/dev/test/data/metadata/small_genome.csv[0m
+  [0;34moutdir                    : [0;32m/home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/output[0m
+
+[1mAnalysis parameters[0m
+  [0;34mn_ref_strains             : [0;32m1[0m
+  [0;34mn_ref_species             : [0;32m1[0m
+  [0;34mn_ref_genera              : [0;32m1[0m
+
+[1mInstitutional config options[0m
+  [0;34mconfig_profile_name       : [0;32mTest profile[0m
+  [0;34mconfig_profile_description: [0;32mMinimal test dataset to check pipeline function[0m
+
+[1mGeneric options[0m
+  [0;34mtrace_report_suffix       : [0;32m2025-01-03_14-49-20[0m
+
+[1mCore Nextflow options[0m
+  [0;34mrunName                   : [0;32melated_engelbart[0m
+  [0;34mcontainerEngine           : [0;32mdocker[0m
+  [0;34mlaunchDir                 : [0;32m/home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1[0m
+  [0;34mworkDir                   : [0;32m/home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work[0m
+  [0;34mprojectDir                : [0;32m/home/fosterz/projects/pathogensurveillance[0m
+  [0;34muserName                  : [0;32mfosterz[0m
+  [0;34mprofile                   : [0;32mdocker,test[0m
+  [0;34mconfigFiles               : [0;32m[0m
+
+!! Only displaying parameters that differ from the pipeline defaults !!
+-[2m----------------------------------------------------[0m-
+* The nf-core framework
+    https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+    https://github.com/nf-core/pathogensurveillance/blob/master/CITATIONS.md
+
+Jan-03 14:49:26.349 [main] DEBUG nextflow.validation.SchemaValidator - Starting parameters validation
+Jan-03 14:49:26.679 [main] DEBUG nextflow.validation.SchemaEvaluator - Started validating /grunwaldlab/pathogensurveillance/refs/heads/dev/test/data/metadata/small_genome.csv
+Jan-03 14:49:26.782 [main] DEBUG nextflow.validation.SchemaEvaluator - Validation of file 'https://raw.githubusercontent.com/grunwaldlab/pathogensurveillance/refs/heads/dev/test/data/metadata/small_genome.csv' passed!
+Jan-03 14:49:26.897 [main] DEBUG nextflow.validation.SchemaValidator - Finishing parameters validation
+Jan-03 14:49:27.009 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SAMPLESHEET_CHECK` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:SAMPLESHEET_CHECK
+Jan-03 14:49:27.023 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.024 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.037 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jan-03 14:49:27.046 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=28; memory=125.5 GB; capacity=28; pollInterval=100ms; dumpInterval=5m
+Jan-03 14:49:27.049 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Jan-03 14:49:27.262 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP
+Jan-03 14:49:27.265 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SRATOOLS_FASTERQDUMP` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP
+Jan-03 14:49:27.278 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.279 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.309 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH
+Jan-03 14:49:27.311 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BBMAP_SENDSKETCH` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH
+Jan-03 14:49:27.315 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.315 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.327 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION
+Jan-03 14:49:27.328 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:INITIAL_CLASSIFICATION` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION
+Jan-03 14:49:27.332 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.332 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.375 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES
+Jan-03 14:49:27.376 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FIND_ASSEMBLIES` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES
+Jan-03 14:49:27.379 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.379 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.424 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:PICK_ASSEMBLIES
+Jan-03 14:49:27.425 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:PICK_ASSEMBLIES` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:PICK_ASSEMBLIES
+Jan-03 14:49:27.427 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.428 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.471 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES
+Jan-03 14:49:27.472 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:DOWNLOAD_ASSEMBLIES` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES
+Jan-03 14:49:27.582 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.582 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.635 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:COUNT_READS
+Jan-03 14:49:27.639 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.639 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.649 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:PREPARE_INPUT:SUBSET_READS
+Jan-03 14:49:27.649 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SUBSET_READS` matches process PATHOGENSURVEILLANCE:PREPARE_INPUT:SUBSET_READS
+Jan-03 14:49:27.651 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.651 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.692 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FASTP
+Jan-03 14:49:27.692 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FASTP` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FASTP
+Jan-03 14:49:27.696 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.696 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.714 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:SPADES
+Jan-03 14:49:27.714 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SPADES` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:SPADES
+Jan-03 14:49:27.717 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.717 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.735 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_NANOPORE
+Jan-03 14:49:27.735 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FLYE.*` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_NANOPORE
+Jan-03 14:49:27.736 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FLYE.*` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_NANOPORE
+Jan-03 14:49:27.738 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.738 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.746 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_PACBIO
+Jan-03 14:49:27.747 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FLYE.*` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_PACBIO
+Jan-03 14:49:27.747 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FLYE.*` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_PACBIO
+Jan-03 14:49:27.750 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.750 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.762 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FILTER_ASSEMBLY` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FILTER_ASSEMBLY
+Jan-03 14:49:27.764 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.764 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.780 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:QUAST
+Jan-03 14:49:27.781 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:QUAST` matches process PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:QUAST
+Jan-03 14:49:27.783 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.783 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.824 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:SKETCH_COMPARISON:TRIM_AND_SKETCH
+Jan-03 14:49:27.826 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:TRIM_AND_SKETCH` matches process PATHOGENSURVEILLANCE:SKETCH_COMPARISON:TRIM_AND_SKETCH
+Jan-03 14:49:27.828 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.828 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.854 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_SKETCH
+Jan-03 14:49:27.855 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SOURMASH_SKETCH` matches process PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_SKETCH
+Jan-03 14:49:27.858 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.858 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.889 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_COMPARE
+Jan-03 14:49:27.891 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SOURMASH_COMPARE` matches process PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_COMPARE
+Jan-03 14:49:27.893 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.893 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.914 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:FASTQC
+Jan-03 14:49:27.915 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:FASTQC` matches process PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:FASTQC
+Jan-03 14:49:27.917 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.918 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.933 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:NANOPLOT
+Jan-03 14:49:27.934 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:NANOPLOT` matches process PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:NANOPLOT
+Jan-03 14:49:27.936 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.936 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:27.980 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ASSIGN_MAPPING_REFERENCE
+Jan-03 14:49:27.982 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:27.982 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.013 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:SEQKIT_SLIDING
+Jan-03 14:49:28.014 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SEQKIT_SLIDING` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:SEQKIT_SLIDING
+Jan-03 14:49:28.015 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.015 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.031 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:PICARD_CREATESEQUENCEDICTIONARY
+Jan-03 14:49:28.031 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:PICARD_CREATESEQUENCEDICTIONARY` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:PICARD_CREATESEQUENCEDICTIONARY
+Jan-03 14:49:28.033 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.033 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.043 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:SAMTOOLS_FAIDX
+Jan-03 14:49:28.045 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.045 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.055 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:BWA_INDEX
+Jan-03 14:49:28.056 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BWA_INDEX` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:BWA_INDEX
+Jan-03 14:49:28.058 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.058 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.086 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:BWA_MEM
+Jan-03 14:49:28.087 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BWA_MEM` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:BWA_MEM
+Jan-03 14:49:28.089 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.089 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.118 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:PICARD_FORMAT
+Jan-03 14:49:28.119 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:PICARD_FORMAT` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:PICARD_FORMAT
+Jan-03 14:49:28.123 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.123 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.133 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:SAMTOOLS_INDEX
+Jan-03 14:49:28.134 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:SAMTOOLS_INDEX` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:SAMTOOLS_INDEX
+Jan-03 14:49:28.137 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.137 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.171 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:MAKE_REGION_FILE
+Jan-03 14:49:28.174 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.174 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.193 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_GENOTYPE
+Jan-03 14:49:28.194 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:GRAPHTYPER_GENOTYPE` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_GENOTYPE
+Jan-03 14:49:28.197 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.197 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.217 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_VCFCONCATENATE
+Jan-03 14:49:28.219 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:GRAPHTYPER_VCFCONCATENATE` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_VCFCONCATENATE
+Jan-03 14:49:28.222 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.222 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.235 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:TABIX_TABIX
+Jan-03 14:49:28.236 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:TABIX_TABIX` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:TABIX_TABIX
+Jan-03 14:49:28.241 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.241 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.256 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:BGZIP_MAKE_GZIP
+Jan-03 14:49:28.259 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.259 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.285 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GATK4_VARIANTFILTRATION
+Jan-03 14:49:28.285 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:GATK4_VARIANTFILTRATION` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GATK4_VARIANTFILTRATION
+Jan-03 14:49:28.287 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.287 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.297 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:VCFLIB_VCFFILTER
+Jan-03 14:49:28.298 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:VCFLIB_VCFFILTER` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:VCFLIB_VCFFILTER
+Jan-03 14:49:28.304 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.304 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.324 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:VCF_TO_SNP_ALIGN
+Jan-03 14:49:28.327 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.327 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.343 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:IQTREE2_SNP
+Jan-03 14:49:28.344 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:IQTREE2` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:IQTREE2_SNP
+Jan-03 14:49:28.344 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:IQTREE2_SNP` matches process PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:IQTREE2_SNP
+Jan-03 14:49:28.346 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.346 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.389 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+Jan-03 14:49:28.391 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.392 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.411 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTADBDOWNLOAD
+Jan-03 14:49:28.412 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BAKTA_BAKTADBDOWNLOAD` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTADBDOWNLOAD
+Jan-03 14:49:28.414 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.414 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.438 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTA
+Jan-03 14:49:28.439 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BAKTA_BAKTA` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTA
+Jan-03 14:49:28.442 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.442 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.455 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAKE_GFF_WITH_FASTA
+Jan-03 14:49:28.456 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MAKE_GFF_WITH_FASTA` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAKE_GFF_WITH_FASTA
+Jan-03 14:49:28.457 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.457 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.473 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:PIRATE
+Jan-03 14:49:28.473 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:PIRATE` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:PIRATE
+Jan-03 14:49:28.475 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.475 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.487 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:REFORMAT_PIRATE_RESULTS
+Jan-03 14:49:28.489 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.489 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.498 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:CALCULATE_POCP
+Jan-03 14:49:28.499 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.500 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.505 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ALIGN_FEATURE_SEQUENCES
+Jan-03 14:49:28.506 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.507 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.512 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:RENAME_CORE_GENE_HEADERS
+Jan-03 14:49:28.513 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.514 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.522 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:SUBSET_CORE_GENES
+Jan-03 14:49:28.524 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.524 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.540 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:FILES_IN_DIR
+Jan-03 14:49:28.542 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.542 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.552 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.553 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MAFFT_SMALL` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.555 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.555 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.567 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.568 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:IQTREE2` matches process PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.569 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.569 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.600 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+Jan-03 14:49:28.602 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.602 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.627 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO_DOWNLOAD
+Jan-03 14:49:28.627 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BUSCO_DOWNLOAD` matches process PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO_DOWNLOAD
+Jan-03 14:49:28.628 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.629 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.642 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO
+Jan-03 14:49:28.643 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:BUSCO` matches process PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO
+Jan-03 14:49:28.645 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.645 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.670 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:SUBSET_BUSCO_GENES
+Jan-03 14:49:28.674 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.674 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.694 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:FILES_IN_DIR
+Jan-03 14:49:28.695 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.695 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.703 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches labels `process_high` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.703 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MAFFT_SMALL` matches process PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.705 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.705 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.717 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches labels `process_medium` for process with name PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.718 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:IQTREE2` matches process PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.719 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.719 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.790 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_single` matches labels `process_single` for process with name PATHOGENSURVEILLANCE:MULTIQC
+Jan-03 14:49:28.796 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.797 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.893 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:PREPARE_REPORT_INPUT
+Jan-03 14:49:28.894 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:PREPARE_REPORT_INPUT` matches process PATHOGENSURVEILLANCE:PREPARE_REPORT_INPUT
+Jan-03 14:49:28.898 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.898 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.916 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches labels `process_low` for process with name PATHOGENSURVEILLANCE:MAIN_REPORT
+Jan-03 14:49:28.917 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:MAIN_REPORT.*` matches process PATHOGENSURVEILLANCE:MAIN_REPORT
+Jan-03 14:49:28.920 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-03 14:49:28.920 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-03 14:49:28.940 [main] DEBUG nextflow.Session - Config process names validation disabled as requested
+Jan-03 14:49:28.941 [main] DEBUG nextflow.Session - Igniting dataflow network (86)
+Jan-03 14:49:28.942 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SAMPLESHEET_CHECK
+Jan-03 14:49:28.942 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:PICK_ASSEMBLIES
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:COUNT_READS
+Jan-03 14:49:28.943 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SUBSET_READS
+Jan-03 14:49:28.944 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FASTP
+Jan-03 14:49:28.945 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:SPADES
+Jan-03 14:49:28.946 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_NANOPORE
+Jan-03 14:49:28.947 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_PACBIO
+Jan-03 14:49:28.947 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FILTER_ASSEMBLY
+Jan-03 14:49:28.948 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:QUAST
+Jan-03 14:49:28.951 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:SKETCH_COMPARISON:TRIM_AND_SKETCH
+Jan-03 14:49:28.951 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_SKETCH
+Jan-03 14:49:28.951 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_COMPARE
+Jan-03 14:49:28.951 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:FASTQC
+Jan-03 14:49:28.951 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:NANOPLOT
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ASSIGN_MAPPING_REFERENCE
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:SEQKIT_SLIDING
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:PICARD_CREATESEQUENCEDICTIONARY
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:SAMTOOLS_FAIDX
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:BWA_INDEX
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:BWA_MEM
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:PICARD_FORMAT
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:SAMTOOLS_INDEX
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:MAKE_REGION_FILE
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_GENOTYPE
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_VCFCONCATENATE
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:TABIX_TABIX
+Jan-03 14:49:28.952 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:BGZIP_MAKE_GZIP
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GATK4_VARIANTFILTRATION
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:VCFLIB_VCFFILTER
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:VCF_TO_SNP_ALIGN
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:IQTREE2_SNP
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTADBDOWNLOAD
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTA
+Jan-03 14:49:28.953 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAKE_GFF_WITH_FASTA
+Jan-03 14:49:28.954 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:PIRATE
+Jan-03 14:49:28.956 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:REFORMAT_PIRATE_RESULTS
+Jan-03 14:49:28.956 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:CALCULATE_POCP
+Jan-03 14:49:28.956 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ALIGN_FEATURE_SEQUENCES
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:RENAME_CORE_GENE_HEADERS
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:SUBSET_CORE_GENES
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:FILES_IN_DIR
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.957 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO_DOWNLOAD
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:SUBSET_BUSCO_GENES
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:FILES_IN_DIR
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:MAFFT_SMALL
+Jan-03 14:49:28.958 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:IQTREE2_CORE
+Jan-03 14:49:28.976 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:MULTIQC
+Jan-03 14:49:28.977 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:PREPARE_REPORT_INPUT
+Jan-03 14:49:28.979 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > PATHOGENSURVEILLANCE:MAIN_REPORT
+Jan-03 14:49:28.984 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_3dbf83190e816049: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/busco/busco/main.nf
+  Script_976e0524ba96e973: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/graphtyper/genotype/main.nf
+  Script_5c0af8b5911446cf: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/local/picard_format.nf
+  Script_242c4d74e0f3fc73: /home/fosterz/projects/pathogensurveillance/./subworkflows/local/utils_nfcore_pathogensurveillance_pipeline/main.nf
+  Script_b59b55148d4fde29: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/fasterqdump.nf
+  Script_69e6cf167d92684d: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/find_assemblies.nf
+  Script_3ff1656b1d66c1f2: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/samtools/index/main.nf
+  Script_a23851bee44f29dd: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/sourmash_compare.nf
+  Script_09a48cd8dcfd99db: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/sourmash/sketch/main.nf
+  Script_223ca400878df5b0: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/untar/main.nf
+  Script_066582a9c33a4dac: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/local/bgzip_make_gzip.nf
+  Script_457bed8824424ab5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/iqtree2.nf
+  Script_36efba79e790a1bd: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./align_reads.nf
+  Script_ca6a11a15ac2c315: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./call_variants.nf
+  Script_7e5c0c23082b3a9b: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/gatk4/variantfiltration/main.nf
+  Script_ffeb79a9937275d5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/filter_assembly.nf
+  Script_21d646f3a8d767b1: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/nanoplot/main.nf
+  Script_81b095d3d4073bd5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/rename_core_gene_headers.nf
+  Script_f5b6ba6f62042d3b: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./reference_index.nf
+  Script_8b6f2bf5665f668d: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/bakta/bakta/main.nf
+  Script_84f8a97db529516a: /home/fosterz/projects/pathogensurveillance/./workflows/../modules/local/main_report.nf
+  Script_426cabc238b3f3a7: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/assign_context_references.nf
+  Script_c9fc09f855ff8086: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/mafft/main.nf
+  Script_e3956f058f6f37d9: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/local/make_region_file.nf
+  Script_288a5302bba6aaa5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/graphtyper/vcfconcatenate/main.nf
+  Script_668d1f0d214380c6: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/samtools/faidx/main.nf
+  Script_62016853878c16b5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/seqkit/sliding/main.nf
+  Script_483462ce860c7aa0: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/samplesheet_check.nf
+  Script_97d4638bebbb1048: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/sketch_comparison.nf
+  Script_51c66c405425ecae: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/reformat_pirate_results.nf
+  Script_09d7d4cf1244e7a8: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/busco_download.nf
+  Script_76588ce1ed4ba7e4: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/pick_assemblies.nf
+  Script_d0de87c91ef1b611: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/assign_mapping_reference.nf
+  Script_215a636da7ab24a2: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/utils_nfcore_pathogensurveillance_pipeline/../../nf-core/utils_nfschema_plugin/main.nf
+  Script_aedd4c18163c2839: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/initial_classification.nf
+  Script_5c4e8d4051efa81e: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/utils_nfcore_pathogensurveillance_pipeline/../../nf-core/utils_nfcore_pipeline/main.nf
+  Script_d832509c91ffe271: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/flye/main.nf
+  Script_af9aba0b062b4002: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/core_genome_phylogeny.nf
+  Script_a5c22e20441be6c7: /home/fosterz/projects/pathogensurveillance/./workflows/../modules/local/prepare_report_input.nf
+  Script_d1b85324b96d2933: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/calculate_pocp.nf
+  Script_45636a530f1f5512: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/local/bwa_index.nf
+  Script_9f6ce129b29ed4a5: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/fastp/main.nf
+  Script_02615c6dc34202d9: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/quast.nf
+  Script_a56de46118022034: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/sendsketch.nf
+  Script_5a7dbb57a77983f2: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/align_feature_sequences.nf
+  Script_ec7a410c4e02eb62: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/spades/main.nf
+  Script_ca5fdbdd03ea1ad9: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/variant_analysis.nf
+  Script_b2eabfaaea17012f: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/busco_phylogeny.nf
+  Script_97cb5a0238fb7953: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/picard/createsequencedictionary/main.nf
+  Script_94c063052a08a5cb: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/subset_core_genes.nf
+  Script_7eaceb450370d5ff: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/pirate.nf
+  Script_5a3de1aeadb2ed03: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/files_in_dir.nf
+  Script_40aa42c399fabf3e: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/subset_busco_genes.nf
+  Script_113f045ba19c2c46: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/fastqc/main.nf
+  Script_de587d6350b990b1: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/vcf_to_snp_align.nf
+  Script_4f612cfd8c52e8cd: /home/fosterz/projects/pathogensurveillance/./subworkflows/local/utils_nfcore_pathogensurveillance_pipeline/../../nf-core/utils_nextflow_pipeline/main.nf
+  Script_0c45c9df79c2f50d: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/vcflib/vcffilter/main.nf
+  Script_1b3f41acc37c97a3: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/initial_qc_checks.nf
+  Script_5f108d62a5477f8f: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/nf-core/bakta/baktadbdownload/main.nf
+  Script_38a4774575fa7eda: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/trim_and_sketch.nf
+  Script_7b525d8f9f6b19b1: /home/fosterz/projects/pathogensurveillance/./workflows/pathogensurveillance.nf
+  Script_aa3c656e19e9ecd0: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/prepare_input.nf
+  Script_28f941a95f1d6b78: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/tabix/tabix/main.nf
+  Script_fb9325ad709eda79: /home/fosterz/projects/pathogensurveillance/./workflows/../modules/local/record_messages.nf
+  Script_78ffabd880c97ad1: /home/fosterz/projects/pathogensurveillance/main.nf
+  Script_0efe1bd11f3c1ecf: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/./../../modules/nf-core/bwa/mem/main.nf
+  Script_4b5e075d1571f58e: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/count_reads.nf
+  Script_7da4329a82b4c3fe: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/make_gff_with_fasta.nf
+  Script_ea4c26b09158e90d: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/genome_assembly.nf
+  Script_d917dfb43e2eec07: /home/fosterz/projects/pathogensurveillance/./workflows/../subworkflows/local/../../modules/local/subset_reads.nf
+  Script_ce62393905be62c9: /home/fosterz/projects/pathogensurveillance/./workflows/../modules/local/download_assemblies.nf
+  Script_f4c855ce980bf3e2: /home/fosterz/projects/pathogensurveillance/./workflows/../modules/nf-core/multiqc/main.nf
+Jan-03 14:49:28.985 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jan-03 14:49:28.985 [main] DEBUG nextflow.Session - Session await
+Jan-03 14:49:29.117 [FileTransfer-1] DEBUG nextflow.file.FilePorter - Copying foreign file https://raw.githubusercontent.com/grunwaldlab/pathogensurveillance/refs/heads/dev/test/data/metadata/small_genome.csv to work dir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/stage-bd06a1ec-d220-4293-9067-b81281e885c0/6e/51cd1e2fa47feb4f9ae00f8a11058c/small_genome.csv
+Jan-03 14:49:29.187 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:29.188 [Task submitter] INFO  nextflow.Session - [f3/aba84b] Submitted process > PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO_DOWNLOAD (eukaryota_odb10)
+Jan-03 14:49:29.200 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:29.201 [Task submitter] INFO  nextflow.Session - [df/ce185f] Submitted process > PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTADBDOWNLOAD
+Jan-03 14:49:29.218 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:29.218 [Task submitter] INFO  nextflow.Session - [0f/105690] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SAMPLESHEET_CHECK (small_genome.csv)
+Jan-03 14:49:36.534 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:SAMPLESHEET_CHECK (small_genome.csv); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/0f/1056909c27f8ada59f19d03522a2a3]
+Jan-03 14:49:36.536 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=84; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jan-03 14:49:36.569 [TaskFinalizer-1] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=84; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Jan-03 14:49:36.626 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.626 [Task submitter] INFO  nextflow.Session - [ea/5c43f4] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR29397006)
+Jan-03 14:49:36.637 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.638 [Task submitter] INFO  nextflow.Session - [d8/ab19dc] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR29695256)
+Jan-03 14:49:36.645 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.645 [Task submitter] INFO  nextflow.Session - [79/b2688c] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR18850310)
+Jan-03 14:49:36.651 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.652 [Task submitter] INFO  nextflow.Session - [e0/5b451c] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (ERR13427439)
+Jan-03 14:49:36.657 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.657 [Task submitter] INFO  nextflow.Session - [84/2d388c] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR27942447)
+Jan-03 14:49:36.663 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.663 [Task submitter] INFO  nextflow.Session - [77/878c35] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR18850314)
+Jan-03 14:49:36.671 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:49:36.672 [Task submitter] INFO  nextflow.Session - [f4/5f5f78] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES (GCF_000002765.6)
+Jan-03 14:49:43.826 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES (GCF_000002765.6); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/f4/5f5f78611f7c50be6e0b4571f29a88]
+Jan-03 14:49:52.849 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO_DOWNLOAD (eukaryota_odb10); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/f3/aba84b8ecd42a2683491099dc82faa]
+Jan-03 14:50:07.150 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR18850314); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/77/878c35ee965d4bbc76a31d9578af7a]
+Jan-03 14:50:07.183 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:07.183 [Task submitter] INFO  nextflow.Session - [f7/3b4cbb] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH (SRR18850314)
+Jan-03 14:50:07.469 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 6; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:SRATOOLS_FASTERQDUMP (SRR18850310); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/79/b2688ceff4cfea79e8c44b12bfa486]
+Jan-03 14:50:07.495 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:07.496 [Task submitter] INFO  nextflow.Session - [28/b711ba] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH (SRR18850310)
+Jan-03 14:50:10.180 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 11; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH (SRR18850314); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/f7/3b4cbb8378e8c279e642e6aff4183c]
+Jan-03 14:50:10.216 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:10.216 [Task submitter] INFO  nextflow.Session - [a9/c5c2b8] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION (SRR18850314)
+Jan-03 14:50:10.408 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 12; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH (SRR18850310); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/28/b711bad030ed1cc24d6c11473f7795]
+Jan-03 14:50:10.434 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:10.435 [Task submitter] INFO  nextflow.Session - [c9/41306c] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION (SRR18850310)
+Jan-03 14:50:11.002 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 13; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION (SRR18850314); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/a9/c5c2b819a2b1b863a2499f52cb3725]
+Jan-03 14:50:11.039 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:11.040 [Task submitter] INFO  nextflow.Session - [4f/ae9bef] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES (Lactobacillaceae)
+Jan-03 14:50:11.049 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-03 14:50:11.049 [Task submitter] INFO  nextflow.Session - [9d/5f8c9f] Submitted process > PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES (Streptomycetaceae)
+Jan-03 14:50:11.198 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION (SRR18850310); status: COMPLETED; exit: 0; error: -; workDir: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/c9/41306cdd3aa5a47a853801d3fb4d2a]
+Jan-03 14:50:29.719 [SIGINT handler] DEBUG nextflow.Session - Session aborted -- Cause: SIGINT
+Jan-03 14:50:29.744 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Jan-03 14:50:29.769 [SIGINT handler] DEBUG nextflow.Session - The following nodes are still active:
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:BBMAP_SENDSKETCH
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:INITIAL_CLASSIFICATION
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:FIND_ASSEMBLIES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: taxon
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:PICK_ASSEMBLIES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: n_ref_strains
+  port 2: (value) bound ; channel: n_ref_species
+  port 3: (value) bound ; channel: n_ref_genera
+  port 4: (value) bound ; channel: only_latin_binomial_refs
+  port 5: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:DOWNLOAD_ASSEMBLIES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:COUNT_READS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_INPUT:SUBSET_READS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FASTP
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: adapter_fasta
+  port 2: (value) bound ; channel: discard_trimmed_pass
+  port 3: (value) bound ; channel: save_trimmed_fail
+  port 4: (value) bound ; channel: save_merged
+  port 5: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:SPADES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: yml
+  port 2: (value) bound ; channel: hmm
+  port 3: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_NANOPORE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: mode
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FLYE_PACBIO
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: mode
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:FILTER_ASSEMBLY
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:GENOME_ASSEMBLY:QUAST
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:SKETCH_COMPARISON:TRIM_AND_SKETCH
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_SKETCH
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:SKETCH_COMPARISON:SOURMASH_COMPARE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: file_list
+  port 2: (value) bound ; channel: save_numpy_matrix
+  port 3: (value) bound ; channel: save_csv
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:FASTQC
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:INITIAL_QC_CHECKS:NANOPLOT
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ASSIGN_MAPPING_REFERENCE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: min_ref_ani
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:SEQKIT_SLIDING
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:PICARD_CREATESEQUENCEDICTIONARY
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:SAMTOOLS_FAIDX
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: -
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:REFERENCE_INDEX:BWA_INDEX
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:BWA_MEM
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (queue) OPEN  ; channel: -
+  port 2: (value) bound ; channel: -
+  port 3: (value) bound ; channel: sort_bam
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:PICARD_FORMAT
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:ALIGN_READS:SAMTOOLS_INDEX
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:MAKE_REGION_FILE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_GENOTYPE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (queue) OPEN  ; channel: -
+  port 2: (queue) OPEN  ; channel: -
+  port 3: (queue) OPEN  ; channel: region_file
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GRAPHTYPER_VCFCONCATENATE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:TABIX_TABIX
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:BGZIP_MAKE_GZIP
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:GATK4_VARIANTFILTRATION
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (queue) OPEN  ; channel: -
+  port 2: (queue) OPEN  ; channel: -
+  port 3: (queue) OPEN  ; channel: -
+  port 4: (queue) OPEN  ; channel: -
+  port 5: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:CALL_VARIANTS:VCFLIB_VCFFILTER
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:VCF_TO_SNP_ALIGN
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:VARIANT_ANALYSIS:IQTREE2_SNP
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: constant_sites
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: n_ref_closest
+  port 2: (value) bound ; channel: n_ref_closest_named
+  port 3: (value) bound ; channel: n_ref_context
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:BAKTA_BAKTA
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) OPEN  ; channel: db
+  port 2: (value) bound ; channel: proteins
+  port 3: (value) bound ; channel: prodigal_tf
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAKE_GFF_WITH_FASTA
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:PIRATE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:REFORMAT_PIRATE_RESULTS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:CALCULATE_POCP
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:ALIGN_FEATURE_SEQUENCES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:RENAME_CORE_GENE_HEADERS
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:SUBSET_CORE_GENES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: min_core_genes
+  port 2: (value) bound ; channel: max_core_genes
+  port 3: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:FILES_IN_DIR
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:MAFFT_SMALL
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: -
+  port 2: (value) bound ; channel: -
+  port 3: (value) bound ; channel: -
+  port 4: (value) bound ; channel: -
+  port 5: (value) bound ; channel: -
+  port 6: (value) bound ; channel: compress
+  port 7: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:CORE_GENOME_PHYLOGENY:IQTREE2_CORE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: constant_sites
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:ASSIGN_CONTEXT_REFERENCES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: n_ref_closest
+  port 2: (value) bound ; channel: n_ref_closest_named
+  port 3: (value) bound ; channel: n_ref_context
+  port 4: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:BUSCO
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: mode
+  port 2: (value) bound ; channel: lineage
+  port 3: (value) bound ; channel: busco_lineages_path
+  port 4: (value) bound ; channel: config_file
+  port 5: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:SUBSET_BUSCO_GENES
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: min_genes
+  port 2: (value) bound ; channel: max_genes
+  port 3: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:FILES_IN_DIR
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:MAFFT_SMALL
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: -
+  port 2: (value) bound ; channel: -
+  port 3: (value) bound ; channel: -
+  port 4: (value) bound ; channel: -
+  port 5: (value) bound ; channel: -
+  port 6: (value) bound ; channel: compress
+  port 7: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:BUSCO_PHYLOGENY:IQTREE2_CORE
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: constant_sites
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:MULTIQC
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: multiqc_config
+  port 2: (value) bound ; channel: extra_multiqc_config
+  port 3: (value) bound ; channel: multiqc_logo
+  port 4: (value) bound ; channel: replace_names
+  port 5: (value) bound ; channel: sample_names
+  port 6: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:PREPARE_REPORT_INPUT
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) OPEN  ; channel: versions
+  port 2: (cntrl) -     ; channel: $
+
+[process] PATHOGENSURVEILLANCE:MAIN_REPORT
+  status=ACTIVE
+  port 0: (queue) OPEN  ; channel: -
+  port 1: (value) bound ; channel: template
+  port 2: (cntrl) -     ; channel: $
+
+Jan-03 14:50:29.774 [SIGINT handler] DEBUG nextflow.Session - 
+Thread[Actor Thread 22,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Task submitter,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  app//nextflow.processor.TaskPollingMonitor.awaitTasks(TaskPollingMonitor.groovy:388)
+  app//nextflow.processor.TaskPollingMonitor.submitLoop(TaskPollingMonitor.groovy:412)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.13/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.13/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 23,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Common-Cleaner,8,InnocuousThreadGroup]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.13/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+  java.base@11.0.13/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:134)
+
+Thread[Actor Thread 5,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[SIGINT handler,9,system]
+  java.base@11.0.13/java.lang.Thread.dumpThreads(Native Method)
+  java.base@11.0.13/java.lang.Thread.getAllStackTraces(Thread.java:1653)
+  app//nextflow.util.SysHelper.dumpThreads(SysHelper.groovy:188)
+  app//nextflow.Session.abort(Session.groovy:800)
+  app//nextflow.Session$_registerSignalHandlers_closure17.doCall(Session.groovy:489)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.13/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.13/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:279)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//org.codehaus.groovy.runtime.ConvertedClosure.invokeCustom(ConvertedClosure.java:52)
+  app//org.codehaus.groovy.runtime.ConversionHandler.invoke(ConversionHandler.java:113)
+  com.sun.proxy.$Proxy26.handle(Unknown Source)
+  jdk.unsupported@11.0.13/sun.misc.Signal$InternalMiscHandler.handle(Signal.java:198)
+  java.base@11.0.13/jdk.internal.misc.Signal$1.run(Signal.java:220)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-8,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-11,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-3,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-10,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-7,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-6,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-8,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-16,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Reference Handler,10,system]
+  java.base@11.0.13/java.lang.ref.Reference.waitForReferencePendingList(Native Method)
+  java.base@11.0.13/java.lang.ref.Reference.processPendingReferences(Reference.java:241)
+  java.base@11.0.13/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:213)
+
+Thread[Actor Thread 8,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 9,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 15,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 17,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 20,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-14,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-2,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 2,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 24,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-4,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 27,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 4,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 25,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 13,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 14,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Signal Dispatcher,9,system]
+
+Thread[Actor Thread 11,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-15,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-2,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 7,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-13,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Thread-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:2123)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingDeque.pollFirst(LinkedBlockingDeque.java:513)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingDeque.poll(LinkedBlockingDeque.java:675)
+  app//nextflow.util.SimpleAgent.run(SimpleAgent.groovy:89)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+  java.base@11.0.13/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+  java.base@11.0.13/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+  java.base@11.0.13/java.lang.reflect.Method.invoke(Method.java:566)
+  app//org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+  app//groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1333)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethodClosure(MetaClassImpl.java:1017)
+  app//groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1207)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1088)
+  app//groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+  app//groovy.lang.Closure.call(Closure.java:433)
+  app//groovy.lang.Closure.call(Closure.java:412)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 10,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-5,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 16,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-2,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-6,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[main,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  app//nextflow.util.Barrier$_awaitCompletion_closure3.doCall(Barrier.groovy:92)
+  app//nextflow.util.Barrier$_awaitCompletion_closure3.call(Barrier.groovy)
+  app//nextflow.extension.Bolts.withLock(Bolts.groovy:337)
+  app//nextflow.extension.Bolts.withLock(Bolts.groovy)
+  app//nextflow.util.Barrier.awaitCompletion(Barrier.groovy:89)
+  app//nextflow.Session.await(Session.groovy:676)
+  app//nextflow.script.ScriptRunner.await(ScriptRunner.groovy:256)
+  app//nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:144)
+  app//nextflow.cli.CmdRun.run(CmdRun.groovy:376)
+  app//nextflow.cli.Launcher.run(Launcher.groovy:503)
+  app//nextflow.cli.Launcher.main(Launcher.groovy:658)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 6,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 19,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 18,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-4,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-9,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 12,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-5,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 3,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:462)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:937)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1053)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-12,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-9,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 26,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[PublishDir-3,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 21,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Finalizer,8,system]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+  java.base@11.0.13/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176)
+  java.base@11.0.13/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:170)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+  java.base@11.0.13/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[TaskFinalizer-3,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 28,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[FileTransfer-1,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2081)
+  java.base@11.0.13/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:433)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[pool-2-thread-7,5,main]
+  java.base@11.0.13/java.lang.Object.wait(Native Method)
+  java.base@11.0.13/java.lang.Object.wait(Object.java:328)
+  java.base@11.0.13/java.lang.ProcessImpl.waitFor(ProcessImpl.java:495)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.doCall(LocalTaskHandler.groovy:109)
+  app//nextflow.executor.local.LocalTaskHandler$_submit_closure1.call(LocalTaskHandler.groovy)
+  app//groovy.lang.Closure.run(Closure.java:505)
+  java.base@11.0.13/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+  java.base@11.0.13/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[process reaper,10,system]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:234)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:462)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:937)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1053)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Thread[Actor Thread 29,5,main]
+  java.base@11.0.13/jdk.internal.misc.Unsafe.park(Native Method)
+  java.base@11.0.13/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.awaitFulfill(SynchronousQueue.java:460)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:361)
+  java.base@11.0.13/java.util.concurrent.SynchronousQueue.take(SynchronousQueue.java:920)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1054)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1114)
+  java.base@11.0.13/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  java.base@11.0.13/java.lang.Thread.run(Thread.java:829)
+
+Jan-03 14:50:29.779 [SIGINT handler] ERROR nextflow.Nextflow - Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting
+Jan-03 14:50:29.780 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jan-03 14:50:29.784 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jan-03 14:50:29.793 [Actor Thread 34] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.793 [Actor Thread 5] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.802 [Actor Thread 4] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.803 [Actor Thread 6] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.805 [Actor Thread 31] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.809 [Actor Thread 35] DEBUG nextflow.file.SortFileCollector - FileCollector temp dir not removed: null
+Jan-03 14:50:29.813 [main] INFO  nextflow.Nextflow - -[0;35m[nf-core/pathogensurveillance][0;31m Pipeline completed with errors[0m-
+Jan-03 14:50:29.816 [main] WARN  n.processor.TaskPollingMonitor - Killing running tasks (7)
+Jan-03 14:50:29.845 [Actor Thread 1] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 3; slices: 1; internal sort time: 0.03 s; external sort time: 0.002 s; total time: 0.032 s
+Jan-03 14:50:29.849 [Actor Thread 1] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/collect-file/f40225a2c6b0d44144fcc969654bccdd
+Jan-03 14:50:29.849 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=9; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=7; succeedDuration=3m 2s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=9; peakCpus=16; peakMemory=66.5 GB; ]
+Jan-03 14:50:29.850 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+Jan-03 14:50:29.851 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+Jan-03 14:50:29.857 [Actor Thread 1] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /tmp/nxf-11121723186135681313
+Jan-03 14:50:30.419 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+Jan-03 14:50:30.610 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jan-03 14:50:30.646 [main] INFO  org.pf4j.AbstractPluginManager - Stop plugin 'nf-schema@2.1.1'
+Jan-03 14:50:30.646 [main] DEBUG nextflow.plugin.BasePlugin - Plugin stopped nf-schema
+Jan-03 14:50:30.649 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

@@ -1,0 +1,1 @@
+/home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/28/b711bad030ed1cc24d6c11473f7795/SRR18850310.txt

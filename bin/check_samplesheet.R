@@ -146,7 +146,7 @@ is_present <- function(x) {
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/downloads/sample_data_N664_true.csv')
-# args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
+# args <- list('~/downloads/sample_data_N664_true.csv', '~/downloads/ref_data.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/small_genome.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)

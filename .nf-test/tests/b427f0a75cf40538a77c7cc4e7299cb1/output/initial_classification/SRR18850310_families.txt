@@ -1,0 +1,1 @@
+/home/fosterz/projects/pathogensurveillance/.nf-test/tests/b427f0a75cf40538a77c7cc4e7299cb1/work/c9/41306cdd3aa5a47a853801d3fb4d2a/SRR18850310_families.txt
