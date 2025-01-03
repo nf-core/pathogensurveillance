@@ -17,6 +17,7 @@ process SAMPLESHEET_CHECK {
     output:
     path 'sample_metadata.csv'    , emit: sample_data
     path 'reference_metadata.csv' , emit: reference_data
+    path 'removed_sample_data.csv', emit: removed_sample_data
     path "versions.yml"           , emit: versions
 
     script:

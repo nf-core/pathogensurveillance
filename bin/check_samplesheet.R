@@ -6,6 +6,14 @@
 #
 # The first part of this script defines constants that might need to be changed in the future.
 
+# Where to save list of removed samples
+removed_sample_data_path <- 'removed_sample_data.csv'
+removed_sample_data <- data.frame(
+    sample_id = character(0),
+    report_group_id = character(0),
+    description = character(0)
+)
+
 # Column names that can be used by the pipeline
 # These will always be present and in this order in the output
 # See the README.md for descriptions of each column
@@ -137,7 +145,7 @@ is_present <- function(x) {
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('~/Downloads/sample_data_N273_14ncbigenomes.csv', '~/Downloads/ref_data.csv')
+# args <- list('~/downloads/sample_data_N664_true.csv')
 # args <- list('test/data/metadata/chaos_samples.csv', 'test/data/metadata/chaos_references.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/small_genome.csv")
 
@@ -516,19 +524,18 @@ biosample_ids <- unique(metadata_samp$ncbi_accession[grepl("^SAM[ND|E]", metadat
 run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
 names(run_id_key) <- biosample_ids
 
-no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
 
 # Write biosamples with no reads to a file
-#if (length(no_runs_found) > 0) {
-#  writeLines(paste("The following biosamples do not have reads associated with them:\n", 
-#                   paste(no_runs_found, collapse = "\n")),
-#             con = "missing_reads_biosamples.txt")
-#  stop("Some biosamples do not have reads associated with them. See 'missing_reads_biosamples.txt' for details.")
-#}
-
+no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
 if (length(no_runs_found) > 0) {
-  stop('The following biosamples do not have reads associated with them:\n',
-       paste0(no_runs_found, collapse = '\n'), '\n')
+    warning('The following biosamples do not have reads associated with them:\n',
+            paste0(no_runs_found, collapse = '\n'), '\n')
+    removed_sample_data <- rbind(removed_sample_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% no_runs_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% no_runs_found],
+        description = 'Sample removed since there are no runs associated with this biosample.'
+    ))
+    metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
 }
 
 split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
@@ -902,6 +909,10 @@ if (nrow(metadata_ref) > 0) {
 # Replace double quotes with single quotes to not conflict with the CSV format quoting values
 metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
 metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
+removed_sample_data[] <- lapply(removed_sample_data, gsub, pattern = '"', replacement = "'")
+
+# Write data for samples removed for some reason during this process
+write.csv(removed_sample_data, file = removed_sample_data_path, row.names = FALSE, na = '')
 
 # Write output metadata
 write.csv(metadata_samp, file = 'sample_metadata.csv', row.names = FALSE, na = '')
