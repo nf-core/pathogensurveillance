@@ -9,7 +9,7 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#    '/home/fosterz/projects/pathogensurveillance/work/e9/79b957f28752a68c3f033ef5b3e856/_no_group_defined__GCF_029962605_1.vcffilter.vcf.gz',
+#    '/home/fosterz/projects/pathogensurveillance/work/09/b3620ef7f4fb8600f8666267c1009f/validation_serratia_GCF_000214235_1.vcffilter.vcf.gz',
 #    'deleteme.fasta'
 # )
 names(args) <- c("vcf_path", "out_path")
@@ -79,9 +79,13 @@ if (remove_missing_samples) {
                                    function(x) all(is.na(x)))
     samples_to_remove <- sample_ids[is_only_missing_data]
     vcf_data[samples_to_remove] <- NULL
+    if (all(is_only_missing_data)) {
+        vcf_data <- vcf_data[numeric(0), , drop = FALSE]
+    }
     sample_ids <- sample_ids[! sample_ids %in% samples_to_remove]
     writeLines(samples_to_remove, missing_sample_file_path)
 }
+
 
 # Remove variants with missing data
 if (! is.na(max_missing_data_prop) && max_missing_data_prop < 1) {

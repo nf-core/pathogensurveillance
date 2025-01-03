@@ -162,17 +162,19 @@ workflow VARIANT_ANALYSIS {
         .map { [[id: it[1].replace('\n', '')], it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
 
     // Dont make trees for groups with less than 3 samples
-    align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta // val(ref+report_meta), fasta
-        .combine(CALL_VARIANTS.out.samples, by:0) // val(ref+report_meta), fasta, [meta]
-    align_for_tree = align_with_samp_meta
-        .filter { it[2].size() >= 3 }
-        .map { it[0..1] } // val(ref+report_meta), fasta
-    too_few_samp_warnings = align_with_samp_meta // val(ref+report_meta), fasta, [meta]
-        .filter { it[2].size() < 3 }
-        .map { [null, it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] } // meta, report_meta, ref_meta, workflow, level, message
+    align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta
+        .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
+        .branch { meta, fasta, seq_count ->
+            enough: seq_count.toInteger() >= 3
+                return [meta, fasta]
+            too_few: true
+                return [meta, fasta]
+        }
+    too_few_samp_warnings = align_with_samp_meta.too_few
+        .map { meta, fasta -> [null, meta.group, meta.ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] }
     messages = messages.mix(too_few_samp_warnings)
 
-    IQTREE2_SNP ( align_for_tree, [] )
+    IQTREE2_SNP ( align_with_samp_meta.enough, [] )
     versions = versions.mix(IQTREE2_SNP.out.versions)
 
     phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
