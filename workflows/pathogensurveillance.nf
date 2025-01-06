@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
+include { MULTIQC                     } from '../modules/local/multiqc/main'
 include { PREPARE_INPUT               } from '../subworkflows/local/prepare_input'
 include { CORE_GENOME_PHYLOGENY       } from '../subworkflows/local/core_genome_phylogeny'
 include { VARIANT_ANALYSIS            } from '../subworkflows/local/variant_analysis'

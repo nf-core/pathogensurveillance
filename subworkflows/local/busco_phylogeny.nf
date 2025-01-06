@@ -1,4 +1,4 @@
-include { BUSCO                     } from '../../modules/nf-core/busco/busco/main'
+include { BUSCO                     } from '../../modules/local/busco/busco/main'
 include { BUSCO_DOWNLOAD            } from '../../modules/local/busco_download'
 include { ASSIGN_CONTEXT_REFERENCES } from '../../modules/local/assign_context_references'
 include { MAFFT as MAFFT_SMALL      } from '../../modules/nf-core/mafft/main'

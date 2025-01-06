@@ -1,4 +1,4 @@
-name: busco
+name: busco_busco
 description: Benchmarking Universal Single Copy Orthologs
 keywords:
   - quality control
@@ -22,9 +22,10 @@ input:
         description: |
           Groovy Map containing sample information
           e.g. [ id:'test', single_end:false ]
-    - "'tmp_input/*'":
+    - fasta:
         type: file
-        description: Input assembly
+        description: Nucleic or amino acid sequence file in FASTA format.
+        pattern: "*.{fasta,fna,fa,fasta.gz,fna.gz,fa.gz}"
   - - mode:
         type: string
         description: The mode to run Busco in. One of genome, proteins, or transcriptome
@@ -117,7 +118,9 @@ output:
             e.g. [ id:'test', single_end:false ]
       - "*-busco/*/translated_proteins":
           type: directory
-          description: Translated proteins
+          description: Six frame translations of each transcript made by the transcriptome
+            mode
+          pattern: "translated_dir"
   - busco_dir:
       - meta:
           type: map
@@ -128,24 +131,6 @@ output:
           type: directory
           description: BUSCO lineage specific output
           pattern: "*-busco"
-  - single_copy_faa:
-      - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. [ id:'test', single_end:false ]
-      - "*-busco/*/run_*/busco_sequences/single_copy_busco_sequences/*.faa":
-          type: file
-          description: Single copy busco amino acid sequence
-  - single_copy_fna:
-      - meta:
-          type: map
-          description: |
-            Groovy Map containing sample information
-            e.g. [ id:'test', single_end:false ]
-      - "*-busco/*/run_*/busco_sequences/single_copy_busco_sequences/*.fna":
-          type: file
-          description: Single copy busco nucleotide sequence
   - versions:
       - versions.yml:
           type: file
@@ -157,9 +142,11 @@ authors:
   - "@mahesh-panchal"
   - "@muffato"
   - "@jvhagey"
+  - "@gallvp"
 maintainers:
   - "@priyanka-surana"
   - "@charles-plessy"
   - "@mahesh-panchal"
   - "@muffato"
   - "@jvhagey"
+  - "@gallvp"

@@ -15,12 +15,7 @@ tools:
       licence: ["GPL-3.0-or-later"]
       identifier: biotools:multiqc
 input:
-  - - meta:
-        type: map
-        description: |
-          Groovy Map containing sample information
-          e.g. [ id:'test', single_end:false ]
-    - multiqc_files:
+  - - multiqc_files:
         type: file
         description: |
           List of reports / files recognised by MultiQC, for example the html and zip output of FastQC
@@ -51,39 +46,18 @@ input:
           argument.
         pattern: "*.{tsv}"
 output:
-  - outdir:
-      - meta:
-          type: directory
-          description: The ouput directory.
-          pattern: "$*_multiqc"
-      - ${prefix}_multiqc:
-          type: directory
-          description: The ouput directory.
-          pattern: "$*_multiqc"
   - report:
-      - meta:
-          type: file
-          description: MultiQC report file
-          pattern: "multiqc_report.html"
-      - ${prefix}_multiqc/*multiqc_report.html:
+      - "*multiqc_report.html":
           type: file
           description: MultiQC report file
           pattern: "multiqc_report.html"
   - data:
-      - meta:
-          type: directory
-          description: MultiQC data dir
-          pattern: "multiqc_data"
-      - ${prefix}_multiqc/*_data:
+      - "*_data":
           type: directory
           description: MultiQC data dir
           pattern: "multiqc_data"
   - plots:
-      - meta:
-          type: file
-          description: Plots created by MultiQC
-          pattern: "*_data"
-      - ${prefix}_multiqc/*_plots:
+      - "*_plots":
           type: file
           description: Plots created by MultiQC
           pattern: "*_data"

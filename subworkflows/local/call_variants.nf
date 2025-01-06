@@ -1,9 +1,9 @@
-include { GRAPHTYPER_GENOTYPE       } from '../../modules/nf-core/graphtyper/genotype/main'
+include { GRAPHTYPER_GENOTYPE       } from '../../modules/local/graphtyper/genotype/main'
 include { MAKE_REGION_FILE          } from '../../modules/local/make_region_file'
-include { GRAPHTYPER_VCFCONCATENATE } from '../../modules/nf-core/graphtyper/vcfconcatenate/main'
+include { GRAPHTYPER_VCFCONCATENATE } from '../../modules/local/graphtyper/vcfconcatenate/main'
 include { TABIX_TABIX               } from '../../modules/nf-core/tabix/tabix/main'
 include { BGZIP_MAKE_GZIP           } from '../../modules/local/bgzip_make_gzip'
-include { GATK4_VARIANTFILTRATION   } from '../../modules/nf-core/gatk4/variantfiltration/main'
+include { GATK4_VARIANTFILTRATION   } from '../../modules/local/gatk4/variantfiltration/main'
 include { VCFLIB_VCFFILTER          } from '../../modules/nf-core/vcflib/vcffilter/main'
 
 workflow CALL_VARIANTS {
