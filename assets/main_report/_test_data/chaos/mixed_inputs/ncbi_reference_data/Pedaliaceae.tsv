@@ -1,8 +1,0 @@
-Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
-22928451	GCA_040286145.1	ASM4028614v1	300843	Sesamum radiatum (eudicots)	300843	Sesamum radiatum	haploid	Scaffold	60	false	Major	Major	representative genome	2024/06/24 00:00	2024/06/24 00:00	778482	19482327
-22928441	GCA_040286105.1	ASM4028610v1	2727402	Sesamum latifolium (eudicots)	2727402	Sesamum latifolium	haploid	Scaffold	77	false	Major	Major	representative genome	2024/06/24 00:00	2024/06/24 00:00	468802	22152918
-22928291	GCA_040285715.1	ASM4028571v1	2727403	Sesamum calycinum (eudicots)	2727403	Sesamum calycinum	haploid	Scaffold	75	false	Major	Major	representative genome	2024/06/24 00:00	2024/06/24 00:00	407641	14269469
-22928271	GCA_040285695.1	ASM4028569v1	2727405	Sesamum angustifolium (eudicots)	2727405	Sesamum angustifolium	haploid	Scaffold	75	false	Major	Major	representative genome	2024/06/24 00:00	2024/06/24 00:00	369117	11567040
-20288291	GCA_034509725.1	ASM3450972v1	2727404	Sesamum angolense (eudicots)	2727404	Sesamum angolense	haploid	Scaffold	75	false	Major	Major	representative genome	2023/12/21 00:00	2023/12/21 00:00	529803	15373487
-20288281	GCA_034509735.1	ASM3450973v1	300844	Sesamum alatum (eudicots)	300844	Sesamum alatum	haploid	Scaffold	100	false	Major	Major	representative genome	2023/12/21 00:00	2023/12/21 00:00	1671068	40505049
-89401	GCF_000512975.1	S_indicum_v1.0	4182	Sesamum indicum (sesame)	4182	Sesamum indicum	haploid	Chromosome	152.7	false	Major	Major	representative genome	2014/01/06 00:00	2015/01/14 00:00	52169	2060396

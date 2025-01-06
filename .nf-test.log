@@ -1,11 +1,142 @@
-Jan-03 14:49:13.081 [main] INFO  com.askimed.nf.test.App - nf-test 0.9.2
-Jan-03 14:49:13.096 [main] INFO  com.askimed.nf.test.App - Arguments: [test, tests/default.nf.test, --profile, docker,test]
-Jan-03 14:49:14.011 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 24.10.3
-Jan-03 14:49:14.014 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Load config from file /home/fosterz/projects/pathogensurveillance/nf-test.config...
-Jan-03 14:49:16.527 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Loaded 155 files from directory /home/fosterz/projects/pathogensurveillance in 2.084 sec
-Jan-03 14:49:16.529 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Found 1 files containing tests.
-Jan-03 14:49:16.529 [main] DEBUG com.askimed.nf.test.lang.dependencies.DependencyResolver - Found files: [/home/fosterz/projects/pathogensurveillance/tests/default.nf.test]
-Jan-03 14:49:16.646 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Found 1 tests to execute.
-Jan-03 14:49:16.647 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
-Jan-03 14:49:16.647 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test that pipeline runs on minimal dataset with no errors.' from file '/home/fosterz/projects/pathogensurveillance/tests/default.nf.test'.
-Jan-03 14:49:16.647 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'b427f0a7: Should run without failures'. type: com.askimed.nf.test.lang.pipeline.PipelineTest
+Jan-06 09:58:48.465 [main] INFO  com.askimed.nf.test.App - nf-test 0.9.2
+Jan-06 09:58:48.490 [main] INFO  com.askimed.nf.test.App - Arguments: [test, .]
+Jan-06 09:58:49.404 [main] INFO  com.askimed.nf.test.App - Nextflow Version: 24.10.3
+Jan-06 09:58:49.409 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Load config from file /home/fosterz/projects/pathogensurveillance/nf-test.config...
+Jan-06 09:58:51.880 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Loaded 154 files from directory /home/fosterz/projects/pathogensurveillance in 2.029 sec
+Jan-06 09:58:51.882 [main] INFO  com.askimed.nf.test.lang.dependencies.DependencyResolver - Found 35 files containing tests.
+Jan-06 09:58:51.883 [main] DEBUG com.askimed.nf.test.lang.dependencies.DependencyResolver - Found files: [/home/fosterz/projects/pathogensurveillance/modules/nf-core/picard/addorreplacereadgroups/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/picard/createsequencedictionary/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/picard/sortsam/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/seqtk/sample/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/bakta/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/pirate/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/flye/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/samtools/faidx/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/subworkflows/nf-core/utils_nfcore_pipeline/tests/main.workflow.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/seqkit/sliding/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/tabix/tabix/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/untar/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/bwa/mem/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/nanoplot/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/samtools/index/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/subworkflows/nf-core/utils_nextflow_pipeline/tests/main.function.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/picard/markduplicates/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/vcflib/vcffilter/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/quast/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/fastqc/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/mafft/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/baktadbdownload/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/sourmash/sketch/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/spades/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/custom/dumpsoftwareversions/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/fastp/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/sourmash/compare/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/gatk4/variantfiltration/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/iqtree/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/subworkflows/nf-core/utils_nfcore_pipeline/tests/main.function.nf.test, /home/fosterz/projects/pathogensurveillance/subworkflows/nf-core/utils_nextflow_pipeline/tests/main.workflow.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/bwa/index/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/subworkflows/nf-core/utils_nfschema_plugin/tests/main.nf.test, /home/fosterz/projects/pathogensurveillance/modules/nf-core/multiqc/tests/main.nf.test]
+Jan-06 09:58:53.298 [main] INFO  com.askimed.nf.test.commands.RunTestsCommand - Found 143 tests to execute.
+Jan-06 09:58:53.299 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Started test plan
+Jan-06 09:58:53.299 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test Process BAKTA_BAKTA' from file '/home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/bakta/tests/main.nf.test'.
+Jan-06 09:58:53.299 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test '6cb708e8: Bakta - bacteroides_fragilis - genome.fasta'. type: com.askimed.nf.test.lang.process.ProcessTest
+Jan-06 09:58:58.476 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test '6cb708e8: Bakta - bacteroides_fragilis - genome.fasta' finished. status: FAILED
+org.codehaus.groovy.runtime.powerassert.PowerAssertionError: 12 of 12 assertions failed
+	at com.askimed.nf.test.lang.extensions.GlobalMethods.assertAll(GlobalMethods.java:48)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.invoke(StaticMetaMethodSite.java:44)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.callStatic(StaticMetaMethodSite.java:100)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallStatic(CallSiteArray.java:55)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:217)
+	at main_nf$_run_closure1$_closure2$_closure6.doCall(main.nf.test:41)
+	at main_nf$_run_closure1$_closure2$_closure6.doCall(main.nf.test)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at com.askimed.nf.test.lang.TestCode.execute(TestCode.java:16)
+	at com.askimed.nf.test.lang.process.ProcessTest.execute(ProcessTest.java:171)
+	at com.askimed.nf.test.core.TestExecutionEngine.execute(TestExecutionEngine.java:165)
+	at com.askimed.nf.test.commands.RunTestsCommand.execute(RunTestsCommand.java:298)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:43)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:18)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1953)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2346)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2311)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at com.askimed.nf.test.App.run(App.java:39)
+	at com.askimed.nf.test.App.main(App.java:46)
+Jan-06 09:58:58.483 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'd86c95bf: Bakta - stub'. type: com.askimed.nf.test.lang.process.ProcessTest
+Jan-06 09:59:04.289 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/bakta/tests/main.nf.test.snap'
+Jan-06 09:59:04.341 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'Bakta - stub' do not match.
+Jan-06 09:59:04.344 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'd86c95bf: Bakta - stub' finished. status: FAILED
+org.codehaus.groovy.runtime.powerassert.PowerAssertionError: 1 of 2 assertions failed
+	at com.askimed.nf.test.lang.extensions.GlobalMethods.assertAll(GlobalMethods.java:48)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.invoke(StaticMetaMethodSite.java:44)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.callStatic(StaticMetaMethodSite.java:100)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallStatic(CallSiteArray.java:55)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:217)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:240)
+	at main_nf$_run_closure1$_closure3$_closure23.doCall(main.nf.test:75)
+	at main_nf$_run_closure1$_closure3$_closure23.doCall(main.nf.test)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at com.askimed.nf.test.lang.TestCode.execute(TestCode.java:16)
+	at com.askimed.nf.test.lang.process.ProcessTest.execute(ProcessTest.java:171)
+	at com.askimed.nf.test.core.TestExecutionEngine.execute(TestExecutionEngine.java:165)
+	at com.askimed.nf.test.commands.RunTestsCommand.execute(RunTestsCommand.java:298)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:43)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:18)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1953)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2346)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2311)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at com.askimed.nf.test.App.run(App.java:39)
+	at com.askimed.nf.test.App.main(App.java:46)
+Jan-06 09:59:04.345 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Testsuite 'Test Process BAKTA_BAKTA' finished. snapshot file: true, skipped tests: false, failed tests: true
+Jan-06 09:59:04.346 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Running testsuite 'Test Process BAKTA_BAKTADBDOWNLOAD' from file '/home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/baktadbdownload/tests/main.nf.test'.
+Jan-06 09:59:04.346 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test 'fb3ac3cf: Bakta database download'. type: com.askimed.nf.test.lang.process.ProcessTest
+Jan-06 09:59:10.113 [main] DEBUG com.askimed.nf.test.lang.extensions.SnapshotFile - Load snapshots from file '/home/fosterz/projects/pathogensurveillance/modules/nf-core/bakta/baktadbdownload/tests/main.nf.test.snap'
+Jan-06 09:59:10.117 [main] DEBUG com.askimed.nf.test.lang.extensions.Snapshot - Snapshots 'Bakta database download' do not match.
+Jan-06 09:59:10.118 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Test 'fb3ac3cf: Bakta database download' finished. status: FAILED
+org.codehaus.groovy.runtime.powerassert.PowerAssertionError: 3 of 3 assertions failed
+	at com.askimed.nf.test.lang.extensions.GlobalMethods.assertAll(GlobalMethods.java:48)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.invoke(StaticMetaMethodSite.java:44)
+	at org.codehaus.groovy.runtime.callsite.StaticMetaMethodSite.callStatic(StaticMetaMethodSite.java:100)
+	at org.codehaus.groovy.runtime.callsite.CallSiteArray.defaultCallStatic(CallSiteArray.java:55)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:217)
+	at org.codehaus.groovy.runtime.callsite.AbstractCallSite.callStatic(AbstractCallSite.java:249)
+	at main_nf$_run_closure1$_closure2$_closure5.doCall(main.nf.test:23)
+	at main_nf$_run_closure1$_closure2$_closure5.doCall(main.nf.test)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:107)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:323)
+	at org.codehaus.groovy.runtime.metaclass.ClosureMetaClass.invokeMethod(ClosureMetaClass.java:274)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1030)
+	at groovy.lang.Closure.call(Closure.java:427)
+	at groovy.lang.Closure.call(Closure.java:406)
+	at com.askimed.nf.test.lang.TestCode.execute(TestCode.java:16)
+	at com.askimed.nf.test.lang.process.ProcessTest.execute(ProcessTest.java:171)
+	at com.askimed.nf.test.core.TestExecutionEngine.execute(TestExecutionEngine.java:165)
+	at com.askimed.nf.test.commands.RunTestsCommand.execute(RunTestsCommand.java:298)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:43)
+	at com.askimed.nf.test.commands.AbstractCommand.call(AbstractCommand.java:18)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1953)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2346)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2311)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at com.askimed.nf.test.App.run(App.java:39)
+	at com.askimed.nf.test.App.main(App.java:46)
+Jan-06 09:59:10.119 [main] INFO  com.askimed.nf.test.core.TestExecutionEngine - Run test '3857ddc5: Bakta database download - stub'. type: com.askimed.nf.test.lang.process.ProcessTest

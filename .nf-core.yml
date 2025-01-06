@@ -1,6 +1,7 @@
 bump_version: null
 lint:
   pipeline_todos: False
+  template_strings: False
 nf_core_version: 3.0.2
 org_path: null
 repository_type: pipeline

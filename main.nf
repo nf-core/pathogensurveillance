@@ -1,11 +1,7 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-<<<<<<< HEAD
-    nf-core/PATHOGENSURVEILLANCE
-=======
     nf-core/pathogensurveillance
->>>>>>> 903bebec0530d13e13bd909528fc81d1cfb62b67
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/pathogensurveillance
     Website: https://nf-co.re/pathogensurveillance
@@ -43,7 +39,7 @@ workflow {
         params.monochrome_logs,
         args,
         params.outdir,
-        params.sample_data,
+        params.input,
         params.reference_data
     )
 

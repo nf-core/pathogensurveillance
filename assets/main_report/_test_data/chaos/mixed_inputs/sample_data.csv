@@ -1,5 +1,0 @@
-"sample_id","name","description","path","path_2","ncbi_accession","ncbi_query","ncbi_query_max","sequence_type","report_group_ids","color_by","ploidy","ref_contextual_usage","random_column","User Factor 1","user factor (2)","â¦","_","single_end","sendsketch_depth","kingdom"
-"HoneyBee_Adorsata_","honey bee","honey bee","null","null","SRR1564144","null","10","illumina","mixed","User Factor 1;user factor (2)","2","optional","might","null","null","null","null","false","2.950","Eukaryota"
-"Rsol_Rsolanacearum","Rsol_Rsolanacearum","Rsol_Rsolanacearum","null","null","SRR19621834","null","10","illumina","mixed","User Factor 1;user factor (2)","1","optional","cause","null","null","null","null","false","34.077","Bacteria"
-"SRR10432277","SRR10432277","SRR10432277","null","null","SRR10432277","null","10","illumina","mixed","User Factor 1;user factor (2)","2","optional","stuff","null","null","null","null","false","3.268","Eukaryota"
-"BDM_Pbelbahrii","BDM_Pbelbahrii","BDM_Pbelbahrii","null","null","ERR1578941","null","10","illumina","mixed","User Factor 1;user factor (2)","1","optional","that","null","null","null","null","false","8.389","Eukaryota"

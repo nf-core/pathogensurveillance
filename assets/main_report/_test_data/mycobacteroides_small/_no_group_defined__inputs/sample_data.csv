@@ -1,4 +1,0 @@
-"sample_id","name","description","path","path_2","ncbi_accession","ncbi_query","ncbi_query_max","sequence_type","report_group_ids","color_by","ploidy","ref_contextual_usage","single_end","sendsketch_depth","kingdom"
-"SRR12574846","SRR12574846","SRR12574846","null","null","SRR12574846","null","10","illumina","_no_group_defined_","null","1","optional","false","33.323","Bacteria"
-"SRR12574848","SRR12574848","SRR12574848","null","null","SRR12574848","null","10","illumina","_no_group_defined_","null","1","optional","false","45.333","Bacteria"
-"SRR12574847","SRR12574847","SRR12574847","null","null","SRR12574847","null","10","illumina","_no_group_defined_","null","1","optional","false","42.573","Bacteria"

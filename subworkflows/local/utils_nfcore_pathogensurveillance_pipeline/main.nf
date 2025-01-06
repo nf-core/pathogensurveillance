@@ -70,7 +70,7 @@ workflow PIPELINE_INITIALISATION {
 
     // Check input path parameters to see if they exist
     def checkPathParamList = [
-        params.sample_data,
+        params.input,
         params.reference_data,
         params.multiqc_config,
         params.bakta_db
@@ -80,8 +80,8 @@ workflow PIPELINE_INITIALISATION {
     }
 
     // Check mandatory parameters
-    if (params.sample_data) {
-        sample_data_csv = file(params.sample_data)
+    if (params.input) {
+        sample_data_csv = file(params.input)
     } else {
         exit 1, 'Sample metadata CSV not specified.'
     }
@@ -117,7 +117,7 @@ workflow PIPELINE_COMPLETION {
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     def multiqc_reports = multiqc_report.toList()
-    
+
     //
     // Completion email and summary
     //

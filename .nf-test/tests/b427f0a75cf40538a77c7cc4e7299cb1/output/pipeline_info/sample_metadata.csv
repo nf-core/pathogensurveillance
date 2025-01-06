@@ -1,7 +1,0 @@
-"sample_id","name","description","path","path_2","ncbi_accession","ncbi_query","ncbi_query_max","sequence_type","report_group_ids","color_by","ploidy","ref_contextual_usage","taxon","ref_ids"
-"SRR18850314","SRR18850314","SRR18850314","","","SRR18850314","","10","illumina","_no_group_defined_","","1","optional","Limosilactobacillus fermentum",""
-"SRR18850310","SRR18850310","SRR18850310","","","SRR18850310","","10","illumina","_no_group_defined_","","1","optional","Limosilactobacillus fermentum",""
-"ERR13427439","ERR13427439","ERR13427439","","","ERR13427439","","10","illumina","_no_group_defined_","","1","optional","Limosilactobacillus fermentum",""
-"SRR29695256","SRR29695256","SRR29695256","","","SRR29695256","","10","nanopore","_no_group_defined_","","1","exclusive","Plasmodium falciparum","GCF_000002765_6"
-"SRR29397006","SRR29397006","SRR29397006","","","SRR29397006","","10","illumina","_no_group_defined_","","1","exclusive","Plasmodium falciparum","GCF_000002765_6"
-"SRR27942447","SRR27942447","SRR27942447","","","SRR27942447","","10","illumina","_no_group_defined_","","1","exclusive","Plasmodium falciparum","GCF_000002765_6"

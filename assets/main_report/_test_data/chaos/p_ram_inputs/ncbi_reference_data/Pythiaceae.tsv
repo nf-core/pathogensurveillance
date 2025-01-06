@@ -1,6 +1,0 @@
-Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
-14527151	GCA_026401395.1	ASM2640139v1	114742	Pythium insidiosum (oomycetes)	114742	Pythium insidiosum	haploid	Scaffold	149.61	false	Major	Major	na	2022/11/25 00:00	2022/11/25 00:00	9145	45748
-14527141	GCA_026401375.1	ASM2640137v1	114742	Pythium insidiosum (oomycetes)	114742	Pythium insidiosum	haploid	Scaffold	206.13	false	Major	Major	na	2022/11/25 00:00	2022/11/25 00:00	9659	45208
-4512141	GCA_008271595.1	ASM827159v1	1485010	[Pythium] brassicae (nom. inval.) (oomycetes)	1485010	[Pythium] brassicae (nom. inval.)	haploid	Scaffold	8	false	Major	Major	representative genome	2019/09/04 00:00	2023/01/14 00:00	9595	30302
-3522931	GCA_006386115.1	DCB_P.spl	82926	Globisporangium splendens (oomycetes)	82926	Globisporangium splendens	haploid	Scaffold	100	false	Major	Major	representative genome	2019/06/24 00:00	2020/04/16 00:00	342140	429825
-3255651	GCA_005966545.1	ASM596654v1	41045	Pythium oligandrum (oomycetes)	41045	Pythium oligandrum	haploid	Contig	112	false	Major	Major	na	2019/06/04 00:00	2019/06/04 00:00	1292773	1292773

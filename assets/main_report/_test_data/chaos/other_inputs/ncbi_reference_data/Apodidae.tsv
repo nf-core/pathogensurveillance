@@ -1,4 +1,0 @@
-Id	LastMajorReleaseAccession	AssemblyName	Taxid	Organism	SpeciesTaxid	SpeciesName	AssemblyType	AssemblyStatus	Coverage	PartialGenomeRepresentation	ReleaseLevel	ReleaseType	RefSeq_category	SubmissionDate	LastUpdateDate	ContigN50	ScaffoldN50
-12943111	GCF_000747805.1	ChaPel_1.1	8897	Chaetura pelagica (chimney swift)	8897	Chaetura pelagica	haploid	Scaffold	106	false	Minor	Minor	representative genome	2014/09/04 00:00	2023/02/19 00:00	30767	3841852
-11377901	GCF_020740795.1	bApuApu2.pri.cur	8895	Apus apus (common swift)	8895	Apus apus	haploid (principal pseudohaplotype of diploid)	Chromosome	103.36	false	Major	Major	representative genome	2021/11/04 00:00	2023/02/26 00:00	25561769	115508478
-7335451	GCA_013396855.1	ASM1339685v1	243314	Hemiprocne comata (birds)	243314	Hemiprocne comata	haploid	Scaffold	40	false	Major	Major	na	2020/07/10 00:00	2020/07/10 00:00	62389	355677

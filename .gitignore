@@ -6,8 +6,8 @@ results/
 testing/
 testing*
 *.pyc
-scratch/
 null/
+scratch/
 *.swp
 .Rproj.user
 *.Rproj
@@ -19,4 +19,3 @@ seqtk_sample/
 docs/lab_meetings
 path_surveil_data
 .RData
-null/
