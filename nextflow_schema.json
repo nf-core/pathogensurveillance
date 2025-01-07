@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/master/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/main/nextflow_schema.json",
     "title": "nf-core/pathogensurveillance pipeline parameters",
     "description": "Surveillance of pathogens using high-throughput sequencing",
     "type": "object",
