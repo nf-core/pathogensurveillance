@@ -21,7 +21,7 @@ process BGZIP_MAKE_GZIP {
     def args = task.ext.args ?: ''
     prefix   = task.ext.prefix ?: "${meta.id}"
     """
-    bgzip -r $input 
+    bgzip -r $input
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

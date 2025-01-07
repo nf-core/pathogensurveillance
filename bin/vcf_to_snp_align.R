@@ -75,8 +75,7 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
 
 # Remove samples with only missing data
 if (remove_missing_samples) {
-    is_only_missing_data <- vapply(vcf_data[sample_ids], FUN.VALUE = logical(1),
-                                   function(x) all(is.na(x)))
+    is_only_missing_data <- vapply(vcf_data[sample_ids], FUN.VALUE = logical(1), function(x) all(is.na(x)))
     samples_to_remove <- sample_ids[is_only_missing_data]
     vcf_data[samples_to_remove] <- NULL
     if (all(is_only_missing_data)) {
@@ -89,8 +88,7 @@ if (remove_missing_samples) {
 
 # Remove variants with missing data
 if (! is.na(max_missing_data_prop) && max_missing_data_prop < 1) {
-    prop_missing <- apply(vcf_data[sample_ids], MARGIN = 1, simplify = TRUE,
-                          function(x) sum(is.na(x)) / length(x))
+    prop_missing <- apply(vcf_data[sample_ids], MARGIN = 1, simplify = TRUE, function(x) sum(is.na(x)) / length(x))
     vcf_data <- vcf_data[prop_missing <= max_missing_data_prop, , drop = FALSE]
 }
 

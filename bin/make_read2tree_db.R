@@ -2,7 +2,7 @@
 
 # This script converts the output of BUSCO on reference sequences into a reference database for use with read2tree.
 # Since read2tree requires references to be labeled with 5 letter species codes, this script will produce arbitrary
-# 5 letter codes as well as a lookup table to correlate codes with their reference ID. 
+# 5 letter codes as well as a lookup table to correlate codes with their reference ID.
 
 # Input format:
 #    * name of lineage DB used for BUSCO (e.g. 'eukaryota_odb10')
@@ -81,3 +81,4 @@ for (gene_data in split(single_copy_faa_data, single_copy_faa_data$busco_id)) {
 
 # Save table with info on which random code corresponds to which reference ID
 write.table(ref_data, file = ref_data_out_path, sep = ',', quote = FALSE, row.names = FALSE)
+

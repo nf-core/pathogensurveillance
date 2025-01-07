@@ -160,7 +160,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Calculate POCP from presence/absence matrix of genes
     CALCULATE_POCP (
-       REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
+        REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
     )
 
     // Extract sequences of all genes (does not align, contrary to current name)
@@ -206,11 +206,11 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Mix in null placeholders for failed groups
     pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-         .map { [it[1], null] }
-         .mix(PIRATE.out.aln) // group_meta, align_fasta
+        .map { [it[1], null] }
+        .mix(PIRATE.out.aln) // group_meta, align_fasta
     phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-         .map { [it[1], null] }
-         .mix(trees) // group_meta, [trees]
+        .map { [it[1], null] }
+        .mix(trees) // group_meta, [trees]
 
 
     emit:

@@ -35,7 +35,7 @@ process MAKE_GFF_WITH_FASTA {
     else
         sed -E 's/^>([a-zA-Z0-9_.]+) +.*\$/>\\1/g' ${sequence} >> ${prefix}_with_ref.gff
     fi
-    
+
     # Rename output file to be just the sample ID and make sure input file does not have same name
     mv ${gff} input_${gff}
     mv ${prefix}_with_ref.gff ${prefix}.gff

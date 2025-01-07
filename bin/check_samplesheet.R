@@ -173,8 +173,7 @@ if (nrow(metadata_ref) > 0) {
 
 # Check that there is data
 if (nrow(metadata_samp) == 0) {
-    stop(call. = FALSE,
-         'There are no rows in the input samplesheet.')
+    stop(call. = FALSE, 'There are no rows in the input samplesheet.')
 }
 
 # Validate column names
@@ -243,10 +242,7 @@ metadata_ref[] <- lapply(metadata_ref, function(x) {
 check_required_cols <- function(metadata, required_cols, csv_name) {
     for (columns in required_cols) {
         if (! any(columns %in% colnames(metadata))) {
-            stop(call. = FALSE,
-                 'At least one of the following columns must be present in the ', csv_name, ' CSV: ',
-                 paste0('"', columns, '"', collapse = ', ')
-            )
+            stop(call. = FALSE, 'At least one of the following columns must be present in the ', csv_name, ' CSV: ', paste0('"', columns, '"', collapse = ', '))
         }
     }
 }
@@ -372,7 +368,7 @@ validate_usage_col <- function(metadata, col) {
         }
         return(value)
     }))
- }
+}
 if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_primary_usage <- validate_usage_col(metadata_ref, 'ref_primary_usage')
     metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
@@ -468,56 +464,56 @@ metadata_samp <- rbind(
 
 # Add the function to retrieve SRA Run IDs from BioSample IDs
 get_sra_from_biosamples <- function(biosample_id) {
-  # Create an empty data frame to store biosample_id to SRA mapping
-  sra_data <- data.frame(biosample_id = character(),
-                         SRR = character(),
-                         stringsAsFactors = FALSE)
-  
-  message("Processing biosample_id:", biosample_id, "\n")
-  
-  # Step 1: Search for biosample_id in the NCBI database to get its internal ID
-  search_result <- tryCatch({
-    rentrez::entrez_search(db = "biosample", term = biosample_id)
-  }, error = function(e) {
-    warning("Error while searching for biosample_id:", biosample_id, "\n")
-    return(NULL)
-  })
-  
-  genbank_id <- search_result$ids[1]
-  
-  # Step 2: Use elink to find linked SRA records
-  link_result <- tryCatch({
-    rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
-  }, error = function(e) {
-    warning("Error while linking biosample_id to SRA:", genbank_id, "\n")
-    return(NULL)
-  })
-  
-  sra_id <- link_result$links$biosample_sra
-  if (is.null(sra_id)) {
-    warning('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
-    return(NULL)
-  }
-  # Step 3: Retrieve the SRA Run IDs
-  # Retrieve detailed information about the SRA run
-  sra_record <- tryCatch({
-    rentrez::entrez_summary(db = "sra", id = sra_id)
-  }, error = function(e) {
-    warning("Error retrieving SRA record for:", sra_id, "\n")
-    return(NULL)
-  })
-  
-  # Extract run IDs
-  if (!is.null(sra_record$runs)) {
-    # Extract only the Run ID from the XML-like string
-    runs <- unlist(strsplit(sra_record$runs, split = ";"))
-    run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
-  } else {
-    warning("Error retrieving runs for SRA record:", sra_id, "\n")
-    return(NULL)
-  }
-  
-  return(run_ids)
+    # Create an empty data frame to store biosample_id to SRA mapping
+    sra_data <- data.frame(biosample_id = character(),
+                           SRR = character(),
+                           stringsAsFactors = FALSE)
+
+    message("Processing biosample_id:", biosample_id, "\n")
+
+    # Step 1: Search for biosample_id in the NCBI database to get its internal ID
+    search_result <- tryCatch({
+        rentrez::entrez_search(db = "biosample", term = biosample_id)
+    }, error = function(e) {
+        warning("Error while searching for biosample_id:", biosample_id, "\n")
+        return(NULL)
+    })
+
+    genbank_id <- search_result$ids[1]
+
+    # Step 2: Use elink to find linked SRA records
+    link_result <- tryCatch({
+        rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
+    }, error = function(e) {
+        warning("Error while linking biosample_id to SRA:", genbank_id, "\n")
+        return(NULL)
+    })
+
+    sra_id <- link_result$links$biosample_sra
+    if (is.null(sra_id)) {
+        warning('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
+        return(NULL)
+    }
+    # Step 3: Retrieve the SRA Run IDs
+    # Retrieve detailed information about the SRA run
+    sra_record <- tryCatch({
+        rentrez::entrez_summary(db = "sra", id = sra_id)
+    }, error = function(e) {
+        warning("Error retrieving SRA record for:", sra_id, "\n")
+        return(NULL)
+    })
+
+    # Extract run IDs
+    if (!is.null(sra_record$runs)) {
+        # Extract only the Run ID from the XML-like string
+        runs <- unlist(strsplit(sra_record$runs, split = ";"))
+        run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
+    } else {
+        warning("Error retrieving runs for SRA record:", sra_id, "\n")
+        return(NULL)
+    }
+
+    return(run_ids)
 }
 
 biosample_ids <- unique(metadata_samp$ncbi_accession[grepl("^SAM[ND|E]", metadata_samp$ncbi_accession)])
@@ -539,15 +535,15 @@ if (length(no_runs_found) > 0) {
 }
 
 split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
-  current <- metadata_samp$ncbi_accession[i]
-  if (current %in% names(run_id_key)) {
-    out <- metadata_samp[rep(i,length(run_id_key[[current]])), , drop = FALSE]
-    rownames(out) <- NULL
-    out$ncbi_accession <- run_id_key[[current]]
-  } else {
-    out <- metadata_samp[i, , drop = FALSE]
-  }
-  return(out)
+    current <- metadata_samp$ncbi_accession[i]
+    if (current %in% names(run_id_key)) {
+        out <- metadata_samp[rep(i,length(run_id_key[[current]])), , drop = FALSE]
+        rownames(out) <- NULL
+        out$ncbi_accession <- run_id_key[[current]]
+    } else {
+        out <- metadata_samp[i, , drop = FALSE]
+    }
+    return(out)
 })
 
 metadata_samp <- do.call(rbind, split_metadata)

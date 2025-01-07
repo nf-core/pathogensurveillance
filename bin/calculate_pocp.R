@@ -12,7 +12,7 @@ piratetab_tr <- as.data.frame(t(piratetab))
 piratetab_tr$strain <- row.names(piratetab_tr)
 
 pocp <- function(a, b) {
-	  round(2*sum(a == '1' & b == '1')/(sum(a == '1') + sum(b == '1')) * 100, digits = 2)
+    round(2*sum(a == '1' & b == '1')/(sum(a == '1') + sum(b == '1')) * 100, digits = 2)
 }
 
 tmp <- asplit(piratetab_tr, 1)

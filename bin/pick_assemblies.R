@@ -173,7 +173,7 @@ select_references <- function(ref_data, n = 1) {
         ref_data$source_database == 'SOURCE_DATABASE_REFSEQ', # Is a RefSeq reference
         is_latin_binomial(ref_data$species), # Has a species epithet
         ref_data$is_annotated,
-        factor(ref_data$assembly_level, levels = c("Contig", "Scaffold", "Chromosome", "Complete Genome"), ordered = TRUE), 
+        factor(ref_data$assembly_level, levels = c("Contig", "Scaffold", "Chromosome", "Complete Genome"), ordered = TRUE),
         ref_data$contig_n50
     )
     return(ref_data[priority[seq_len(n)], ])
@@ -193,7 +193,7 @@ if (length(sp_stats) == 0 )  {
 } else {
     sp_stats <- do.call(rbind, sp_stats)
     rownames(sp_stats) <- NULL
-} 
+}
 
 # Pick representatives for each genus
 gn_stats <- assem_data[assem_data$genus %in% genera, , drop = FALSE]
@@ -250,13 +250,15 @@ if (nrow(result) == 0) {
     formatted_result <- data.frame(
         ref_id = result$reference_id,
         ref_name = result$organism_name,
-        ref_description = paste0(result$organism_name, ' (', 
-                                 result$accession,
-                                 ifelse(result$is_type, '; Type', ''),
-                                 ifelse(result$source_database == 'SOURCE_DATABASE_REFSEQ', '; RefSeq', ''),
-                                 ifelse(result$is_atypical, '; Atypical', ''),
-                                 ifelse(is.na(result$hosts), '', paste0('; Host: ', result$hosts)),
-                                 ')'),
+        ref_description = paste0(
+            result$organism_name, ' (',
+            result$accession,
+            ifelse(result$is_type, '; Type', ''),
+            ifelse(result$source_database == 'SOURCE_DATABASE_REFSEQ', '; RefSeq', ''),
+            ifelse(result$is_atypical, '; Atypical', ''),
+            ifelse(is.na(result$hosts), '', paste0('; Host: ', result$hosts)),
+            ')'
+        ),
         ref_path = '',
         ref_ncbi_accession = result$accession,
         ref_ncbi_query = '',

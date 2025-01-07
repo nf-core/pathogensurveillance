@@ -1,9 +1,9 @@
 ---
 title: Pathogen Surveillance Report
 params:
-  inputs: "~/Documents/Github/_no_group_defined__inputs"
+    inputs: "~/Documents/Github/_no_group_defined__inputs"
 execute:
-  echo: false
+    echo: false
 bibliography: references.bib
 nocite: |
   @qin2014proposed, @kurtzer2017singularity, @anaconda
@@ -76,7 +76,7 @@ This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-c
 
 ## {{< bi info-circle >}} Pipeline status
 
-The pipeline finished excution. 
+The pipeline finished excution.
 Warning or error messages describing problems encountered in the analysis might be provided below.
 
 ```{r}
@@ -390,24 +390,24 @@ ref_data <- ref_meta_parsed(params$inputs)
 ```{r plot_msns, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
 # Find which columns are used to provide colors to the trees, if any
 ids_used <- unique(unlist(lapply(alignments, function(a) {
-  if (is.null(a)) {
-    return(character(0))
-  } else {
-    return(rownames(a))
-  }
+    if (is.null(a)) {
+        return(character(0))
+    } else {
+        return(rownames(a))
+    }
 })))
 color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
 color_by_cols <- color_by_cols[! is.na(color_by_cols)]
 
 plot_one <- function(ref_id, threshold, color_by = NULL) {
-  align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
-  align_without_ref <- align[rownames(align) != ref_id, ]
-  psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
+    align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
+    align_without_ref <- align[rownames(align) != ref_id, ]
+    psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
 }
 
 plot_vars <- list(
-  Reference = align_data$ref_id,
-  Threshold = threshold_options
+    Reference = align_data$ref_id,
+    Threshold = threshold_options
 )
 if (length(color_by_cols) > 0) {
     plot_vars$Color = unlist(color_by_cols)
@@ -429,7 +429,7 @@ The edges represent the SNP differences between two given genotypes, and the dar
 
 Note: within these MSNs, edge lengths are not proportional to SNP differences.
 :::
- ')
+')
 ```
 
 ```{r, results='asis', eval = length(variant_align_path(params$inputs)) <= 0}
@@ -468,7 +468,7 @@ knitr::kable(version_data)
 ```{r, include=FALSE}
 # automatically create a bib database for R packages
 knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+    .packages(), 'bookdown', 'knitr', 'rmarkdown'
 ), 'packages.bib')
 ```
 
@@ -487,7 +487,7 @@ sessionInfo()
 The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alex Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
 ## {{< bi wallet2 >}} Funding
- This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D. 
+This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D.
 
 ## {{< bi github >}} Contribute
 

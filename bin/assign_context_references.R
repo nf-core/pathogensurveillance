@@ -26,8 +26,8 @@ n_refs_contextual <- as.integer(args$n_refs_contextual)
 
 #Check if user does not want references selected
 if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) {
-  writeLines(character(0), args$output_path)
-  quit(save = 'no')
+    writeLines(character(0), args$output_path)
+    quit(save = 'no')
 }
 
 # Read sample data with user-defined references
