@@ -15,8 +15,5 @@ For each user-defined group of samples, an HTML report with statistics and inter
 A static PDF version is also made.
 Advanced users can access the intermediate files to conduct further analyses.
 It can be executed on any Linux computer, from laptops to large-scale cloud computing environments.
-It is written in Nextflow, allowing it to take advantage of massive computational resources when available, restart failed analyses, or add samples to existing analyses without doing redundant work. 
+It is written in Nextflow, allowing it to take advantage of massive computational resources when available, restart failed analyses, or add samples to existing analyses without doing redundant work.
 Our pipeline automates and accelerates analysis of whole genome sequence data, which is essential for rapid responses to disease outbreaks, while allowing genomic analysis by non-bioinformaticians.
-
-
-

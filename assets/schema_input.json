@@ -58,7 +58,7 @@
             },
             "ref_group_ids": {
                 "type": "string"
-            },
+            }
         },
         "required": []
     }

@@ -1,19 +1,19 @@
-.sidebar h2 { 
+.sidebar h2 {
   font-size: 130% !important;
 }
 
-.sidebar > nav > ul > li .nav-link { 
+.sidebar > nav > ul > li .nav-link {
   font-size: 120% !important;
 }
 
-.sidebar > nav > ul > li > ul > li .nav-link { 
+.sidebar > nav > ul > li > ul > li .nav-link {
   font-size: 110% !important;
-  color: #888888
+  color: #888888;
 }
 
-.sidebar > nav > ul > li > ul > li > ul > li .nav-link { 
+.sidebar > nav > ul > li > ul > li > ul > li .nav-link {
   font-size: 90% !important;
-  color: #888888
+  color: #888888;
 }
 
 h1 {
@@ -27,26 +27,26 @@ h1.title {
 }
 
 .content > section {
-    padding-bottom: 50px;
+  padding-bottom: 50px;
 }
 
 .zoomist-wrapper {
-    background-color: white !important;
+  background-color: white !important;
 }
 
-.zoomist-image { 
+.zoomist-image {
   display: flex;
 }
 
 .zoomist-wrapper img {
-    height: auto;
-    max-height: min(80vh, 1200px);
-    width: auto;
-    max-width: 100%;
-    margin: 0 auto;
+  height: auto;
+  max-height: min(80vh, 1200px);
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .html-widget {
-    height: auto !important;
-    max-height: min(80vh, 1200px) !important;
+  height: auto !important;
+  max-height: min(80vh, 1200px) !important;
 }

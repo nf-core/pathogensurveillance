@@ -16,4 +16,3 @@ Use the following command from the root of the repository to run this test datas
 nextflow run main.nf -profile test,docker
 
 The output will be in "test/output"
-

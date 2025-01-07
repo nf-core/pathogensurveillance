@@ -74,13 +74,13 @@
                     "type": "boolean",
                     "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
                     "fa_icon": "fas fa-download",
-                    "default":"true"
+                    "default": "true"
                 },
                 "bakta_db_type": {
                     "type": "string",
                     "pattern": "light|full",
                     "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
-                    "default":"light"
+                    "default": "light"
                 }
             }
         },
