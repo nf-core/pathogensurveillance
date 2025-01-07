@@ -37,7 +37,7 @@ indent_style = unset
 insert_final_newline = unset
 
 # ignore embedded libraries and third-party code
-[assets/main_report/_extensions]
+[assets/main_report/_extensions/**]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
