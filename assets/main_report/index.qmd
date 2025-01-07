@@ -441,7 +441,7 @@ See staus messages at the start of the report for details.
 ```
 
 
-# Software and resources
+# Software and references
 
 ## {{< fa flask >}} Methods
 
