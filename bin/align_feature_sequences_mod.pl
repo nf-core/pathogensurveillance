@@ -108,7 +108,7 @@ die "GFF directory not found.\n" unless -d "$gff_dir";
 
 # make output directory if it doesn't exist.
 unless ( -d "$output_dir" ){
-     die "could not make working directory in $output_dir\n" unless mkdir "$output_dir";
+    die "could not make working directory in $output_dir\n" unless mkdir "$output_dir";
 }
 
 # check for mandatory input arguments

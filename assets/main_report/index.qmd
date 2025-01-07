@@ -6,7 +6,7 @@ execute:
     echo: false
 bibliography: references.bib
 nocite: |
-  @qin2014proposed, @kurtzer2017singularity, @anaconda
+    @qin2014proposed, @kurtzer2017singularity, @anaconda
 # adds literature citations that aren't referenced within the report - important when citation isn't associated with a program
 ---
 

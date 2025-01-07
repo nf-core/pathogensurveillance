@@ -255,8 +255,8 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
     duplicated_cols <- unique(present_known_cols[duplicated(present_known_cols)])
     if (length(duplicated_cols) > 0) {
         stop(call. = FALSE,
-             'The following columns occur more than once in the ', csv_name, ' CSV: ',
-             paste0('"', duplicated_cols, '"', collapse = ', ')
+            'The following columns occur more than once in the ', csv_name, ' CSV: ',
+            paste0('"', duplicated_cols, '"', collapse = ', ')
         )
     }
 }
@@ -465,9 +465,11 @@ metadata_samp <- rbind(
 # Add the function to retrieve SRA Run IDs from BioSample IDs
 get_sra_from_biosamples <- function(biosample_id) {
     # Create an empty data frame to store biosample_id to SRA mapping
-    sra_data <- data.frame(biosample_id = character(),
-                           SRR = character(),
-                           stringsAsFactors = FALSE)
+    sra_data <- data.frame(
+        biosample_id = character(),
+        SRR = character(),
+        stringsAsFactors = FALSE
+    )
 
     message("Processing biosample_id:", biosample_id, "\n")
 

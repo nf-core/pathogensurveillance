@@ -23,7 +23,7 @@ ref_ids <- all_ids[! all_ids %in% sample_ids]
 # Create matrix with number of genes for each gene in each sample
 cluster_data <- raw_gene_data1[, 23:ncol(raw_gene_data1)]
 cluster_data[, all_ids] <- lapply(cluster_data[, all_ids], function(column) {
-  unlist(lapply(strsplit(column, split = '[;:]'), length))
+    unlist(lapply(strsplit(column, split = '[;:]'), length))
 })
 
 # Create pairwise matrix of number of shared genes between all samples and references
@@ -144,30 +144,30 @@ writeLines(removed_ref_ids, con = 'removed_ref_ids.txt')
 read_fasta <- function(file_path) {
     # Read raw string
     raw_data <- paste0(readLines(file_path), collapse = '\n')
-    
+
     # Return an empty vector an a warning if no sequences are found
     if (raw_data == "") {
         warning(paste0("No sequences found in the file: ", file_path))
         return(character(0))
     }
-    
-    # Find location of every header start 
+
+    # Find location of every header start
     split_data <- strsplit(raw_data, "\n>")[[1]]
-    
+
     # Split the data for each sequence into lines
     split_data <- strsplit(split_data, split = "\n")
-    
+
     # The first lines are headers, so remove those
     headers <- vapply(split_data, FUN = `[`, FUN.VALUE = character(1), 1)
     split_data <- lapply(split_data, FUN = `[`, -1)
-    
+
     # Remove the > from the first sequence. The others were removed by the split
     headers[1] <- sub(headers[1], pattern = "^>", replacement = "")
-    
+
     # Combine multiple lines into single sequences
     seqs <- vapply(split_data, FUN = paste0, FUN.VALUE = character(1), collapse = "")
-    
-    # Combine and return results 
+
+    # Combine and return results
     return(stats::setNames(seqs, headers))
 }
 
