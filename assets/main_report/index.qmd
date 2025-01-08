@@ -483,7 +483,7 @@ sessionInfo()
 # About
 
 ## {{< bi file-earmark-person >}} Authors
-The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alex Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
 ## {{< bi wallet2 >}} Funding
 This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D.
