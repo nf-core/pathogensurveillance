@@ -9,10 +9,11 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#    '/home/fosterz/projects/pathogensurveillance/work/09/b3620ef7f4fb8600f8666267c1009f/validation_serratia_GCF_000214235_1.vcffilter.vcf.gz',
+#    '~/projects/pathogensurveillance/work/77/7cb9506b7533dd446b74260a73e031/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
+#    '~/projects/pathogensurveillance/work/77/7cb9506b7533dd446b74260a73e031/_no_group_defined__GCF_000002765_6.csv',
 #    'deleteme.fasta'
 # )
-names(args) <- c("vcf_path", "out_path")
+names(args) <- c('vcf_path', 'ploidy_data_path', 'out_path')
 args <- as.list(args)
 
 # Read VCF file
@@ -23,14 +24,38 @@ header[1] <- 'CHROM'
 vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', header = FALSE)
 colnames(vcf_data) <- header
 
+# Read ploidy data file
+ploidy_data <- read.csv(args$ploidy_data_path)
+ploidy_key <- stats::setNames(ploidy_data$ploidy, ploidy_data$mapping_id)
+
 # Make table with just alleles for each sample
 sample_ids <- colnames(vcf_data)[10:length(colnames(vcf_data))]
 gt_index <- vapply(strsplit(vcf_data$FORMAT, split = ':'), FUN.VALUE = integer(1), function(x) {
     which(x == 'GT')
 })
+ad_index <- vapply(strsplit(vcf_data$FORMAT, split = ':'), FUN.VALUE = integer(1), function(x) {
+    which(x == 'AD')
+})
 vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
     vapply(seq_len(nrow(vcf_data)), FUN.VALUE = character(1), function(index) {
-        strsplit(vcf_data[index, samp_id], split = ':')[[1]][gt_index[index]]
+        genotypes <- strsplit(vcf_data[index, samp_id], split = ':')[[1]][gt_index[index]]
+        genotypes <- strsplit(genotypes, '/')[[1]]
+        genotypes[genotypes == '.'] <- NA
+        genotypes <- as.numeric(genotypes)
+        depths <- strsplit(vcf_data[index, samp_id], split = ':')[[1]][ad_index[index]]
+        depths <- as.numeric(strsplit(depths, ',')[[1]])
+        depths <- depths[genotypes]
+        ploidy <- ploidy_key[samp_id]
+        if (ploidy == 1) {
+            if (all(is.na(depths))) {
+                return('.')
+            } else {
+                return(as.character(genotypes[which.max(depths)]))
+            }
+        } else {
+            genotypes <- ifelse(is.na(genotypes), '.', as.character(genotypes))
+            return(paste0(genotypes, collapse = '/'))
+        }
     })
 })
 

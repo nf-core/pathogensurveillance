@@ -5,8 +5,9 @@ ani_threshold <- c(species = 90, genus = 80, family = 50)  # These numbers are t
 complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 
 # Parse inputs
-args = commandArgs(trailingOnly = TRUE)
-data <- read.csv(args[1], skip = 2, header = TRUE, sep = '\t')
+args <- commandArgs(trailingOnly = TRUE)
+# args <- list('~/projects/pathogensurveillance/work/66/c64114197ddf5ea301f6cd3ffc4e23/SRR26197583.txt')
+data <- read.csv(args[[1]], skip = 2, header = TRUE, sep = '\t')
 
 # Format table
 data$ANI <- as.numeric(sub(pattern = "%", replacement = "", fixed = TRUE, data$ANI))

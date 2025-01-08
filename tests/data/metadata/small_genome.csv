@@ -1,7 +1,7 @@
 ncbi_accession,taxon,enabled,ref_ncbi_accession,ref_primary_usage,ref_contextual_usage
 SRR18850314,Limosilactobacillus fermentum,TRUE,,,
-SRR18850310,Limosilactobacillus fermentum,FALSE,,,
-ERR13427439,Limosilactobacillus fermentum,FALSE,,,
-SRR29695256,Plasmodium falciparum,FALSE,GCF_000002765.6,exclusive,exclusive
-SRR29397006,Plasmodium falciparum,FALSE,GCF_000002765.6,exclusive,exclusive
-SRR27942447,Plasmodium falciparum,FALSE,GCF_000002765.6,exclusive,exclusive
+SRR18850310,Limosilactobacillus fermentum,TRUE,,,
+ERR13427439,Limosilactobacillus fermentum,TRUE,,,
+SRR29695256,Plasmodium falciparum,TRUE,GCF_000002765.6,exclusive,exclusive
+SRR29397006,Plasmodium falciparum,TRUE,GCF_000002765.6,exclusive,exclusive
+SRR27942447,Plasmodium falciparum,TRUE,GCF_000002765.6,exclusive,exclusive

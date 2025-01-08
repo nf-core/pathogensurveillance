@@ -1,16 +1,19 @@
 #!/usr/bin/env Rscript
 
-# This script takes 4 arguments:
+# This script takes 2 arguments:
 #   1. The path to the per-sample CSV input to the pipeline supplied by the user
 #   2. The path to the per-reference CSV input to the pipeline supplied by the user
 #
 # The first part of this script defines constants that might need to be changed in the future.
 
-# Where to save list of removed samples
-removed_sample_data_path <- 'removed_sample_data.csv'
-removed_sample_data <- data.frame(
+# Where to save list of messages to be shown to the user, such as samples that were filtered out
+message_data_path <- 'message_data.csv'
+message_data <- data.frame(
     sample_id = character(0),
     report_group_id = character(0),
+    reference_id = character(0),
+    workflow = character(0),
+    level = character(0),
     description = character(0)
 )
 
@@ -69,7 +72,6 @@ defaults_ref <- c(
 defaults_samp <- c(
     report_group_ids = '_no_group_defined_',
     enabled = TRUE,
-    ploidy = '1',
     ncbi_query_max = '10',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
     ref_primary_usage = defaults_ref[['ref_primary_usage']],
@@ -147,7 +149,7 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/downloads/sample_data_N664_true.csv')
 # args <- list('~/downloads/sample_data_N664_true.csv', '~/downloads/ref_data.csv')
-# args <- list("/home/fosterz/projects/pathogensurveillance/test/data/metadata/small_genome.csv")
+args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -374,15 +376,6 @@ if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
 }
 
-# Validate ploidy column
-for (index in 1:nrow(metadata_samp)) {
-    if (! grepl(metadata_samp$ploidy[index], pattern = '^[0-9]+$')) {
-        stop(call. = FALSE, paste0(
-            'The value for the ploidy column "', metadata_samp$ploidy[index],
-            '" of the sample metadata CSV on row ', index, ' is not numeric.'
-        ))
-    }
-}
 
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
@@ -523,14 +516,17 @@ run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
 names(run_id_key) <- biosample_ids
 
 
-# Write biosamples with no reads to a file
+# Report biosamples with no reads to the user
 no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
 if (length(no_runs_found) > 0) {
     warning('The following biosamples do not have reads associated with them:\n',
             paste0(no_runs_found, collapse = '\n'), '\n')
-    removed_sample_data <- rbind(removed_sample_data, data.frame(
+    message_data <- rbind(message_data, data.frame(
         sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% no_runs_found],
         report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% no_runs_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        level = 'WARNING',
         description = 'Sample removed since there are no runs associated with this biosample.'
     ))
     metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
@@ -820,6 +816,7 @@ if (nrow(metadata_ref)) {
     }
 }
 
+
 # Look up sequence type for NCBI accessions without a sequence type defined
 lookup_sequence_type <- function(id) {
     search_result <- rentrez::entrez_search(db = 'sra', id)
@@ -882,6 +879,35 @@ metadata_samp$ref_ids <- unlist(lapply(metadata_samp$ref_group_ids, function(gro
     paste(ref_ids, collapse = ';')
 }))
 
+# Warn user if ploidy data is not specified
+no_ploidy_specified <- ! is_present(metadata_samp$ploidy)
+if (any(no_ploidy_specified)) {
+    warning(
+        'The following samples do not have a ploidy specified. Defaulting to 2 (diploid).:\n',
+        paste0(unique(metadata_samp$sample_id[no_ploidy_specified]), collapse = '\n'),
+        '\n'
+    )
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[no_ploidy_specified],
+        report_group_id = metadata_samp$report_group_ids[no_ploidy_specified],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = 'Ploidy not specified by user, defaulting to 2 (diploid). Add a value in the "ploidy" column in the input sample data table.'
+    ))
+    metadata_samp$ploidy <- ifelse(no_ploidy_specified, 2, metadata_samp$ploidy)
+}
+
+# Validate ploidy column
+for (index in 1:nrow(metadata_samp)) {
+    if (! grepl(metadata_samp$ploidy[index], pattern = '^[0-9]+$')) {
+        stop(call. = FALSE, paste0(
+            'The value for the ploidy column "', metadata_samp$ploidy[index],
+            '" of the sample metadata CSV on row ', index, ' is not numeric.'
+        ))
+    }
+}
+
 # Remove unneeded columns
 metadata_samp$enabled <- NULL
 metadata_samp$ref_group_ids <- NULL
@@ -907,10 +933,10 @@ if (nrow(metadata_ref) > 0) {
 # Replace double quotes with single quotes to not conflict with the CSV format quoting values
 metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
 metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
-removed_sample_data[] <- lapply(removed_sample_data, gsub, pattern = '"', replacement = "'")
+message_data[] <- lapply(message_data, gsub, pattern = '"', replacement = "'")
 
-# Write data for samples removed for some reason during this process
-write.csv(removed_sample_data, file = removed_sample_data_path, row.names = FALSE, na = '')
+# Write data for messages to be shown to the user, such as warnings about removed samples
+write.csv(message_data, file = message_data_path, row.names = FALSE, na = '')
 
 # Write output metadata
 write.csv(metadata_samp, file = 'sample_metadata.csv', row.names = FALSE, na = '')

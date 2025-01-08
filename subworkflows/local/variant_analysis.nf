@@ -64,7 +64,7 @@ workflow VARIANT_ANALYSIS {
             [[id: csv_contents[0]], report_meta, [id: csv_contents[1]]]
         }
         .join(ref_paths, by: 0..2)
-        .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type] }, by: 0..1)
+        .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type, it.ploidy] }, by: 0..1)
         .branch { // Remove any samples that do not have reference information
             filtered: it[2] != null
             no_ref: it[2] == null
@@ -72,8 +72,8 @@ workflow VARIANT_ANALYSIS {
 
     // Remove samples belonging to groups with only one sample
     grouped_sample_data_with_refs = sample_data_with_refs.filtered
-        .map{sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
-            [report_meta, ref_meta, [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type]]
+        .map{sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [report_meta, ref_meta, [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy]]
         }
         .groupTuple(by: [0,1])
     filtered_sample_data_with_refs = grouped_sample_data_with_refs
@@ -90,22 +90,22 @@ workflow VARIANT_ANALYSIS {
 
     // Cutting up long reads
     longreads = filtered_sample_data_with_refs
-        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             sequence_type == "nanopore" || sequence_type == "pacbio"
         }
     SEQKIT_SLIDING (
-        longreads.map { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+        longreads.map { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [sample_meta, read_paths]
         }
         .unique()
     )
     chopped_reads = SEQKIT_SLIDING.out.fastx
         .combine(longreads, by: 0)
-        .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
-            [sample_meta, report_meta, ref_meta, ref_path, usage, chopped_reads, sequence_type]
+        .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [sample_meta, report_meta, ref_meta, ref_path, usage, chopped_reads, sequence_type, ploidy]
         }
     filtered_input = filtered_sample_data_with_refs
-        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+        .filter { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             sequence_type == "illumina" || sequence_type == "bgiseq"
         }
         .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, report_meta
@@ -113,7 +113,7 @@ workflow VARIANT_ANALYSIS {
 
     // Report samples that do not have reference information
     no_ref_warnings = sample_data_with_refs.no_ref
-        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [sample_meta, report_meta, null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."]
         }
     messages = messages.mix(no_ref_warnings)
@@ -121,7 +121,7 @@ workflow VARIANT_ANALYSIS {
     // Create indexes for each reference
     REFERENCE_INDEX (
         filtered_input
-            .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+            .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
                 [ref_meta, ref_path]
             }
             .unique()
@@ -129,7 +129,7 @@ workflow VARIANT_ANALYSIS {
     versions = versions.mix(REFERENCE_INDEX.out.versions)
 
     input_with_indexes = filtered_input
-        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type ->
+        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [ref_meta, sample_meta, read_paths, ref_path, report_meta]
         }
         .combine(REFERENCE_INDEX.out.samtools_fai, by: 0)
@@ -155,7 +155,20 @@ workflow VARIANT_ANALYSIS {
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)
 
-    VCF_TO_SNP_ALIGN ( CALL_VARIANTS.out.vcf )
+    sample_ploidy_data = filtered_sample_data_with_refs
+        .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [ "${report_meta.id}_${ref_meta.id}.csv", "mapping_id,ploidy\n${ref_meta.id}_${sample_meta.id},${ploidy}\n" ]
+        }
+        .map { [it.getSimpleName(), it] }
+        .combine(CALL_VARIANTS.out.vcf.map { combined_meta, vcf -> [combined_meta.id, combined_meta]}, by: 0) // add on full combined metadata uing combined ID
+        .map { combined_id, ploidy_data_path, combined_meta ->
+            [combined_meta, ploidy_data_path]
+        }
+
+    VCF_TO_SNP_ALIGN (
+        CALL_VARIANTS.out.vcf
+            .combine(sample_ploidy_data, by: 0)
+    )
     versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
     removed_samps = VCF_TO_SNP_ALIGN.out.removed_sample_ids
         .splitText()

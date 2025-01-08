@@ -30,10 +30,18 @@ workflow PREPARE_INPUT {
     reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_reference_metadata_channel(it) }
-    removed_samps = SAMPLESHEET_CHECK.out.removed_sample_data
-        .splitCsv ( header:true, sep:',', quote:'"' )
-        .map { [[id: it.sample_id], [id: it.report_group_id], null, "PREPARE_INPUT", "WARNING", it.description] } // meta, group_meta, ref_meta, workflow, level, message
-    messages = messages.mix(removed_samps)
+    messages = messages.mix (
+        SAMPLESHEET_CHECK.out.message_data
+            .splitCsv ( header:true, sep:',', quote:'"' )
+            .map { [
+                it.sample_id == '' ? null : [id: it.sample_id],
+                it.report_group_id == '' ? null : [id: it.report_group_id],
+                it.reference_id == '' ? null : [id: it.reference_id],
+                "PREPARE_INPUT",
+                it.message_type,
+                it.description
+            ] }
+    )
 
     // Add all of the reference metadata to the sample metadata
     sample_data_without_refs = sample_data

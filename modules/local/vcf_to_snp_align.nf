@@ -8,7 +8,7 @@ process VCF_TO_SNP_ALIGN {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(ref_meta), path(vcf)
+    tuple val(ref_meta), path(vcf), path(ploidy_data)
 
     output:
     tuple val(ref_meta), path("${prefix}.fasta")       , emit: fasta
@@ -23,7 +23,7 @@ process VCF_TO_SNP_ALIGN {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    vcf_to_snp_align.R ${vcf} ${prefix}.fasta
+    vcf_to_snp_align.R ${vcf} ${ploidy_data} ${prefix}.fasta
 
     SEQ_COUNT=\$(grep '^>' ${prefix}.fasta | wc -l)
     cat <<-END_VERSIONS > versions.yml
