@@ -482,7 +482,7 @@ sessionInfo()
 
 # About
 
-## {{< bi file-earmark-person >}} Authors
+## {{< bi file-earmark-person >}} Contributors
 The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
 ## {{< bi wallet2 >}} Funding
