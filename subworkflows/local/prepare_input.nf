@@ -74,7 +74,15 @@ workflow PREPARE_INPUT {
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            sample_meta.paths = reads_path instanceof Collection ? reads_path : [reads_path]
+            if (reads_path instanceof Collection) {
+                if (reads_path.size() <= 2) {
+                    sample_meta.paths = reads_path
+                } else {  // if there are a mixture of single and paired end reads
+                    sample_meta.paths = reads_path.findAll{it ==~ /^.+_[12]\..+$/}
+                }
+            } else {
+                sample_meta.paths = [reads_path]
+            }
             sample_meta.single_end = sample_meta.paths.size() == 1
             [sample_meta, ref_metas]
         }
