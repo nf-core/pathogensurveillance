@@ -13,7 +13,7 @@ message_data <- data.frame(
     report_group_id = character(0),
     reference_id = character(0),
     workflow = character(0),
-    level = character(0),
+    message_type = character(0),
     description = character(0)
 )
 
@@ -148,7 +148,7 @@ is_present <- function(x) {
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/downloads/sample_data_N664_true.csv')
-# args <- list('~/downloads/sample_data_N664_true.csv', '~/downloads/ref_data.csv')
+# args <- list('~/projects/pathogensurveillance/work/bc/c89a63060df485e6c6f47e2b1a09b4/serratia_N664.csv', '~/projects/pathogensurveillance/work/bc/c89a63060df485e6c6f47e2b1a09b4/serratia_N664_ref_data.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
@@ -526,7 +526,7 @@ if (length(no_runs_found) > 0) {
         report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% no_runs_found],
         reference_id = NA_character_,
         workflow = 'PREPARE_INPUT',
-        level = 'WARNING',
+        message_type = 'WARNING',
         description = 'Sample removed since there are no runs associated with this biosample.'
     ))
     metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
@@ -895,8 +895,8 @@ if (any(no_ploidy_specified)) {
         message_type = 'WARNING',
         description = 'Ploidy not specified by user, defaulting to 2 (diploid). Add a value in the "ploidy" column in the input sample data table.'
     ))
-    metadata_samp$ploidy <- ifelse(no_ploidy_specified, 2, metadata_samp$ploidy)
 }
+metadata_samp$ploidy <- ifelse(no_ploidy_specified, 2, metadata_samp$ploidy)
 
 # Validate ploidy column
 for (index in 1:nrow(metadata_samp)) {
