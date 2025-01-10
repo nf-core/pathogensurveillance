@@ -883,7 +883,7 @@ metadata_samp$ref_ids <- unlist(lapply(metadata_samp$ref_group_ids, function(gro
 no_ploidy_specified <- ! is_present(metadata_samp$ploidy)
 if (any(no_ploidy_specified)) {
     warning(
-        'The following samples do not have a ploidy specified. Defaulting to 2 (diploid).:\n',
+        'The following samples do not have a ploidy specified. Defaulting to 1 (haploid).:\n',
         paste0(unique(metadata_samp$sample_id[no_ploidy_specified]), collapse = '\n'),
         '\n'
     )
@@ -893,10 +893,10 @@ if (any(no_ploidy_specified)) {
         reference_id = NA_character_,
         workflow = 'PREPARE_INPUT',
         message_type = 'WARNING',
-        description = 'Ploidy not specified by user, defaulting to 2 (diploid). Add a value in the "ploidy" column in the input sample data table.'
+        description = 'Ploidy not specified by user, defaulting to 1 (haploid). Add a value in the "ploidy" column in the input sample data table.'
     ))
 }
-metadata_samp$ploidy <- ifelse(no_ploidy_specified, 2, metadata_samp$ploidy)
+metadata_samp$ploidy <- ifelse(no_ploidy_specified, 1, metadata_samp$ploidy)
 
 # Validate ploidy column
 for (index in 1:nrow(metadata_samp)) {
