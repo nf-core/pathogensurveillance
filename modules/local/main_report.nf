@@ -24,6 +24,9 @@ process MAIN_REPORT {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
+    # Tell quarto where to put cache so it does not try to put it where it does not have permissions
+    export XDG_CACHE_HOME="\$(pwd)/cache"
+
     # Copy source of report here cause quarto seems to want to make its output in the source
     cp -r --dereference main_report_template main_report
 
