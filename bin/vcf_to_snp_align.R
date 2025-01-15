@@ -8,16 +8,16 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#    '~/projects/pathogensurveillance/work/77/7cb9506b7533dd446b74260a73e031/_no_group_defined__GCF_000002765_6.vcffilter.vcf.gz',
-#    '~/projects/pathogensurveillance/work/77/7cb9506b7533dd446b74260a73e031/_no_group_defined__GCF_000002765_6.csv',
-#    'deleteme.fasta'
-# )
+args <- c(
+   '/home/fosterz/projects/pathogensurveillance/work/3a/712c951885f09d194c0b9a6e5ce1d1/magn_or_GCA_000292585_1.vcffilter.vcf.gz',
+   '/home/fosterz/projects/pathogensurveillance/work/tmp/23/7db1da96a063224d35657e6741968a/magn_or_GCA_000292585_1.csv',
+   'deleteme.fasta'
+)
 names(args) <- c('vcf_path', 'ploidy_data_path', 'out_path')
 args <- as.list(args)
 
 # Read VCF file
-header_data <- readLines(args$vcf_path, n = 1000)
+header_data <- readLines(args$vcf_path)
 header_line <- header_data[grepl(header_data, pattern = '^#CHROM')]
 header <- strsplit(header_line, split = '\t')[[1]]
 header[1] <- 'CHROM'
