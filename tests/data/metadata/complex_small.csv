@@ -40,4 +40,4 @@ Should be B. burgdorferi,"SRR25420531 (B. burgdorferi, illumina)",human_pathogen
 Should be A. lumbricoides,"SRR8419293 (A. lumbricoides, illumina)",human_pathogens;mixed,TRUE,SRR8419293,illumina,Ascaris lumbricoides,,helminths,PRJNA511012,,,,,,,,,,,,,,,,,,
 Should be N. americanus,"SRR25712679 (N. americanus, illumina)",human_pathogens;mixed,TRUE,SRR25712679,nanopore,Necator americanus,,helminths,PRJNA1007425,,,,,,,,,,,,,,,,,,
 Should be C. immitis,"SRR21292664 (C. immitis, illumina)",human_pathogens;mixed,TRUE,SRR21292664 ,illumina,Coccidioides immitis,,fungi,PRJNA274372,,,,,,,,,,,,,,,,,,
-Should be C. posadasii,"SRR9644375 (C. posadasii, pacbio)",human_pathogens;mixed,TRUE,SRR9644375,pacbio,Coccidioides posadasii,,fungi,PRJNA494320,,,,,,,,,,,,,,,,,,
+Should be C. posadasii,"SRR9644375 (C. posadasii, pacbio)",human_pathogens;mixed,FALSE,SRR9644375,pacbio,Coccidioides posadasii,,fungi,PRJNA494320,,,,,,,,,,,,,,,,,,
