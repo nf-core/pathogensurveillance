@@ -8,11 +8,11 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-args <- c(
-   '/home/fosterz/projects/pathogensurveillance/work/3a/712c951885f09d194c0b9a6e5ce1d1/magn_or_GCA_000292585_1.vcffilter.vcf.gz',
-   '/home/fosterz/projects/pathogensurveillance/work/tmp/23/7db1da96a063224d35657e6741968a/magn_or_GCA_000292585_1.csv',
-   'deleteme.fasta'
-)
+# args <- c(
+#    '~/projects/pathogensurveillance/work/7e/982f33311eb286918183ec32916767/mixed_GCF_042647405_1.vcffilter.vcf.gz',
+#    '~/projects/pathogensurveillance/work/7e/982f33311eb286918183ec32916767/mixed_GCF_042647405_1.csv',
+#    'deleteme.fasta'
+# )
 names(args) <- c('vcf_path', 'ploidy_data_path', 'out_path')
 args <- as.list(args)
 
