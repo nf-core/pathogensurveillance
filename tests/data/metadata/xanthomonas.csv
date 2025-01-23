@@ -1,0 +1,30 @@
+sample_id,path,Path_2,sequence_type,ref_path,ref_id,report_group_ids,color_by,date_isolated,date_received,year,host,cv_key,nursery
+22-299,test/data/reads/22-299_R1.fastq.gz,test/data/reads/22-299_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/2/22,3/29/22,2022,Pelargonium x hortorum,CV-1,MD
+22-300,test/data/reads/22-300_R1.fastq.gz,test/data/reads/22-300_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/2/22,3/30/22,2022,Pelargonium x hortorum,CV-2,MD
+22-301,test/data/reads/22-301_R1.fastq.gz,test/data/reads/22-301_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/2/22,3/31/22,2022,Pelargonium x hortorum,CV-3,MD
+22-302,test/data/reads/22-302_R1.fastq.gz,test/data/reads/22-302_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/2/22,4/1/22,2022,Pelargonium x hortorum,CV-4,MD
+22-303,test/data/reads/22-303_R1.fastq.gz,test/data/reads/22-303_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/2/22,4/2/22,2022,Pelargonium x hortorum,CV-5,MD
+22-304,test/data/reads/22-304_R1.fastq.gz,test/data/reads/22-304_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/7/22,4/3/22,2022,Pelargonium x hortorum,CV-6,MD
+22-309,test/data/reads/22-309_R1.fastq.gz,test/data/reads/22-309_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/4/22,4/4/22,2022,Pelargonium x hortorum,CV-7,NY
+22-310,test/data/reads/22-310_R1.fastq.gz,test/data/reads/22-310_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/4/22,4/5/22,2022,P. x hortorum,CV-8,NY
+22-311,test/data/reads/22-311_R1.fastq.gz,test/data/reads/22-311_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/4/22,4/6/22,2022,P. x hortorum,CV-9,NY
+22-312,test/data/reads/22-312_R1.fastq.gz,test/data/reads/22-312_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/7/22,4/7/22,2022,P. x hortorum,CV-10,NY
+22-314,test/data/reads/22-314_R1.fastq.gz,test/data/reads/22-314_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/7/22,4/9/22,2022,P. x hortorum,CV-12,NY
+22-315,test/data/reads/22-315_R1.fastq.gz,test/data/reads/22-315_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/8/22,4/10/22,2022,P. x hortorum,CV-13,NY
+22-316,test/data/reads/22-316_R1.fastq.gz,test/data/reads/22-316_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/8/22,4/11/22,2022,P. x hortorum,CV-14,NY
+22-317,test/data/reads/22-317_R1.fastq.gz,test/data/reads/22-317_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/14/22,4/12/22,2022,P. x hortorum,CV-12,NY
+22-318,test/data/reads/22-318_R1.fastq.gz,test/data/reads/22-318_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/14/22,4/13/22,2022,P. x hortorum,CV-15,NY
+22-319,test/data/reads/22-319_R1.fastq.gz,test/data/reads/22-319_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/21/22,4/14/22,2022,P. x hortorum,CV-16,NY
+22-320,test/data/reads/22-320_R1.fastq.gz,test/data/reads/22-320_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,3/21/22,4/15/22,2022,P. x hortorum,CV-17,NY
+22-322,test/data/reads/22-322_R1.fastq.gz,test/data/reads/22-322_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,2001,4/17/22,2001,P. x hortorum,CV-18,KS
+22-324,test/data/reads/22-324_R1.fastq.gz,test/data/reads/22-324_R2.fastq.gz,Illumina,,,xan_test;subgroup,year;nursery,1987,4/19/22,1987,P. x hortorum,NA,NA
+22-329A,test/data/reads/22-329A_R1.fastq.gz,test/data/reads/22-329A_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/25/22,4/30/22,2022,P. x hortorum,CV-28,PA
+22-329B,test/data/reads/22-329B_R1.fastq.gz,test/data/reads/22-329B_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/25/22,4/29/22,2022,P. x hortorum,CV-28,PA
+22-330,test/data/reads/22-330_R1.fastq.gz,test/data/reads/22-330_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/25/22,5/1/22,2022,P. x hortorum,CV-29,PA
+22-331,test/data/reads/22-331_R1.fastq.gz,test/data/reads/22-331_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/21/22,2022,Pelargonium x,CV-20,IN
+22-332,test/data/reads/22-332_R1.fastq.gz,test/data/reads/22-332_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/22/22,2022,Pelargonium x,CV-21,IN
+22-333,test/data/reads/22-333_R1.fastq.gz,test/data/reads/22-333_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/23/22,2022,Pelargonium x,CV-22,IN
+22-334,test/data/reads/22-334_R1.fastq.gz,test/data/reads/22-334_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/24/22,2022,Pelargonium x,CV-23,IN
+22-335,test/data/reads/22-335_R1.fastq.gz,test/data/reads/22-335_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/25/22,2022,Pelargonium x,CV-24,IN
+22-336,test/data/reads/22-336_R1.fastq.gz,test/data/reads/22-336_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/26/22,2022,Pelargonium zonale,CV-25,IN
+22-337,test/data/reads/22-337_R1.fastq.gz,test/data/reads/22-337_R2.fastq.gz,Illumina,test/data/refs/reference-22-331.fna,22_331_assembly,xan_test,year;nursery,3/21/22,4/27/22,2022,Pelargonium zonale,CV-26,IN

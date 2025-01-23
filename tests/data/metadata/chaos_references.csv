@@ -1,0 +1,5 @@
+ref_id,ref_group_ids,ref_name,ref_description,ref_ncbi_query,ref_ncbi_query_max,ref_path,Ref primary usage,Ref contextual Usage,ref_color_by,ref_enabled
+,xan_refs,22_331_assembly,,,,test/data/refs/reference-22-331.fna,required,optional,,
+PR-102 v3.1,p_ram_refs,,,,,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/refs/PR-102_v3.1.fasta.gz,optional,,,
+,p_ram_refs,,,Phytophthora ramorum,5,,optional,exclusive,,
+,xan_refs_query,,,Xanthomonas,1,,,,,

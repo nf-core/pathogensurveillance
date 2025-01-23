@@ -1,0 +1,87 @@
+## 2024-10-24
+
+Working on test dataset for Jeff's proposal.
+Desired attributes:
+- [x] Illumina
+- [x] pacbio
+- [x] nanopore
+- [x] prokaryotes
+- [x] fungi
+- [x] sample by query
+- [x] sample by path
+- [x] sample by accession
+- [x] reference by query
+- [x] reference by file
+- [x] reference by accession
+- [x] different reference usages
+- [x] multiple report groups
+
+Started work on 'assemble_first' branch to make genome assembly the first step.
+I refactored the genome assembly code to be more flexible with multiple assembliers, but still have not chosen an assemblier for eukaryotes sequenced with short reads or tested the code yet.
+
+
+
+
+
+## 2024-10-22
+
+Working on reference selection figure.
+
+Shared steps in reference selection:
+* Sendsketch
+* download metadata for all refseq entries for each family encountered
+* Select references to download based on Sendsketch results, some for each taxonomic rank
+* Make sketches of all reads and references
+* All vs all comparison of sketches
+
+Contextual reference selection:
+* Select references such that each sample in a tree has a references for each ANI bin as well as the most similar referneces.
+
+Primary reference selection:
+* Select a minimum number of references such that samples are within a ANI threshold of their refernece
+
+
+
+[2024-05-24 09:40:59 AM] Planning new reference group input
+The goal is to allow users to specify multiple references per sample to be used for both variant calling and phylogenetic analyses.
+
+A new input spreadsheet with one row per referene and the following columns:
+* refernce_id: unique identifier for the refernece input (path, accession, etc). The sample ID / reference ID combination must be unique, but this can be repeated to use the same reference for multiple samples. If not supplied, an ID will be automatically generated from the `name` or input path/accession/query.
+* name: Short human-readable label, ideally starting with a latin binomial species name, used in figures and tables in the pipeline output. If not supplied, the sample ID will be used.
+* description: Longer label for the reference, used in figures and tables in the pipeline output. If this is not supplied, the value of `name` will be used.
+* group_id: The group the reference is a part of. This ID is used in the sample data spreadsheet to identify a group of references. References can be assigned to more than one group by seperating group IDs with semicolons (;). The id of the reference is always added automatically as a group ID, so individual referneces can also be referred to in the sample data spreadsheet.
+* path: The local file path or URL to a reference assembly. If supplied, `ncbi_accession` and `ncbi_query` must be empty.
+* ncbi_accession: The NCBI accession ID for a reference assembly to download. If supplied, `path` and `ncbi_query` must be empty.
+* ncbi_query: An NCBI query used to search for references to download. The `id`, `name`, and `description` fields cannot have values since they will be automatically filled in based on download data. If supplied, `ncbi_accession` and `path` must be empty.
+* primary_usage: One of "excluded", "optional", or "required". Controls how this reference is used in cases where a single "best" reference is required, such as read mapping to call variants.
+* contextual_usage: One of "excluded", "optional", "required", or "exclusive". Controls how this reference is used in cases where multiple references are used to provide context, such as in phylogenetic analyses.
+* color_by: The names of one or more other columns in this spreadsheet (usually custom user-specific metadata) delimited by semicolons (;) containing data used to color reference labels in output reports.
+* enabled: TRUE/FALSE. Whether or not to use this reference. This can be used to prevent a refernece to be used without deleting its data from the spreadsheet.
+
+
+The definations of the values of the `*_usage` columns:
+* excluded: Do not use this refernece. This is primarily useful for references defined using the `ncbi_accession` and `ncbi_query` columns.
+* optional: The reference will be considered when selecting references, but not nessesarily used.
+* required: The reference will always be included, but other references might be as well.
+* exclusive: Only references marked exclusive will be used.
+
+
+This will also result in changes to the sample data spreadsheet:
+* sample_id: The unique identifier for each sample. This will be used in file names to distinguish samples in the output. Each sample ID must correspond to a single set of sequence data (The `path`, `ncbi_accession`, and `ncbi_query` columns), although the same sequence data can be used by multiple different IDs. Any values that correspond to multiple different sets of sequence data or contain characters that cannot appear in file names (\/:*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the names of input data.
+* name: A human-readable label for the sample that is used in plots and tables. If not supplied, it will be inferred from the names of `sample_id`.
+* description: A longer human-readable label used in plots and tables. If not supplied, it will be equal to the `name` value
+* path: Path to a local file or a URL. For paired-end data, like that produced by Illumina sequencers, supply the forward read path here and the revese in the `path_2` column. If this is supplied, the `ncbi_accession` and `ncbi_query` columns must be empty.
+* path_2: Path to short read FASTQs like that produced by Illumina. This is used for the reverse read's data when paired-end sequencing is used. This can be a local file path or a URL to an online location.
+* ncbi_accession: The NCBI accession for the reads to be automatically downloaded. If supplied, the `path` and `ncbi_query` columns must be empty.
+* ncbi_query: The NCBI search query to use to automatically find and download reads. If supplied, the `ncbi_accession` and `path` columns must be empty.
+* type: The type of sequencing supplied in the `path`, `ncbi_accession`, or `ncbi_query` column. One of "ilumina", "pacbio", or "nanopore".
+* reference_id: The unique identifier for each user-defined reference genome or group of genomes. This must be values that occur in the `id` or `group_id` columns in the reference input spreadsheet.
+* group_ids: How to group samples into reports. For every unique value in this column a report will be generated. Samples can be assigned to multiple reports by separating group IDs by `;`. For example `all;subset` will put the sample in both `all` and `subset` report groups. If not included, all samples will be
+* color_by: The names of user-specific columns (not usually any of the ones described here) containing variables to base the color of some plots by (e.g. the minimum spanning network). If not include, plots will not be colored.
+* enabled: TRUE/FALSE. Whether or not to use this sample. This can be used to prevent a sample to be used without deleting its data from the spreadsheet.
+* ploidy: The ploidy of the sample, specified as the number of copies. Defualts to 1.
+
+[2024-05-28 02:27:30 PM] Working on combining branches
+I am trying to combine the branches with long read support and read2tree support with the master branch, along with changes to how references will be supplied to the pipeline.
+Currently, `master` has been merged into `r2tlink`.
+A new branch `reference_groups` has been created from `rt2link` to working on the chagnes to reference inputs, but before making those changes I will merge in `long_read_support`, so I only have to look through all the code once.

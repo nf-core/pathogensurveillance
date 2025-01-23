@@ -7,27 +7,59 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces",
-                "meta": ["id"]
+            "sample_id": {
+                "type": "string"
             },
-            "fastq_1": {
+            "name": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "path": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
-            "fastq_2": {
+            "path_2": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "ncbi_accession": {
+                "type": "string",
+                "pattern": "^[A-Z]{3,6}[0-9]+$",
+                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (captial letters followed by numbers)."
+            },
+            "ncbi_query": {
+                "type": "string"
+            },
+            "ncbi_query_max": {
+                "type": "string"
+            },
+            "sequence_type": {
+                "type": "string"
+            },
+            "report_group_ids": {
+                "type": "string"
+            },
+            "color_by": {
+                "type": "string"
+            },
+            "ploidy": {
+                "type": "number"
+            },
+            "enabled": {
+                "type": "boolean"
+            },
+            "ref_group_ids": {
+                "type": "string"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": []
     }
 }
