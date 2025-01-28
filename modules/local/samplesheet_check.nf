@@ -7,7 +7,7 @@ process SAMPLESHEET_CHECK {
 
     conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
+        'docker.io/zacharyfoster/rentrez:0.1' :
         'docker.io/zacharyfoster/rentrez:0.1' }"
 
     input:
