@@ -295,3 +295,6 @@ Should be P. spinosum,"SRR15309484 (P. spinosum, illumina)",oomycetes;mixed,TRUE
 Should be P. infestans,"SRR29814928 (P. infestans, illumina)",oomycetes;mixed,TRUE,SRR29814928,illumina,Phytophthora infestans,oomycete,PRJNA1135328,,,,,,,,,,,,,,,,,,
 Should be P. cinnamomi,"SRR26197583 (P. cinnamomi, pacbio)",oomycetes;mixed,TRUE,SRR26197583,pacbio,Phytophthora cinnamomi,oomycete,PRJNA1019754,,Pc2109,,,,,,,mixed,,,,,,,,,
 Should be P. effusa,"SRR16542347 (P. effusa, illumina)",oomycetes;mixed,TRUE,SRR16542347,illumina,Pernospora effusa,oomycete,PRJNA772192,,,spinach,,,,,,mixed,,,,,,,,,
+Should be P. falciparum,"SRR29695256 (P. falciparum, nanopore)",apicomplexa;mixed,TRUE,SRR29695256,nanopore,Plasmodium falciparum,apicomplexa,PRJNA1131459,,,,,,,,,,,,,,,,,,
+Should be P. falciparum,"SRR29397006 (P. falciparum, illumina)",apicomplexa;mixed,TRUE,SRR29397006,illumina,Plasmodium falciparum,apicomplexa,PRJNA1119461,,,,,,,,,,,,,,,,,,
+Should be P. falciparum,"SRR27942447 (P. falciparum, illumina)",apicomplexa;mixed,TRUE,SRR27942447,illumina,Plasmodium falciparum,apicomplexa,PRJNA1004408,,,,,,,,,,,,,,,,,,
