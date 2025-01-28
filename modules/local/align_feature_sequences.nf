@@ -4,7 +4,7 @@ process ALIGN_FEATURE_SEQUENCES {
 
     conda "conda-forge::mafft=7.526 bioconda::perl-bioperl=1.7.8 conda-forge::parallel=20230522"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'library://logan-blair/collection/maft-perl.sif:latest':
+        'zachary-foster/mafft-perl':
         'zachary-foster/mafft-perl' }"
 
     input:
