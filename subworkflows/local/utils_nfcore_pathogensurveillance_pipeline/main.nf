@@ -26,16 +26,17 @@ include { UTILS_NEXTFLOW_PIPELINE   } from '../../nf-core/utils_nextflow_pipelin
 workflow PIPELINE_INITIALISATION {
 
     take:
-    version           // boolean: Display version and exit
-    validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs   // boolean: Do not use coloured log outputs
-    nextflow_cli_args //   array: List of positional nextflow CLI args
-    outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    version            // boolean: Display version and exit
+    validate_params    // boolean: Boolean whether to validate parameters against the schema at runtime
+    monochrome_logs    // boolean: Do not use coloured log outputs
+    nextflow_cli_args  //   array: List of positional nextflow CLI args
+    outdir             //  string: The output directory where the results will be saved
+    sample_data_csv    //  string: Path to input sample data table
+    reference_data_csv //  string: Path to reference data table
 
     main:
 
-    ch_versions = Channel.empty()
+    versions = Channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -66,35 +67,34 @@ workflow PIPELINE_INITIALISATION {
     //
     // Custom validation for pipeline parameters
     //
-    validateInputParameters()
 
-    //
-    // Create channel from input file provided through params.input
-    //
+    // Check input path parameters to see if they exist
+    def checkPathParamList = [
+        params.input,
+        params.reference_data,
+        params.multiqc_config,
+        params.bakta_db
+    ]
+    for (param in checkPathParamList) {
+        if (param) { file(param, checkIfExists: true) }
+    }
 
-    Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_samplesheet }
+    // Check mandatory parameters
+    if (params.input) {
+        sample_data_csv = file(params.input)
+    } else {
+        exit 1, 'Sample metadata CSV not specified.'
+    }
+    if (params.reference_data) {
+        reference_data_csv = file(params.reference_data)
+    } else {
+        reference_data_csv = []
+    }
 
     emit:
-    samplesheet = ch_samplesheet
-    versions    = ch_versions
+    sample_data_csv    = sample_data_csv
+    reference_data_csv = reference_data_csv
+    versions           = versions
 }
 
 /*

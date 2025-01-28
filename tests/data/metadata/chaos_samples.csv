@@ -1,0 +1,16 @@
+sample_id,path,Path   2,sequence_type,NAME, description ,random_column,ncbi accession,NCBI_query,ref_group_ids,report_group_ids,color_by,enabled,User Factor 1,user factor (2),…,_,ploidy
+Xan_1,test/data/reads/22-299_R1.fastq.gz,test/data/reads/22-299_R2.fastq.gz,ILLUMINA,Xan 1,The best Xanthomonas; its number 1,just,,,xan_refs;xan_refs_query,all;xanthemonas,User Factor 1,,,,,,1
+,test/data/reads/22-300_R1.fastq.gz,test/data/reads/22-300_R2.fastq.gz,illumina,Xan 2,,some,,,xan_refs;xan_refs_query,all;xanthemonas,User Factor 1,TRUE,,,,,1
+Xan 3,test/data/reads/22-301_R1.fastq.gz,test/data/reads/22-301_R2.fastq.gz, Illumina,,,random,,,xan_refs,all;xanthemonas,User Factor 1,FALSE,,,,,1
+Xan 4,test/data/reads/22-302_R1.fastq.gz,test/data/reads/22-302_R2.fastq.gz, Illumina,,,user,,,xan_refs,all;xanthemonas,User Factor 1   ,TRUE,,,,,1
+,,, Illumina,,,stuff,SRR10432277,,,mixed,User Factor 1; user factor (2),TRUE,,,,,2
+BDM_Pbelbahrii,,,,,,that,ERR1578941,,,mixed,User Factor 1; user factor (2),,,,,,
+HoneyBee (Adorsata),,, Illumina,honey bee,,might,SRR1564144,,,mixed,User Factor 1; user factor (2),,,,,,2
+Rsol_Rsolanacearum,,, Illumina,,,cause,SRR19621834,,,mixed,User Factor 1; user factor (2),,,,,,1
+pram1,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s013-indexRPI27-ATTCCT-7612-C7_S13_L006_R1_001.fastq.gz,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s013-indexRPI27-ATTCCT-7612-C7_S13_L006_R2_001.fastq.gz, Illumina,,Phytophthora ramoum (sudden oak death),problems,,,p_ram_refs,all;p_ram,User Factor 1; user factor (2),,,,,,
+,,,,,,,,,,,,,,,,,
+pram2,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R1_001.fastq.gz,https://github.com/grunwaldlab/pathogensurveillance/raw/master/test/data/reads_small/lane6-s008-indexRPI16-CCGTCC-7612-D1_S8_L006_R2_001.fastq.gz, Illumina,,Phytophthora ramoum (sudden oak death),,,,p_ram_refs,all;p_ram,User Factor 1; user factor (2),,,,,,
+Bp-511283_SE,,,,,,,SRR19894741,,,all;other,  User Factor 1; user factor (2),,,,,,
+Bp-804855_SE,,,nanopore,,,,SRR19894742,,,all;other,  User Factor 1; user factor (2),,,,,,
+,,,,,,,ERR12074698,,,all;other,  User Factor 1; user factor (2),,,,,,
+ing_agg_,,,,,,,,Ignisphaera aggregans SZUA ,,all;other,  User Factor 1; user factor (2),,,,,,

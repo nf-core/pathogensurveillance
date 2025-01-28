@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/main/nextflow_schema.json",
     "title": "nf-core/pathogensurveillance pipeline parameters",
-    "description": "Surveillance of plant pathogens using high-throughput sequencing",
+    "description": "Surveillance of pathogens using high-throughput sequencing",
     "type": "object",
     "$defs": {
         "input_output_options": {
@@ -18,15 +18,38 @@
                     "exists": true,
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/pathogensurveillance/usage#samplesheet-input).",
+                    "pattern": "^\\S+\\.[ct]sv$",
+                    "description": "Path to comma-separated file containing information about samples.",
+                    "help_text": "This CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "reference_data": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.[ct]sv$",
+                    "schema": "assets/schema_input.json",
+                    "description": "Path to comma-separated file containing information about samples.",
+                    "help_text": "This CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+                    "description": "The output directory where the results will be saved. You have to use absolute paths to storage if running on Cloud infrastructure.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "temp_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "The location to save temporary files for processes. This is only used for some processes that produce large temporary files such as PICARD_SORTSAM.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "data_dir": {
+                    "type": "string",
+                    "default": "path_surveil_data",
+                    "format": "directory-path",
+                    "description": "The location to save downloaded files for later use. This is seperate from the cached data (usually stored in the 'work' directory), so that the cache can be cleared without having to repeat many large downloads.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "email": {
@@ -40,45 +63,116 @@
                     "type": "string",
                     "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
                     "fa_icon": "fas fa-file-signature"
+                },
+                "bakta_db": {
+                    "type": "string",
+                    "description": "The path to the Bakta database folder. This or --download_bakta_db must be included.",
+                    "fa_icon": "fas fa-folder-open",
+                    "format": "directory-path"
+                },
+                "download_bakta_db": {
+                    "type": "boolean",
+                    "description": "Download the database required for running Bakta. This or --bakta_db must be included. Note that this will download gigabytes of information, so if you are planning to do repeated runs without --resume it would be better to download the database manually according to the bakta documentaion and specify it with --bakta_db.",
+                    "fa_icon": "fas fa-download",
+                    "default": "true"
+                },
+                "bakta_db_type": {
+                    "type": "string",
+                    "pattern": "light|full",
+                    "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
+                    "default": "light"
                 }
             }
         },
-        "reference_genome_options": {
-            "title": "Reference genome options",
+        "analysis_parameters": {
+            "title": "Analysis parameters",
             "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Parmaters that modify the analysis done by the pipleine.",
+            "default": "",
             "properties": {
-                "genome": {
-                    "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                "max_depth": {
+                    "type": "number",
+                    "default": 100,
+                    "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
+                    "fa_icon": "fas fa-align-center"
                 },
-                "fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
-                },
-                "igenomes_ignore": {
+                "only_latin_binomial_refs": {
                     "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "description": "When selecting references automatically, only consider references with names that appear to be standard latin bionomials (i.e. no numbers or symbols in the first two words).",
+                    "fa_icon": "fas fa-download",
+                    "default": false
                 },
-                "igenomes_base": {
-                    "type": "string",
-                    "format": "directory-path",
-                    "description": "The base path to the igenomes reference files",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "default": "s3://ngi-igenomes/igenomes/"
+                "allow_non_refseq": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies not in RegSeq.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "allow_unannotated": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that do not have annotations. The pipleine will attempt to annotate these references as needed.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "allow_atypical_refs": {
+                    "type": "boolean",
+                    "description": "When selecting references automatically, allow assemblies that NCBI considers atypical.",
+                    "fa_icon": "fas fa-download",
+                    "default": false
+                },
+                "n_ref_strains": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "fa_icon": "fas fa-download"
+                },
+                "n_ref_species": {
+                    "type": "number",
+                    "default": 20,
+                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "fa_icon": "fas fa-download"
+                },
+                "n_ref_genera": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "fa_icon": "fas fa-download"
+                },
+                "n_ref_closest": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
+                    "fa_icon": "fas fa-download"
+                },
+                "n_ref_closest_named": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Same as the 'n_ref_closest' option except that it only applies to referneces with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
+                    "fa_icon": "fas fa-download"
+                },
+                "n_ref_context": {
+                    "type": "number",
+                    "default": 5,
+                    "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
+                    "fa_icon": "fas fa-download"
+                },
+                "phylo_min_genes": {
+                    "type": "number",
+                    "default": 30,
+                    "description": "The minimum number of genes needed to conduct a core gene phylogeny. Samples and references will be removed (as allowed by the `min_core_samps` and `min_core_refs` options) until this minimum is met.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "phylo_max_genes": {
+                    "type": "number",
+                    "default": 300,
+                    "description": "The maximum number of genes used to conduct a core gene phylogeny.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "ref_min_ani": {
+                    "type": "number",
+                    "default": 0.95,
+                    "description": "The minimum ANI between a sample and potential reference for that reference to be used for mapping reads from that sample. To force all the samples in a report group to use the same reference, set this value very low.",
+                    "fa_icon": "fas fa-align-center"
                 }
             }
         },
@@ -130,6 +224,37 @@
                 }
             }
         },
+        "max_job_request_options": {
+            "title": "Max job request options",
+            "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+            "properties": {
+                "max_total_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested for all jobs combined. Should be an integer e.g. `--max_total_cpus 1`. Only applies if running the pipeline in a personal computer.",
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for all jobs combined. Should be an integer e.g. `--max_total_cpus 1`"
+                },
+                "max_total_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for all jobs combined. Should be a string in the format integer-unit e.g. `--max_total_memory '8.GB'`. Only applies if running the pipeline in a personal computer.",
+                    "fa_icon": "fas fa-memory",
+                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for all jobs combined. Should be a string in the format integer-unit e.g. `--max_total_memory '8.GB'`"
+                },
+                "max_total_jobs": {
+                    "type": "integer",
+                    "description": "Maximum number of jobs that can run at once. Should be an integer e.g. `--max_total_jobs 1`",
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the jobs to schedule at once. Should be an integer e.g. `--max_total_jobs 1`"
+                }
+            }
+        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -151,6 +276,15 @@
                     "fa_icon": "fas fa-copy",
                     "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
+                },
+                "copymode": {
+                    "type": "string",
+                    "default": "medium",
+                    "description": "Designates which files are copied from work/ directory",
+                    "help_text": "Sets `publishDir` mode for individual files. Storage footprint of the pipeline can be quite large, and files can be saved twice: both within the work/ directory and within the published output directory. By default, this parameter is set so that intermediate files will be linked from the published directory to their location in the work/ directory instead of being stored twice.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": ["high", "medium", "low", "none"],
+                    "hidden": false
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -212,6 +346,19 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
+                "show_hidden_params": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-eye-slash",
+                    "description": "Show all params when using `--help`",
+                    "hidden": true,
+                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "hpc_queue": {
+                    "type": "string",
+                    "description": "Name of queue in HPC environment to run jobs.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-cogs"
+                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
@@ -233,7 +380,10 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/$defs/reference_genome_options"
+            "$ref": "#/$defs/analysis_parameters"
+        },
+        {
+            "$ref": "#/$defs/max_job_request_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
