@@ -1,6 +1,8 @@
 lint:
   pipeline_todos: false
   template_strings: false
+  files_unchanged:
+    - .github/PULL_REQUEST_TEMPLATE.md
 nf_core_version: 3.2.0
 repository_type: pipeline
 template:
