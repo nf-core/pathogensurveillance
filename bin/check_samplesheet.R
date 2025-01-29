@@ -148,7 +148,7 @@ is_present <- function(x) {
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 # args <- list('~/downloads/sample_data_N664_true.csv')
-# args <- list('~/projects/pathogensurveillance/work/bc/c89a63060df485e6c6f47e2b1a09b4/serratia_N664.csv', '~/projects/pathogensurveillance/work/bc/c89a63060df485e6c6f47e2b1a09b4/serratia_N664_ref_data.csv')
+# args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
@@ -820,12 +820,12 @@ if (nrow(metadata_ref)) {
 # Look up sequence type for NCBI accessions without a sequence type defined
 lookup_sequence_type <- function(id) {
     search_result <- rentrez::entrez_search(db = 'sra', id)
-    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
     if (length(search_result$ids) != 1) {
         stop(call. = FALSE, paste0(
             'Could not look up sequence type for id "', id, '". Specify it in the sample metadata CSV.'
         ))
     }
+    summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
     gsub(summary_result$expxml, pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2')
 }
 undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadata_samp$sequence_type) & is_present(metadata_samp$ncbi_accession)])
