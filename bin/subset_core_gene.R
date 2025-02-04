@@ -2,9 +2,10 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.tsv',
-#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test_feat_seqs_renamed',
-#           '/home/fosterz/projects/pathogensurveillance/work/3a/94cef0d2d01b0d07ccaf3f9a253ffe/xan_test.csv',
+# subset_core_gene.R smarcescens.tsv smarcescens_feat_seqs_renamed smarcescens.csv 30 300 smarcescens_core_genes smarcescens_feat_seqs
+# args <- c('~/downloads/smarcescens.tsv',
+#           '~/downloads/smarcescens_feat_seqs_renamed',
+#           '~/downloads/smarcescens.csv',
 #           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
 args <- as.list(args)
@@ -12,7 +13,6 @@ raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.n
 metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
-raw_gene_data1 <- raw_gene_data
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
@@ -21,7 +21,7 @@ sample_ids <- unique(metadata$sample_id[metadata$sample_id %in% all_ids])
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
 # Create matrix with number of genes for each gene in each sample
-cluster_data <- raw_gene_data1[, 23:ncol(raw_gene_data1)]
+cluster_data <- raw_gene_data[, 23:ncol(raw_gene_data)]
 cluster_data[, all_ids] <- lapply(cluster_data[, all_ids], function(column) {
     unlist(lapply(strsplit(column, split = '[;:]'), length))
 })
@@ -114,8 +114,8 @@ has_ref_and_samp <- unlist(lapply(clustered_samples, function(ids) {
     any(ids %in% ref_ids) && any(ids %in% sample_ids)
 }))
 
-# Make subset Pirate output for clusters with both samples and references
-output_clusters <- lapply(clustered_samples[has_ref_and_samp], function(ids) {
+# Make subset Pirate output for clusters
+output_clusters <- lapply(clustered_samples, function(ids) {
     is_core_gene <- rowSums(present_and_single[, ids]) == length(ids)
     output <- raw_gene_data[is_core_gene, c(colnames(raw_gene_data)[1:22], ids)]
     if (nrow(output) > max_core_genes) {
@@ -130,11 +130,10 @@ for (index in seq_along(output_clusters)) {
 }
 
 # Save the IDs of any samples and references that were removed from the analysis
-if (any(!has_ref_and_samp)) {
-    removed_ids <- unlist(clustered_samples[! has_ref_and_samp])
-} else {
-    removed_ids <- character()
-}
+removed_ids <- character()
+# if (any(!has_ref_and_samp)) {
+#     removed_ids <- c(removed_ids, unlist(clustered_samples[! has_ref_and_samp]))
+# }
 removed_sample_ids <- removed_ids[removed_ids %in% sample_ids]
 removed_ref_ids <- removed_ids[removed_ids %in% ref_ids]
 writeLines(removed_sample_ids, con = 'removed_sample_ids.txt')
