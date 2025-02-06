@@ -36,12 +36,16 @@ process PREPARE_REPORT_INPUT {
     cp -r ${sendsketch} ${prefix}_inputs/sendsketch/
 
     # Put all of the statistics for NCBI references considered into a single folder
-    mkdir ${prefix}_inputs/ncbi_reference_data
-    cp -r ${ncbi_ref_meta} ${prefix}_inputs/ncbi_reference_data/
+    if [ ! -z "${ncbi_ref_meta}" ]; then
+        mkdir ${prefix}_inputs/ncbi_reference_data
+        cp -r ${ncbi_ref_meta} ${prefix}_inputs/ncbi_reference_data/
+    fi
 
     # Put the metadata for references selected for each sample into a single folder
-    mkdir ${prefix}_inputs/selected_references
-    cp -r ${selected_refs} ${prefix}_inputs/selected_references/
+    if [ ! -z "${selected_refs}" ]; then
+        mkdir ${prefix}_inputs/selected_references
+        cp -r ${selected_refs} ${prefix}_inputs/selected_references/
+    fi
 
     # Add estimated ANI matrix from sourmash
     mv ${ani_matrix} ${prefix}_inputs/sourmash_ani_matrix.csv

@@ -176,26 +176,25 @@ workflow PATHOGENSURVEILLANCE {
         .groupTuple(sort: 'hash')
 
     // Gather NCBI reference metadata for all references considered
-    family = PREPARE_INPUT.out.families
-        .splitText(elem: 1)
-        .map { sample_meta, families ->
-            [families.replace('\n', ''), sample_meta]
+    ncbi_ref_meta = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.family_stats_per_sample, by: 0)
+        .groupTuple(by: 1, sort: 'hash')
+        .map { sample_meta, report_meta, family_stats ->
+            [report_meta, family_stats.flatten().unique()]
         }
-    ncbi_ref_meta = PREPARE_INPUT.out.ncbi_ref_meta
-        .combine(family, by: 0)
-        .map { family, ref_stats, sample_meta -> [sample_meta, ref_stats]}
-        .combine(PREPARE_INPUT.out.sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids]] }, by: 0)
-        .map { sample_meta, ref_stats, report_meta -> [report_meta, ref_stats] }
-        .unique()
-        .groupTuple(sort: 'hash')
 
     // Gather selected reference metadata
     selected_ref_meta = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
-        .map{ sample_meta, report_meta, ref_meta -> [report_meta, ref_meta] }
+        .map{ sample_meta, report_meta, ref_meta_file ->
+            [report_meta, ref_meta_file] }
         .unique()
         .groupTuple(sort: 'hash')
+        .map { report_meta, ref_meta_files ->
+            [report_meta, ref_meta_files.findAll{it != null}]
+        }
 
     // Gather SNP alignments from the variant analysis
     snp_align = VARIANT_ANALYSIS.out.snp_align

@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/Documents/Github/_no_group_defined__inputs"
+    inputs: "/home/fosterz/projects/pathogensurveillance/tests/output/serratia_small/prepare_report_input/validation_serratia_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -18,7 +18,9 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 # "_test_data/xanthomonas/xan_test_inputs"
 # "_test_data/mycobacteroides/_no_group_defined__inputs"
 # "_test_data/chaos/all_inputs"
-# "/home/fosterz/data/files/projects/current/pathogensurveillance/test/output/xanthomonas_small/prepare_report_input/subgroup_inputs"
+# "/home/fosterz/projects/pathogensurveillance/tests/output/xanthomonas_small/prepare_report_input/xan_test_inputs"
+# "/home/fosterz/projects/pathogensurveillance/tests/output/test/prepare_report_input/_no_group_defined__inputs"
+# "/home/fosterz/projects/pathogensurveillance/tests/output/serratia_small/prepare_report_input/validation_serratia_inputs"
 ```
 
 

@@ -116,9 +116,14 @@ workflow PREPARE_INPUT {
         }
 
     // Get list of families for all samples without exclusive references defined by the user
+    def no_auto_contextual_refs = params.n_ref_closest == 0 && params.n_ref_closest_named == 0 && params.n_ref_context == 0
     all_families = sample_data
-        .filter { sample_meta, ref_metas ->
-            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') && ref_metas.collect{it.ref_contextual_usage}.contains('exclusive'))
+        .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata if no references are to be dowloaded automatically (besides user-defined references)
+            ! (params.n_ref_genera == 0 && params.n_ref_species == 0 && params.n_ref_strains == 0)
+        }
+        .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata for samples that the user has defined exclusive references for
+            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') &&
+                (ref_metas.collect{it.ref_contextual_usage}.contains('exclusive') || no_auto_contextual_refs))
         }
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
@@ -136,40 +141,73 @@ workflow PREPARE_INPUT {
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
-    // Choose reference sequences to provide context for each sample
-    taxon_data = sample_data
-        .filter { sample_meta, ref_metas ->
-            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') && ref_metas.collect{it.ref_contextual_usage}.contains('exclusive'))
+    // Add placeholders for NCBI reference metadata if none was looked up
+    ncbi_ref_meta = INITIAL_CLASSIFICATION.out.families
+        .splitText(elem: 1)
+        .map { sample_meta, families ->
+            [families.replace('\n', '')]
         }
-        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }  // Joining with a subset of samples acts like a filter
+        .unique()
+        .join(FIND_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
+        .filter { it != [null, null] }
+
+    // Choose reference sequences to provide context for each sample
+    family_stats_per_sample = INITIAL_CLASSIFICATION.out.families
+        .splitText(elem: 1)
+        .map { sample_id, families -> [families.replace('\n', ''), sample_id] }
+        .combine(ncbi_ref_meta, by: 0)
+        .map { family, sample_id, stats_path -> [sample_id, stats_path] }
+        .unique()
+        .groupTuple(by: 0, sort: 'hash')
+        .map { sample_id, family_stats ->
+            [sample_id, family_stats.findAll{it != null}]
+        }
+    taxon_and_ref_data = sample_data
+        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(INITIAL_CLASSIFICATION.out.families)
         .join(INITIAL_CLASSIFICATION.out.genera)
         .join(INITIAL_CLASSIFICATION.out.species)
-    family_stats_per_sample = INITIAL_CLASSIFICATION.out.families
-        .splitText(elem: 1)
-        .map { sample_id, families -> [families.replace('\n', ''), sample_id] }
-        .combine(FIND_ASSEMBLIES.out.stats, by: 0)
-        .map { family, sample_id, stats_path -> [sample_id, stats_path] }
-        .unique()
-        .groupTuple(by: 0, sort: 'hash')
+        .join(family_stats_per_sample)
+        .filter { sample_meta, families, genera, species, family_stats ->
+            family_stats.size() > 0
+        }
     PICK_ASSEMBLIES (
-        taxon_data.join(family_stats_per_sample),
+        taxon_and_ref_data,
         params.n_ref_strains,
         params.n_ref_species,
         params.n_ref_genera,
         params.only_latin_binomial_refs
     )
-    new_reference_data =  PICK_ASSEMBLIES.out.stats
+
+    // Add placeholders for PICK_ASSEMBLIES output if not run
+    picked_assemblies_stat_files = sample_data
+        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
+        .unique()
+        .join(PICK_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
+        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+    picked_assemblies_refs = PICK_ASSEMBLIES.out.stats // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
             [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
         }
+        .unique()
+        .groupTuple(by: 0, sort: 'hash')
+    new_reference_data = sample_data
+        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
+        .unique()
+        .join(picked_assemblies_refs.ifEmpty([null, null]), remainder: true)
+        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+        .map { sample_meta, ref_metas ->
+            [sample_meta, ref_metas == null ? [] : ref_metas]
+        }
+
+    // Add new refernces to sample metadata
     sample_data = sample_data
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta, ref_metas]
         }
-        .join(new_reference_data.groupTuple(by: 0, sort: 'hash'), by: 0, remainder: true)
+        .combine(new_reference_data, by: 0)
         .map { sample_id, sample_meta, ref_metas_user, ref_metas_to_download ->
             [sample_id, ref_metas_user + (ref_metas_to_download ?: [])]
         }
@@ -179,6 +217,7 @@ workflow PREPARE_INPUT {
         }
 
     reference_data = new_reference_data
+        .transpose(by: 1)
         .map{ sample_id, ref_meta -> ref_meta }
         .mix(reference_data)
 
@@ -281,13 +320,12 @@ workflow PREPARE_INPUT {
         }
         .mix(samples_to_not_subset)
 
-
     emit:
     sample_data
     sendsketch = BBMAP_SENDSKETCH.out.hits
-    ncbi_ref_meta = FIND_ASSEMBLIES.out.stats
-    selected_ref_meta = PICK_ASSEMBLIES.out.stats
-    families = INITIAL_CLASSIFICATION.out.families
+    family_stats = ncbi_ref_meta
+    selected_ref_meta = picked_assemblies_stat_files
+    family_stats_per_sample = family_stats_per_sample
     versions = SAMPLESHEET_CHECK.out.versions
     messages = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
