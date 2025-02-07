@@ -938,11 +938,12 @@ detected_seq_types <- lapply(seq_along(metadata_samp$sequence_type), function(in
     }))
     return(known_read_types[is_seq_type])
 })
-invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1 & metadata_samp$enabled
+invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1 
 metadata_samp$sequence_type[! invalid_seq_type] <- unlist(detected_seq_types[! invalid_seq_type])
 metadata_samp$enabled[invalid_seq_type] <- FALSE
 
 # Report missing sequence type information
+is_invalid_seq_type_to_report <- invalid_seq_type & metadata_samp$enabled
 if (sum(invalid_seq_type) > 0) {
     warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
             paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
