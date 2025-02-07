@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "/home/fosterz/projects/pathogensurveillance/tests/output/serratia_small/prepare_report_input/validation_serratia_inputs"
+    inputs: "~/Documents/Github/temp/xan_test_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -298,7 +298,7 @@ POPC not calculated.
 
 :::
 
-## {{< bi check-lg >}} Phylogenetic context
+## {{< iconify tdesign tree-round-dot-vertical >}} Phylogenetic context
 
 Shown are phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
 The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
@@ -489,7 +489,7 @@ sessionInfo()
 The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
 ## {{< bi wallet2 >}} Funding
-This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grant 2021-67021-34433 to JC and NG and USDA ARS Project 2072-22000-045-000-D.
+This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grants 2021-67021-34433, 2023-67013-39918 to JHC and NJG and ARS Project 2072-22000-045-000-D to NJG.
 
 ## {{< bi github >}} Contribute
 
