@@ -27,9 +27,11 @@ workflow PREPARE_INPUT {
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_sample_metadata_channel(it) }
+        .filter { sample_meta -> sample_meta.enabled.toBoolean() }
     reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:',', quote:'"' )
         .map { create_reference_metadata_channel(it) }
+        .filter { ref_meta -> ref_meta.ref_enabled.toBoolean() }
     messages = messages.mix (
         SAMPLESHEET_CHECK.out.message_data
             .splitCsv ( header:true, sep:',', quote:'"' )
