@@ -516,7 +516,7 @@ get_sra_from_biosamples <- function(biosample_id) {
     if (length(assembly_id) > 1) {
         warning('Multiple assembly accessions found for ncbi_accession value: "', biosample_id, '"')
     }
-    
+
     if (!is.null(sra_id)) {
         # Retrieve detailed information about the SRA run
         sra_record <- tryCatch({
@@ -557,7 +557,7 @@ get_sra_from_biosamples <- function(biosample_id) {
             warning("Error retrieving runs for assembly record:", sra_id, "\n")
             return(NULL)
         }
-    } 
+    }
 
     return(run_ids)
 }
@@ -938,7 +938,7 @@ detected_seq_types <- lapply(seq_along(metadata_samp$sequence_type), function(in
     }))
     return(known_read_types[is_seq_type])
 })
-invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1 
+invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1
 metadata_samp$sequence_type[! invalid_seq_type] <- unlist(detected_seq_types[! invalid_seq_type])
 metadata_samp$enabled[invalid_seq_type] <- FALSE
 
