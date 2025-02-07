@@ -150,6 +150,7 @@ args <- as.list(args)
 # args <- list('~/downloads/sample_data_N664_true.csv')
 # args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
+# args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664.csv", '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664_ref_data.csv')
 
 metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
 if (length(args) > 1) {
@@ -317,10 +318,21 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Remove any disabled rows
-metadata_samp <- metadata_samp[as.logical(metadata_samp$enabled), ]
+# Validate enabled column
+validate_enabled <- function(col_values, file_name) {
+    is_enabled <- as.logical(col_values)
+    is_invalid <- is.na(is_enabled)
+    if (any(is_invalid)) {
+        stop(call. = FALSE, paste0(
+            'The following rows in the ', file_name, ' have invalid values for the `enabled` column:\n    ',
+            paste0(which(is_invalid), ' (', col_values[is_invalid], ')', collapse = ', '), '\n'
+        ))
+    }
+    return(is_enabled)
+}
+metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CSV')
 if (nrow(metadata_ref) > 0) {
-    metadata_ref <- metadata_ref[as.logical(metadata_ref$ref_enabled), ]
+    metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
 }
 
 # Validate color_by column and add back any original user-defined columns used
@@ -426,7 +438,8 @@ unique_queries <- unique(metadata_samp$ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
 names(ncbi_result) <- unique_queries
-new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_query)), function(index) {
+is_query_to_use <- is_present(metadata_samp$ncbi_query) & metadata_samp$enabled
+new_sample_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
     # Remove any samples with abnormally low reads
     query_data <- query_data[query_data$total_bases > 100000, ]
@@ -450,12 +463,12 @@ new_sample_data <- do.call(rbind, lapply(which(is_present(metadata_samp$ncbi_que
     output
 }))
 metadata_samp <- rbind(
-    metadata_samp[! is_present(metadata_samp$ncbi_query), ],
+    metadata_samp[! is_query_to_use, ],
     new_sample_data
 )
 
 
-# Add the function to retrieve SRA Run IDs from BioSample IDs
+# Lookup SRA runs accessions for biosamples
 get_sra_from_biosamples <- function(biosample_id) {
     # Create an empty data frame to store biosample_id to SRA mapping
     sra_data <- data.frame(
@@ -466,7 +479,7 @@ get_sra_from_biosamples <- function(biosample_id) {
 
     message("Processing biosample_id:", biosample_id, "\n")
 
-    # Step 1: Search for biosample_id in the NCBI database to get its internal ID
+    # Search for biosample_id in the NCBI database to get its internal ID
     search_result <- tryCatch({
         rentrez::entrez_search(db = "biosample", term = biosample_id)
     }, error = function(e) {
@@ -476,50 +489,87 @@ get_sra_from_biosamples <- function(biosample_id) {
 
     genbank_id <- search_result$ids[1]
 
-    # Step 2: Use elink to find linked SRA records
-    link_result <- tryCatch({
+    # Use elink to find linked SRA records
+    sra_link_result <- tryCatch({
         rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
     }, error = function(e) {
         warning("Error while linking biosample_id to SRA:", genbank_id, "\n")
         return(NULL)
     })
-
-    sra_id <- link_result$links$biosample_sra
-    if (is.null(sra_id)) {
-        warning('No SRA accessions found for ncbi_accession value: "', biosample_id, '"')
-        return(NULL)
-    }
-    # Step 3: Retrieve the SRA Run IDs
-    # Retrieve detailed information about the SRA run
-    sra_record <- tryCatch({
-        rentrez::entrez_summary(db = "sra", id = sra_id)
+    assembly_link_result <- tryCatch({
+        rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "assembly")
     }, error = function(e) {
-        warning("Error retrieving SRA record for:", sra_id, "\n")
+        warning("Error while linking biosample_id to assembly database:", genbank_id, "\n")
         return(NULL)
     })
-
-    # Extract run IDs
-    if (!is.null(sra_record$runs)) {
-        # Extract only the Run ID from the XML-like string
-        runs <- unlist(strsplit(sra_record$runs, split = ";"))
-        run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
-    } else {
-        warning("Error retrieving runs for SRA record:", sra_id, "\n")
+    sra_id <- sra_link_result$links$biosample_sra
+    assembly_id <- assembly_link_result$links$biosample_assembly
+    if (is.null(sra_id) && is.null(assembly_id)) {
+        warning('No SRA or assembly accessions found for ncbi_accession value: "', biosample_id, '"')
         return(NULL)
+    } else if (is.null(sra_id)) {
+        warning('No SRA accessions found for ncbi_accession value: "', biosample_id, '". In the future, the assembly may be used instead.')
     }
+    if (length(sra_id) > 1) {
+        warning('Multiple SRA accessions found for ncbi_accession value: "', biosample_id, '"')
+    }
+    if (length(assembly_id) > 1) {
+        warning('Multiple assembly accessions found for ncbi_accession value: "', biosample_id, '"')
+    }
+    
+    if (!is.null(sra_id)) {
+        # Retrieve detailed information about the SRA run
+        sra_record <- tryCatch({
+            rentrez::entrez_summary(db = "sra", id = sra_id)
+        }, error = function(e) {
+            warning("Error retrieving SRA record for:", sra_id, "\n")
+            return(NULL)
+        })
+        # Extract run IDs
+        if (!is.null(sra_record)) {
+            if (inherits(sra_record, "esummary_list")) {
+                run_data <- unname(vapply(sra_record, function(x) x$runs, FUN.VALUE = character(1)))
+            } else {
+                run_data <- sra_record$runs
+            }
+            runs <- unlist(strsplit(run_data, split = ";"))
+            run_ids <- sub('.*acc="([^"]*)".*', '\\1', runs)
+        } else {
+            warning("Error retrieving runs for SRA record:", sra_id, "\n")
+            return(NULL)
+        }
+    } else if (!is.null(assembly_id)) {
+        # Retrieve detailed information about the SRA run
+        assembly_record <- tryCatch({
+            rentrez::entrez_summary(db = "assembly", id = assembly_id)
+        }, error = function(e) {
+            warning("Error retrieving SRA record for:", assembly_id, "\n")
+            return(NULL)
+        })
+        # Extract run IDs
+        if (!is.null(assembly_record)) {
+            if (inherits(assembly_record, "esummary_list")) {
+                run_ids <- unname(vapply(assembly_record, function(x) x$assemblyaccession, FUN.VALUE = character(1)))
+            } else {
+                run_ids <- assembly_record$assemblyaccession
+            }
+        } else {
+            warning("Error retrieving runs for assembly record:", sra_id, "\n")
+            return(NULL)
+        }
+    } 
 
     return(run_ids)
 }
-
-biosample_ids <- unique(metadata_samp$ncbi_accession[grepl("^SAM[ND|E]", metadata_samp$ncbi_accession)])
+is_biosample_to_lookup <- grepl("^SAM[NDE]", metadata_samp$ncbi_accession) & metadata_samp$enabled
+biosample_ids <- unique(metadata_samp$ncbi_accession[is_biosample_to_lookup])
 run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
 names(run_id_key) <- biosample_ids
-
 
 # Report biosamples with no reads to the user
 no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
 if (length(no_runs_found) > 0) {
-    warning('The following biosamples do not have reads associated with them:\n',
+    warning('The following ', length(no_runs_found), ' biosamples do not have reads associated with them:\n',
             paste0(no_runs_found, collapse = '\n'), '\n')
     message_data <- rbind(message_data, data.frame(
         sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% no_runs_found],
@@ -532,18 +582,52 @@ if (length(no_runs_found) > 0) {
     metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
 }
 
+# Report biosamples with multiple SRA runs associated with them
+multiple_runs_found <- names(run_id_key)[vapply(run_id_key, function(x) length(x) > 1, logical(1))]
+if (length(multiple_runs_found) > 0) {
+    warning('The following ', length(multiple_runs_found), ' biosamples have multiple SRA runs associated with them:\n',
+            paste0(multiple_runs_found, collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% multiple_runs_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% multiple_runs_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'NOTE',
+        description = 'Biosample associated with multiple SRA accessions. Sample will be treated as multiple samples, one for each run associated with its biosample. User-defined sequence_type will be ignored.'
+    ))
+}
+
+# Report biosamples with assemblies associated with them instead of SRA accessions
+assembly_found <- names(run_id_key)[vapply(run_id_key, function(x) any(grepl(x, pattern = '^GC[AF]_[0-9]+\\.?[0-9]*$')), FUN.VALUE = logical(1))]
+if (length(assembly_found) > 0) {
+    warning('The following ', length(assembly_found), ' biosamples are associated with assembly(s) instead of SRA accessions:\n',
+            paste0(assembly_found, collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% assembly_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% assembly_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = 'Biosample associated with assembly(s) instead of SRA accessions. These may be supported as samples in the future, but will be ignored for now.'
+    ))
+}
+
+# Duplicate rows with multiple SRA accessions for a given biosample
 split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
     current <- metadata_samp$ncbi_accession[i]
     if (current %in% names(run_id_key)) {
-        out <- metadata_samp[rep(i,length(run_id_key[[current]])), , drop = FALSE]
+        out <- metadata_samp[rep(i, length(run_id_key[[current]])), , drop = FALSE]
         rownames(out) <- NULL
         out$ncbi_accession <- run_id_key[[current]]
+        out$sequence_type <- '' # There may be a mix of sequencing types so clear user input to be safe
+        if (metadata_samp$enabled[i]) { # Disable biosamples associated with assemblies (for now)
+            out$enabled <- ! grepl(run_id_key[[current]], pattern = '^GC[AF]_[0-9]+\\.?[0-9]*$')
+        }
     } else {
         out <- metadata_samp[i, , drop = FALSE]
     }
     return(out)
 })
-
 metadata_samp <- do.call(rbind, split_metadata)
 rownames(metadata_samp) <- NULL
 
@@ -574,7 +658,8 @@ unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
-new_ref_data <- do.call(rbind, lapply(which(is_present(metadata_ref$ref_ncbi_query)), function(index) {
+is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & metadata_ref$ref_enabled
+new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
     query_max <- metadata_ref$ref_ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
@@ -593,7 +678,7 @@ new_ref_data <- do.call(rbind, lapply(which(is_present(metadata_ref$ref_ncbi_que
     return(output)
 }))
 metadata_ref <- rbind(
-    metadata_ref[! is_present(metadata_ref$ref_ncbi_query), ],
+    metadata_ref[! is_query_to_use, ],
     new_ref_data
 )
 
@@ -816,46 +901,61 @@ if (nrow(metadata_ref)) {
     }
 }
 
-
 # Look up sequence type for NCBI accessions without a sequence type defined
 lookup_sequence_type <- function(id) {
     search_result <- rentrez::entrez_search(db = 'sra', id)
-    if (length(search_result$ids) != 1) {
+    if (length(search_result$ids) < 1) {
         stop(call. = FALSE, paste0(
             'Could not look up sequence type for id "', id, '". Specify it in the sample metadata CSV.'
         ))
     }
     summary_result <- rentrez::entrez_summary(db = 'sra', search_result$ids)
-    gsub(summary_result$expxml, pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2')
+    if (inherits(summary_result, 'esummary_list')) {
+        xml_result <- unname(vapply(summary_result, function(x) x$expxml, FUN.VALUE = character(1)))
+    } else {
+        xml_result <- summary_result$expxml
+    }
+    seq_type <- unique(gsub(xml_result, pattern = '.+<Platform instrument_model="(.+?)">(.+?)</Platform>.+', replacement = '\\2'))
+    if (length(seq_type) != 1) {
+        stop(call. = FALSE, paste0(
+            'Could not look up sequence type for id "', id, '". Specify it in the sample metadata CSV.'
+        ))
+    }
+    return(seq_type)
 }
-undefined_accessions <- unique(metadata_samp$ncbi_accession[! is_present(metadata_samp$sequence_type) & is_present(metadata_samp$ncbi_accession)])
+to_check <- ! is_present(metadata_samp$sequence_type) & is_present(metadata_samp$ncbi_accession) & metadata_samp$enabled
+undefined_accessions <- unique(metadata_samp$ncbi_accession[to_check])
 type_replace_key <- lapply(undefined_accessions, lookup_sequence_type)
 names(type_replace_key) <- undefined_accessions
 is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
 metadata_samp$sequence_type[is_undefined] <- unlist(type_replace_key[metadata_samp$ncbi_accession[is_undefined]])
 
 # Validate sequence_type column
-metadata_samp$sequence_type <- unlist(lapply(seq_along(metadata_samp$sequence_type), function(index) {
+detected_seq_types <- lapply(seq_along(metadata_samp$sequence_type), function(index) {
     user_value <- metadata_samp$sequence_type[index]
     is_seq_type <- unlist(lapply(known_read_types, function(type) {
         grepl(user_value, pattern = type, ignore.case = TRUE)
     }))
-    if (sum(is_seq_type) == 0) {
-        stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column ("', user_value, '") on row ', index, ' ("', metadata_samp$sequence_type[index], '") does not contain a supported sequence type. ',
-            'The following sequencing types are supported (case insensitive):\n',
-            paste0('"', known_read_types, '"', collapse = ', '), '\n'
-        ))
-    }
-    if (sum(is_seq_type) > 1) {
-        stop(call. = FALSE, paste0(
-            'The value in the "sequence_type" column ("', user_value, '") on row ', index, ' contains the names of multiple sequencing types. ',
-            'Exactly one of the following words must appear (case insensitive):\n',
-            paste0('"', known_read_types, '"', collapse = ', '), '\n'
-        ))
-    }
     return(known_read_types[is_seq_type])
-}))
+})
+invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1 & metadata_samp$enabled
+metadata_samp$sequence_type[! invalid_seq_type] <- unlist(detected_seq_types[! invalid_seq_type])
+metadata_samp$enabled[invalid_seq_type] <- FALSE
+
+# Report missing sequence type information
+if (sum(invalid_seq_type) > 0) {
+    warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
+            paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[invalid_seq_type],
+        report_group_id = metadata_samp$report_group_ids[invalid_seq_type],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
+    ))
+}
+
 
 # Add row for each group for samples/references with multiple groups
 duplicate_rows_by_id_list <- function(metadata, id_col) {
@@ -909,7 +1009,6 @@ for (index in 1:nrow(metadata_samp)) {
 }
 
 # Remove unneeded columns
-metadata_samp$enabled <- NULL
 metadata_samp$ref_group_ids <- NULL
 metadata_samp$ref_id <- NULL
 metadata_samp$ref_name <- NULL
@@ -920,9 +1019,7 @@ metadata_samp$ref_ncbi_query <- NULL
 metadata_samp$ref_ncbi_query_max <- NULL
 metadata_samp$ref_primary_usage <- NULL
 metadata_samp$ref_color_by <- NULL
-metadata_samp$ref_enabled <- NULL
 metadata_ref$ref_group_ids <- NULL
-metadata_ref$ref_enabled <- NULL
 
 # Make rows unique
 metadata_samp <- unique(metadata_samp)

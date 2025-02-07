@@ -2,7 +2,7 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::r-xml conda-forge::r-devtools conda-forge::r-leaflet conda-forge::r-biocmanager conda-forge::quarto conda-forge::r-knitr conda-forge::r-dplyr conda-forge::r-ggplot2 conda-forge::r-readr conda-forge::r-purrr conda-forge::r-yaml conda-forge::r-ape conda-forge::r-magrittr conda-forge::r-pheatmap conda-forge::r-heatmaply conda-forge::r-tidyverse conda-forge::r-palmerpenguins conda-forge::r-ade4 conda-forge::r-adegenet bioconda::bioconductor-ggtree conda-forge::r-igraph conda-forge::r-visnetwork conda-forge::r-phangorn conda-forge::r-ggnewscale conda-forge::r-kableextra conda-forge::r-plotly conda-forge::r-webshot2 conda-forge::r-ggdendro conda-forge::r-rcrossref"
+    conda "conda-forge::r-rcurl conda-forge::r-xml conda-forge::r-devtools conda-forge::r-leaflet conda-forge::r-biocmanager conda-forge::quarto conda-forge::r-knitr conda-forge::r-dplyr conda-forge::r-ggplot2 conda-forge::r-readr conda-forge::r-purrr conda-forge::r-yaml conda-forge::r-ape conda-forge::r-magrittr conda-forge::r-pheatmap conda-forge::r-heatmaply conda-forge::r-tidyverse conda-forge::r-palmerpenguins conda-forge::r-ade4 conda-forge::r-adegenet bioconda::bioconductor-ggtree conda-forge::r-igraph conda-forge::r-visnetwork conda-forge::r-phangorn conda-forge::r-ggnewscale conda-forge::r-kableextra conda-forge::r-plotly conda-forge::r-webshot2 conda-forge::r-ggdendro conda-forge::r-rcrossref"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker.io/zacharyfoster/main-report-r-packages:0.16':
         'docker.io/zacharyfoster/main-report-r-packages:0.16' }"
