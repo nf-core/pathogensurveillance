@@ -148,7 +148,7 @@ workflow PATHOGENSURVEILLANCE {
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.csv", sample_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join('\t') + "\n" ]
         }
         .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
 
@@ -163,7 +163,7 @@ workflow PATHOGENSURVEILLANCE {
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.csv", ref_meta.keySet().collect{'"' + it + '"'}.join(',') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join(',') + "\n" ]
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join('\t') + "\n" ]
         }
         .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
@@ -210,7 +210,7 @@ workflow PATHOGENSURVEILLANCE {
     group_messages = messages
         .unique()
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.csv", "\"sample_id\",\"reference_id\",\"workflow\",\"level\",\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\",\"${ref_meta ? ref_meta.id : 'NA'}\",\"${workflow}\",\"${level}\",\"${message}\"\n" ]
+            [ "${report_meta.id}.tsv", "\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
         .ifEmpty([])
