@@ -11,7 +11,7 @@ process REFORMAT_PIRATE_RESULTS {
     tuple val(ref_meta), path(pirate_results)
 
     output:
-    tuple val(ref_meta), path("${prefix}.tsv")                , emit: gene_fam
+    tuple val(ref_meta), path("${prefix}_gene_family.tsv")    , emit: gene_fam
     tuple val(ref_meta), path("${prefix}_genePA.tsv")         , emit: gene_fam_pa
     tuple val(ref_meta), path("${prefix}_genePAparalogs.tsv") , emit: gene_fam_para
     tuple val(ref_meta), path("${prefix}_roary.tsv")          , emit: gene_fam_roary
@@ -29,16 +29,16 @@ process REFORMAT_PIRATE_RESULTS {
     sed -i 's/^# /## /' reformatted_gffs/*.gff
 
     # rename with original locus tag from input files
-    subsample_outputs.pl -i PIRATE.gene_families.ordered.tsv -g reformatted_gffs/ -o ${prefix}.tsv --field "prev_ID" --feature "CDS"
+    subsample_outputs.pl -i PIRATE.gene_families.ordered.tsv -g reformatted_gffs/ -o ${prefix}_gene_family.tsv --field "prev_ID" --feature "CDS"
 
     # gene/allele presence-absence
-    PIRATE_to_Rtab.pl -i ${prefix}.tsv -o ${prefix}_genePA.tsv
+    PIRATE_to_Rtab.pl -i ${prefix}_gene_family.tsv -o ${prefix}_genePA.tsv
 
     # paralog presence-absence (duplications = d, fission/fusions = ff)
-    paralogs_to_Rtab.pl -i ${prefix}.tsv -o ${prefix}_genePAparalogs.tsv --type d
+    paralogs_to_Rtab.pl -i ${prefix}_gene_family.tsv -o ${prefix}_genePAparalogs.tsv --type d
 
     #create roary format output
-    PIRATE_to_roary.pl -i ${prefix}.tsv -o ${prefix}_roary.tsv
+    PIRATE_to_roary.pl -i ${prefix}_gene_family.tsv -o ${prefix}_roary.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
