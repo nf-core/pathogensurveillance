@@ -1,0 +1,38 @@
+---
+title: "Publication draft"
+output: html_document
+date: "2025-02-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reference selection 
+
+The `pathogensurveillance` pipeline automatically selects and download a set of references optimized for the analysis of a set of potentially diverse samples.
+These automatically selected references can be combined with or replaced by user-defined references, which can take the form of local files, URLs to files online, NCBI assembly accessions, or arbitrary queries to the NCBI assembly database.
+In order to make narrow down the taxa of references that need to be considered, the sample undergoes a tentative identification using bbmap sendsketch, a quick k-mer-hash-based comparison with an online database of similarly made hashes.
+Sendsketch returns the taxonomic classifications associated with the raw reads of the samples, including those of any potential contaminants or hosts.
+The NCBI assembly metadata is downloaded for every unique family found in all classifications for all samples. 
+A subset of references present in this metadata is then selected on the basis of the genera, species, and strains in the taxonomic classifications returned by sendsketch for each sample as well as data about the references themselves, such as whether they are type strains and their overall quality/contiguity.
+The effects of potential inaccuracies in the initial sendsketch-based classification are mitigated by downloading representatives of each genus in each predicted family, each species in each predicted genus, and each strain in each predicted species.
+This means that even if the initial classification is so inaccurate that even the genus is incorrect, but the family is correct, then representatives of the correct genus will be selected and the user can then refine the reference selection or manually choose a reference.
+Selected references for each sample are downloaded and all references and samples are compared using sourmash sketch followed by sourmash compare.
+The resulting estimated average nucleotide identity (ANI) matrix is used to select mapping and contextual references for each subworkflow that requires them.
+
+Contextual references are those used to provide taxonomic context in phylogenetic trees and other comparisons, in particular the core gene phylogeny for prokaryotes and the BUSCO gene phylogeny for eukaryotes.
+They are intended to represent a wide range of similarity to the samples so that samples can be understood in the context of the taxonomic family they belong to.
+Contextual references are chosen such that each sample has the reference it is most similar to as well as a selection of references equally spaced along a gradient of similarity.
+Similarity is determined using the ANI calculated by sourmash, as described above, and preference is given to type strains and those with normal binomial Latin names as opposed to numeric codes.
+Since diverse samples can be in the same group, one sample's closest reference might function as another's more distant reference.
+Conversely, a group of similar samples can likely use many of the same references.
+Therefore, all but the most similar references to each sample are chosen for the group as a whole in order to minimize the total number of references needed to provide context for every sample in the group.
+This process picks the minimum number of references needed for the group of samples which minimizes the computational resources needed to construct the phylogeny.
+
+Mapping references are used to map reads for a group of samples to a single reference, as is done in the variant analysis subworkflow.
+Only samples mapped to the same reference can be compared, but the reference needs to be similar enough to every sample that reads can be aligned reliably.
+The ANI comparisons between samples and available references are used to progressively cluster samples with references based on how many samples a given reference is similar enough to, based on an adjustable threshold.
+If all samples in a group are similar enough, this process with result in a single cluster using the reference most similar to the greatest number of samples.
+When multiple clusters result, because the ANI difference between clusters is too great, variant analysis is conducted on each cluster separately.
+This process minimizes the number of references used and therefore maximizes comparisons between samples sharing the same reference.
