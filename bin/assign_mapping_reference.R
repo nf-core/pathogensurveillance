@@ -77,4 +77,4 @@ if (length(unassigned_sample_ids) > 0) {
 }
 
 # Write output to file
-write.table(output, file = args$out_path, sep = ',', quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(output, file = args$out_path, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)

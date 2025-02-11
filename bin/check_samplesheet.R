@@ -155,7 +155,7 @@ args <- as.list(args)
 # args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664.csv", '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664_ref_data.csv')
-args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/mycobacteroides_small.tsv")
+# args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/mycobacteroides_small.tsv")
 
 read_input_table <- function(path) {
     if (endsWith(path, '.csv')) {
