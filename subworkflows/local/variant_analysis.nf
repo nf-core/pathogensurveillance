@@ -42,7 +42,7 @@ workflow VARIANT_ANALYSIS {
         .unique()
         .tap{ references }
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
-            [ "${report_group_id}.csv", "${sample_id},${ref_id},${ref_name},${ref_desc},${usage}\n" ]
+            [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
 
@@ -59,9 +59,9 @@ workflow VARIANT_ANALYSIS {
     sample_data_with_refs = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-        .splitCsv( elem: 1 )
-        .map { report_meta, csv_contents ->
-            [[id: csv_contents[0]], report_meta, [id: csv_contents[1]]]
+        .splitCsv( elem: 1, sep: '\t' )
+        .map { report_meta, tsv_contents ->
+            [[id: tsv_contents[0]], report_meta, [id: tsv_contents[1]]]
         }
         .join(ref_paths, by: 0..2)
         .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type, it.ploidy] }, by: 0..1)
@@ -157,7 +157,7 @@ workflow VARIANT_ANALYSIS {
 
     sample_ploidy_data = filtered_sample_data_with_refs
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
-            [ "${report_meta.id}_${ref_meta.id}.csv", "mapping_id,ploidy\n${ref_meta.id}_${sample_meta.id},${ploidy}\n" ]
+            [ "${report_meta.id}_${ref_meta.id}.tsv", "mapping_id\tploidy\n${ref_meta.id}_${sample_meta.id}\t${ploidy}\n" ]
         }
         .map { [it.getSimpleName(), it] }
         .combine(CALL_VARIANTS.out.vcf.map { combined_meta, vcf -> [combined_meta.id, combined_meta]}, by: 0) // add on full combined metadata uing combined ID
@@ -208,7 +208,7 @@ workflow VARIANT_ANALYSIS {
     snp_align     = snp_align   // report_meta, ref_meta, fasta
     vcf           = vcf         // report_meta, ref_meta, fasta
     results       = results     // report_meta, ref_meta, vcf, align, tree
-    mapping_ref   = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // report_meta, csv
+    mapping_ref   = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // report_meta, tsv
     versions      = versions // versions.yml
     messages      = messages    // meta, report_meta, ref_meta, workflow, level, message
 

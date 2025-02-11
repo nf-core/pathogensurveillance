@@ -6,8 +6,12 @@
 #
 # The first part of this script defines constants that might need to be changed in the future.
 
+# Where to save output metadata files
+sample_data_path <- 'sample_metadata.tsv'
+reference_data_path <- 'reference_metadata.tsv'
+
 # Where to save list of messages to be shown to the user, such as samples that were filtered out
-message_data_path <- 'message_data.csv'
+message_data_path <- 'message_data.tsv'
 message_data <- data.frame(
     sample_id = character(0),
     report_group_id = character(0),
@@ -151,10 +155,21 @@ args <- as.list(args)
 # args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664.csv", '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664_ref_data.csv')
+args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/mycobacteroides_small.tsv")
 
-metadata_original_samp <- read.csv(args[[1]], check.names = FALSE)
+read_input_table <- function(path) {
+    if (endsWith(path, '.csv')) {
+        output <- read.csv(path, check.names = FALSE)
+    } else if (endsWith(path, '.tsv')) {
+        output <- read.csv(path, check.names = FALSE, sep = '\t')
+    } else {
+        stop('Input file extension not supported. Must be .csv or .tsv.')
+    }
+}
+
+metadata_original_samp <- read_input_table(args[[1]])
 if (length(args) > 1) {
-    metadata_original_ref <- read.csv(args[[2]], check.names = FALSE)
+    metadata_original_ref <- read_input_table(args[[2]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
 }
@@ -318,23 +333,6 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Validate enabled column
-validate_enabled <- function(col_values, file_name) {
-    is_enabled <- as.logical(col_values)
-    is_invalid <- is.na(is_enabled)
-    if (any(is_invalid)) {
-        stop(call. = FALSE, paste0(
-            'The following rows in the ', file_name, ' have invalid values for the `enabled` column:\n    ',
-            paste0(which(is_invalid), ' (', col_values[is_invalid], ')', collapse = ', '), '\n'
-        ))
-    }
-    return(is_enabled)
-}
-metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CSV')
-if (nrow(metadata_ref) > 0) {
-    metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
-}
-
 # Validate color_by column and add back any original user-defined columns used
 validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
     split_color_by <- strsplit(metadata[[color_by_col]], split = sep)
@@ -388,6 +386,22 @@ if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_contextual_usage <- validate_usage_col(metadata_ref, 'ref_contextual_usage')
 }
 
+# Validate enabled column
+validate_enabled <- function(col_values, file_name) {
+    is_enabled <- as.logical(col_values)
+    is_invalid <- is.na(is_enabled)
+    if (any(is_invalid)) {
+        stop(call. = FALSE, paste0(
+            'The following rows in the ', file_name, ' have invalid values for the `enabled` column:\n    ',
+            paste0(which(is_invalid), ' (', col_values[is_invalid], ')', collapse = ', '), '\n'
+        ))
+    }
+    return(is_enabled)
+}
+metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CSV')
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
+}
 
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
@@ -1034,8 +1048,8 @@ metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
 message_data[] <- lapply(message_data, gsub, pattern = '"', replacement = "'")
 
 # Write data for messages to be shown to the user, such as warnings about removed samples
-write.csv(message_data, file = message_data_path, row.names = FALSE, na = '')
+write.table(message_data, file = message_data_path, row.names = FALSE, na = '', sep = '\t')
 
 # Write output metadata
-write.csv(metadata_samp, file = 'sample_metadata.csv', row.names = FALSE, na = '')
-write.csv(metadata_ref, file = 'reference_metadata.csv', row.names = FALSE, na = '')
+write.table(metadata_samp, file = sample_data_path, row.names = FALSE, na = '', sep = '\t')
+write.table(metadata_ref, file = reference_data_path, row.names = FALSE, na = '', sep = '\t')

@@ -7,10 +7,10 @@ args <- commandArgs(trailingOnly = TRUE)
 #           '~/downloads/smarcescens_feat_seqs_renamed',
 #           '~/downloads/smarcescens.csv',
 #           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
-names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "csv_output_path", "fasta_output_path")
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "tsv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
-metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
+metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
 min_core_genes <- as.integer(args$min_core_genes)
 max_core_genes <- as.integer(args$max_core_genes)
 
@@ -123,9 +123,9 @@ output_clusters <- lapply(clustered_samples, function(ids) {
     }
     return(output)
 })
-dir.create(args$csv_output_path, showWarnings = FALSE)
+dir.create(args$tsv_output_path, showWarnings = FALSE)
 for (index in seq_along(output_clusters)) {
-    out_path <- file.path(args$csv_output_path, paste0('cluster_', index, '.tsv'))
+    out_path <- file.path(args$tsv_output_path, paste0('cluster_', index, '.tsv'))
     write.table(output_clusters[[index]], file = out_path, row.names = FALSE, sep = '\t', quote = FALSE)
 }
 

@@ -31,8 +31,8 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs    // boolean: Do not use coloured log outputs
     nextflow_cli_args  //   array: List of positional nextflow CLI args
     outdir             //  string: The output directory where the results will be saved
-    sample_data_csv    //  string: Path to input sample data table
-    reference_data_csv //  string: Path to reference data table
+    sample_data_tsv    //  string: Path to input sample data table
+    reference_data_tsv //  string: Path to reference data table
 
     main:
 
@@ -81,19 +81,19 @@ workflow PIPELINE_INITIALISATION {
 
     // Check mandatory parameters
     if (params.input) {
-        sample_data_csv = file(params.input)
+        sample_data_tsv = file(params.input)
     } else {
-        exit 1, 'Sample metadata CSV not specified.'
+        exit 1, 'Sample metadata TSV/CSV not specified.'
     }
     if (params.reference_data) {
-        reference_data_csv = file(params.reference_data)
+        reference_data_tsv = file(params.reference_data)
     } else {
-        reference_data_csv = []
+        reference_data_tsv = []
     }
 
     emit:
-    sample_data_csv    = sample_data_csv
-    reference_data_csv = reference_data_csv
+    sample_data_tsv    = sample_data_tsv
+    reference_data_tsv = reference_data_tsv
     versions           = versions
 }
 
@@ -173,7 +173,7 @@ def validateInputSamplesheet(input) {
 }
 //
 // Get attribute from genome config file e.g. fasta
-//
+//utils_nfcore_pathogensurveillance_pipeline
 def getGenomeAttribute(attribute) {
     if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
         if (params.genomes[ params.genome ].containsKey(attribute)) {

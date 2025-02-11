@@ -20,7 +20,7 @@
 ## Introduction
 
 **nf-core/pathogensurveillance** is a population genomic pipeline for pathogen diagnosis, variant detection, and biosurveillance.
-The pipeline accepts the paths to raw reads for one or more organisms (in the form of a CSV file) and creates reports in the form of interactive HTML reports or PDF documents.
+The pipeline accepts the paths to raw reads for one or more organisms (in the form of a TSV or CSV file) and creates reports in the form of interactive HTML reports or PDF documents.
 Significant features include the ability to analyze unidentified eukaryotic and prokaryotic samples, creation of reports for multiple user-defined groupings of samples, automated discovery and downloading of reference assemblies from NCBI RefSeq, and rapid initial identification based on k-mer sketches followed by a more robust core genome phylogeny and SNP-based phylogeny.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner.
@@ -60,13 +60,13 @@ Note that some form of configuration will be needed so that Nextflow knows how t
 Now, you can run the pipeline using:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL -resume --sample_data <CSV> --out_dir <OUTDIR> --download_bakta_db
+nextflow run nf-core/pathogensurveillance -r dev -profile RUN_TOOL -resume --sample_data <TSV/CSV> --out_dir <OUTDIR> --download_bakta_db
 ```
 
 ```bash
 nextflow run nf-core/pathogensurveillance \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --input samplesheet.tsv \
    --outdir <OUTDIR>
 ```
 
@@ -80,8 +80,8 @@ https://grunwaldlab.github.io/pathogensurveillance_documentation
 
 ### Input format
 
-The primary input to the pipeline is a CSV (comma comma-separated value) file, specified using the `--sample_data` option.
-This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to CSV.
+The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma comma-separated value) file, specified using the `--sample_data` option.
+This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to TSV.
 Columns can be in any order and unneeded columns can be left out or left blank.
 Column names are case insensitive and spaces are equivalent to underscores and can be left out.
 Only a single column containing either paths to raw sequence data, SRA (Sequence Read Archive) accessions, or NCBI queries to search the SRA is required and each sample can have values in different columns.
@@ -101,14 +101,14 @@ Below is a description of each column used by `pathogensurveillance`:
 - **color_by**: The names of other columns that contain values used to color samples in plots and figures in the report. Multiple column names can be separated by ";". Specified columns can contain either categorical factors or specific colors, specified as a hex code. By default, samples will be one color and references another.
 - **ploidy**: The ploidy of the sample. Should be a number. Defaults to "1".
 - **enabled**: Either "TRUE" or "FALSE", indicating whether the sample should be included in the analysis or not. Defaults to "TRUE".
-- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata CSV.
+- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata TSV.
 
-Additionally, users can supply a reference metadata CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
+Additionally, users can supply a reference metadata TSV/CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
 If not provided, the pipeline will download and choose references to use automatically.
-References are assigned to samples if they share a reference group ID in the `ref_group_ids` columns that can appear in both input CSVs.
-The reference metadata CSV or the sample metadata CSV can have the following columns:
+References are assigned to samples if they share a reference group ID in the `ref_group_ids` columns that can appear in both input TSVs/CSVs.
+The reference metadata TSV or the sample metadata TSV can have the following columns:
 
-- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to group references and supply an ID that can be used in the `ref_group_ids` column of the sample metadata CSV to assign references to particular samples.
+- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to group references and supply an ID that can be used in the `ref_group_ids` column of the sample metadata TSV/CSV to assign references to particular samples.
 - **ref_id**: The unique identifier for each user-defined reference genome. This will be used in file names to distinguish samples in the output. Each reference ID must correspond to a single source of reference data (The `ref_path`, `ref_ncbi_accession`, and `ref_ncbi_query` columns), although the same reference data can be used by multiple IDs. Any values that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `path`, `ref_name` columns or supplied automatically when `ref_ncbi_accession` or `ref_ncbi_query` are used.
 - **ref_id**: The unique identify for each reference input. This will be used in file names to distinguish references in the output. Each sample ID must correspond to a single source of reference data (e.g. the `ref_path` and `ref_ncbi_accession` columns), although the same sequence data can be used by different IDs. Any values supplied that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `ref_path`, `ref_ncbi_accession`, or `ref_name` columns.
 - **ref_name**: A human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from `ref_id`. It will be supplied automatically when the `ref_ncbi_query` column is used.

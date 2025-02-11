@@ -25,7 +25,7 @@ vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', hea
 colnames(vcf_data) <- header
 
 # Read ploidy data file
-ploidy_data <- read.csv(args$ploidy_data_path)
+ploidy_data <- read.csv(args$ploidy_data_path, sep = '\t')
 ploidy_key <- stats::setNames(ploidy_data$ploidy, ploidy_data$mapping_id)
 
 # Make table with just alleles for each sample

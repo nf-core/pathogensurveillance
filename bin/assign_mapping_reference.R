@@ -12,7 +12,7 @@ args <- as.list(args)
 names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani")
 ani_matrix <- read.csv(args$ani_matrix, check.names = FALSE)
 rownames(ani_matrix) <- as.character(colnames(ani_matrix))
-samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "ref_id", "ref_name", "ref_desc", "usage"))
+samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "ref_id", "ref_name", "ref_desc", "usage"), sep = '\t')
 samp_ref_pairs$sample_id <- as.character(samp_ref_pairs$sample_id)
 start_min_ani <- as.numeric(args$start_min_ani) # The minimum ANI for a reference to be assigned to a samples
 end_min_ani <- max(c(0, start_min_ani - 0.3)) # How low the minimum can go if no samples can be assigned

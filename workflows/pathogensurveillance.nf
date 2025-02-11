@@ -30,8 +30,8 @@ include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore
 workflow PATHOGENSURVEILLANCE {
 
     take:
-    sample_data_csv
-    reference_data_csv
+    sample_data_tsv
+    reference_data_tsv
 
     main:
 
@@ -41,7 +41,7 @@ workflow PATHOGENSURVEILLANCE {
     messages = Channel.empty()
 
     // Read in samplesheet, validate and stage input files
-    PREPARE_INPUT ( sample_data_csv, reference_data_csv )
+    PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
     versions = versions.mix(PREPARE_INPUT.out.versions)
     messages = messages.mix(PREPARE_INPUT.out.messages)
 
@@ -142,7 +142,7 @@ workflow PATHOGENSURVEILLANCE {
     versions = versions.mix(MULTIQC.out.versions)
 
     // Gather sample data for each report
-    sample_data_csvs = PREPARE_INPUT.out.sample_data
+    sample_data_tsvs = PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
             [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
         }
@@ -153,7 +153,7 @@ workflow PATHOGENSURVEILLANCE {
         .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
 
     // Gather reference data for each report
-    reference_data_csvs = PREPARE_INPUT.out.sample_data
+    reference_data_tsvs = PREPARE_INPUT.out.sample_data
         .map { sample_meta ->
             [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
         }
@@ -216,8 +216,8 @@ workflow PATHOGENSURVEILLANCE {
         .ifEmpty([])
 
     // Combine components into a single channel for the main report_meta
-    report_inputs = sample_data_csvs
-        .join(reference_data_csvs, remainder: true)
+    report_inputs = sample_data_tsvs
+        .join(reference_data_tsvs, remainder: true)
         .join(sendsketch_hits, remainder: true)
         .join(ncbi_ref_meta, remainder: true)
         .join(selected_ref_meta, remainder: true)

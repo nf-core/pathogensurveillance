@@ -14,7 +14,7 @@ process ASSIGN_CONTEXT_REFERENCES {
     val n_ref_context
 
     output:
-    tuple val(group_meta), path("${prefix}_context_refs.csv"), emit: references
+    tuple val(group_meta), path("${prefix}_context_refs.tsv"), emit: references
     path "versions.yml"                                      , emit: versions
 
     when:
@@ -24,7 +24,7 @@ process ASSIGN_CONTEXT_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_closest_named} ${n_ref_context} ${prefix}_context_refs.csv
+    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_closest_named} ${n_ref_context} ${prefix}_context_refs.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

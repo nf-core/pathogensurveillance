@@ -8,7 +8,7 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.csv'), path(pocp), path(core_phylos, stageAs: 'core_phylos/*'), path(busco_refs, stageAs: 'busco_refs.csv'), path(busco_phylos, stageAs: 'busco_phylos/*'), path(multiqc), path(messages)
+    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.tsv'), path(pocp), path(core_phylos, stageAs: 'core_phylos/*'), path(busco_refs, stageAs: 'busco_refs.tsv'), path(busco_phylos, stageAs: 'busco_phylos/*'), path(multiqc), path(messages)
     path versions
 
     output:
@@ -26,10 +26,10 @@ process PREPARE_REPORT_INPUT {
     mkdir ${prefix}_inputs
 
     # Add sample metadata for this report group
-    cp -r ${sample_data} ${prefix}_inputs/sample_data.csv
+    cp -r ${sample_data} ${prefix}_inputs/sample_data.tsv
 
     # Add reference metadata for this report group
-    cp -r ${ref_data} ${prefix}_inputs/reference_data.csv
+    cp -r ${ref_data} ${prefix}_inputs/reference_data.tsv
 
     # Put sendsketch's output into a single folder for organization
     mkdir ${prefix}_inputs/sendsketch
@@ -52,7 +52,7 @@ process PREPARE_REPORT_INPUT {
 
     # Add metadata for references assined for variant calling
     if [ ! -z "${mapping_ref}" ]; then
-        mv ${mapping_ref} ${prefix}_inputs/mapping_references.csv
+        mv ${mapping_ref} ${prefix}_inputs/mapping_references.tsv
     fi
 
     # Add SNP alignment from variant calling
@@ -69,12 +69,12 @@ process PREPARE_REPORT_INPUT {
 
     # Add seleted references for the core gene phylogeny
     if [ ! -z "${core_phylo_refs}" ]; then
-        cp -r ${core_phylo_refs} ${prefix}_inputs/core_gene_tree_references.csv
+        cp -r ${core_phylo_refs} ${prefix}_inputs/core_gene_tree_references.tsv
     fi
 
     # Add POCP estimate from the core genome phylogeny
     if [ ! -z "${pocp}" ]; then
-        cp -r ${pocp} ${prefix}_inputs/pocp.csv
+        cp -r ${pocp} ${prefix}_inputs/pocp.tsv
     fi
 
     # Add core genome phylogenies
@@ -85,7 +85,7 @@ process PREPARE_REPORT_INPUT {
 
     # Add seleted references for the busco phylogeny
     if [ ! -z "${busco_refs}" ]; then
-        cp -r ${busco_refs} ${prefix}_inputs/busco_tree_references.csv
+        cp -r ${busco_refs} ${prefix}_inputs/busco_tree_references.tsv
     fi
 
     # Add busco phylogeny
@@ -98,7 +98,7 @@ process PREPARE_REPORT_INPUT {
 
     # Add pipeline status messages
     if [ ! -z "${messages}" ]; then
-        mv ${messages} ${prefix}_inputs/messages.csv
+        mv ${messages} ${prefix}_inputs/messages.tsv
     fi
 
     # Add versions of software used

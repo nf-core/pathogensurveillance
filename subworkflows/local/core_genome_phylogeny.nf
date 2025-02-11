@@ -38,7 +38,7 @@ workflow CORE_GENOME_PHYLOGENY {
         }
         .unique()
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
-            [ "${report_group_id}.csv", "${sample_id},${ref_id},${ref_name},${ref_desc},${usage}\n" ]
+            [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
 
@@ -63,9 +63,9 @@ workflow CORE_GENOME_PHYLOGENY {
     selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-        .splitCsv( elem: 1 )
-        .map { report_meta, csv_contents ->
-            [[id: csv_contents[0]], report_meta]
+        .splitCsv( elem: 1, sep: '\t' )
+        .map { report_meta, tsv_contents ->
+            [[id: tsv_contents[0]], report_meta]
         }
         .join(all_ref_data, by: 0..1)
         .map { ref_meta, report_meta, ref_path, gff_path ->
@@ -217,7 +217,7 @@ workflow CORE_GENOME_PHYLOGENY {
     pirate_aln    = pirate_aln              // group_meta, align_fasta
     phylogeny     = phylogeny               // group_meta, [trees]
     pocp          = CALCULATE_POCP.out.pocp // group_meta, pocp
-    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references // group_meta, csv
+    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references // group_meta, tsv
     versions      = versions             // versions.yml
     messages      = messages                // meta, group_meta, ref_meta, workflow, level, message
 

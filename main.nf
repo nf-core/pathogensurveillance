@@ -47,8 +47,8 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     PATHOGENSURVEILLANCE (
-        PIPELINE_INITIALISATION.out.sample_data_csv,
-        PIPELINE_INITIALISATION.out.reference_data_csv
+        PIPELINE_INITIALISATION.out.sample_data_tsv,
+        PIPELINE_INITIALISATION.out.reference_data_tsv
     )
 
     //

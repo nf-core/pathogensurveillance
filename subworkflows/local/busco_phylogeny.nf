@@ -31,7 +31,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .unique()
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
-            [ "${report_group_id}.csv", "${sample_id},${ref_id},${ref_name},${ref_desc},${usage}\n" ]
+            [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t{ref_name}\t${ref_desc}\t${usage}\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
 
@@ -56,9 +56,9 @@ workflow BUSCO_PHYLOGENY {
     selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
-        .splitCsv( elem: 1 )
-        .map { report_meta, csv_contents ->
-            [report_meta, [id: csv_contents[0]]]
+        .splitCsv( elem: 1, sep: '\t' )
+        .map { report_meta, tsv_contents ->
+            [report_meta, [id: tsv_contents[0]]]
         }
         .combine(references, by: 0..1)
         .map {report_meta, ref_meta, ref_path, ref_name ->

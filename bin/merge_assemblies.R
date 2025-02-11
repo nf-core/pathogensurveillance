@@ -17,5 +17,5 @@ modified_id <- gsub(out_data$LastMajorReleaseAccession, pattern = '[\\/:*?"<>| .
 out_data <- cbind(reference_id = modified_id, out_data)
 
 # Write output table
-write.csv(out_data, file = 'merged_assembly_stats.tsv', sep = '\t', row.names = FALSE)
+write.table(out_data, file = 'merged_assembly_stats.tsv', sep = '\t', row.names = FALSE)
 

@@ -3,7 +3,7 @@ Validates the input data and returns a reformatted version that is used for the 
 */
 
 process SAMPLESHEET_CHECK {
-    tag "$sample_csv"
+    tag "$sample_tsv"
 
     conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -11,18 +11,18 @@ process SAMPLESHEET_CHECK {
         'docker.io/zacharyfoster/rentrez:0.1' }"
 
     input:
-    path sample_csv
-    path reference_csv
+    path sample_tsv
+    path reference_tsv
 
     output:
-    path 'sample_metadata.csv'   , emit: sample_data
-    path 'reference_metadata.csv', emit: reference_data
-    path 'message_data.csv'      , emit: message_data
+    path 'sample_metadata.tsv'   , emit: sample_data
+    path 'reference_metadata.tsv', emit: reference_data
+    path 'message_data.tsv'      , emit: message_data
     path "versions.yml"          , emit: versions
 
     script:
     """
-    check_samplesheet.R ${sample_csv} ${reference_csv}
+    check_samplesheet.R ${sample_tsv} ${reference_tsv}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

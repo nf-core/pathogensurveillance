@@ -31,7 +31,7 @@ if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) 
 }
 
 # Read sample data with user-defined references
-sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
+sample_data <- read.csv(args$sample_data, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
 sample_data <- unique(sample_data)
 sample_ids <- unique(sample_data$sample_id)
 ref_name_key <- stats::setNames(sample_data$ref_name, sample_data$ref_id)

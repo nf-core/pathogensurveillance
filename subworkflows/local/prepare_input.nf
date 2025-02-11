@@ -13,8 +13,8 @@ include { COUNT_READS            } from '../../modules/local/count_reads'
 
 workflow PREPARE_INPUT {
     take:
-    sample_data_csv
-    reference_data_csv
+    sample_data_tsv
+    reference_data_tsv
 
     main:
 
@@ -22,19 +22,19 @@ workflow PREPARE_INPUT {
     versions = Channel.empty()
     messages = Channel.empty()
 
-    // Parse input CSVs
-    SAMPLESHEET_CHECK ( sample_data_csv, reference_data_csv )
+    // Parse input tables
+    SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv )
     sample_data = SAMPLESHEET_CHECK.out.sample_data
-        .splitCsv ( header:true, sep:',', quote:'"' )
+        .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { create_sample_metadata_channel(it) }
         .filter { sample_meta -> sample_meta.enabled.toBoolean() }
     reference_data = SAMPLESHEET_CHECK.out.reference_data
-        .splitCsv ( header:true, sep:',', quote:'"' )
+        .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { create_reference_metadata_channel(it) }
         .filter { ref_meta -> ref_meta.ref_enabled.toBoolean() }
     messages = messages.mix (
         SAMPLESHEET_CHECK.out.message_data
-            .splitCsv ( header:true, sep:',', quote:'"' )
+            .splitCsv ( header:true, sep:'\t', quote:'"' )
             .map { [
                 it.sample_id == '' ? null : [id: it.sample_id],
                 it.report_group_id == '' ? null : [id: it.report_group_id],
@@ -334,10 +334,10 @@ workflow PREPARE_INPUT {
 
 def create_sample_metadata_channel(LinkedHashMap sample_meta) {
     if (sample_meta.path != "" && !file(sample_meta.path).exists()) {
-        exit 1, "ERROR: Please check the sample metadata CSV. The file specified by 'path` does not exist.\n${sample_meta.path}"
+        exit 1, "ERROR: Please check the sample metadata TSV/CSV. The file specified by 'path` does not exist.\n${sample_meta.path}"
     }
     if (sample_meta.path_2 != "" && !file(sample_meta.path_2).exists()) {
-        exit 1, "ERROR: Please check the sample metadata CSV. The file specified by 'path_2' does not exist.\n${sample_meta.path_2}"
+        exit 1, "ERROR: Please check the sample metadata TSV/CSV. The file specified by 'path_2' does not exist.\n${sample_meta.path_2}"
     }
     sample_meta = sample_meta.collectEntries { key, value -> [(key): value ?: null] }
     sample_meta.ref_ids = sample_meta.ref_ids ? sample_meta.ref_ids.split(";") as ArrayList : []
@@ -355,7 +355,7 @@ def create_sample_metadata_channel(LinkedHashMap sample_meta) {
 
 def create_reference_metadata_channel(LinkedHashMap ref_meta) {
     if (ref_meta.ref_path != "" && !file(ref_meta.ref_path).exists()) {
-        exit 1, "ERROR: Please check the reference metadata CSV. The file specified by 'ref_path` does not exist.\n${ref_meta.ref_path}"
+        exit 1, "ERROR: Please check the reference metadata TSV/CSV. The file specified by 'ref_path` does not exist.\n${ref_meta.ref_path}"
     }
     ref_meta = ref_meta.collectEntries { key, value -> [(key): value ?: null] }
     ref_meta.ref_path = ref_meta.ref_path ? file(ref_meta.ref_path) : null

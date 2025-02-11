@@ -21,7 +21,7 @@ if (length(args) < 5) {
 busco_dirs <- unlist(args[5:length(args)])
 args <- args[1:4]
 names(args) <- c("sample_ref_pairs", "min_genes", "max_genes",  "feat_seqs_out_path")
-metadata <- read.csv(args$sample_ref_pairs, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'))
+metadata <- read.csv(args$sample_ref_pairs, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
 min_genes <- as.integer(args$min_genes)
 max_genes <- as.integer(args$max_genes)
 
