@@ -15,8 +15,10 @@ workflow GENOME_ASSEMBLY {
 
     versions = Channel.empty()
     messages = Channel.empty()
-    sample_data
-        .map{ [[id: it.sample_id, single_end: it.single_end, kingdom: it.kingdom, type: it.sequence_type], it.paths] }
+    parsed_sample_data = sample_data
+        .map{ [[id: it.sample_id, single_end: it.single_end, kingdom: it.kingdom, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
+    parsed_sample_data
+        .map{ sample_meta, report_meta, read_paths -> [sample_meta, read_paths]}
         .unique()
         .branch { meta, paths->
             short_prokaryote:    (meta.type == "illumina" || meta.type == "bgiseq") && meta.kingdom == "Bacteria"
@@ -38,8 +40,30 @@ workflow GENOME_ASSEMBLY {
     FASTP( fastp_input, [], false, false, false )
     versions = versions.mix(FASTP.out.versions)
 
+    // Check for samples with too few reads after quality control
+    filtered_reads = FASTP.out.json
+        .splitJson(path: 'summary.after_filtering')
+        .filter{ sample_meta, json ->
+            json.key == 'total_bases'
+        }
+        .combine(FASTP.out.reads, by: 0)
+        .branch{ sample_meta, json, read_paths ->
+            pass: json.value.toBigInteger() >= params.min_bases_to_assemble.toBigInteger()
+                return [sample_meta, read_paths]
+
+            fail: true
+                return [sample_meta, read_paths, json.value]
+        }
+
+    filtered_reads_warnings = filtered_reads.fail
+        .combine(parsed_sample_data, by: 0)
+        .map { sample_meta, read_paths1, base_count, report_meta, read_paths2 ->
+            [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "After quality filtering, sample reads consist of ${base_count} bases, which is less than the minimum of ${params.min_bases_to_assemble} defined by the option `min_bases_to_assemble` and therefore will not be assembled."]
+        }.view()
+    messages = messages.mix(filtered_reads_warnings)
+
     SPADES(
-        FASTP.out.reads.map{ sample_meta, read_paths -> [sample_meta, read_paths, [], []] },
+        filtered_reads.pass.map{ sample_meta, read_paths -> [sample_meta, read_paths, [], []] },
         [], // val yml
         []  // val hmm
     )
@@ -51,10 +75,11 @@ workflow GENOME_ASSEMBLY {
         .filter { sample_meta, read_paths, scaffolds ->
             ! scaffolds
         }
-        .combine(sample_data.map{ [[id: it.sample_id, single_end: it.single_end], [id: it.report_group_ids]] }, by: 0)
-        .map { sample_meta, read_paths, scaffolds, report_meta ->
+        .combine(parsed_sample_data, by: 0)
+        .map { sample_meta, read_paths, scaffolds, report_meta, read_paths2 ->
             [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assebled, possibly due to short read lengh or low quality. Check Spades' logs for more details."]
         }
+    messages = messages.mix(spades_warnings)
 
     FLYE_NANOPORE (
         filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),

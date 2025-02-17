@@ -12,3 +12,4 @@ testing*
 bin/
 ro-crate-metadata.json
 assets/main_report
+docs/
