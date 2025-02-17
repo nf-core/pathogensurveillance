@@ -59,7 +59,7 @@ workflow GENOME_ASSEMBLY {
         .combine(parsed_sample_data, by: 0)
         .map { sample_meta, read_paths1, base_count, report_meta, read_paths2 ->
             [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "After quality filtering, sample reads consist of ${base_count} bases, which is less than the minimum of ${params.min_bases_to_assemble} defined by the option `min_bases_to_assemble` and therefore will not be assembled."]
-        }.view()
+        }
     messages = messages.mix(filtered_reads_warnings)
 
     SPADES(
