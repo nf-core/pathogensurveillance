@@ -2,9 +2,13 @@
 
 # Constants
 min_cluster_size <- 3
-cluster_count_weight <- 0.3
-shared_gene_count_weight <- 1
-sample_proportion_weight <- 5
+clustering_weights <- c(
+    sample_proportion = 5,
+    reference_proportion = 2,
+    shared_gene_score = 1,
+    mean_cluster_size_score = 1
+)
+clustering_weights <- clustering_weights / sum(clustering_weights)
 clustering_stats_path <- 'clustering_statistics.tsv'
 message_data_path <- 'message_data.tsv'
 
@@ -21,16 +25,16 @@ message_data <- data.frame(
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # subset_core_gene.R smarcescens.tsv smarcescens_feat_seqs_renamed smarcescens.csv 30 300 smarcescens_core_genes smarcescens_feat_seqs
-# args <- c('scratch/subset_core_gene_test_data/smarcescens_gene_family.tsv',
-#           'scratch/subset_core_gene_test_data/smarcescens_feat_seqs_renamed',
-#           'scratch/subset_core_gene_test_data/smarcescens.tsv',
+# args <- c('~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined__gene_family.tsv',
+#           '~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined__feat_seqs_renamed/',
+#           '~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined_.tsv',
 #           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
-names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_core_genes",  "max_core_genes", "tsv_output_path", "fasta_output_path")
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "tsv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
-min_core_genes <- as.integer(args$min_core_genes)
-max_core_genes <- as.integer(args$max_core_genes)
+min_genes <- as.integer(args$min_genes)
+max_genes <- as.integer(args$max_genes)
 
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
@@ -47,7 +51,7 @@ present_and_single <- present_and_single_original
 # Initialize "clusters" with one sample each
 # Sample IDs are also used for the cluster IDs, although the specific sample used is arbitrary
 clusters <- as.list(all_ids)
-names(clusters) <- all_ids 
+names(clusters) <- all_ids
 
 # Make table with number of genes shared for all pairwise comparisons
 count_shared_genes <- function(cluster_1_id, cluster_2_id) {
@@ -59,21 +63,26 @@ cluster_shared_count <- do.call(rbind, lapply(combn(seq_along(all_ids), 2, simpl
 # Keep combining clusters until no more can be combined
 get_next_combination <- function() {
     most_shared <- which.max(cluster_shared_count$count)
-    if (cluster_shared_count$count[most_shared] >= min_core_genes) {
+    if (cluster_shared_count$count[most_shared] >= min_genes) {
         return(cluster_shared_count[most_shared, ])
     } else {
         return(NULL)
     }
+}
+is_valid_cluster <- function(cluster) {
+    length(cluster) >= min_cluster_size && any(cluster %in% sample_ids)
 }
 calc_cluster_stats <- function(clusters) {
     cluster_lengths <- vapply(clusters, length, FUN.VALUE = numeric(1))
     shared_gene_counts <- vapply(names(clusters), FUN.VALUE = numeric(1), function(id) {
         sum(present_and_single[[id]])
     })
+    is_valid <- vapply(clusters, FUN.VALUE = logical(1), is_valid_cluster)
     data.frame(
         cluster_count = length(clusters),
-        big_cluster_count = sum(cluster_lengths >= min_cluster_size),
-        sample_count = sum(unlist(clusters[cluster_lengths >= min_cluster_size]) %in% sample_ids),
+        valid_cluster_count = sum(is_valid),
+        sample_count = sum(unlist(clusters[is_valid]) %in% sample_ids),
+        ref_count = sum(unlist(clusters[is_valid]) %in% ref_ids),
         weigthed_shared_genes = sum(shared_gene_counts * cluster_lengths / sum(cluster_lengths))
     )
 }
@@ -84,55 +93,55 @@ while (length(clusters) > 1 && ! is.null(best_pair <- get_next_combination())) {
     best_ids <- c(best_pair$cluster_1_id, best_pair$cluster_2_id)
     clusters[[best_pair$cluster_1_id]] <- unname(unique(unlist(clusters[best_ids])))
     clusters[best_pair$cluster_2_id] <- NULL
-    
+
     # Update gene presence/absence matrix
     present_and_single[[best_pair$cluster_1_id]] <- present_and_single[[best_pair$cluster_1_id]] & present_and_single[[best_pair$cluster_2_id]]
     present_and_single[best_pair$cluster_2_id] <- NULL
-    
+
     # Update pairwise shared gene counts between clusters
     cluster_shared_count <- cluster_shared_count[! (cluster_shared_count$cluster_1_id %in% best_ids | cluster_shared_count$cluster_2_id %in% best_ids), ]
     other_clusters <- names(clusters)[names(clusters) != best_pair$cluster_1_id]
     new_shared_count <- do.call(rbind, lapply(other_clusters, function(n) count_shared_genes(n, best_pair$cluster_1_id)))
     cluster_shared_count <- rbind(cluster_shared_count, new_shared_count)
-    
+
     # Save updated clusters and cluster statistics
     all_clusterings <- c(all_clusterings, list(clusters))
     clustering_stats <- c(clustering_stats, list(calc_cluster_stats(clusters)))
 }
 
-# Filter out clusters that are only references so they don't influence which clustering result to choose
-all_clusterings <- lapply(all_clusterings, function(clusters) {
-    is_only_refs <- vapply(clusters, function(x) all(x %in% ref_ids), FUN.VALUE = logical(1))
-    clusters[! is_only_refs]
-})
-
 # Choose best clustering based on clustering statistics
-logistic_scaling_func <- function(x, floor = 0.01, ceiling = 1, midpoint = 0, steepness = 0.01) {
-    logistic_value <- ceiling / (1 + exp(1)^(-steepness * (x - midpoint)))
+logistic_scaling_func <- function(shared_count, floor = 0.1, ceiling = 1, midpoint = 0, steepness = 0.02) {
+    logistic_value <- ceiling / (1 + exp(1)^(-steepness * (shared_count - midpoint)))
     (logistic_value - 0.5 + floor) / (0.5 + floor)
 }
 clustering_stats <- do.call(rbind, clustering_stats)
 clustering_stats$sample_proportion <- clustering_stats$sample_count / length(sample_ids)
-clustering_stats$mean_cluster_size <- clustering_stats$sample_count / clustering_stats$big_cluster_count
+if (length(ref_ids) == 0) {
+    clustering_stats$reference_proportion <- 1
+} else {
+    clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)   
+}
+clustering_stats$mean_cluster_size <- ifelse(clustering_stats$valid_cluster_count == 0, 0, clustering_stats$sample_count / clustering_stats$valid_cluster_count)
 clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
-clustering_stats$shared_gene_score <- logistic_scaling_func(clustering_stats$weigthed_shared_genes, steepness = 0.02, floor = 0.1)
-clustering_stats$overall_score <- clustering_stats$sample_proportion ^ sample_proportion_weight *
-                                    clustering_stats$shared_gene_score ^ shared_gene_count_weight *
-                                    clustering_stats$mean_cluster_size_score ^ cluster_count_weight
+non_zero_cluster_range <-  range(clustering_stats$valid_cluster_count[clustering_stats$valid_cluster_count != 0])
+clustering_stats$cluster_count_score <- ifelse(clustering_stats$valid_cluster_count == 0, 0, 1 / (clustering_stats$valid_cluster_count - min(non_zero_cluster_range) + 1))
+clustering_stats$shared_gene_score <- ifelse(clustering_stats$weigthed_shared_genes >= max_genes, 1, logistic_scaling_func(clustering_stats$weigthed_shared_genes))
+clustering_stats$overall_score <- vapply(seq_len(nrow(clustering_stats)), FUN.VALUE = numeric(1), function(i) {
+    sum(vapply(names(clustering_weights), FUN.VALUE = numeric(1), function(n) clustering_stats[[n]][i] * clustering_weights[n]))
+})
 best_clusters <- all_clusterings[[which.max(clustering_stats$overall_score)]]
 
 # Remove clusters that have too few samples/references
-cluster_sizes <- vapply(best_clusters, length, FUN.VALUE = numeric(1))
-is_to_few <- cluster_sizes < min_cluster_size
-removed_ids <- unlist(best_clusters[is_to_few])
+is_valid <- vapply(best_clusters, is_valid_cluster, FUN.VALUE = logical(1))
+removed_ids <- unlist(best_clusters[! is_valid])
 removed_sample_ids <- removed_ids[removed_ids %in% sample_ids]
 removed_reference_ids <- removed_ids[removed_ids %in% ref_ids]
-best_clusters <- best_clusters[! is_to_few]
+best_clusters <- best_clusters[is_valid]
 
 # Report removed samples and references
 report_group_id <- gsub(basename(args$metadata), pattern = '\\.tsv$', replacement = '')
 if (length(removed_ids) > 0) {
-    warning('Removed ', length(cluster_sizes), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ', 
+    warning('Removed ', length(cluster_sizes), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ',
             length(removed_sample_ids), ' samples and ', length(removed_reference_ids), ' references.')
 }
 if (length(removed_sample_ids) > 0) {
@@ -142,7 +151,7 @@ if (length(removed_sample_ids) > 0) {
         reference_id = NA_character_,
         workflow = 'CORE_GENOME_PHYLOGENY',
         message_type = 'WARNING',
-        description = 'Sample removed from core gene phylogeny in order to find enough core genes.'
+        description = 'Sample removed from core gene phylogeny in order to find enough core genes amoung other samples/references.'
     ))
 }
 if (length(removed_reference_ids) > 0) {
@@ -152,7 +161,7 @@ if (length(removed_reference_ids) > 0) {
         reference_id = removed_reference_ids,
         workflow = 'CORE_GENOME_PHYLOGENY',
         message_type = 'NOTE',
-        description = 'Reference removed from core gene phylogeny in order to find enough core genes.'
+        description = 'Reference removed from core gene phylogeny in order to find enough core genes amoung other samples/references.'
     ))
 }
 
@@ -160,8 +169,8 @@ if (length(removed_reference_ids) > 0) {
 output_cluster_data <- lapply(best_clusters, function(ids) {
     is_core_gene <- rowSums(present_and_single_original[, ids]) == length(ids)
     output <- raw_gene_data[is_core_gene, c(colnames(raw_gene_data)[1:22], ids)]
-    if (nrow(output) > max_core_genes) {
-        output <- output[1:max_core_genes, ]
+    if (nrow(output) > max_genes) {
+        output <- output[1:max_genes, ]
     }
     return(output)
 })

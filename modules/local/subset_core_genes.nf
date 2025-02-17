@@ -15,8 +15,7 @@ process SUBSET_CORE_GENES {
     output:
     tuple val(group_meta), path("${prefix}_core_genes/cluster_*.tsv"), emit: gene_fam
     tuple val(group_meta), path("${prefix}_feat_seqs/cluster_*"), emit: feat_seq
-    tuple val(group_meta), path("removed_sample_ids.txt"), emit: removed_sample_ids
-    tuple val(group_meta), path("removed_ref_ids.txt"), emit: removed_ref_ids
+    tuple val(group_meta), path("message_data.tsv"), emit: message_data
 
 
     when:
