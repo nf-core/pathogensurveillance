@@ -178,16 +178,18 @@ workflow CORE_GENOME_PHYLOGENY {
         params.phylo_min_genes,
         params.phylo_max_genes
     )
-
-    // Report any sample or references that have been removed from the analysis
-    removed_refs = SUBSET_CORE_GENES.out.removed_ref_ids
-        .splitText()
-        .map { [null, [id: it[1].replace('\n', '')], it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Reference removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    removed_samps = SUBSET_CORE_GENES.out.removed_sample_ids
-        .splitText()
-        .map { [[id: it[1].replace('\n', '')], null, it[0], "CORE_GENOME_PHYLOGENY", "WARNING", "Sample removed from core gene phylogeny in order to find enough core genes."] } // meta, group_meta, ref_meta, workflow, level, message
-    messages = messages.mix(removed_refs)
-    messages = messages.mix(removed_samps)
+    messages = messages.mix (
+        SUBSET_CORE_GENES.out.message_data
+            .splitCsv ( header:true, sep:'\t', quote:'"' )
+            .map { [
+                it.sample_id == '' ? null : [id: it.sample_id],
+                it.report_group_id == '' ? null : [id: it.report_group_id],
+                it.reference_id == '' ? null : [id: it.reference_id],
+                "CORE_GENOME_PHYLOGENY",
+                it.message_type,
+                it.description
+            ] }
+    )
 
     // Align each gene family with mafft
     core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
