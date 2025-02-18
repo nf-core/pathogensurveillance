@@ -24,10 +24,9 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# subset_core_gene.R smarcescens.tsv smarcescens_feat_seqs_renamed smarcescens.csv 30 300 smarcescens_core_genes smarcescens_feat_seqs
-# args <- c('~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined__gene_family.tsv',
-#           '~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined__feat_seqs_renamed/',
-#           '~/projects/pathogensurveillance/work/54/77df94541099c770dd151374d2286e/_no_group_defined_.tsv',
+# args <- c('~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens_gene_family.tsv',
+#           '~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens_feat_seqs_renamed/',
+#           '~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens.tsv',
 #           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "tsv_output_path", "fasta_output_path")
 args <- as.list(args)
@@ -141,7 +140,7 @@ best_clusters <- best_clusters[is_valid]
 # Report removed samples and references
 report_group_id <- gsub(basename(args$metadata), pattern = '\\.tsv$', replacement = '')
 if (length(removed_ids) > 0) {
-    warning('Removed ', length(cluster_sizes), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ',
+    warning('Removed ', sum(! is_valid), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ',
             length(removed_sample_ids), ' samples and ', length(removed_reference_ids), ' references.')
 }
 if (length(removed_sample_ids) > 0) {
@@ -151,7 +150,7 @@ if (length(removed_sample_ids) > 0) {
         reference_id = NA_character_,
         workflow = 'CORE_GENOME_PHYLOGENY',
         message_type = 'WARNING',
-        description = 'Sample removed from core gene phylogeny in order to find enough core genes amoung other samples/references.'
+        description = 'Sample removed from core gene phylogeny in order to find enough core genes among other samples/references.'
     ))
 }
 if (length(removed_reference_ids) > 0) {
@@ -161,7 +160,7 @@ if (length(removed_reference_ids) > 0) {
         reference_id = removed_reference_ids,
         workflow = 'CORE_GENOME_PHYLOGENY',
         message_type = 'NOTE',
-        description = 'Reference removed from core gene phylogeny in order to find enough core genes amoung other samples/references.'
+        description = 'Reference removed from core gene phylogeny in order to find enough core genes among other samples/references.'
     ))
 }
 
