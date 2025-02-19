@@ -167,7 +167,8 @@ workflow VARIANT_ANALYSIS {
 
     VCF_TO_SNP_ALIGN (
         CALL_VARIANTS.out.vcf
-            .combine(sample_ploidy_data, by: 0)
+            .combine(sample_ploidy_data, by: 0),
+        params.max_variants
     )
     versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
     removed_samps = VCF_TO_SNP_ALIGN.out.removed_sample_ids

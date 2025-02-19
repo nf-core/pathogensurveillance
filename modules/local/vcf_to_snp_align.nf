@@ -9,6 +9,7 @@ process VCF_TO_SNP_ALIGN {
 
     input:
     tuple val(ref_meta), path(vcf), path(ploidy_data)
+    val max_variants
 
     output:
     tuple val(ref_meta), path("${prefix}.fasta")       , emit: fasta
@@ -23,7 +24,7 @@ process VCF_TO_SNP_ALIGN {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    vcf_to_snp_align.R ${vcf} ${ploidy_data} ${prefix}.fasta
+    vcf_to_snp_align.R ${vcf} ${ploidy_data} ${max_variants} ${prefix}.fasta
 
     SEQ_COUNT=\$(grep '^>' ${prefix}.fasta | wc -l)
     cat <<-END_VERSIONS > versions.yml

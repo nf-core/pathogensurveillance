@@ -179,6 +179,12 @@
                     "default": 100000,
                     "description": "The minimum number of bases after quailty filtering needed to attempt an genome assembly. Samples with few than this amount of bases will be excluded from further analysis.",
                     "fa_icon": "fas fa-align-center"
+                },
+                "max_variants": {
+                    "type": "number",
+                    "default": 100000,
+                    "description": "The maximum number of variants to use for the SNP tree and minimum spanning nextwork produced by the variant analysis. The first N variants are used when more than N are available.",
+                    "fa_icon": "fas fa-align-center"
                 }
             }
         },

@@ -4,24 +4,39 @@
 missing_data_char <- '-'
 max_missing_data_prop <- 0.5  # SNPs are removed if the proportion of samples with data is greater than this. Set to 1 or NA to disable SNP filtering.
 remove_missing_samples <- TRUE # Whether to remove samples with only missing data
+pick_best_allele_for_haploids <- FALSE # Use depth information to pick the best allele for haploids that have information for two "alleles". Slower.
 missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#    '~/projects/pathogensurveillance/work/7e/982f33311eb286918183ec32916767/mixed_GCF_042647405_1.vcffilter.vcf.gz',
-#    '~/projects/pathogensurveillance/work/7e/982f33311eb286918183ec32916767/mixed_GCF_042647405_1.csv',
+#    '~/projects/pathogensurveillance/work/07/c24675b3100e1b17e935e23837e7bf/smarcescens_GCA_000513215_1.vcffilter.vcf.gz',
+#    '~/projects/pathogensurveillance/work/07/c24675b3100e1b17e935e23837e7bf/smarcescens_GCA_000513215_1.tsv',
+#    '1000000',
 #    'deleteme.fasta'
 # )
-names(args) <- c('vcf_path', 'ploidy_data_path', 'out_path')
+names(args) <- c('vcf_path', 'ploidy_data_path', 'max_variants', 'out_path')
 args <- as.list(args)
 
-# Read VCF file
-header_data <- readLines(args$vcf_path)
-header_line <- header_data[grepl(header_data, pattern = '^#CHROM')]
+# Get header from VCF file
+file_handle <- file(args$vcf_path, "r")
+while ( TRUE ) {
+    line <- readLines(file_handle, n = 1)
+    if ( length(line) == 0 ) {
+        stop('Cannot find VCF header.')
+    }
+    if (grepl(line, pattern = '^#CHROM')) {
+        header_line <- line
+        break
+    }
+}
+close(file_handle)
 header <- strsplit(header_line, split = '\t')[[1]]
 header[1] <- 'CHROM'
-vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', header = FALSE)
+
+# Read VCF file and name by header
+vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#',
+                       header = FALSE, nrows = as.numeric(args$max_variants))
 colnames(vcf_data) <- header
 
 # Read ploidy data file
@@ -37,29 +52,33 @@ ad_index <- vapply(strsplit(vcf_data$FORMAT, split = ':'), FUN.VALUE = integer(1
     which(x == 'AD')
 })
 vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
-    vapply(seq_len(nrow(vcf_data)), FUN.VALUE = character(1), function(index) {
-        genotypes <- strsplit(vcf_data[index, samp_id], split = ':')[[1]][gt_index[index]]
-        genotypes <- strsplit(genotypes, '/')[[1]]
-        genotypes[genotypes == '.'] <- NA
-        genotypes <- as.numeric(genotypes)
-        depths <- strsplit(vcf_data[index, samp_id], split = ':')[[1]][ad_index[index]]
-        depths <- as.numeric(strsplit(depths, ',')[[1]])
-        depths <- depths[genotypes]
-        ploidy <- ploidy_key[samp_id]
-        if (ploidy == 1) {
-            if (all(is.na(depths))) {
+    raw_values <- vcf_data[[samp_id]]
+    split_values <- strsplit(raw_values, split = ':')
+    genotypes <- mapply(`[`, split_values, gt_index, SIMPLIFY = TRUE)
+    if (ploidy_key[samp_id] == 1 && pick_best_allele_for_haploids) {
+        genotypes <- strsplit(genotypes, '/')
+        depths <- vapply(seq_along(split_values), FUN.VALUE = character(1), function(i) split_values[[i]][ad_index[i]])
+        depths <- strsplit(depths, ',')
+        depths <- lapply(depths, function(x) as.numeric(x))
+        depths <- lapply(seq_along(depths), function(i) {
+            genos <- genotypes[[i]]
+            genos[genos == '.'] <- NA
+            depths[[i]][as.numeric(genos) + 1] # Is this + 1 supposed to be here?
+        }) 
+        is_all_na <- vapply(depths, FUN.VALUE = logical(1), function(x) all(is.na(x)))
+        genotypes <- vapply(seq_along(genotypes), FUN.VALUE = character(1), function(i) {
+            if (all(is.na(depths[[i]]))) {
                 return('.')
             } else {
-                return(as.character(genotypes[which.max(depths)]))
+                return(as.character(genotypes[[i]][which.max(depths[[i]])]))
             }
-        } else {
-            genotypes <- ifelse(is.na(genotypes), '.', as.character(genotypes))
-            return(paste0(genotypes, collapse = '/'))
-        }
-    })
+        })
+    }
+    return(genotypes)
 })
 
-# Convert allele numeric codes to AGCT + IUPAC ambiguity codes
+
+# Create IUPAC key with all combinations precomputed for speed
 iupac_key <- c(
     A='A',
     C='C',
@@ -77,25 +96,50 @@ iupac_key <- c(
     CGT='B',
     ACGT='N'
 )
+permute_char <- function(char) {
+    if (nchar(char) == 1) {
+        return(char)
+    }
+    split <- strsplit(char, split = '')[[1]]
+    options <- expand.grid(rep(list(split), length(split)))
+    is_duplicated <- apply(options, MARGIN = 1, function(x) any(duplicated(x)))
+    unname(apply(options[! is_duplicated, ], MARGIN = 1, paste0, collapse = ''))
+}
+iupac_permutations <- lapply(names(iupac_key), permute_char)
+expanded_iupac_key <- rep(iupac_key, vapply(iupac_permutations, FUN.VALUE = numeric(1), length))
+names(expanded_iupac_key) <- unlist(iupac_permutations)
+
+# Convert allele numeric codes to AGCT + IUPAC ambiguity codes
 vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
-    vapply(seq_len(nrow(vcf_data)), FUN.VALUE = character(1), function(index) {
+    if (ploidy_key[samp_id] == 1 && ! pick_best_allele_for_haploids) {
         # Parse indexes of alleles for each haplotype
-        allele_codes <- strsplit(vcf_data[index, samp_id], split = '/')[[1]]
-        allele_codes <- allele_codes[allele_codes != '.']
+        allele_codes <- substring(vcf_data[[samp_id]], 1, 1) # A hack for speed. Ignores alternative allele and will return incorrect results if there are more than 9 alleles
+        allele_codes[allele_codes == '.'] <- NA
         allele_codes <- as.numeric(allele_codes)
-
+        
         # Convert allele codes to sequence
-        allele_code_key <- c(vcf_data$REF[index], strsplit(vcf_data$ALT[index], split = ',')[[1]])
-        alleles <- allele_code_key[allele_codes + 1]
-
-        # Return NA if not a simple SNP
-        if (any(nchar(alleles) != 1)) {
-            return(NA_character_)
-        }
-
-        # Convert alleles to a single sequence, using IUPAC ambiguity codes as needed
-        return(iupac_key[paste0(sort(unique(alleles)), collapse = '')])
-    })
+        allele_code_key <- mapply(c, vcf_data$REF, strsplit(vcf_data$ALT, split = ','), SIMPLIFY = FALSE)
+        alleles <- mapply(allele_codes + 1, allele_code_key, SIMPLIFY = TRUE, FUN = function(a, k) {
+            expanded_iupac_key[k[a]]
+        })
+        return(unname(alleles))
+    } else {
+        # Parse indexes of alleles for each haplotype
+        allele_codes <- strsplit(vcf_data[[samp_id]], split = '/')
+        allele_codes <- lapply(allele_codes, function(x) as.numeric(x[x != '.']))
+        
+        # Convert allele codes to sequence
+        allele_code_key <- mapply(c, vcf_data$REF, strsplit(vcf_data$ALT, split = ','), SIMPLIFY = FALSE)
+        alleles <- mapply(allele_codes, allele_code_key, SIMPLIFY = FALSE, FUN = function(a, k) {
+            out <- k[a + 1]
+            if (any(nchar(out) != 1)) { # Return NA if not a simple SNP
+                return(NA_character_)
+            } else {
+                return(expanded_iupac_key[paste0(unique(out), collapse = '')]) # Convert alleles to a single sequence, using IUPAC ambiguity codes as needed
+            }
+        })
+        return(unname(unlist(alleles)))
+    }
 })
 
 # Remove samples with only missing data
@@ -109,7 +153,6 @@ if (remove_missing_samples) {
     sample_ids <- sample_ids[! sample_ids %in% samples_to_remove]
     writeLines(samples_to_remove, missing_sample_file_path)
 }
-
 
 # Remove variants with missing data
 if (! is.na(max_missing_data_prop) && max_missing_data_prop < 1) {
