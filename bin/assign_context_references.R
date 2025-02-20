@@ -8,12 +8,12 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#   '../smarcescens_comp.csv',
-#   '../smarcescens.csv',
-#   '0',
-#   '0',
-#   '0',
-#   'all_context_refs.csv'
+#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all_comp.csv',
+#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all.tsv',
+#   '1',
+#   '1',
+#   '3',
+#   'all_context_refs.tsv'
 # )
 names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
@@ -52,11 +52,11 @@ ani_matrix <- ani_matrix[row.names(ani_matrix) %in% all_ids, names(ani_matrix) %
 
 # Scale ANI values for each sample
 rescale <- function(x) {
-    if (length(x) > 1) {
-        return((x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
-    } else {
-        return(x)
+    out <- x
+    if (sum(! is.na(x)) > 1) {
+        out[! is.na(out)] <- (out[! is.na(out)] - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
     }
+    return(out)
 }
 ref_ids <- unique(rownames(ani_matrix)[! rownames(ani_matrix) %in% sample_ids])
 ani_ref_v_samples <- ani_matrix[ref_ids, sample_ids, drop = FALSE]

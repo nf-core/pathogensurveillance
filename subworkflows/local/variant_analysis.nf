@@ -77,12 +77,12 @@ workflow VARIANT_ANALYSIS {
         }
         .groupTuple(by: [0,1])
     filtered_sample_data_with_refs = grouped_sample_data_with_refs
-        .filter{ it[2].size() >= 3 }
+        .filter{ it[2].size() >= 2 }
         .transpose(by: 2)
         .map{ it[2] }
     messages = messages.mix(
         grouped_sample_data_with_refs
-            .filter{ it[2].size() < 3 }
+            .filter{ it[2].size() < 2 }
             .map{ report_meta, ref_meta, data ->
                 [data[0][0], report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because there are too few samples aligned to this reference to make a tree."]
             }

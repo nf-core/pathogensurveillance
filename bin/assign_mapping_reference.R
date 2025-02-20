@@ -3,9 +3,9 @@
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/6f/a8638157f5028f753f9ff512bb3de0/subgroup_comp.csv',
-#     '/home/fosterz/projects/pathogensurveillance/work/6f/a8638157f5028f753f9ff512bb3de0/subgroup.csv',
-#     'deleteme.csv',
+#     '~/projects/pathogensurveillance/work/4a/ca57fe640cde1d0210d78f861b8f0f/all_comp.csv',
+#     '~/projects/pathogensurveillance/work/4a/ca57fe640cde1d0210d78f861b8f0f/all.tsv',
+#     'all_reassigned.tsv',
 #     '0.95'
 # )
 args <- as.list(args)

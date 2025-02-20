@@ -90,7 +90,8 @@ process PREPARE_REPORT_INPUT {
 
     # Add busco phylogeny
     if [ ! -z "${busco_phylos}" ]; then
-        cp -r ${busco_phylos} ${prefix}_inputs/busco_tree.nwk
+        mkdir ${prefix}_inputs/busco_trees
+        cp -r ${busco_phylos} ${prefix}_inputs/busco_trees/
     fi
 
     # Put multiqc's output into a single folder for organization

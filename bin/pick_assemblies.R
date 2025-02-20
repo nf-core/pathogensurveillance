@@ -8,12 +8,12 @@ set.seed(1)
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_families.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_genera.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/SRR25712679_species.txt',
-#     '5', '10', '10', 'false', 'output.tsv',
-#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/Enterobacteriaceae.json',
-#     '/home/fosterz/projects/pathogensurveillance/work/3f/f4e16e7882380283e66883115e299e/Ancylostomatidae.json'
+#     '/home/fosterz/projects/pathogensurveillance/work/77/c91bb1c3a824299b0ca7735fb23fe6/LF1_families.txt',
+#     '/home/fosterz/projects/pathogensurveillance/work/77/c91bb1c3a824299b0ca7735fb23fe6/LF1_genera.txt',
+#     '/home/fosterz/projects/pathogensurveillance/work/77/c91bb1c3a824299b0ca7735fb23fe6/LF1_species.txt',
+#     '1', '3', '3', 'true', 'LF1.tsv',
+#     '/home/fosterz/projects/pathogensurveillance/work/77/c91bb1c3a824299b0ca7735fb23fe6/Lactobacillaceae.json',
+#     '/home/fosterz/projects/pathogensurveillance/work/77/c91bb1c3a824299b0ca7735fb23fe6/Streptomycetaceae.json'
 # )
 args <- as.list(args)
 families <- readLines(args[[1]])
@@ -251,12 +251,12 @@ if (nrow(result) == 0) {
         ref_id = result$reference_id,
         ref_name = result$organism_name,
         ref_description = paste0(
-            result$organism_name, ' (',
+            result$species, ' (',
             result$accession,
-            ifelse(result$is_type, '; Type', ''),
-            ifelse(result$source_database == 'SOURCE_DATABASE_REFSEQ', '; RefSeq', ''),
-            ifelse(result$is_atypical, '; Atypical', ''),
-            ifelse(is.na(result$hosts), '', paste0('; Host: ', result$hosts)),
+            ifelse(result$is_type, '; T', ''),
+            ifelse(result$source_database == 'SOURCE_DATABASE_REFSEQ', '; RS', ''),
+            ifelse(result$is_atypical, '; A', ''),
+            # ifelse(is.na(result$hosts), '', paste0('; Host: ', result$hosts)),
             ')'
         ),
         ref_path = '',

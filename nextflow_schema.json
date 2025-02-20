@@ -158,13 +158,13 @@
                 },
                 "phylo_min_genes": {
                     "type": "number",
-                    "default": 30,
+                    "default": 10,
                     "description": "The minimum number of genes needed to conduct a core gene phylogeny. Samples and references will be removed (as allowed by the `min_core_samps` and `min_core_refs` options) until this minimum is met.",
                     "fa_icon": "fas fa-align-center"
                 },
                 "phylo_max_genes": {
                     "type": "number",
-                    "default": 300,
+                    "default": 500,
                     "description": "The maximum number of genes used to conduct a core gene phylogeny.",
                     "fa_icon": "fas fa-align-center"
                 },

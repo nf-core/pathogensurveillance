@@ -6,7 +6,7 @@ complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are 
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- list('~/projects/pathogensurveillance/work/66/c64114197ddf5ea301f6cd3ffc4e23/SRR26197583.txt')
+# args <- list('/home/fosterz/projects/pathogensurveillance/work/12/25ffa8ac8801703ed6717d3f3f43fa/LF1.txt')
 data <- read.csv(args[[1]], skip = 2, header = TRUE, sep = '\t')
 
 # Format table

@@ -580,52 +580,6 @@ biosample_ids <- unique(metadata_samp$ncbi_accession[is_biosample_to_lookup])
 run_id_key <- lapply(biosample_ids, get_sra_from_biosamples)
 names(run_id_key) <- biosample_ids
 
-# Report biosamples with no reads to the user
-no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
-if (length(no_runs_found) > 0) {
-    warning('The following ', length(no_runs_found), ' biosamples do not have reads associated with them:\n',
-            paste0(no_runs_found, collapse = '\n'), '\n')
-    message_data <- rbind(message_data, data.frame(
-        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% no_runs_found],
-        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% no_runs_found],
-        reference_id = NA_character_,
-        workflow = 'PREPARE_INPUT',
-        message_type = 'WARNING',
-        description = 'Sample removed since there are no runs associated with this biosample.'
-    ))
-    metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
-}
-
-# Report biosamples with multiple SRA runs associated with them
-multiple_runs_found <- names(run_id_key)[vapply(run_id_key, function(x) length(x) > 1, logical(1))]
-if (length(multiple_runs_found) > 0) {
-    warning('The following ', length(multiple_runs_found), ' biosamples have multiple SRA runs associated with them:\n',
-            paste0(multiple_runs_found, collapse = '\n'), '\n')
-    message_data <- rbind(message_data, data.frame(
-        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% multiple_runs_found],
-        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% multiple_runs_found],
-        reference_id = NA_character_,
-        workflow = 'PREPARE_INPUT',
-        message_type = 'NOTE',
-        description = 'Biosample associated with multiple SRA accessions. Sample will be treated as multiple samples, one for each run associated with its biosample. User-defined sequence_type will be ignored.'
-    ))
-}
-
-# Report biosamples with assemblies associated with them instead of SRA accessions
-assembly_found <- names(run_id_key)[vapply(run_id_key, function(x) any(grepl(x, pattern = '^GC[AF]_[0-9]+\\.?[0-9]*$')), FUN.VALUE = logical(1))]
-if (length(assembly_found) > 0) {
-    warning('The following ', length(assembly_found), ' biosamples are associated with assembly(s) instead of SRA accessions:\n',
-            paste0(assembly_found, collapse = '\n'), '\n')
-    message_data <- rbind(message_data, data.frame(
-        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% assembly_found],
-        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% assembly_found],
-        reference_id = NA_character_,
-        workflow = 'PREPARE_INPUT',
-        message_type = 'WARNING',
-        description = 'Biosample associated with assembly(s) instead of SRA accessions. These may be supported as samples in the future, but will be ignored for now.'
-    ))
-}
-
 # Duplicate rows with multiple SRA accessions for a given biosample
 split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
     current <- metadata_samp$ncbi_accession[i]
@@ -956,22 +910,6 @@ invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) !
 metadata_samp$sequence_type[! invalid_seq_type] <- unlist(detected_seq_types[! invalid_seq_type])
 metadata_samp$enabled[invalid_seq_type] <- FALSE
 
-# Report missing sequence type information
-is_invalid_seq_type_to_report <- invalid_seq_type & metadata_samp$enabled
-if (sum(invalid_seq_type) > 0) {
-    warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
-            paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
-    message_data <- rbind(message_data, data.frame(
-        sample_id = metadata_samp$sample_id[invalid_seq_type],
-        report_group_id = metadata_samp$report_group_ids[invalid_seq_type],
-        reference_id = NA_character_,
-        workflow = 'PREPARE_INPUT',
-        message_type = 'WARNING',
-        description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
-    ))
-}
-
-
 # Add row for each group for samples/references with multiple groups
 duplicate_rows_by_id_list <- function(metadata, id_col) {
     group_ids <- strsplit(metadata[[id_col]], split = ';')
@@ -993,6 +931,67 @@ metadata_samp$ref_ids <- unlist(lapply(metadata_samp$ref_group_ids, function(gro
     ref_ids <- metadata_ref$ref_id[metadata_ref$ref_group_ids %in% strsplit(group_ids, split = ';')]
     paste(ref_ids, collapse = ';')
 }))
+
+# Report missing sequence type information
+is_invalid_seq_type_to_report <- invalid_seq_type & metadata_samp$enabled
+if (sum(invalid_seq_type) > 0) {
+    warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
+            paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[invalid_seq_type],
+        report_group_id = metadata_samp$report_group_ids[invalid_seq_type],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
+    ))
+}
+
+# Report biosamples with no reads to the user
+no_runs_found <- names(run_id_key)[vapply(run_id_key, is.null, logical(1))]
+if (length(no_runs_found) > 0) {
+    warning('The following ', length(no_runs_found), ' biosamples do not have reads associated with them:\n',
+            paste0(no_runs_found, collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% no_runs_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% no_runs_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = 'Sample removed since there are no runs associated with this biosample.'
+    ))
+    metadata_samp <- metadata_samp[! metadata_samp$ncbi_accession %in% no_runs_found, , drop = FALSE]
+}
+
+# Report biosamples with multiple SRA runs associated with them
+multiple_runs_found <- names(run_id_key)[vapply(run_id_key, function(x) length(x) > 1, logical(1))]
+if (length(multiple_runs_found) > 0) {
+    warning('The following ', length(multiple_runs_found), ' biosamples have multiple SRA runs associated with them:\n',
+            paste0(multiple_runs_found, collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% multiple_runs_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% multiple_runs_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'NOTE',
+        description = 'Biosample associated with multiple SRA accessions. Sample will be treated as multiple samples, one for each run associated with its biosample. User-defined sequence_type will be ignored.'
+    ))
+}
+
+# Report biosamples with assemblies associated with them instead of SRA accessions
+assembly_found <- names(run_id_key)[vapply(run_id_key, function(x) any(grepl(x, pattern = '^GC[AF]_[0-9]+\\.?[0-9]*$')), FUN.VALUE = logical(1))]
+if (length(assembly_found) > 0) {
+    warning('The following ', length(assembly_found), ' biosamples are associated with assembly(s) instead of SRA accessions:\n',
+            paste0(assembly_found, collapse = '\n'), '\n')
+    message_data <- rbind(message_data, data.frame(
+        sample_id = metadata_samp$sample_id[metadata_samp$ncbi_accession %in% assembly_found],
+        report_group_id = metadata_samp$report_group_ids[metadata_samp$ncbi_accession %in% assembly_found],
+        reference_id = NA_character_,
+        workflow = 'PREPARE_INPUT',
+        message_type = 'WARNING',
+        description = 'Biosample associated with assembly(s) instead of SRA accessions. These may be supported as samples in the future, but will be ignored for now.'
+    ))
+}
 
 # Warn user if ploidy data is not specified
 no_ploidy_specified <- ! is_present(metadata_samp$ploidy)
