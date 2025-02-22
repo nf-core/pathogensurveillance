@@ -181,13 +181,13 @@ workflow CORE_GENOME_PHYLOGENY {
     messages = messages.mix (
         SUBSET_CORE_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
-            .map { [
-                it.sample_id == '' ? null : [id: it.sample_id],
-                it.report_group_id == '' ? null : [id: it.report_group_id],
-                it.reference_id == '' ? null : [id: it.reference_id],
+            .map { file_name, message_data -> [
+                message_data.sample_id ? [id: message_data.sample_id] : null,
+                message_data.report_group_id ? [id: message_data.report_group_id] : null,
+                message_data.reference_id ? [id: message_data.reference_id] : null,
                 "CORE_GENOME_PHYLOGENY",
-                it.message_type,
-                it.description
+                message_data.message_type,
+                message_data.description
             ] }
     )
 
