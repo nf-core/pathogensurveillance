@@ -35,8 +35,7 @@ header <- strsplit(header_line, split = '\t')[[1]]
 header[1] <- 'CHROM'
 
 # Read VCF file and name by header
-vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#',
-                       header = FALSE, nrows = as.numeric(args$max_variants))
+vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', header = FALSE, nrows = as.numeric(args$max_variants))
 colnames(vcf_data) <- header
 
 # Read ploidy data file
@@ -64,7 +63,7 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
             genos <- genotypes[[i]]
             genos[genos == '.'] <- NA
             depths[[i]][as.numeric(genos) + 1] # Is this + 1 supposed to be here?
-        }) 
+        })
         is_all_na <- vapply(depths, FUN.VALUE = logical(1), function(x) all(is.na(x)))
         genotypes <- vapply(seq_along(genotypes), FUN.VALUE = character(1), function(i) {
             if (all(is.na(depths[[i]]))) {
@@ -116,7 +115,7 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
         allele_codes <- substring(vcf_data[[samp_id]], 1, 1) # A hack for speed. Ignores alternative allele and will return incorrect results if there are more than 9 alleles
         allele_codes[allele_codes == '.'] <- NA
         allele_codes <- as.numeric(allele_codes)
-        
+
         # Convert allele codes to sequence
         allele_code_key <- mapply(c, vcf_data$REF, strsplit(vcf_data$ALT, split = ','), SIMPLIFY = FALSE)
         alleles <- mapply(allele_codes + 1, allele_code_key, SIMPLIFY = TRUE, FUN = function(a, k) {
@@ -127,7 +126,7 @@ vcf_data[sample_ids] <- lapply(sample_ids, function(samp_id) {
         # Parse indexes of alleles for each haplotype
         allele_codes <- strsplit(vcf_data[[samp_id]], split = '/')
         allele_codes <- lapply(allele_codes, function(x) as.numeric(x[x != '.']))
-        
+
         # Convert allele codes to sequence
         allele_code_key <- mapply(c, vcf_data$REF, strsplit(vcf_data$ALT, split = ','), SIMPLIFY = FALSE)
         alleles <- mapply(allele_codes, allele_code_key, SIMPLIFY = FALSE, FUN = function(a, k) {

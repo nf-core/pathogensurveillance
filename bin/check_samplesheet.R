@@ -283,8 +283,8 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
     duplicated_cols <- unique(present_known_cols[duplicated(present_known_cols)])
     if (length(duplicated_cols) > 0) {
         stop(call. = FALSE,
-             'The following columns occur more than once in the ', csv_name, ' CSV: ',
-             paste0('"', duplicated_cols, '"', collapse = ', ')
+            'The following columns occur more than once in the ', csv_name, ' CSV: ',
+            paste0('"', duplicated_cols, '"', collapse = ', ')
         )
     }
 }
@@ -500,9 +500,9 @@ get_sra_from_biosamples <- function(biosample_id) {
         SRR = character(),
         stringsAsFactors = FALSE
     )
-    
+
     message("Processing biosample_id:", biosample_id, "\n")
-    
+
     # Search for biosample_id in the NCBI database to get its internal ID
     search_result <- tryCatch({
         rentrez::entrez_search(db = "biosample", term = biosample_id)
@@ -510,9 +510,9 @@ get_sra_from_biosamples <- function(biosample_id) {
         warning("Error while searching for biosample_id:", biosample_id, "\n")
         return(NULL)
     })
-    
+
     genbank_id <- search_result$ids[1]
-    
+
     # Use elink to find linked SRA records
     sra_link_result <- tryCatch({
         rentrez::entrez_link(dbfrom = "biosample", id = genbank_id, db = "sra")
@@ -540,7 +540,7 @@ get_sra_from_biosamples <- function(biosample_id) {
     if (length(assembly_id) > 1) {
         warning('Multiple assembly accessions found for ncbi_accession value: "', biosample_id, '"')
     }
-    
+
     if (!is.null(sra_id)) {
         # Retrieve detailed information about the SRA run
         sra_record <- tryCatch({
@@ -582,7 +582,7 @@ get_sra_from_biosamples <- function(biosample_id) {
             return(NULL)
         }
     }
-    
+
     return(run_ids)
 }
 is_biosample_to_lookup <- grepl("^SAM[NDE]", metadata_samp$ncbi_accession) & metadata_samp$enabled

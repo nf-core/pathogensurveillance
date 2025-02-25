@@ -126,17 +126,17 @@ while (length(clusters) > 1 && ! is.null(best_pair <- get_next_combination())) {
     best_ids <- c(best_pair$cluster_1_id, best_pair$cluster_2_id)
     clusters[[best_pair$cluster_1_id]] <- unname(unique(unlist(clusters[best_ids])))
     clusters[best_pair$cluster_2_id] <- NULL
-    
+
     # Update gene presence/absence matrix
     present_and_single[[best_pair$cluster_1_id]] <- present_and_single[[best_pair$cluster_1_id]] & present_and_single[[best_pair$cluster_2_id]]
     present_and_single[best_pair$cluster_2_id] <- NULL
-    
+
     # Update pairwise shared gene counts between clusters
     cluster_shared_count <- cluster_shared_count[! (cluster_shared_count$cluster_1_id %in% best_ids | cluster_shared_count$cluster_2_id %in% best_ids), ]
     other_clusters <- names(clusters)[names(clusters) != best_pair$cluster_1_id]
     new_shared_count <- do.call(rbind, lapply(other_clusters, function(n) count_shared_genes(n, best_pair$cluster_1_id)))
     cluster_shared_count <- rbind(cluster_shared_count, new_shared_count)
-    
+
     # Save updated clusters and cluster statistics
     all_clusterings <- c(all_clusterings, list(clusters))
     clustering_stats <- c(clustering_stats, list(calc_cluster_stats(clusters)))
@@ -152,7 +152,7 @@ clustering_stats$sample_proportion <- clustering_stats$sample_count / length(sam
 if (length(ref_ids) == 0) {
     clustering_stats$reference_proportion <- 1
 } else {
-    clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)   
+    clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)
 }
 clustering_stats$mean_cluster_size <- ifelse(clustering_stats$valid_cluster_count == 0, 0, clustering_stats$sample_count / clustering_stats$valid_cluster_count)
 clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)

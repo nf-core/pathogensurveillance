@@ -118,7 +118,7 @@ clustering_stats$sample_proportion <- clustering_stats$sample_count / length(sam
 if (length(ref_ids) == 0) {
     clustering_stats$reference_proportion <- 1
 } else {
-    clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)   
+    clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)
 }
 clustering_stats$mean_cluster_size <- ifelse(clustering_stats$valid_cluster_count == 0, 0, clustering_stats$sample_count / clustering_stats$valid_cluster_count)
 clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
