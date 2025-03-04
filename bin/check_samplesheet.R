@@ -845,7 +845,9 @@ if (nrow(metadata_ref) > 0) {
 
 # Replace any characters in IDs that cannot be present in file names
 make_ids_ok_for_file_names <- function(ids) {
-    trimws(gsub(ids, pattern = invalid_id_char_pattern, replacement = '_'))
+    out <- trimws(gsub(ids, pattern = invalid_id_char_pattern, replacement = '_'))
+    out <- gsub(out, pattern = '_+', replacement = '_')
+    return(out)
 }
 metadata_samp$sample_id <- make_ids_ok_for_file_names(metadata_samp$sample_id)
 if (nrow(metadata_ref) > 0) {

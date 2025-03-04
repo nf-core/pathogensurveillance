@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/Documents/Github/temp/xan_test_inputs"
+    inputs: "/home/fosterz/projects/pathogensurveillance/work/e5/ff23e1933ae20625d2d84fc6a9c680/validation_salmonella_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 # "/home/fosterz/projects/pathogensurveillance/tests/output/xanthomonas_small/prepare_report_input/xan_test_inputs"
 # "/home/fosterz/projects/pathogensurveillance/tests/output/test/prepare_report_input/_no_group_defined__inputs"
 # "/home/fosterz/projects/pathogensurveillance/tests/output/serratia_small/prepare_report_input/validation_serratia_inputs"
+# "/home/fosterz/projects/pathogensurveillance/work/e5/ff23e1933ae20625d2d84fc6a9c680/validation_salmonella_inputs/"
 ```
 
 
