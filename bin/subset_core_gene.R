@@ -24,10 +24,10 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens_gene_family.tsv',
-#           '~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens_feat_seqs_renamed/',
-#           '~/projects/pathogensurveillance/work/d9/e351c077a122014a7f1f3c6aada240/smarcescens.tsv',
-#           '10', '300', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
+# args <- c('/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella_gene_family.tsv',
+#           '/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella_feat_seqs_renamed/',
+#           '/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella.tsv',
+#           '10', '500', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "tsv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
@@ -35,16 +35,19 @@ metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', '
 min_genes <- as.integer(args$min_genes)
 max_genes <- as.integer(args$max_genes)
 
+# Replace runs of underscores with a single underscore in sample IDs since this is what PIRATE does
+metadata$modified_sample_ids <- gsub(metadata$sample_id, pattern = '_+', replacement = '_')
+
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
 all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
-sample_ids <- unique(metadata$sample_id[metadata$sample_id %in% all_ids])
+sample_ids <- unique(metadata$modified_sample_ids[metadata$modified_sample_ids %in% all_ids])
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
 # Create matrix with TRUE/FALSE for whether a gene is present and single copy
 present_and_single_original <- as.data.frame(lapply(raw_gene_data[, all_ids], function(column) {
     unlist(lapply(strsplit(column, split = '[;:]'), length)) == 1
-}))
+}), check.names = FALSE)
 present_and_single <- present_and_single_original
 
 # Initialize "clusters" with one sample each
