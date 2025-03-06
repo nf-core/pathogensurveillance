@@ -165,7 +165,7 @@ args <- as.list(args)
 # args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
 # args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664.csv", '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664_ref_data.csv')
-# args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/mycobacteroides_small.tsv")
+# args <- list("~/downloads/hortorum.csv")
 
 read_input_table <- function(path) {
     if (endsWith(path, '.csv')) {
@@ -409,9 +409,7 @@ validate_enabled <- function(col_values, file_name) {
     return(is_enabled)
 }
 metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CSV')
-if (nrow(metadata_ref) > 0) {
-    metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
-}
+metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
 
 # Convert NCBI sample queries to a list of SRA run accessions
 get_ncbi_sra_runs <- function(query) {
@@ -685,7 +683,7 @@ unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
-is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & metadata_ref$ref_enabled
+is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata_ref$ref_enabled)
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
     query_max <- metadata_ref$ref_ncbi_query_max[index]

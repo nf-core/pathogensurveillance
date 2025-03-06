@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "/home/fosterz/projects/pathogensurveillance/tests/output/salmonella_N566_out/prepare_report_input/validation_salmonella_inputs/"
+    inputs: "/home/fosterz/projects/pathogensurveillance/tests/output/small_genome/prepare_report_input/all_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -48,7 +48,7 @@ no_messages = nrow(status_message_parsed(params$inputs)) == 0
 ## Summary
 
 ```{r, include=!no_messages}
-status_message_table_summary(params$inputs)
+status_message_table(params$inputs, summarize_by = 'workflow', interactive = TRUE)
 ```
 
 ```{r, include=!no_messages, results='asis'}
@@ -70,7 +70,7 @@ cat('✅  **No issues reported.**')
 ## Details
 
 ```{r detailed-groups-table}
-status_message_table(params$inputs)
+status_message_table(params$inputs, interactive = TRUE)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -84,7 +84,7 @@ A list of issues reported by the pipeline during execution. When relevant, the s
 ## {{< bi clipboard-data >}} Input data
 
 ```{r}
-sample_meta_table(params$inputs)
+sample_meta_table(params$inputs, interactive = TRUE)
 ```
 
 
@@ -106,7 +106,7 @@ is_single_taxon <- length(unique_tax) == 1
 ```
 
 ```{r fig.height = 8, eval = !is_single_taxon}
-sendsketch_taxonomy_plot(top_hits)
+sendsketch_taxonomy_plot(params$inputs, interactive = TRUE)
 ```
 
 ```{r, results='asis', eval = !is_single_taxon}
@@ -139,7 +139,7 @@ cat(paste0(
 ### Per-sample classification
 
 ```{r sketchtable, fig.width = 5}
-sendsketch_table(top_hits)
+sendsketch_table(params$inputs, interactive = TRUE)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -163,11 +163,7 @@ Included metrics can provide insights into how each sample compares with referen
 ### ANI top matches
 
 ```{r}
-# Parse ANI matrix
-ani_matrix <- estimated_ani_matrix_parsed(params$inputs)[[1]]
-sample_data <- sample_meta_parsed(params$inputs)
-reference_data <- ref_meta_parsed(params$inputs)
-print_ani_table(ani_matrix * 100, sample_data, reference_data)
+estimated_ani_match_table(params$inputs, interactive = TRUE)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -182,7 +178,7 @@ Note that this measure only takes into account the shared portion of genomes, so
 ### ANI heatmap
 
 ```{r ani_heatmap}
-make_ani_heatmap(ani_matrix * 100, reference_data, sample_data)
+estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -201,7 +197,7 @@ pocp_matrix <- pocp_matrix_parsed(params$inputs)
 ```
 
 ```{r eval=length(pocp_matrix) > 0}
-print_pocp_table(pocp_matrix[[1]], sample_data, reference_data)
+pocp_match_table(params$inputs, interactive = TRUE)
 ```
 
 ```{r, results='asis', eval=length(pocp_matrix) > 0}
@@ -228,7 +224,7 @@ POPC not calculated.
 ### POCP heatmap
 
 ```{r pocp_heatmap, eval=length(pocp_matrix) > 0}
-make_ani_heatmap(pocp_matrix[[1]], reference_data, sample_data)
+pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
 ```
 
 ```{r, results='asis', eval = length(pocp_matrix) > 0}
