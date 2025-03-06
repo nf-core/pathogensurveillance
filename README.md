@@ -78,6 +78,10 @@ Documentation is currently under development, but can be found here:
 
 https://grunwaldlab.github.io/pathogensurveillance_documentation
 
+To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/pathogensurveillance/results) tab on the nf-core website pipeline page.
+For more details about the output files and reports, please refer to the
+[output documentation](https://nf-co.re/pathogensurveillance/output).
+
 ### Input format
 
 The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma comma-separated value) file, specified using the `--sample_data` option.
@@ -124,15 +128,11 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 
 ## Credits
 
-nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Camilo Parada-Rojas, Logan Blair, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald
+The following people contributed to the pipeline: Zachary S.L. Foster, Martha Sudermann, Camilo Parada-Rojas, Logan K. Blair, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Nicholas C. Cauldron, Alexandra J. Weisberg, Jeﬀ H. Chang, and Niklaus J. Grünwald.
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/pathogensurveillance/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/pathogensurveillance/output).
+## Funding
 
-## Credits
-
-nf-core/pathogensurveillance was originally written by Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald.
+This work was supported by grants from USDA ARS (2072-22000-045-000-D) to NJG, USDA NIFA (2021-67021-34433; 2023-67013-39918) to JHC and NJG, as well as USDAR ARS NPDRS and FNRI and USDA APHIS to NJG. 
 
 ## Contributions and Support
 
