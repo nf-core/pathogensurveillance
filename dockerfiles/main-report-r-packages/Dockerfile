@@ -31,42 +31,7 @@ EOF
 
 RUN <<EOF
 install.r \
-    shiny \
-    jsonlite \
-    htmltools \
-    remotes \
-    renv \
-    rmarkdown \
-    quarto \
-    dplyr \
-    readr \
-    knitr \
-    readr \
-    purrr \
-    yaml \
-    phylocanvas \
-    ape \
-    magrittr \
-    pheatmap \
-    tidyverse \
-    palmerpenguins \
-    ade4 \
-    adegenet \
-    poppr \
-    ggtree \
-    igraph \
-    visNetwork \
-    phangorn \
-    ggplot2 \
-    ggnewscale \
-    kableExtra \
-    plotly \
-    webshot2 \
-    metacoder \
-    ggdendro \
-    DT \
-    heatmaply \
-    leaflet
+    quarto
 EOF
 
 RUN <<EOF
@@ -82,7 +47,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer@c4e55ee2e96c1d0bb731ad5551bfc6dc69643c92")'
+Rscript -e 'devtools::install_github("grunwaldlab/psminer@96cc95372d9fa15838f043a1da0933931825bcfd")'
 EOF
 
 USER root
