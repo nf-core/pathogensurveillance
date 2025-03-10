@@ -2,7 +2,7 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::quarto bioconda::r-psminer"
+    conda "conda-forge::quarto=1.4.4 bioconda::r-pathosurveilr=0.3.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker.io/zacharyfoster/main-report-r-packages:0.18':
         'docker.io/zacharyfoster/main-report-r-packages:0.18' }"

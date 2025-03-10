@@ -47,7 +47,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/psminer@96cc95372d9fa15838f043a1da0933931825bcfd")'
+Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.3.0")'
 EOF
 
 USER root

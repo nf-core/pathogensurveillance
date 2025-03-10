@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 ```
 
 ```{r load_libraries, include=FALSE}
-library(psminer)
+library(PathoSurveilR)
 ```
 
 # Summary
@@ -356,7 +356,7 @@ color_by_cols <- color_by_cols[! is.na(color_by_cols)]
 plot_one <- function(ref_id, threshold, color_by = NULL) {
     align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
     align_without_ref <- align[rownames(align) != ref_id, ]
-    psminer:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
+    PathoSurveilR:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
 }
 
 plot_vars <- list(
