@@ -10,8 +10,8 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#    '~/projects/pathogensurveillance/work/07/c24675b3100e1b17e935e23837e7bf/smarcescens_GCA_000513215_1.vcffilter.vcf.gz',
-#    '~/projects/pathogensurveillance/work/07/c24675b3100e1b17e935e23837e7bf/smarcescens_GCA_000513215_1.tsv',
+#    '~/projects/pathogensurveillance/work/09/440702826216a7101811d85a080794/subgroup_GCF_903978215_1.vcffilter.vcf.gz',
+#    '~/projects/pathogensurveillance/work/09/440702826216a7101811d85a080794/subgroup_GCF_903978215_1.tsv',
 #    '1000000',
 #    'deleteme.fasta'
 # )
@@ -30,12 +30,17 @@ while ( TRUE ) {
         break
     }
 }
+no_variants <- length(readLines(file_handle, n = 1)) == 0
 close(file_handle)
 header <- strsplit(header_line, split = '\t')[[1]]
 header[1] <- 'CHROM'
 
 # Read VCF file and name by header
-vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', header = FALSE, nrows = as.numeric(args$max_variants))
+if (no_variants) {
+    vcf_data <- as.data.frame(rep(list(character(0)), length(header)))
+} else {
+    vcf_data <- read.delim(file = args$vcf_path, sep = '\t', comment.char = '#', header = FALSE, nrows = as.numeric(args$max_variants))
+}
 colnames(vcf_data) <- header
 
 # Read ploidy data file
