@@ -1,7 +1,7 @@
 //
 // Check input samplesheets and convert to channels
 //
-include { BBMAP_SENDSKETCH       } from '../../../modules/local/bbmap/sendsketch'
+include { BBMAP_SENDSKETCH       } from '../../../modules/nf-core/bbmap/sendsketch'
 include { SAMPLESHEET_CHECK      } from '../../../modules/local/custom/samplesheet_check'
 include { SRATOOLS_FASTERQDUMP   } from '../../../modules/local/sratools/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
@@ -105,11 +105,17 @@ workflow PREPARE_INPUT {
     versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
 
     // Add estimated depth and kingdom to sample metadata
+    sendsketch_depth = BBMAP_SENDSKETCH.out.hits
+        .splitText(limit: 2, by: 2)
+        .map { sample_meta, header ->
+            def match = header =~ /Depth: ([0-9.]+)/
+            [sample_meta, match[0][1]]
+        }
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta, ref_metas]
         }
-        .combine(BBMAP_SENDSKETCH.out.depth, by: 0)
+        .combine(sendsketch_depth, by: 0)
         .combine(INITIAL_CLASSIFICATION.out.kingdom, by: 0)
         .map{ sample_id, sample_meta, ref_metas, depth, kingdom ->
             sample_meta.sendsketch_depth = depth

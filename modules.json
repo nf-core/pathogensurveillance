@@ -15,6 +15,11 @@
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
                         "installed_by": ["modules"]
                     },
+                    "bbmap/sendsketch": {
+                        "branch": "master",
+                        "git_sha": "f06465ff69516528b0178b2a2a5f6b1d4287faa9",
+                        "installed_by": ["modules"]
+                    },
                     "busco/busco": {
                         "branch": "master",
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
