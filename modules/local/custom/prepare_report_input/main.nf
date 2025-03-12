@@ -48,11 +48,11 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Add estimated ANI matrix from sourmash
-    mv ${ani_matrix} ${prefix}_inputs/sourmash_ani_matrix.csv
+    cp ${ani_matrix} ${prefix}_inputs/sourmash_ani_matrix.csv
 
     # Add metadata for references assined for variant calling
     if [ ! -z "${mapping_ref}" ]; then
-        mv ${mapping_ref} ${prefix}_inputs/mapping_references.tsv
+        cp ${mapping_ref} ${prefix}_inputs/mapping_references.tsv
     fi
 
     # Add SNP alignment from variant calling
@@ -99,11 +99,11 @@ process PREPARE_REPORT_INPUT {
 
     # Add pipeline status messages
     if [ ! -z "${messages}" ]; then
-        mv ${messages} ${prefix}_inputs/messages.tsv
+        cp ${messages} ${prefix}_inputs/messages.tsv
     fi
 
     # Add versions of software used
-    mv ${versions} ${prefix}_inputs/versions.yml
+    cp ${versions} ${prefix}_inputs/versions.yml
 
     # Record run metadata
     cat <<-END_INFO > ${prefix}_inputs/pathogensurveillance_run_info.yml

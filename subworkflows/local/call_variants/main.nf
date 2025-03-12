@@ -2,7 +2,8 @@ include { GRAPHTYPER_GENOTYPE       } from '../../../modules/local/graphtyper/ge
 include { MAKE_REGION_FILE          } from '../../../modules/local/custom/make_region_file'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/local/graphtyper/vcfconcatenate'
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
-include { BGZIP_BGZIP               } from '../../../modules/local/bgzip/bgzip'
+//include { TABIX_BGZIP               } from '../../../modules/local/bgzip/bgzip'
+include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'
 include { GATK4_VARIANTFILTRATION   } from '../../../modules/local/gatk4/variantfiltration'
 include { VCFLIB_VCFFILTER          } from '../../../modules/nf-core/vcflib/vcffilter'
 
@@ -45,14 +46,14 @@ workflow CALL_VARIANTS {
     versions = versions.mix(TABIX_TABIX.out.versions)
 
     // Make .gzi file from reference in case it is gzipped
-    BGZIP_BGZIP ( ch_ref )
-    versions = versions.mix(BGZIP_BGZIP.out.versions)
+    TABIX_BGZIP ( ch_ref )
+    versions = versions.mix(TABIX_BGZIP.out.versions)
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
         .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
         .join(ch_ref_grouped.map { it[0..3] })
-        .join(BGZIP_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
+        .join(TABIX_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
         vf_input.map { [it[0], it[3]] },
@@ -69,6 +70,6 @@ workflow CALL_VARIANTS {
     emit:
     vcf      = VCFLIB_VCFFILTER.out.vcf               // val(ref+group_meta), file(vcf)
     samples  = ch_ref_grouped.map { [it[0], it[4]] }  // val(ref+group_meta), [meta]
-    versions = versions                            // versions.yml
+    versions = versions                               // versions.yml
 }
 
