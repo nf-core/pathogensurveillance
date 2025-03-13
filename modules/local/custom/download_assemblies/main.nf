@@ -4,8 +4,8 @@ process DOWNLOAD_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 unzip"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/ncbi-datasets-cli:0.1':
-        'docker.io/zacharyfoster/ncbi-datasets-cli:0.1' }"
+        'quay.io/nf-core/ncbi-datasets-cli:0.1':
+        'quay.io/nf-core/ncbi-datasets-cli:0.1' }"
 
     input:
     tuple val(ref_meta), val(id)

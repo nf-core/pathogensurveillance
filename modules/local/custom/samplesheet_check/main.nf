@@ -7,8 +7,8 @@ process SAMPLESHEET_CHECK {
 
     conda "conda-forge::r-rentrez=1.2.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/rentrez:0.1' :
-        'docker.io/zacharyfoster/rentrez:0.1' }"
+        'quay.io/nf-core/rentrez:0.1' :
+        'quay.io/nf-core/rentrez:0.1' }"
 
     input:
     path sample_tsv

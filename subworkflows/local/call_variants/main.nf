@@ -53,7 +53,7 @@ workflow CALL_VARIANTS {
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
         .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
         .join(ch_ref_grouped.map { it[0..3] })
-        .join(TABIX_BGZIP.out.gzi).view() // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
+        .join(TABIX_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
         vf_input.map { [it[0], it[3]] },

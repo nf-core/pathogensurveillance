@@ -6,8 +6,8 @@ process TRIM_AND_SKETCH {
 
     conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/khmer_sourmash:0.1' :
-        'docker.io/zacharyfoster/khmer_sourmash:0.1' }"
+        'quay.io/nf-core/khmer_sourmash:0.1' :
+        'quay.io/nf-core/khmer_sourmash:0.1' }"
 
     input:
     tuple val(meta), path(fasta)

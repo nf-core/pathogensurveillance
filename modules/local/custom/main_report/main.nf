@@ -6,7 +6,6 @@ process MAIN_REPORT {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'docker.io/zacharyfoster/main-report-r-packages:0.18':
         'docker.io/zacharyfoster/main-report-r-packages:0.18' }"
-        //singularity not currently supported. First run command [singularity build main-report-r-packages.sif docker://zacharyfoster/main-report-r-packages]
 
     input:
     tuple val(group_meta), file(inputs)
