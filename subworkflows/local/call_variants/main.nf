@@ -4,7 +4,7 @@ include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/local/graphtyper/vc
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
 //include { TABIX_BGZIP               } from '../../../modules/local/bgzip/bgzip'
 include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'
-include { GATK4_VARIANTFILTRATION   } from '../../../modules/local/gatk4/variantfiltration'
+include { GATK4_VARIANTFILTRATION   } from '../../../modules/nf-core/gatk4/variantfiltration'
 include { VCFLIB_VCFFILTER          } from '../../../modules/nf-core/vcflib/vcffilter'
 
 workflow CALL_VARIANTS {
@@ -53,7 +53,7 @@ workflow CALL_VARIANTS {
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
         .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
         .join(ch_ref_grouped.map { it[0..3] })
-        .join(TABIX_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
+        .join(TABIX_BGZIP.out.gzi).view() // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
         vf_input.map { it[0..2] },
         vf_input.map { [it[0], it[3]] },
