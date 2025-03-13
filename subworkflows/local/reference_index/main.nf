@@ -11,7 +11,7 @@
 // Subworkflow_MakeReferenceIndex
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../../modules/nf-core/picard/createsequencedictionary'
 include { SAMTOOLS_FAIDX                  } from '../../../modules/nf-core/samtools/faidx'
-include { BWA_INDEX                       } from '../../../modules/local/bwa/index'
+include { BWA_INDEX                       } from '../../../modules/nf-core/bwa/index'
 
 
 /*

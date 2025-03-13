@@ -27,7 +27,7 @@
                     },
                     "bwa/index": {
                         "branch": "master",
-                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "git_sha": "b519b07af4ed954827e8cbbed1de3b6751ad2427",
                         "installed_by": ["modules"]
                     },
                     "bwa/mem": {
@@ -157,7 +157,7 @@
                     },
                     "tabix/bgzip": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "69fdb99a8affa55adfda16966aa4568e103dc1b6",
                         "installed_by": ["modules"]
                     },
                     "tabix/tabix": {
