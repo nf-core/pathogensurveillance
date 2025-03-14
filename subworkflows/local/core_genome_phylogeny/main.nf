@@ -1,4 +1,4 @@
-include { PIRATE                    } from '../../../modules/local/pirate/pirate'
+include { PIRATE                    } from '../../../modules/nf-core/pirate'
 include { SAMTOOLS_FAIDX            } from '../../../modules/nf-core/samtools/faidx'
 include { MAFFT as MAFFT_SMALL      } from '../../../modules/nf-core/mafft'
 include { IQTREE2 as IQTREE2_CORE   } from '../../../modules/local/iqtree2/iqtree2'
