@@ -2,7 +2,7 @@ include { TRIM_AND_SKETCH            } from '../../../modules/local/custom/trim_
 include { ASSIGN_MAPPING_REFERENCE   } from '../../../modules/local/custom/assign_mapping_reference'
 include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
 include { SOURMASH_SKETCH            } from '../../../modules/nf-core/sourmash/sketch/main'
-include { SOURMASH_COMPARE           } from '../../../modules/local/sourmash/compare'
+include { SOURMASH_COMPARE           } from '../../../modules/nf-core/sourmash/compare'
 
 workflow SKETCH_COMPARISON {
 

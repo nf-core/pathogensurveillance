@@ -1,6 +1,6 @@
 include { GRAPHTYPER_GENOTYPE       } from '../../../modules/local/graphtyper/genotype'
 include { MAKE_REGION_FILE          } from '../../../modules/local/custom/make_region_file'
-include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/local/graphtyper/vcfconcatenate'
+include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/nf-core/graphtyper/vcfconcatenate'
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
 //include { TABIX_BGZIP               } from '../../../modules/local/bgzip/bgzip'
 include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'

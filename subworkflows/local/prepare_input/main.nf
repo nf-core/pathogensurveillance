@@ -3,12 +3,12 @@
 //
 include { BBMAP_SENDSKETCH       } from '../../../modules/nf-core/bbmap/sendsketch'
 include { SAMPLESHEET_CHECK      } from '../../../modules/local/custom/samplesheet_check'
-include { SRATOOLS_FASTERQDUMP   } from '../../../modules/local/sratools/fasterqdump'
+include { SRATOOLS_FASTERQDUMP   } from '../../../modules/nf-core/sratools/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
 include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/custom/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_assemblies'
 include { PICK_ASSEMBLIES        } from '../../../modules/local/custom/pick_assemblies'
-include { SEQKIT_HEAD            } from '../../../modules/local/seqkit/head'
+include { SEQKIT_HEAD            } from '../../../modules/nf-core/seqkit/head'
 include { COUNT_READS            } from '../../../modules/local/custom/count_reads'
 
 workflow PREPARE_INPUT {
@@ -71,7 +71,7 @@ workflow PREPARE_INPUT {
             [ncbi_acc_meta, ncbi_acc_meta.id]
         }
         .unique()
-    SRATOOLS_FASTERQDUMP ( ncbi_acc )
+    SRATOOLS_FASTERQDUMP ( ncbi_acc, [], [] )
     versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
@@ -321,7 +321,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta ->
             [[id: sample_meta.sample_id], sample_meta]
         }
-        .combine(SEQKIT_HEAD.out.reads, by: 0)
+        .combine(SEQKIT_HEAD.out.subset, by: 0)
         .map { sample_id, sample_meta, subset_reads ->
             sample_meta.paths = subset_reads
             sample_meta
