@@ -25,6 +25,11 @@
                         "git_sha": "4cb2f9ee119676880857d6620020ee370df829b4",
                         "installed_by": ["modules"]
                     },
+                    "busco/download": {
+                        "branch": "master",
+                        "git_sha": "dfadfcc1c5b2bc37228bcef7b98113f5c0d5e8ea",
+                        "installed_by": ["modules"]
+                    },
                     "bwa/index": {
                         "branch": "master",
                         "git_sha": "b519b07af4ed954827e8cbbed1de3b6751ad2427",

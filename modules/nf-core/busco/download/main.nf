@@ -2,10 +2,10 @@ process BUSCO_DOWNLOAD {
     tag "$lineage"
     label 'process_low'
 
-    conda "bioconda::busco=5.5.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/busco:5.5.0--pyhdfd78af_0':
-        'biocontainers/busco:5.5.0--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/busco:5.8.2--pyhdfd78af_0':
+        'biocontainers/busco:5.8.2--pyhdfd78af_0' }"
 
     input:
     val lineage
@@ -19,6 +19,7 @@ process BUSCO_DOWNLOAD {
 
     script:
     def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${lineage}"
     """
     busco \\
         --download $lineage \\
@@ -33,10 +34,6 @@ process BUSCO_DOWNLOAD {
     stub:
     def args = task.ext.args ?: ''
     """
-    echo "busco \\
-        --download $lineage \\
-        $args"
-
     mkdir busco_downloads
 
     cat <<-END_VERSIONS > versions.yml

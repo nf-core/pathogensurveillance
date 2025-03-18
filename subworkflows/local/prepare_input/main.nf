@@ -106,11 +106,11 @@ workflow PREPARE_INPUT {
 
     // Add estimated depth and kingdom to sample metadata
     sendsketch_depth = BBMAP_SENDSKETCH.out.hits
-        .splitText(limit: 2, by: 2)
+        .splitText(limit: 2, by: 2).view()
         .map { sample_meta, header ->
             def match = header =~ /Depth: ([0-9.]+)/
             [sample_meta, match[0][1]]
-        }
+        }.view()
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta, ref_metas]

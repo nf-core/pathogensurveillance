@@ -1,5 +1,5 @@
 include { BUSCO_BUSCO                } from '../../../modules/local/busco/busco'
-include { BUSCO_DOWNLOAD             } from '../../../modules/local/busco/download'
+include { BUSCO_DOWNLOAD             } from '../../../modules/nf-core/busco/download'
 include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
 include { MAFFT_ALIGN as MAFFT_SMALL } from '../../../modules/nf-core/mafft/align'
 include { IQTREE2 as IQTREE2_CORE    } from '../../../modules/local/iqtree2/iqtree2'
