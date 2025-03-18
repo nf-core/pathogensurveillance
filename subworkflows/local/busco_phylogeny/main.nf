@@ -1,10 +1,10 @@
-include { BUSCO_BUSCO               } from '../../../modules/nf-core/busco/busco'
-include { BUSCO_DOWNLOAD            } from '../../../modules/local/busco/download'
-include { ASSIGN_CONTEXT_REFERENCES } from '../../../modules/local/custom/assign_context_references'
-include { MAFFT as MAFFT_SMALL      } from '../../../modules/nf-core/mafft'
-include { IQTREE2 as IQTREE2_CORE   } from '../../../modules/local/iqtree2/iqtree2'
-include { SUBSET_BUSCO_GENES        } from '../../../modules/local/custom/subset_busco_genes'
-include { FILES_IN_DIR              } from '../../../modules/local/custom/files_in_dir'
+include { BUSCO_BUSCO                } from '../../../modules/nf-core/busco/busco'
+include { BUSCO_DOWNLOAD             } from '../../../modules/local/busco/download'
+include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
+include { MAFFT_ALIGN as MAFFT_SMALL } from '../../../modules/nf-core/mafft/align'
+include { IQTREE2 as IQTREE2_CORE    } from '../../../modules/local/iqtree2/iqtree2'
+include { SUBSET_BUSCO_GENES         } from '../../../modules/local/custom/subset_busco_genes'
+include { FILES_IN_DIR               } from '../../../modules/local/custom/files_in_dir'
 
 workflow BUSCO_PHYLOGENY {
 

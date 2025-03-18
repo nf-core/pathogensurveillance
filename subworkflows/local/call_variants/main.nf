@@ -2,7 +2,6 @@ include { GRAPHTYPER_GENOTYPE       } from '../../../modules/local/graphtyper/ge
 include { MAKE_REGION_FILE          } from '../../../modules/local/custom/make_region_file'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/nf-core/graphtyper/vcfconcatenate'
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
-//include { TABIX_BGZIP               } from '../../../modules/local/bgzip/bgzip'
 include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'
 include { GATK4_VARIANTFILTRATION   } from '../../../modules/nf-core/gatk4/variantfiltration'
 include { VCFLIB_VCFFILTER          } from '../../../modules/nf-core/vcflib/vcffilter'

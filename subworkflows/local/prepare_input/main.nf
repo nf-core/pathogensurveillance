@@ -3,7 +3,7 @@
 //
 include { BBMAP_SENDSKETCH       } from '../../../modules/nf-core/bbmap/sendsketch'
 include { SAMPLESHEET_CHECK      } from '../../../modules/local/custom/samplesheet_check'
-include { SRATOOLS_FASTERQDUMP   } from '../../../modules/nf-core/sratools/fasterqdump'
+include { SRATOOLS_FASTERQDUMP   } from '../../../modules/local/sratools/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
 include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/custom/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_assemblies'
