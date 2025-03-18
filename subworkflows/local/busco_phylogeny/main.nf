@@ -1,4 +1,4 @@
-include { BUSCO_BUSCO                } from '../../../modules/nf-core/busco/busco'
+include { BUSCO_BUSCO                } from '../../../modules/local/busco/busco'
 include { BUSCO_DOWNLOAD             } from '../../../modules/local/busco/download'
 include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
 include { MAFFT_ALIGN as MAFFT_SMALL } from '../../../modules/nf-core/mafft/align'
@@ -85,7 +85,7 @@ workflow BUSCO_PHYLOGENY {
         "genome",
         "eukaryota_odb10",
         BUSCO_DOWNLOAD.out.download_dir.first(), // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
-        [], []
+        []
     )
     versions = versions.mix(BUSCO_BUSCO.out.versions)
 

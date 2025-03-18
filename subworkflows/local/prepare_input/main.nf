@@ -71,7 +71,7 @@ workflow PREPARE_INPUT {
             [ncbi_acc_meta, ncbi_acc_meta.id]
         }
         .unique()
-    SRATOOLS_FASTERQDUMP ( ncbi_acc, [], [] )
+    SRATOOLS_FASTERQDUMP ( ncbi_acc )
     versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)

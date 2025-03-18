@@ -20,9 +20,8 @@ input:
           Groovy Map containing sample information e.g. [ id:'test', single_end:false
           ]
     - sra:
-        type: directory
-        description: Directory containing ETL data for the given SRA.
-        pattern: "*/*.sra"
+        type: string
+        description: Accession number for SRA.
   - - ncbi_settings:
         type: file
         description: >
