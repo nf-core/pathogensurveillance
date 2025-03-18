@@ -35,7 +35,7 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ## Pipeline summary
 
-![Pipeline flowchart](docs/images/pipeline_diagram.png)
+![](docs/images/pipeline_diagram.png)
 
 ## Usage
 
@@ -157,13 +157,4 @@ You can cite the `nf-core` publication as follows:
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 
-<h1>
-  <picture style="float:left;">
-    <source srcset="docs/images/usda_logo.png">
-    <img alt="USDA Logo" src="docs/images/usda_logo.png.png"  style="max-height:100px;">
-  </picture>
-  <picture style="float:right;">
-    <source srcset="docs/images/osu_logo.png">
-    <img alt="OSU Logo" src="docs/images/osu_logo.png"  style="max-height:100px;">
-  </picture>
-</h1>
+![](docs/images/combined_logos.png)
