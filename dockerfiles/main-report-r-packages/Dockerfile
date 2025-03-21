@@ -47,7 +47,7 @@ EOF
 
 RUN <<EOF
 install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.3.0")'
+Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.3.1")'
 EOF
 
 USER root
