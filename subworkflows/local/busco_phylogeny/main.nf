@@ -1,10 +1,10 @@
-include { BUSCO_BUSCO                } from '../../../modules/local/busco/busco'
-include { BUSCO_DOWNLOAD             } from '../../../modules/nf-core/busco/download'
-include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
-include { MAFFT_ALIGN as MAFFT_SMALL } from '../../../modules/nf-core/mafft/align'
-include { IQTREE2 as IQTREE2_CORE    } from '../../../modules/local/iqtree2/iqtree2'
-include { SUBSET_BUSCO_GENES         } from '../../../modules/local/custom/subset_busco_genes'
-include { FILES_IN_DIR               } from '../../../modules/local/custom/files_in_dir'
+include { BUSCO_BUSCO                                          } from '../../../modules/local/busco/busco'
+include { BUSCO_DOWNLOAD                                       } from '../../../modules/nf-core/busco/download'
+include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../modules/local/custom/assign_context_references'
+include { MAFFT_ALIGN as MAFFT_SMALL                           } from '../../../modules/nf-core/mafft/align'
+include { IQTREE2 as IQTREE2_BUSCO                             } from '../../../modules/local/iqtree2/iqtree2'
+include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/custom/subset_busco_genes'
+include { FILES_IN_DIR                                         } from '../../../modules/local/custom/files_in_dir'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -36,13 +36,13 @@ workflow BUSCO_PHYLOGENY {
         .map {[[id: it.getSimpleName()], it]}
 
     // Assign referneces to groups for context in phylogenetic analyses
-    ASSIGN_CONTEXT_REFERENCES (
+    ASSIGN_BUSCO_REFERENCES (
         ani_matrix.combine(samp_ref_pairs, by: 0),
         params.n_ref_closest,
         params.n_ref_closest_named,
         params.n_ref_context
     )
-    versions = versions.mix(ASSIGN_CONTEXT_REFERENCES.out.versions)
+    versions = versions.mix(ASSIGN_BUSCO_REFERENCES.out.versions)
 
     // Create channel with required reference metadata and genomes from selected references
     references =  sample_data
@@ -53,7 +53,7 @@ workflow BUSCO_PHYLOGENY {
         }
         .unique()
 
-    selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
+    selected_ref_data = ASSIGN_BUSCO_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
@@ -125,16 +125,16 @@ workflow BUSCO_PHYLOGENY {
     versions = versions.mix(MAFFT_SMALL.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
-    versions = versions.mix(IQTREE2_CORE.out.versions)
-    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+    IQTREE2_BUSCO ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
+    versions = versions.mix(IQTREE2_BUSCO.out.versions)
+    trees = IQTREE2_BUSCO.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
 
     emit:
     versions      = versions // versions.yml
     messages      = messages // meta, group_meta, ref_meta, workflow, level, message
-    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references
+    selected_refs = ASSIGN_BUSCO_REFERENCES.out.references
     tree          = trees
 
 }

@@ -1,16 +1,16 @@
-include { PIRATE                     } from '../../../modules/nf-core/pirate'
-include { MAFFT_ALIGN as MAFFT_SMALL } from '../../../modules/nf-core/mafft/align'
-include { IQTREE2 as IQTREE2_CORE    } from '../../../modules/local/iqtree2/iqtree2'
-include { REFORMAT_PIRATE_RESULTS    } from '../../../modules/local/custom/reformat_pirate_results'
-include { ALIGN_FEATURE_SEQUENCES    } from '../../../modules/local/custom/align_feature_sequences'
-include { SUBSET_CORE_GENES          } from '../../../modules/local/custom/subset_core_genes'
-include { RENAME_CORE_GENE_HEADERS   } from '../../../modules/local/custom/rename_core_gene_headers'
-include { CALCULATE_POCP             } from '../../../modules/local/custom/calculate_pocp'
-include { FILES_IN_DIR               } from '../../../modules/local/custom/files_in_dir'
-include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
-include { MAKE_GFF_WITH_FASTA        } from '../../../modules/local/custom/make_gff_with_fasta'
-include { BAKTA_BAKTA                } from '../../../modules/nf-core/bakta/bakta'
-include { BAKTA_BAKTADBDOWNLOAD      } from '../../../modules/nf-core/bakta/baktadbdownload'
+include { PIRATE                                              } from '../../../modules/nf-core/pirate'
+include { MAFFT_ALIGN as MAFFT_SMALL                          } from '../../../modules/nf-core/mafft/align'
+include { IQTREE2 as IQTREE2_CORE                             } from '../../../modules/local/iqtree2/iqtree2'
+include { REFORMAT_PIRATE_RESULTS                             } from '../../../modules/local/custom/reformat_pirate_results'
+include { ALIGN_FEATURE_SEQUENCES                             } from '../../../modules/local/custom/align_feature_sequences'
+include { SUBSET_CORE_GENES                                   } from '../../../modules/local/custom/subset_core_genes'
+include { RENAME_CORE_GENE_HEADERS                            } from '../../../modules/local/custom/rename_core_gene_headers'
+include { CALCULATE_POCP                                      } from '../../../modules/local/custom/calculate_pocp'
+include { FILES_IN_DIR                                        } from '../../../modules/local/custom/files_in_dir'
+include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_CORE_REFERENCES } from '../../../modules/local/custom/assign_context_references'
+include { MAKE_GFF_WITH_FASTA                                 } from '../../../modules/local/custom/make_gff_with_fasta'
+include { BAKTA_BAKTA                                         } from '../../../modules/nf-core/bakta/bakta'
+include { BAKTA_BAKTADBDOWNLOAD                               } from '../../../modules/nf-core/bakta/baktadbdownload'
 
 workflow CORE_GENOME_PHYLOGENY {
 
@@ -42,7 +42,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map {[[id: it.getSimpleName()], it]}
 
     // Assign referneces to groups for context in phylogenetic analyses
-    ASSIGN_CONTEXT_REFERENCES (
+    ASSIGN_CORE_REFERENCES (
         ani_matrix.combine(samp_ref_pairs, by: 0),
         params.n_ref_closest,
         params.n_ref_closest_named,
@@ -59,7 +59,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .unique()
 
     // Get information for references selected for this analysis and check if they have an existing gff
-    selected_ref_data = ASSIGN_CONTEXT_REFERENCES.out.references
+    selected_ref_data = ASSIGN_CORE_REFERENCES.out.references
         .splitText( elem: 1 )
         .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
@@ -218,7 +218,7 @@ workflow CORE_GENOME_PHYLOGENY {
     pirate_aln    = pirate_aln              // group_meta, align_fasta
     phylogeny     = phylogeny               // group_meta, [trees]
     pocp          = CALCULATE_POCP.out.pocp // group_meta, pocp
-    selected_refs = ASSIGN_CONTEXT_REFERENCES.out.references // group_meta, tsv
+    selected_refs = ASSIGN_CORE_REFERENCES.out.references // group_meta, tsv
     versions      = versions             // versions.yml
     messages      = messages                // meta, group_meta, ref_meta, workflow, level, message
 
