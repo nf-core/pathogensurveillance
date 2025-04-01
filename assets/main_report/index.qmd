@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "/home/fosterz/projects/pathogensurveillance/work/7d/c1cf4f5e63490adefd86b188a35408/all_inputs"
+    inputs: "/home/fosterz/projects/pathogensurveillance/work/7a/ced8cceb1af89fe0084834e2323707/"
 execute:
     echo: false
 bibliography: references.bib
@@ -47,11 +47,12 @@ no_messages = nrow(status_message_parsed(params$inputs)) == 0
 
 ## Summary
 
-```{r, include=!no_messages}
+```{r, eval=!no_messages}
+cat(no_messages)
 status_message_table(params$inputs, summarize_by = 'workflow', interactive = TRUE)
 ```
 
-```{r, include=!no_messages, results='asis'}
+```{r, eval=!no_messages, results='asis'}
 cat(
 '
 ::: {.callout-tip collapse="true"}
@@ -62,7 +63,7 @@ The number and severity of issues experienced by the pipeline.
 ')
 ```
 
-```{r, results='asis', include=no_messages}
+```{r, results='asis', eval=no_messages}
 cat('✅  **No issues reported.**')
 ```
 
