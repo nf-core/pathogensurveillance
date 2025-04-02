@@ -81,6 +81,11 @@
                     "pattern": "light|full",
                     "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
                     "default": "light"
+                },
+                "max_samples": {
+                    "type": "number",
+                    "description": "Maximum number of samples to analyze. The first n samples will be used. Default: analyze all samples.",
+                    "fa_icon": "fas fa-folder-open"
                 }
             }
         },
@@ -375,7 +380,7 @@
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
-                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "default": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/refs/heads/dev/tests/data/",
                     "hidden": true
                 },
                 "trace_report_suffix": {

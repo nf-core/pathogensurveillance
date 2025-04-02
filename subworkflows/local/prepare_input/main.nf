@@ -45,6 +45,11 @@ workflow PREPARE_INPUT {
             ] }
     )
 
+    // Subest samples if max_samples is used
+    if (params.max_samples) {
+        sample_data = sample_data.take( params.max_samples )
+    }
+
     // Add all of the reference metadata to the sample metadata
     sample_data_without_refs = sample_data
         .filter{ sample_meta -> sample_meta.ref_ids.size() == 0 }
