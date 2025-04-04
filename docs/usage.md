@@ -2,63 +2,98 @@
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/pathogensurveillance/usage](https://nf-co.re/pathogensurveillance/usage)
 
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma comma-separated value) file, specified using the `--sample_data` option.
+This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to TSV.
+Use this parameter to specify its location:
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+Columns can be in any order and unneeded columns can be left out or left blank.
+Column names are case insensitive and spaces are equivalent to underscores and can be left out.
+Only a single column containing either paths to raw sequence data, SRA (Sequence Read Archive) accessions, or NCBI queries to search the SRA is required and each sample can have values in different columns.
+For example, the following is a valid input:
 
 ```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
+sample_id,path_1,path_2
 CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
 CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
 TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
 TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
 TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+Any columns not recognized by `pathogensurveillance` will be ignored, allowing users to adapt existing sample metadata table by adding new columns.
+Below is a description of each column used by `pathogensurveillance`:
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+- **sample_id**: The unique identifier for each sample. This will be used in file names to distinguish samples in the output. Each sample ID must correspond to a single source of sequence data (e.g. the `path` and `ncbi_accession` columns), although the same sequence data can be used by different IDs. Any values supplied that correspond to different sources of sequence data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `path`, `ncbi_accession`, or `name` columns.
+- **name**: A human-readable label for the sample that is used in plots and tables. If not supplied, it will be inferred from `sample_id`.
+- **description**: A longer human-readable label that is used in plots and tables. If not supplied, it will be inferred from `name`.
+- **path**: Path to input sequence data, typically gzipped FASTQ files. When paired end sequencing is used, this is used for the forward read's data and `path_2` is used for the reverse reads. This can be a local file path or a URL to an online location. The `sequence_type` column must have a value.
+- **path_2**: Path to the FASTQ files for the reverse read when paired-end sequencing is used. This can be a local file path or a URL to an online location. The `sequence_type` column must have a value.
+- **ncbi_accession**: An SRA accession ID for reads to be downloaded and used as samples. Values in the `sequence_type` column will be looked up if not supplied.
+- **ncbi_query**: A valid NCBI search query to search the SRA for reads to download and use as samples. This will result in an unknown number of samples being analyzed. The total number downloaded is limited by the `ncbi_query_max` column. Values in the `sample_id`, `name`, and `description` columns will be append to that supplied by the user. Values in the `sequence_type` column will be looked up and does not need to be supplied by the user.
+- **ncbi_query_max**: The maximum number or percentage of samples downloaded for the corresponding query in the `ncbi_query` column. Adding a `%` to the end of a number indicates a percentage of the total number of results instead of a count. A random of subset of results will be downloaded if `ncbi_query_max` is less than "100%" or the total number of results.
+- **sequence_type**: The type of sequencing used to produce reads for the `reads_1` and `reads_2` columns. Valid values include anything containing the words "illumina", "nanopore", or "pacbio". Will be looked up automatically for `ncbi_accession` and `ncbi_query` inputs but must be supplied by the user for `path` inputs.
+- **report_group_ids**: How to group samples into reports. For every unique value in this column a report will be generated. Samples can be assigned to multiple reports by separating group IDs by ";". For example `all;subset` will put the sample in both `all` and `subset` report groups. Samples will be added to a default group if this is not supplied.
+- **color_by**: The names of other columns that contain values used to color samples in plots and figures in the report. Multiple column names can be separated by ";". Specified columns can contain either categorical factors or specific colors, specified as a hex code. By default, samples will be one color and references another.
+- **ploidy**: The ploidy of the sample. Should be a number. Defaults to "1".
+- **enabled**: Either "TRUE" or "FALSE", indicating whether the sample should be included in the analysis or not. Defaults to "TRUE".
+- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata TSV.
+
+Additionally, users can supply a reference metadata TSV/CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
+If not provided, the pipeline will download and choose references to use automatically.
+References are assigned to samples if they share a reference group ID in the `ref_group_ids` columns that can appear in both input TSVs/CSVs.
+The reference metadata TSV or the sample metadata TSV can have the following columns:
+
+- **ref_group_ids**: One or more reference group IDs separated by ";". These are used to group references and supply an ID that can be used in the `ref_group_ids` column of the sample metadata TSV/CSV to assign references to particular samples.
+- **ref_id**: The unique identifier for each user-defined reference genome. This will be used in file names to distinguish samples in the output. Each reference ID must correspond to a single source of reference data (The `ref_path`, `ref_ncbi_accession`, and `ref_ncbi_query` columns), although the same reference data can be used by multiple IDs. Any values that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `path`, `ref_name` columns or supplied automatically when `ref_ncbi_accession` or `ref_ncbi_query` are used.
+- **ref_id**: The unique identify for each reference input. This will be used in file names to distinguish references in the output. Each sample ID must correspond to a single source of reference data (e.g. the `ref_path` and `ref_ncbi_accession` columns), although the same sequence data can be used by different IDs. Any values supplied that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `ref_path`, `ref_ncbi_accession`, or `ref_name` columns.
+- **ref_name**: A human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from `ref_id`. It will be supplied automatically when the `ref_ncbi_query` column is used.
+- **ref_description**: A longer human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from `ref_name`. It will be supplied automatically when the `ref_ncbi_query` column is used.
+- **ref_path**: Path to user-defined reference genomes for each sample. This can be a local file path or a URL to an online location.
+- **ref_ncbi_accession**: RefSeq accession ID for a user-defined reference genome. These will be automatically downloaded and used as input.
+- **ref_ncbi_query**: A valid NCBI search query to search the assembly database for genomes to download and use as references. This will result in an unknown number of references being downloaded. The total number downloaded is limited by the `ref_ncbi_query_max` column. Values in the `ref_id`, `ref_name`, and `ref_description` columns will be append to that supplied by the user.
+- **ref_ncbi_query_max**: The maximum number or percentage of references downloaded for the corresponding query in the `ref_ncbi_query` column. Adding a `%` to the end of a number indicates a percentage of the total number of results instead of a count. A random of subset of results will be downloaded if `ncbi_query_max` is less than "100%" or the total number of results.
+- **ref_primary_usage**: Controls how the reference is used in the analysis in cases where a single "best" reference is required, such as for variant calling. Can be one of "optional" (can be used if selected by the analysis), "required" (will always be used), "exclusive" (only those marked "exclusive" will be used), or "excluded" (will not be used).
+- **ref_contextual_usage**: Controls how the reference is used in the analysis in cases where multiple references are required to provide context for the samples, such as for phylogeny. Can be one of "optional" (can be used if selected by the analysis), "required" (will always be used), "exclusive" (only those marked "exclusive" will be used), or "excluded" (will not be used).
+- **ref_color_by**: The names of other columns that contain values used to color references in plots and figures in the report. Multiple column names can be separated by ";". Specified columns can contain either categorical factors or specific colors, specified as a hex code. By default, samples will be one color and references another.
+- **ref_enabled**: Either "TRUE" or "FALSE", indicating whether the reference should be included in the analysis or not. Defaults to "TRUE".
+
 
 ## Running the pipeline
+
+> - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile docker`.
+> - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
+> - If you are using `singularity`, please use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
+> - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/pathogensurveillance --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/pathogensurveillance -profile RUN_TOOL -resume --sample_data <TSV/CSV> --out_dir <OUTDIR>
 ```
+
+Where:
+
+- `<RUN_TOOL>` is one of docker, singularity, podman, shifter, charliecloud, or conda
+- `<TSV/CSV>` is the path to the input samplesheet
+- `<OUTDIR>` is the path to where to save the output
+
+An actual command might look like this:
+
+```bash
+nextflow run nf-core/pathogensurveillance -profile docker -resume --sample_data ./sample_metadata.tsv --out_dir ./results
+```
+
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
@@ -68,11 +103,10 @@ Note that the pipeline will create the following files in your working directory
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
 .nextflow_log       # Log file from Nextflow
-# Other nextflow hidden files, eg. history of pipeline runs and old logs.
+path_surveil_data   # Where download reads and references are stored for resuse. Can be changed with the `data_dir` parameter
 ```
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
-
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
 > [!WARNING]
@@ -89,7 +123,6 @@ with:
 ```yaml title="params.yaml"
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 
@@ -97,7 +130,9 @@ You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-c
 
 ### Updating the pipeline
 
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
+When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version.
+When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since
+To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
 nextflow pull nf-core/pathogensurveillance

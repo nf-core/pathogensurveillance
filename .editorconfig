@@ -11,22 +11,6 @@ indent_style = space
 [*.{md,yml,yaml,html,css,scss,js}]
 indent_size = 2
 
-# These files are edited and tested upstream in nf-core/modules
-[/modules/nf-core/**]
-charset = unset
-end_of_line = unset
-insert_final_newline = unset
-trim_trailing_whitespace = unset
-indent_style = unset
-indent_size = unset
-[/subworkflows/nf-core/**]
-charset = unset
-end_of_line = unset
-insert_final_newline = unset
-trim_trailing_whitespace = unset
-indent_style = unset
-indent_size = unset
-
 [/assets/email*]
 indent_size = unset
 
@@ -46,13 +30,3 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
-
-# Ignore documentation
-[docs/**]
-charset = unset
-end_of_line = unset
-insert_final_newline = unset
-trim_trailing_whitespace = unset
-indent_style = unset
-indent_size = unset
-
