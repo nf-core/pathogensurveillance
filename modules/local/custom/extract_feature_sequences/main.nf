@@ -1,4 +1,4 @@
-process ALIGN_FEATURE_SEQUENCES {
+process EXTRACT_FEATURE_SEQUENCES {
     tag "$ref_meta.id"
     label 'process_low'
 

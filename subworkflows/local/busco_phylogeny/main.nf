@@ -1,7 +1,7 @@
 include { BUSCO_BUSCO                                          } from '../../../modules/local/busco/busco'
 include { BUSCO_DOWNLOAD                                       } from '../../../modules/nf-core/busco/download'
 include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../modules/local/custom/assign_context_references'
-include { MAFFT_ALIGN as MAFFT_SMALL                           } from '../../../modules/nf-core/mafft/align'
+include { MAFFT_ALIGN                                          } from '../../../modules/nf-core/mafft/align'
 include { IQTREE2 as IQTREE2_BUSCO                             } from '../../../modules/local/iqtree2/iqtree2'
 include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/custom/subset_busco_genes'
 include { FILES_IN_DIR                                         } from '../../../modules/local/custom/files_in_dir'
@@ -121,11 +121,11 @@ workflow BUSCO_PHYLOGENY {
         .transpose()
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] }
     FILES_IN_DIR ( core_genes )
-    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_SMALL.out.versions)
+    MAFFT_ALIGN ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
+    versions = versions.mix(MAFFT_ALIGN.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_BUSCO ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
+    IQTREE2_BUSCO ( MAFFT_ALIGN.out.fas.groupTuple(sort: 'hash'), [] )
     versions = versions.mix(IQTREE2_BUSCO.out.versions)
     trees = IQTREE2_BUSCO.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree

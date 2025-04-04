@@ -12,8 +12,8 @@ process ASSIGN_MAPPING_REFERENCE {
     val min_ref_ani
 
     output:
-    tuple val(group_meta), path("${prefix}_reassigned.tsv"), emit: samp_ref_pairs
-    path "versions.yml"                                    , emit: versions
+    tuple val(group_meta), path("${prefix}_mapping_references.tsv"), emit: samp_ref_pairs
+    path "versions.yml"                                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +22,7 @@ process ASSIGN_MAPPING_REFERENCE {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_mapping_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_reassigned.tsv ${min_ref_ani}
+    assign_mapping_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_mapping_references.tsv ${min_ref_ani}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

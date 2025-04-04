@@ -7,6 +7,7 @@ include { SRATOOLS_FASTERQDUMP   } from '../../../modules/local/sratools/fasterq
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
 include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/custom/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_assemblies'
+include { PARSE_ASSEMBLIES       } from '../../../modules/local/custom/parse_assemblies'
 include { PICK_ASSEMBLIES        } from '../../../modules/local/custom/pick_assemblies'
 include { SEQKIT_HEAD            } from '../../../modules/nf-core/seqkit/head'
 include { COUNT_READS            } from '../../../modules/local/custom/count_reads'
@@ -47,7 +48,12 @@ workflow PREPARE_INPUT {
 
     // Subest samples if max_samples is used
     if (params.max_samples) {
-        sample_data = sample_data.take( params.max_samples )
+        sample_data = sample_data
+        .map{ [it.sample_id, it]}
+        .groupTuple(by: 0)
+        .take( params.max_samples )
+        .transpose(by: 1)
+        .map{ sample_id, sample_meta -> sample_meta }
     }
 
     // Add all of the reference metadata to the sample metadata
@@ -154,6 +160,11 @@ workflow PREPARE_INPUT {
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
+    // Parse assembly metadata to TSVs to save time when multiple samples use the same data
+    PARSE_ASSEMBLIES (
+        FIND_ASSEMBLIES.out.stats
+    )
+
     // Add placeholders for NCBI reference metadata if none was looked up
     ncbi_ref_meta = INITIAL_CLASSIFICATION.out.families
         .splitText(elem: 1)
@@ -161,7 +172,7 @@ workflow PREPARE_INPUT {
             [families.replace('\n', '')]
         }
         .unique()
-        .join(FIND_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
+        .join(PARSE_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
         .filter { it != [null, null] }
 
     // Choose reference sequences to provide context for each sample
@@ -197,9 +208,9 @@ workflow PREPARE_INPUT {
     picked_assemblies_stat_files = sample_data
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
-        .join(PICK_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
+        .join(PICK_ASSEMBLIES.out.formatted.ifEmpty([null, null]), remainder: true)
         .filter { it != [null, null] } // above join adds [null, null] if channel is empty
-    picked_assemblies_refs = PICK_ASSEMBLIES.out.stats // pick_assemblies_out has a list of ref metdata for each sample
+    picked_assemblies_refs = PICK_ASSEMBLIES.out.formatted // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
             [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]

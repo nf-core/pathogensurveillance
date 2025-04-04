@@ -1,8 +1,8 @@
 include { PIRATE                                              } from '../../../modules/nf-core/pirate'
-include { MAFFT_ALIGN as MAFFT_SMALL                          } from '../../../modules/nf-core/mafft/align'
+include { MAFFT_ALIGN                                         } from '../../../modules/nf-core/mafft/align'
 include { IQTREE2 as IQTREE2_CORE                             } from '../../../modules/local/iqtree2/iqtree2'
 include { REFORMAT_PIRATE_RESULTS                             } from '../../../modules/local/custom/reformat_pirate_results'
-include { ALIGN_FEATURE_SEQUENCES                             } from '../../../modules/local/custom/align_feature_sequences'
+include { EXTRACT_FEATURE_SEQUENCES                           } from '../../../modules/local/custom/extract_feature_sequences'
 include { SUBSET_CORE_GENES                                   } from '../../../modules/local/custom/subset_core_genes'
 include { RENAME_CORE_GENE_HEADERS                            } from '../../../modules/local/custom/rename_core_gene_headers'
 include { CALCULATE_POCP                                      } from '../../../modules/local/custom/calculate_pocp'
@@ -163,11 +163,11 @@ workflow CORE_GENOME_PHYLOGENY {
     )
 
     // Extract sequences of all genes (does not align, contrary to current name)
-    ALIGN_FEATURE_SEQUENCES ( good_pirate_results )
-    versions = versions.mix(ALIGN_FEATURE_SEQUENCES.out.versions)
+    EXTRACT_FEATURE_SEQUENCES ( good_pirate_results )
+    versions = versions.mix(EXTRACT_FEATURE_SEQUENCES.out.versions)
 
     // Rename FASTA file headers to start with just sample ID for use with IQTREE
-    RENAME_CORE_GENE_HEADERS ( ALIGN_FEATURE_SEQUENCES.out.feat_seqs )
+    RENAME_CORE_GENE_HEADERS ( EXTRACT_FEATURE_SEQUENCES.out.feat_seqs )
 
     // Filter for core single copy genes with no paralogs
     SUBSET_CORE_GENES (
@@ -195,11 +195,11 @@ workflow CORE_GENOME_PHYLOGENY {
         .transpose() // group_meta, gene_dir
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
-    MAFFT_SMALL ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_SMALL.out.versions)
+    MAFFT_ALIGN ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
+    versions = versions.mix(MAFFT_ALIGN.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_CORE ( MAFFT_SMALL.out.fas.groupTuple(sort: 'hash'), [] )
+    IQTREE2_CORE ( MAFFT_ALIGN.out.fas.groupTuple(sort: 'hash'), [] )
     versions = versions.mix(IQTREE2_CORE.out.versions)
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
