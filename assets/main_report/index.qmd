@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "/home/fosterz/projects/pathogensurveillance/work/7a/ced8cceb1af89fe0084834e2323707/"
+    inputs: ""
 execute:
     echo: false
 bibliography: references.bib
