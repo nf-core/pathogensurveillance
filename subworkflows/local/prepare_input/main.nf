@@ -275,13 +275,14 @@ workflow PREPARE_INPUT {
         .filter{ sample_meta, ref_meta ->
             ref_meta.ref_path
         }
+    downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
+        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
     sample_data = sample_data
         .transpose(by: 1)
         .map{ sample_meta, ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
-        .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
-        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
+        .combine(downloaded_seq_and_gff, by: 0)
         .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
             ref_meta.ref_path = ref_path
             ref_meta.gff = gff_path

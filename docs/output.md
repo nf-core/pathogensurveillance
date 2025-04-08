@@ -14,6 +14,59 @@ The `pathogensurveillance` pipeline has many steps and each will produce output 
 Not all steps will be run for all input datasets.
 Below is a list of the most important outputs created.
 
+```
+outdir
+├── aligned_genes
+│   ├── busco_genes
+│   └── core_genes
+├── aligned_reads
+├── annotations
+│   └── bakta
+├── assemblies
+│   ├── flye
+│   └── spades
+├── busco
+├── downloads
+│   ├── annotations
+│   ├── assemblies
+│   ├── databases
+│   │   ├── bakta
+│   │   └── busco
+│   └── reads
+├── fastp
+├── fastqc
+├── main_report_input
+├── pipeline_info
+├── pirate
+├── pocp
+├── quality_control
+│   ├── multiqc
+│   ├── nanoplot
+│   └── quast
+├── reference_data
+│   ├── considered
+│   ├── downloaded
+│   ├── indexes
+│   │   ├── bgzip
+│   │   ├── bwa
+│   │   ├── faidx
+│   │   ├── picard
+│   │   └── tabix
+│   └── selected
+├── reports
+├── sendsketch
+├── sketch_comparisons
+│   ├── ani_matricies
+│   └── sketches
+├── trees
+│   ├── busco
+│   ├── core
+│   └── snp
+└── variants
+```
+```
+```
+
 
 ### Prokaryotic gene annotations (Bakta)
 
@@ -203,11 +256,13 @@ BUSCO is used to extract gene for phylogenetic analysis of eukaryotes and asses 
   - `<Report ID>_<Reference ID>.vcf.gz.tbi`: The index files for the variants
   - `<Report ID>_<Reference ID>variantfiltration.vcf.gz`: The filtered variants for all samples aligned to this reference produced by `graphtyper genotype`
   - `<Report ID>_<Reference ID>variantfiltration.vcf.gz.tbi`: The index files for the filtered variants
+  - `<Report ID>_<Reference ID>.vcffilter.vcf.gz`:
   - `<Report ID>_<Reference ID>.fasta`: FASTA file with values for each variable site concatenated
 
 </details>
 
 Variants are called against selected references to do a high-resolution comparison of samples.
+
 
 ### Trees (`iqtree2`)
 
