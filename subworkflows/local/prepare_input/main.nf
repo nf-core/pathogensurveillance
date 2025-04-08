@@ -281,7 +281,7 @@ workflow PREPARE_INPUT {
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
         .combine(DOWNLOAD_ASSEMBLIES.out.sequence, by: 0)
-        .combine(DOWNLOAD_ASSEMBLIES.out.gff, by: 0)
+        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
         .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
             ref_meta.ref_path = ref_path
             ref_meta.gff = gff_path

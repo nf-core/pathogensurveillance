@@ -35,7 +35,6 @@ workflow PATHOGENSURVEILLANCE {
 
     main:
 
-
     // Initalize channel to accumulate information about software versions used
     versions = Channel.empty()
     messages = Channel.empty()
@@ -234,6 +233,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(group_messages, remainder: true)
         .filter{it[0] != null} // remove extra item if messages is empty
         .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
+        .filter{ it.size() == 17 } // remove any malformed inputs
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
 
     PREPARE_REPORT_INPUT (
