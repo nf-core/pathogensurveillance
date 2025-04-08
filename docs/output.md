@@ -203,6 +203,7 @@ BUSCO is used to extract gene for phylogenetic analysis of eukaryotes and asses 
   - `<Report ID>_<Reference ID>.vcf.gz.tbi`: The index files for the variants
   - `<Report ID>_<Reference ID>variantfiltration.vcf.gz`: The filtered variants for all samples aligned to this reference produced by `graphtyper genotype`
   - `<Report ID>_<Reference ID>variantfiltration.vcf.gz.tbi`: The index files for the filtered variants
+  - `<Report ID>_<Reference ID>.fasta`: FASTA file with values for each variable site concatenated
 
 </details>
 
@@ -258,6 +259,7 @@ The outputs of these tools are compiled using MultiQC.
 
 This is the primary output of the pipeline, containing the report meant to be understandable by non-bioinformations.
 
+
 ### Main report inputs
 
 <details markdown="1">
@@ -271,6 +273,7 @@ This is the primary output of the pipeline, containing the report meant to be un
 This is the directory used to create the main report for each report group.
 It contains selected and renamed outputs from the pipeline present in other output folders.
 
+
 ### Pirate
 
 <details markdown="1">
@@ -282,6 +285,25 @@ It contains selected and renamed outputs from the pipeline present in other outp
 </details>
 
 Pirate is used to identify orthologous gene clusters, which is are used later in the pipeline to create phylogenies of prokaryotes with the maximum number of shared genes without relying on annotations.
+
+
+### Hash-based comparisons
+
+<details markdown="1">
+<summary>output files</summary>
+
+- `sketch_comparisons/`
+  - `ani_matricies/`
+    - `<Report ID>_comp.csv`: ANI similarity matrix in CSV format made by `sourmash compare`
+    - `<Report ID>_comp.npy`: ANI similarity matrix in NumPy format made by `sourmash compare`
+    - `<Report ID>_comp.npy.labels.txt`: Labels for the above file made by `sourmash compare`
+  - `sketches/`
+    - `<Sample ID or Reference ID>.sig`: FracMinHash signature of the given sequence made by `sourmash sketch`
+
+
+</details>
+
+
 
 ### Pipeline information
 
