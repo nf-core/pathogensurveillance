@@ -1,5 +1,5 @@
 include { PIRATE                                              } from '../../../modules/nf-core/pirate'
-include { MAFFT_ALIGN                                         } from '../../../modules/nf-core/mafft/align'
+include { MAFFT_ALIGN as MAFFT_CORE                           } from '../../../modules/nf-core/mafft/align'
 include { IQTREE2 as IQTREE2_CORE                             } from '../../../modules/local/iqtree2/iqtree2'
 include { REFORMAT_PIRATE_RESULTS                             } from '../../../modules/local/custom/reformat_pirate_results'
 include { EXTRACT_FEATURE_SEQUENCES                           } from '../../../modules/local/custom/extract_feature_sequences'
@@ -195,11 +195,11 @@ workflow CORE_GENOME_PHYLOGENY {
         .transpose() // group_meta, gene_dir
         .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
     FILES_IN_DIR ( core_genes )
-    MAFFT_ALIGN ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_ALIGN.out.versions)
+    MAFFT_CORE ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
+    versions = versions.mix(MAFFT_CORE.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_CORE ( MAFFT_ALIGN.out.fas.groupTuple(sort: 'hash'), [] )
+    IQTREE2_CORE ( MAFFT_CORE.out.fas.groupTuple(sort: 'hash'), [] )
     versions = versions.mix(IQTREE2_CORE.out.versions)
     trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
