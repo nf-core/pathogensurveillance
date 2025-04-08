@@ -13,7 +13,7 @@ website:
     right:
       - icon: github
         href: https://github.com/nf-core/pathogensurveillance
-        aria-label: Nf-core PathogenSurveillance GitHub
+        aria-label: nf-core PathogenSurveillance GitHub
 
   sidebar:
     style: "docked"
