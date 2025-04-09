@@ -24,7 +24,7 @@ workflow PREPARE_INPUT {
     messages = Channel.empty()
 
     // Parse input tables
-    SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv )
+    SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, params.max_samples )
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { create_sample_metadata_channel(it) }
@@ -45,16 +45,6 @@ workflow PREPARE_INPUT {
                 it.description
             ] }
     )
-
-    // Subest samples if max_samples is used
-    if (params.max_samples) {
-        sample_data = sample_data
-        .map{ [it.sample_id, it]}
-        .groupTuple(by: 0)
-        .take( params.max_samples )
-        .transpose(by: 1)
-        .map{ sample_id, sample_meta -> sample_meta }
-    }
 
     // Add all of the reference metadata to the sample metadata
     sample_data_without_refs = sample_data

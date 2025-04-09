@@ -161,11 +161,6 @@ duplicate_rows_by_id_list <- function(metadata, id_col) {
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
-# args <- list('~/downloads/sample_data_N664_true.csv')
-# args <- list('/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_sample_data_val_N566.csv', '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/salmonella_ref_data_val.csv')
-# args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/small_genome.csv")
-# args <- list("/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664.csv", '/home/fosterz/projects/pathogensurveillance/tests/data/metadata/serratia_N664_ref_data.csv')
-# args <- list("~/downloads/hortorum.csv")
 
 read_input_table <- function(path) {
     if (endsWith(path, '.csv')) {
@@ -178,8 +173,9 @@ read_input_table <- function(path) {
 }
 
 metadata_original_samp <- read_input_table(args[[1]])
-if (length(args) > 1) {
-    metadata_original_ref <- read_input_table(args[[2]])
+max_samples <- as.numeric(args[[2]])
+if (length(args) > 2) {
+    metadata_original_ref <- read_input_table(args[[3]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
 }
@@ -203,6 +199,9 @@ if (nrow(metadata_ref) > 0) {
 if (nrow(metadata_samp) == 0) {
     stop(call. = FALSE, 'There are no rows in the input samplesheet.')
 }
+
+# Apply max sample setting
+metadata_samp <- metadata_samp[seq_len(min(c(max_samples, nrow(metadata_samp)))), ]
 
 # Validate column names
 validate_col_names <- function(cols, known_columns) {
@@ -488,7 +487,6 @@ metadata_samp <- rbind(
     metadata_samp[! is_query_to_use, ],
     new_sample_data
 )
-
 
 # Lookup SRA runs accessions for biosamples
 get_sra_from_biosamples <- function(biosample_id) {
@@ -869,15 +867,18 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
         new_id_key <- do.call(rbind, new_id_key) # combine list of data.frames to a single one
         return(new_id_key)
     })
-    id_key <- do.call(rbind, id_key) # combine list of data.frames to a single one
+    do.call(rbind, id_key) # combine list of data.frames to a single one
     # Apply the changes
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)
 }
+old_samp_ids <- metadata_samp$sample_id
 metadata_samp <- make_ids_unique(metadata_samp, id_col = 'sample_id', other_cols = c('path', 'path_2', 'ncbi_accession'))
 if (nrow(metadata_ref) > 0) {
+    old_ref_ids <- metadata_ref$ref_id  
     metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c('ref_path', 'ref_ncbi_accession'))
 }
+message_data <- make_ids_unique(message_data, id_col = 'sample_id', other_cols = c('sample_id'))
 
 # Ensure references and samples do not share ids
 is_shared <- metadata_ref$ref_id %in% metadata_samp$sample_id

@@ -13,6 +13,7 @@ process SAMPLESHEET_CHECK {
     input:
     path sample_tsv
     path reference_tsv
+    val max_samples
 
     output:
     path 'sample_metadata.tsv'   , emit: sample_data
@@ -22,7 +23,7 @@ process SAMPLESHEET_CHECK {
 
     script:
     """
-    check_samplesheet.R ${sample_tsv} ${reference_tsv}
+    check_samplesheet.R ${sample_tsv} ${max_samples} ${reference_tsv}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -84,7 +84,7 @@
                 },
                 "max_samples": {
                     "type": "number",
-                    "description": "Maximum number of samples to analyze. The first n samples will be used. Default: analyze all samples.",
+                    "description": "Maximum number of samples to analyze. The first n samples will be used. Default: 1000",
                     "fa_icon": "fas fa-folder-open"
                 }
             }
