@@ -21,4 +21,5 @@ path_surveil_data
 .RData
 deleteme/
 tests/output/
+test_profiles_out/
 
