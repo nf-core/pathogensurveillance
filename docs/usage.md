@@ -9,7 +9,7 @@
 ## Samplesheet input
 
 The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma comma-separated value) file, specified using the `--sample_data` option.
-This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to TSV.
+This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Excel by exporting to TSV/CSV.
 Use this parameter to specify its location:
 
 ```bash
@@ -94,7 +94,6 @@ An actual command might look like this:
 nextflow run nf-core/pathogensurveillance -profile docker -resume --sample_data ./sample_metadata.tsv --out_dir ./results
 ```
 
-
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
@@ -103,7 +102,7 @@ Note that the pipeline will create the following files in your working directory
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
 .nextflow_log       # Log file from Nextflow
-path_surveil_data   # Where download reads and references are stored for resuse. Can be changed with the `data_dir` parameter
+path_surveil_data   # Where download reads and references are stored for reuse. Can be changed with the `--data_dir` parameter
 ```
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.

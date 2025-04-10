@@ -20,7 +20,7 @@
 ## Introduction
 
 **nf-core/pathogensurveillance** is a population genomics pipeline for pathogen identification, variant detection, and biosurveillance.
-The pipeline accepts the paths to raw reads for one or more organisms (in the form of a TSV or CSV file) and creates reports in the form of interactive HTML reports.
+The pipeline accepts the paths to raw reads for one or more organisms (in the form of a TSV or CSV file) and creates reports in the form of an interactive HTML document.
 Significant features include the ability to analyze unidentified eukaryotic and prokaryotic samples, creation of reports for multiple user-defined groupings of samples, automated discovery and downloading of reference assemblies from [NCBI RefSeq](https://www.ncbi.nlm.nih.gov/refseq/), and rapid initial identification based on k-mer sketches followed by a more robust multi gene phylogeny and SNP-based phylogeny.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner.
@@ -29,7 +29,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
 Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure.
-This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world data sets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources.The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/pathogensurveillance/results).
+This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world data sets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/pathogensurveillance/results).
 
 ## Pipeline summary
 
@@ -75,21 +75,23 @@ For more details and further functionality, please refer to the [usage documenta
 To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/pathogensurveillance/results) tab on the nf-core website pipeline page.
 For more details about the output files and reports, please refer to the [output documentation](https://nf-co.re/pathogensurveillance/output).
 
-### Input format
 
 ## Credits
 
 The following people contributed to the pipeline: Zachary S.L. Foster, Martha Sudermann, Camilo Parada-Rojas, Logan K. Blair, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Nicholas C. Cauldron, Alexandra J. Weisberg, Jeﬀ H. Chang, and Niklaus J. Grünwald.
 
+
 ## Funding
 
 This work was supported by grants from USDA ARS (2072-22000-045-000-D) to NJG, USDA NIFA (2021-67021-34433; 2023-67013-39918) to JHC and NJG, as well as USDAR ARS NPDRS and FNRI and USDA APHIS to NJG.
+
 
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
 For further information or help, don't hesitate to get in touch on the [Slack `#pathogensurveillance` channel](https://nfcore.slack.com/channels/pathogensurveillance) (you can join with [this invite](https://nf-co.re/join/slack)).
+
 
 ## Citations
 
