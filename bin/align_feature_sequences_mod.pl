@@ -1,5 +1,9 @@
 #!/usr/bin/env perl
 
+# Used under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+# A modified version of `align_feature_sequence.pl` from [PIRATE](https://github.com/SionBayliss/PIRATE) by Alexandra Weisberg.
+# Copyright (C) Alexandra Weisberg, 2025
+
 use strict;
 use warnings;
 

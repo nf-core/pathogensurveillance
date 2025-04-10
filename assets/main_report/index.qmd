@@ -26,7 +26,7 @@ group <- run_info$group_id
 sample_data <- sample_meta_parsed(params$inputs)
 ```
 
-This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-co.re/pathogensurveillance/dev/) pipeline.
+This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-co.re/pathogensurveillance/{{< var version >}}) pipeline.
 
 * **Report group:** `r group`
 * **Sample count:** `r nrow(sample_data)`

@@ -1,5 +1,28 @@
 #!/usr/bin/env Rscript
 
+# MIT License
+#
+# Copyright (c) Zachary S.L. Foster and Niklaus J. Grunwald
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 # This script takes 2 arguments:
 #   1. The path to the per-sample CSV input to the pipeline supplied by the user
 #   2. The path to the per-reference CSV input to the pipeline supplied by the user
@@ -875,7 +898,7 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
 old_samp_ids <- metadata_samp$sample_id
 metadata_samp <- make_ids_unique(metadata_samp, id_col = 'sample_id', other_cols = c('path', 'path_2', 'ncbi_accession'))
 if (nrow(metadata_ref) > 0) {
-    old_ref_ids <- metadata_ref$ref_id  
+    old_ref_ids <- metadata_ref$ref_id
     metadata_ref <- make_ids_unique(metadata_ref, id_col = 'ref_id', other_cols = c('ref_path', 'ref_ncbi_accession'))
 }
 message_data <- make_ids_unique(message_data, id_col = 'sample_id', other_cols = c('sample_id'))

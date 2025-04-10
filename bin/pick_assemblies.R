@@ -1,5 +1,28 @@
 #!/usr/bin/env Rscript
 
+# MIT License
+#
+# Copyright (c) Zachary S.L. Foster and Niklaus J. Grunwald
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
@@ -105,11 +128,11 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
             which(assem_data[[subrank]] == subtax & is.na(assem_data$selection_rank))
         })
         names(selected) <- subtaxa_found
-        
+
         # Parse count attributes, which can be percentages or integers
         count_per_rank <- get_count(length(selected), count_per_rank)
         count_per_subrank <- get_count(length(selected), count_per_subrank)
-        
+
         # Pick subtaxa with the most assemblies and best mean attributes (based on order in input)
         mean_index <- vapply(selected, mean, FUN.VALUE = numeric(1))
         subtaxa_count <- vapply(selected, length, FUN.VALUE = numeric(1))
@@ -120,12 +143,12 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
         )
         selected <- selected[selection_priority]
         selected <- selected[seq_len(min(c(count_per_rank, length(selected))))]
-        
+
         # Pick representatives of subtaxa with best attributes (based on order in input)
         selected <- lapply(selected, function(x) {
             x[seq_len(min(c(count_per_subrank, length(x))))]
         })
-        
+
         # Record data on selected assemblies
         selected <- unlist(selected)
         assem_data$selection_rank[selected] <- rank
