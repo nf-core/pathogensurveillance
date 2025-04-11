@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "sample_id": {
-                "type": "string"
+                "type": "string",
             },
             "name": {
                 "type": "string"
@@ -39,27 +39,36 @@
                 "type": "string"
             },
             "ncbi_query_max": {
-                "type": "string"
+                "type": "integer",
+                "default": 10,
+                "minimum": 1,
+                "errorMessage": "The `ncbi_query_max` column must be an integer greater than 0."
             },
             "sequence_type": {
-                "type": "string"
+                "type": "string",
+                "pattern": "(?i)illumina|nanopore|pacbio|bgiseq",
+                "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', or 'bgiseq'."
             },
             "report_group_ids": {
-                "type": "string"
+                "type": "string",
+                "default": "_no_group_defined_"
             },
             "color_by": {
                 "type": "string"
             },
             "ploidy": {
-                "type": "number"
+                "type": "integer",
+                "default": 1,
+                "minimum": 1,
+                "errorMessage": "The `ploidy` column must be an integer greater than or equal to 1."
             },
             "enabled": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": true
             },
             "ref_group_ids": {
                 "type": "string"
             }
-        },
-        "required": []
+        }
     }
 }
