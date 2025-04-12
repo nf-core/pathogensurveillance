@@ -24,7 +24,7 @@
 
 
 # Options
-ani_threshold <- c(species = 90, genus = 80, family = 50)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+ani_threshold <- c(species = 95, genus = 90, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 
 # Parse inputs

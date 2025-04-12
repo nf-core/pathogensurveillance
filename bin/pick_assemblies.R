@@ -26,12 +26,27 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     '/home/fosterz/projects/pathogensurveillance/work/7e/539b11711dd3fc9435dfa105c3063e/SAMEA882280_families.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/7e/539b11711dd3fc9435dfa105c3063e/SAMEA882280_genera.txt',
-#     '/home/fosterz/projects/pathogensurveillance/work/7e/539b11711dd3fc9435dfa105c3063e/SAMEA882280_species.txt',
-#     '1', '5', '5', 'false', 'deleteme.tsv',
-#     '/home/fosterz/projects/pathogensurveillance/work/7e/539b11711dd3fc9435dfa105c3063e/Enterobacteriaceae.tsv'
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_families.txt", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_genera.txt", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_species.txt", 
+#     "1", 
+#     "5", 
+#     "5", 
+#     "false", 
+#     "deleteme", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Morganellaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Halomonadaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Araceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Orchidaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Thiotrichaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Alcaligenaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Enterobacteriaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Erwiniaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Malvaceae.tsv", 
+#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Euglenaceae.tsv"
 # )
+
+
 args <- as.list(args)
 families <- readLines(args[[1]])
 genera <- readLines(args[[2]])
@@ -60,8 +75,11 @@ assem_data <- cbind(reference_id = modified_id, assem_data)
 # Add taxon info columns
 assem_data$organism_name <- gsub(assem_data$organism_name, pattern = '[', replacement = '', fixed = TRUE)
 assem_data$organism_name <- gsub(assem_data$organism_name, pattern = ']', replacement = '', fixed = TRUE)
-assem_data$species <- gsub(assem_data$organism_name, pattern = '([a-zA-Z0-9.]+) ([a-zA-Z0-9.]+) (.*)', replacement = '\\1 \\2')
-assem_data$genus <- gsub(assem_data$organism_name, pattern = '([a-zA-Z0-9.]+) (.*)', replacement = '\\1')
+genus_prefixes <- c('Candidatus')
+genus_prefix_pattern <- paste0(genus_prefixes, collapse = '|')
+binomial_pattern <- paste0('^((?:', genus_prefix_pattern, ')?) ?([a-zA-Z0-9.]+) ?([a-zA-Z0-9.]+) ?(.*)$')
+assem_data$species <- trimws(gsub(assem_data$organism_name, pattern = binomial_pattern, replacement = '\\1 \\2 \\3', ignore.case = TRUE))
+assem_data$genus <- trimws(gsub(assem_data$organism_name, pattern = binomial_pattern, replacement = '\\1 \\2', ignore.case = TRUE))
 
 # Filter out references with non-standard names
 is_ambiguous <- function(x) {
