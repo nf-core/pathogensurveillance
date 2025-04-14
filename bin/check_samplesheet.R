@@ -23,11 +23,15 @@
 # SOFTWARE.
 
 
-# This script takes 2 arguments:
+# This script takes 3 arguments:
 #   1. The path to the per-sample CSV input to the pipeline supplied by the user
-#   2. The path to the per-reference CSV input to the pipeline supplied by the user
+#   2. The maximum number of samples to keep
+#   3. The path to the per-reference CSV input to the pipeline supplied by the user (optional)
 #
 # The first part of this script defines constants that might need to be changed in the future.
+
+# Load dependencies
+library(rentrez)
 
 # Where to save output metadata files
 sample_data_path <- 'sample_metadata.tsv'

@@ -117,7 +117,7 @@ workflow PREPARE_INPUT {
             [[id: sample_meta.sample_id], sample_meta, ref_metas]
         }
         .combine(sendsketch_depth, by: 0)
-        .combine(INITIAL_CLASSIFICATION.out.kingdom, by: 0)
+        .combine(INITIAL_CLASSIFICATION.out.domain, by: 0)
         .map{ sample_id, sample_meta, ref_metas, depth, kingdom ->
             sample_meta.sendsketch_depth = depth
             sample_meta.kingdom = kingdom
@@ -125,8 +125,16 @@ workflow PREPARE_INPUT {
         }
 
     // Get list of families for all samples without exclusive references defined by the user
+    family_taxon_ids = INITIAL_CLASSIFICATION.out.taxa_found
+        .splitCsv(elem: 1, header: true, sep: '\t')
+        .filter{ sample_meta, taxon_data ->
+            taxon_data.rank == 'family'
+        }
+        .map{ sample_meta, taxon_data ->
+            [sample_meta, taxon_data.taxon_id]
+        }
     def no_auto_contextual_refs = params.n_ref_closest == 0 && params.n_ref_closest_named == 0 && params.n_ref_context == 0
-    all_families = sample_data
+    family_ids_to_download = sample_data
         .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata if no references are to be dowloaded automatically (besides user-defined references)
             ! (params.n_ref_genera == 0 && params.n_ref_species == 0 && params.n_ref_strains == 0)
         }
@@ -137,16 +145,14 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
         }
-        .combine(INITIAL_CLASSIFICATION.out.families, by: 0)
-        .map{ sample_id, sample_meta, families -> [families] }
-        .splitText()
+        .combine(family_taxon_ids, by: 0)
+        .map{ sample_id, sample_meta, family_ids -> [family_ids] }
         .flatten()
-        .map { families -> families.replace('\n', '') }
         .unique()
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES (
-        all_families
+        family_ids_to_download
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
@@ -156,21 +162,19 @@ workflow PREPARE_INPUT {
     )
 
     // Add placeholders for NCBI reference metadata if none was looked up
-    ncbi_ref_meta = INITIAL_CLASSIFICATION.out.families
-        .splitText(elem: 1)
-        .map { sample_meta, families ->
-            [families.replace('\n', '')]
+    ncbi_ref_meta = family_taxon_ids
+        .map { sample_meta, family_ids ->
+            [family_ids]
         }
         .unique()
         .join(PARSE_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
         .filter { it != [null, null] }
 
     // Choose reference sequences to provide context for each sample
-    family_stats_per_sample = INITIAL_CLASSIFICATION.out.families
-        .splitText(elem: 1)
-        .map { sample_id, families -> [families.replace('\n', ''), sample_id] }
+    family_stats_per_sample = family_taxon_ids
+        .map { sample_id, family_id -> [family_id, sample_id] }
         .combine(ncbi_ref_meta, by: 0)
-        .map { family, sample_id, stats_path -> [sample_id, stats_path] }
+        .map { family_id, sample_id, stats_path -> [sample_id, stats_path] }
         .unique()
         .groupTuple(by: 0, sort: 'hash')
         .map { sample_id, family_stats ->
@@ -179,11 +183,9 @@ workflow PREPARE_INPUT {
     taxon_and_ref_data = sample_data
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
-        .join(INITIAL_CLASSIFICATION.out.families)
-        .join(INITIAL_CLASSIFICATION.out.genera)
-        .join(INITIAL_CLASSIFICATION.out.species)
+        .join(INITIAL_CLASSIFICATION.out.taxa_found)
         .join(family_stats_per_sample)
-        .filter { sample_meta, families, genera, species, family_stats ->
+        .filter { sample_meta, taxa_found, family_stats ->
             family_stats.size() > 0
         }
     PICK_ASSEMBLIES (

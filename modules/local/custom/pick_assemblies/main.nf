@@ -8,7 +8,7 @@ process PICK_ASSEMBLIES {
         'quay.io/nf-core/rcppsimdjson:0.2' }"
 
     input:
-    tuple val(meta), path(families), path(genera), path(species), path(assem_data_tsvs)
+    tuple val(meta), path(found_taxa), path(assem_data_tsvs)
     val n_ref_strains
     val n_ref_species
     val n_ref_genera
@@ -27,7 +27,7 @@ process PICK_ASSEMBLIES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     """
-    pick_assemblies.R ${families} ${genera} ${species} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${assem_data_tsvs}
+    pick_assemblies.R ${found_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${assem_data_tsvs}
     COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml

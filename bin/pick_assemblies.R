@@ -26,45 +26,32 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_families.txt", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_genera.txt", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Sample_2_species.txt", 
-#     "1", 
-#     "5", 
-#     "5", 
-#     "false", 
-#     "deleteme", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Morganellaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Halomonadaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Araceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Orchidaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Thiotrichaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Alcaligenaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Enterobacteriaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Erwiniaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Malvaceae.tsv", 
-#     "~/projects/pathogensurveillance/work/27/f10e437b1240c997ac23a60b2b21e6/Euglenaceae.tsv"
+#     "/home/fosterz/projects/pathogensurveillance/work/c3/f720295f9cb8da846e29accc28e895/Sample_2_taxa_found.tsv",
+#     "1",
+#     "5",
+#     "5",
+#     "false",
+#     "deleteme",
+#     list.files("/home/fosterz/projects/pathogensurveillance/work/c3/f720295f9cb8da846e29accc28e895", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
-
 args <- as.list(args)
-families <- readLines(args[[1]])
-genera <- readLines(args[[2]])
-species <- readLines(args[[3]])
-n_ref_strains <- args[[4]]
-n_ref_species <- args[[5]]
-n_ref_genera <- args[[6]]
-only_binomial <- as.logical(args[[7]])
-out_name <- args[[8]]
+taxa_found_data <- read.table(args[[1]], header = TRUE, sep = '\t', comment.char = '')
+n_ref_strains <- args[[2]]
+n_ref_species <- args[[3]]
+n_ref_genera <- args[[4]]
+only_binomial <- as.logical(args[[5]])
+out_name <- args[[6]]
 
 # Parse input TSVs
-if (length(args) < 9) {
+if (length(args) < 7) {
     stop('No family-level reference metadata files supplied. Check input data.')
 }
 tsv_paths <- unlist(args[9:length(args)])
 assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     out <- read.table(path, header = TRUE, sep = '\t', comment.char = '')
-    out$family <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
+    family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
+    out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]
     return(out)
 }))
 
@@ -177,21 +164,21 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
 }
 assem_data <- select_for_rank(
     assem_data,
-    query_taxa = species,
+    query_taxa = taxa_found_data$name[taxa_found_data$rank == 'species'],
     rank = 'species',
     subrank = 'organism_name',
     count_per_rank = n_ref_strains
 )
 assem_data <- select_for_rank(
     assem_data,
-    query_taxa = genera,
+    query_taxa = taxa_found_data$name[taxa_found_data$rank == 'genus'],
     rank = 'genus',
     subrank = 'species',
     count_per_rank = n_ref_species
 )
 assem_data <- select_for_rank(
     assem_data,
-    query_taxa = families,
+    query_taxa = taxa_found_data$name[taxa_found_data$rank == 'family'],
     rank = 'family',
     subrank = 'genus',
     count_per_rank = n_ref_genera
