@@ -894,7 +894,7 @@ make_ids_unique <- function(metadata, id_col, other_cols) {
         new_id_key <- do.call(rbind, new_id_key) # combine list of data.frames to a single one
         return(new_id_key)
     })
-    do.call(rbind, id_key) # combine list of data.frames to a single one
+    id_key <- do.call(rbind, id_key) # combine list of data.frames to a single one
     # Apply the changes
     metadata[id_key$row_num, id_col] <- id_key$new_id
     return(metadata)

@@ -19,9 +19,9 @@
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/tsv",
                     "pattern": "^\\S+\\.[ct]sv$",
-                    "description": "Path to comma-separated file containing information about samples.",
-                    "help_text": "This TSV/CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
-                    "fa_icon": "fas fa-file-tsv"
+                    "description": "Path to comma/tab-separated file containing information about samples.",
+                    "help_text": "This TSV/CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the usage page](https://nf-co.re/pathogensurveillance/dev/docs/usage/) for details on formatting this file.",
+                    "fa_icon": "fas fa-file-csv"
                 },
                 "reference_data": {
                     "type": "string",
@@ -30,8 +30,8 @@
                     "pattern": "^\\S+\\.[ct]sv$",
                     "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about samples.",
-                    "help_text": "This TSV/CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the documentaion](https://github.com/grunwaldlab/pathogensurveillance?tab=readme-ov-file#input-format) for details on formatting this file.",
-                    "fa_icon": "fas fa-file-tsv"
+                    "help_text": "This TSV/CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the usage page](https://nf-co.re/pathogensurveillance/dev/docs/usage/) for details on formatting this file.",
+                    "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
                     "type": "string",
@@ -80,12 +80,8 @@
                     "type": "string",
                     "pattern": "light|full",
                     "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
-                    "default": "light"
-                },
-                "max_samples": {
-                    "type": "number",
-                    "description": "Maximum number of samples to analyze. The first n samples will be used. Default: 1000",
-                    "fa_icon": "fas fa-folder-open"
+                    "default": "light",
+                    "fa_icon": "fas fa-download"
                 }
             }
         },
@@ -95,71 +91,76 @@
             "description": "Parmaters that modify the analysis done by the pipleine.",
             "default": "",
             "properties": {
+                "max_samples": {
+                    "type": "number",
+                    "description": "Maximum number of samples to analyze. The first n samples will be used. Default: 1000",
+                    "fa_icon": "fas fa-vials"
+                },
                 "max_depth": {
                     "type": "number",
                     "default": 100,
-                    "description": "Maximum depth of reads to be used for all analses. Samples with more reads are subsampled to this depth.",
+                    "description": "Maximum depth of reads to be used for all analyses. Samples with more reads are subsampled to this depth.",
                     "fa_icon": "fas fa-align-center"
                 },
                 "only_latin_binomial_refs": {
                     "type": "boolean",
                     "description": "When selecting references automatically, only consider references with names that appear to be standard latin bionomials (i.e. no numbers or symbols in the first two words).",
-                    "fa_icon": "fas fa-download",
+                    "fa_icon": "fas fa-spell-check",
                     "default": false
                 },
                 "allow_non_refseq": {
                     "type": "boolean",
                     "description": "When selecting references automatically, allow assemblies not in RegSeq.",
-                    "fa_icon": "fas fa-download",
+                    "fa_icon": "fas fa-vial-circle-check",
                     "default": false
                 },
                 "allow_unannotated": {
                     "type": "boolean",
                     "description": "When selecting references automatically, allow assemblies that do not have annotations. The pipleine will attempt to annotate these references as needed.",
-                    "fa_icon": "fas fa-download",
+                    "fa_icon": "fas fa-vial-circle-check",
                     "default": false
                 },
                 "allow_atypical_refs": {
                     "type": "boolean",
                     "description": "When selecting references automatically, allow assemblies that NCBI considers atypical.",
-                    "fa_icon": "fas fa-download",
+                    "fa_icon": "fas fa-vial-circle-check",
                     "default": false
                 },
                 "n_ref_strains": {
                     "type": "string",
                     "default": "5",
                     "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_species": {
                     "type": "string",
                     "default": "20",
                     "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_genera": {
                     "type": "string",
                     "default": "20",
                     "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_closest": {
                     "type": "number",
                     "default": 2,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_closest_named": {
                     "type": "number",
                     "default": 1,
                     "description": "Same as the 'n_ref_closest' option except that it only applies to referneces with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_context": {
                     "type": "number",
                     "default": 5,
                     "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
-                    "fa_icon": "fas fa-download"
+                    "fa_icon": "fas fa-hashtag"
                 },
                 "phylo_min_genes": {
                     "type": "number",
