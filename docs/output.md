@@ -8,7 +8,6 @@ The directories listed below will be created in the results directory after the 
 All paths are relative to the top-level results directory which is located and named using the `--outdir` parameter.
 Here, we will assume it is called `outdir`.
 
-
 ## Pipeline overview
 
 The `pathogensurveillance` pipeline has many steps and each will produce output files for most of the steps.
@@ -75,7 +74,6 @@ Additionally the [PathoSurveilR package](https://github.com/grunwaldlab/PathoSur
 
 Below is a more detailed description of each output directory.
 
-
 ### Aligned genes (`mafft`)
 
 <details markdown="1">
@@ -92,7 +90,6 @@ Below is a more detailed description of each output directory.
 FASTA files for each gene extracted from assemblies and aligned.
 Contains sequences for both samples and references.
 
-
 ### Aligned reads (`bwa mem`)
 
 <details markdown="1">
@@ -104,12 +101,10 @@ Contains sequences for both samples and references.
   - `<Reference ID>_<Sample ID>.formatted.bam.csi`: Index for the above file produced by `samtools index`
   - `<Reference ID>_<Sample ID>.formatted.MarkDuplicates.metrics.txt`: Output from `picard MarkDuplicates`
 
-
 </details>
 
 Reads are aligned to references as part of the variant calling process used to compare samples with high resolution.
 These read alignments are then filtered for quality and reformatted before being used to call variants.
-
 
 ### Prokaryotic gene annotations (Bakta)
 
@@ -132,7 +127,6 @@ These read alignments are then filtered for quality and reformatted before being
 
 [Bakta](https://github.com/oschwengers/bakta) is a tool for the rapid and standardised annotation of bacterial genomes and plasmids from both isolates and MAGs.
 It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
-
 
 ### Assemblies (Spades and Flye)
 
@@ -158,7 +152,6 @@ It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
 
 These directories contain the output of whole genome assembly of samples using `spades` for short reads and `flye` for long reads.
 
-
 ### BUSCO
 
 <details markdown="1">
@@ -172,7 +165,6 @@ These directories contain the output of whole genome assembly of samples using `
 </details>
 
 BUSCO is used to extract genes from eukaryotic assemblies for phylogenetic analysis and assess assembly completeness.
-
 
 ### Downloads
 
@@ -196,7 +188,6 @@ BUSCO is used to extract genes from eukaryotic assemblies for phylogenetic analy
 
 This directory contains anything the pipeline downloads, such as assemblies, reads, and databases.
 
-
 ### Adapter trimming and quality control (`fastp`)
 
 <details markdown="1">
@@ -213,7 +204,6 @@ This directory contains anything the pipeline downloads, such as assemblies, rea
 `fastp` is used to trim adapters and for other quality control.
 It also produces a useful report on the quality of the sample.
 
-
 ### Sample and reference metadata
 
 <details markdown="1">
@@ -228,7 +218,6 @@ It also produces a useful report on the quality of the sample.
 These files are the parsed and cleaned versions of the input data.
 The IDs present in these tables are those used throughout the pipeline and might be different than what the user provided if they needed to be renamed to be compatible with use in file names.
 These versions of the metadata should be used to automate any downstream analysis rather than the input metadata provided by the user.
-
 
 ### Pipeline information
 
@@ -245,7 +234,6 @@ These versions of the metadata should be used to automate any downstream analysi
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides various reports relevant to the running and execution of the pipeline.
 This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
-
 ### Pirate
 
 <details markdown="1">
@@ -258,7 +246,6 @@ This will allow you to troubleshoot errors with the running of the pipeline, and
 
 Pirate is used to identify orthologous gene clusters, which are used later in the pipeline to create phylogenies of prokaryotes with the maximum number of shared genes without relying on annotations.
 
-
 ### Percentage of conserved proteins (POCP)
 
 <details markdown="1">
@@ -270,7 +257,6 @@ Pirate is used to identify orthologous gene clusters, which are used later in th
 </details>
 
 POCP is calculated as a metric to compare samples to each other and to references in regards to shared gene content.
-
 
 ### Quality control reports
 
@@ -290,7 +276,6 @@ POCP is calculated as a metric to compare samples to each other and to reference
 Various tools are used to check reads and assemblies for quality.
 The outputs of these tools are compiled using MultiQC.
 
-
 ### Reference data
 
 <details markdown="1">
@@ -305,7 +290,7 @@ The outputs of these tools are compiled using MultiQC.
   - `selected/`
     - `<report group>_mapping_references.tsv`: The IDs of references used to align reads to during variant calling
     - `<report group>_core_references.tsv`: The IDs of references used to provide context in core gene phylogenies
-    - `<report group>_busco_references.tsv`:  The IDs of references used to provide context in BUSCO gene phylogenies
+    - `<report group>_busco_references.tsv`: The IDs of references used to provide context in BUSCO gene phylogenies
   - `indexes/`
     - `bwa/`
       - `<Refernce ID>_bwa`: Index files used to align reads to references with `bwa mem`
@@ -324,7 +309,6 @@ The outputs of these tools are compiled using MultiQC.
 The `pathogensurveillance` pipeline will select and download references automatically for use in multiple steps throughout the pipeline.
 The `reference_data` folder contains information regarding references, including the metadata of all that were considered, the metadata of those downloaded, and the IDs of those selected for use in the analysis.
 
-
 ### Main reports
 
 <details markdown="1">
@@ -336,7 +320,6 @@ The `reference_data` folder contains information regarding references, including
 </details>
 
 This is the primary output of the pipeline, containing the report meant to be understandable by non-bioinformaticians.
-
 
 ### Grouped report data
 
@@ -351,7 +334,6 @@ This is the primary output of the pipeline, containing the report meant to be un
 This is the directory used to create the main report for each report group.
 It contains selected and renamed outputs from the pipeline present in other output folders, but organized by report group.
 
-
 ### BBMap Sendsketch results
 
 <details markdown="1">
@@ -363,7 +345,6 @@ It contains selected and renamed outputs from the pipeline present in other outp
 </details>
 
 Tables with information used to make initial identifications of samples from the BBMap `sendsketch` tool.
-
 
 ### Hash-based comparisons
 
@@ -378,11 +359,9 @@ Tables with information used to make initial identifications of samples from the
   - `sketches/`
     - `<Sample ID or Reference ID>.sig`: FracMinHash signature of the given sequence made by `sourmash sketch`
 
-
 </details>
 
 In order to select references to use with samples and provide a rough identification, all samples and references are sketched with `sourmash sketch` and all pairwise comparisons of sketches are made with `sourmash compare`.
-
 
 ### Trees (`iqtree2`)
 
@@ -403,7 +382,6 @@ Various trees are produced by the pipeline to compare the samples to references 
 To put samples in context of reference genomes and provide data that can be useful in identification, core genes from prokaryotes and BUSCO genes from eukaryotes are used to produce trees with `iqtree2`.
 SNPs identified by variant calling are also used to create a tree with `iqtree2` for high-resolution sample comparison.
 
-
 ### Variants (`graphtyper genotype`)
 
 <details markdown="1">
@@ -420,5 +398,3 @@ SNPs identified by variant calling are also used to create a tree with `iqtree2`
 </details>
 
 Variants are called against selected references to do a high-resolution comparison of samples.
-
-

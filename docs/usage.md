@@ -2,9 +2,7 @@
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/pathogensurveillance/usage](https://nf-co.re/pathogensurveillance/usage)
 
-
 ## Introduction
-
 
 ## Samplesheet input
 
@@ -67,7 +65,6 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 - **ref_contextual_usage**: Controls how the reference is used in the analysis in cases where multiple references are required to provide context for the samples, such as for phylogeny. Can be one of "optional" (can be used if selected by the analysis), "required" (will always be used), "exclusive" (only those marked "exclusive" will be used), or "excluded" (will not be used).
 - **ref_color_by**: The names of other columns that contain values used to color references in plots and figures in the report. Multiple column names can be separated by ";". Specified columns can contain either categorical factors or specific colors, specified as a hex code. By default, samples will be one color and references another.
 - **ref_enabled**: Either "TRUE" or "FALSE", indicating whether the reference should be included in the analysis or not. Defaults to "TRUE".
-
 
 ## Running the pipeline
 

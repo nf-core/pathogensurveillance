@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "sample_id": {
-                "type": "string",
+                "type": "string"
             },
             "name": {
                 "type": "string"

@@ -30,3 +30,16 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
+
+# Dont check nf-core assets since they should already be checked
+[/subworkflows/nf-core/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[/modules/nf-core/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
