@@ -105,7 +105,7 @@ workflow PREPARE_INPUT {
     INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
     versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
 
-    // Add estimated depth and kingdom to sample metadata
+    // Add estimated depth and domain to sample metadata
     sendsketch_depth = BBMAP_SENDSKETCH.out.hits
         .splitText(limit: 2, by: 2)
         .map { sample_meta, header ->
@@ -118,9 +118,9 @@ workflow PREPARE_INPUT {
         }
         .combine(sendsketch_depth, by: 0)
         .combine(INITIAL_CLASSIFICATION.out.domain, by: 0)
-        .map{ sample_id, sample_meta, ref_metas, depth, kingdom ->
+        .map{ sample_id, sample_meta, ref_metas, depth, domain ->
             sample_meta.sendsketch_depth = depth
-            sample_meta.kingdom = kingdom
+            sample_meta.domain = domain
             [sample_meta, ref_metas]
         }
 

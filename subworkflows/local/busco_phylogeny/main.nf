@@ -20,7 +20,7 @@ workflow BUSCO_PHYLOGENY {
 
     // Remove any samples that are not eukaryotes
     sample_data = original_sample_data
-        .filter{it.kingdom == "Eukaryota"}
+        .filter{it.domain == "Eukaryota"}
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data

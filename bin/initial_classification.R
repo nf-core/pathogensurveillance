@@ -31,7 +31,7 @@ complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are 
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- list('~/projects/pathogensurveillance/work/7e/c936dcfc799b5e18f8f2120e10ca47/Sample_1.txt')
+# args <- list('~/projects/pathogensurveillance/work/57/16704de16a603b86e9c2220afc64a1/LF1.txt')
 sendsketch_data <- read.csv(args[[1]], skip = 2, header = TRUE, sep = '\t')
 
 # Format table
@@ -48,15 +48,15 @@ class_xml <- get_capture_group(raw_xml, '<LineageEx>(.+?)</LineageEx>')
 class_names <- lapply(class_xml, get_capture_group, pattern = '<ScientificName>(.+?)</ScientificName>')
 class_ranks <- lapply(class_xml, get_capture_group, pattern = '<Rank>(.+?)</Rank>')
 class_ids <- lapply(class_xml, get_capture_group, pattern = '<TaxId>(.+?)</TaxId>')
-tip_taxids <- get_capture_group(raw_xml, '<Taxon>\n    <TaxId>(.+?)</TaxId>')
+tip_taxon_ids <- get_capture_group(raw_xml, '<Taxon>\n    <TaxId>(.+?)</TaxId>')
 class_data <- data.frame(
-    tip_taxon_id = rep(tip_taxids, sapply(class_names, length)),
+    tip_taxon_id = rep(tip_taxon_ids, sapply(class_names, length)),
     taxon_id = unlist(class_ids),
     name = unlist(class_names),
     rank = unlist(class_ranks)
 )
 class_data <- unique(class_data)
-# class_data$classification <- unlist(lapply(split(class_data, class_data$tip_taxid), function(part) {
+# class_data$classification <- unlist(lapply(split(class_data, class_data$tip_taxon_id), function(part) {
 #     vapply(seq_len(nrow(part)), FUN.VALUE = character(1), function(i) {
 #         paste0(part$name[1:i], collapse = ';')
 #     })
@@ -79,6 +79,6 @@ write.table(output_data, file = 'taxa_found.tsv', sep = '\t', col.names = TRUE, 
 # Write table of all taxon information
 write.table(class_data, file = 'taxon_data.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
 
-# Save kingdom
-domain <- class_data$name[class_data$tip_taxid == sendsketch_data$TaxID[1] & class_data$rank == 'domain']
+# Save domain
+domain <- class_data$name[class_data$tip_taxon_id == sendsketch_data$TaxID[1] & class_data$rank == 'domain']
 writeLines(domain, "domain.txt")

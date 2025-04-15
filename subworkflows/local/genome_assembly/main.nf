@@ -16,17 +16,17 @@ workflow GENOME_ASSEMBLY {
     versions = Channel.empty()
     messages = Channel.empty()
     parsed_sample_data = sample_data
-        .map{ [[id: it.sample_id, single_end: it.single_end, kingdom: it.kingdom, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
+        .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
     parsed_sample_data
         .map{ sample_meta, report_meta, read_paths -> [sample_meta, read_paths]}
         .unique()
         .branch { meta, paths->
-            short_prokaryote:    (meta.type == "illumina" || meta.type == "bgiseq") && meta.kingdom == "Bacteria"
-            nanopore_prokaryote: meta.type == "nanopore" && meta.kingdom == "Bacteria"
-            pacbio_prokaryote:   meta.type == "pacbio" && meta.kingdom == "Bacteria"
-            short_eukaryote:     (meta.type == "illumina" || meta.type == "bgiseq") && meta.kingdom != "Bacteria"
-            nanopore_eukaryote:  meta.type == "nanopore" && meta.kingdom != "Bacteria"
-            pacbio_eukaryote:    meta.type == "pacbio" && meta.kingdom != "Bacteria"
+            short_prokaryote:    (meta.type == "illumina" || meta.type == "bgiseq") && meta.domain == "Bacteria"
+            nanopore_prokaryote: meta.type == "nanopore" && meta.domain == "Bacteria"
+            pacbio_prokaryote:   meta.type == "pacbio" && meta.domain == "Bacteria"
+            short_eukaryote:     (meta.type == "illumina" || meta.type == "bgiseq") && meta.domain != "Bacteria"
+            nanopore_eukaryote:  meta.type == "nanopore" && meta.domain != "Bacteria"
+            pacbio_eukaryote:    meta.type == "pacbio" && meta.domain != "Bacteria"
             other:               true
         }
         .set { filtered_input }

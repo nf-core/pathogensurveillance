@@ -26,13 +26,13 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "/home/fosterz/projects/pathogensurveillance/work/c3/f720295f9cb8da846e29accc28e895/Sample_2_taxa_found.tsv",
+#     "~/projects/pathogensurveillance/work/5b/29ffb0e1e1add90d02de99307cffea/LF1_taxa_found.tsv",
 #     "1",
-#     "5",
-#     "5",
+#     "3",
+#     "3",
 #     "false",
 #     "deleteme",
-#     list.files("/home/fosterz/projects/pathogensurveillance/work/c3/f720295f9cb8da846e29accc28e895", pattern = '^[0-9]+.tsv$', full.names = TRUE)
+#     list.files("~/projects/pathogensurveillance/work/5b/29ffb0e1e1add90d02de99307cffea", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
 args <- as.list(args)
@@ -47,7 +47,7 @@ out_name <- args[[6]]
 if (length(args) < 7) {
     stop('No family-level reference metadata files supplied. Check input data.')
 }
-tsv_paths <- unlist(args[9:length(args)])
+tsv_paths <- unlist(args[7:length(args)])
 assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     out <- read.table(path, header = TRUE, sep = '\t', comment.char = '')
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)

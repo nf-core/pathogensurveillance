@@ -26,7 +26,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Remove any samples that are not prokaryotes
     sample_data = sample_data
-        .filter{it.kingdom == "Bacteria" || it.kingdom == "Archaea"}
+        .filter{it.domain == "Bacteria" || it.domain == "Archaea"}
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
