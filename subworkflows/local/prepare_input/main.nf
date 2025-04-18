@@ -200,7 +200,7 @@ workflow PREPARE_INPUT {
     picked_assemblies_stat_files = sample_data
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
-        .join(PICK_ASSEMBLIES.out.formatted.ifEmpty([null, null]), remainder: true)
+        .join(PICK_ASSEMBLIES.out.metadata.ifEmpty([null, null]), remainder: true)
         .filter { it != [null, null] } // above join adds [null, null] if channel is empty
     picked_assemblies_refs = PICK_ASSEMBLIES.out.formatted // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)

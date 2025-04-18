@@ -54,7 +54,6 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 
 - **ref_group_ids**: One or more reference group IDs separated by ";". These are used to group references and supply an ID that can be used in the `ref_group_ids` column of the sample metadata TSV/CSV to assign references to particular samples.
 - **ref_id**: The unique identifier for each user-defined reference genome. This will be used in file names to distinguish samples in the output. Each reference ID must correspond to a single source of reference data (The `ref_path`, `ref_ncbi_accession`, and `ref_ncbi_query` columns), although the same reference data can be used by multiple IDs. Any values that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `path`, `ref_name` columns or supplied automatically when `ref_ncbi_accession` or `ref_ncbi_query` are used.
-- **ref_id**: The unique identify for each reference input. This will be used in file names to distinguish references in the output. Each sample ID must correspond to a single source of reference data (e.g. the `ref_path` and `ref_ncbi_accession` columns), although the same sequence data can be used by different IDs. Any values supplied that correspond to different sources of reference data or contain characters that cannot appear in file names (\/:\*?"<>| .) will be modified automatically. If not supplied, it will be inferred from the `ref_path`, `ref_ncbi_accession`, or `ref_name` columns.
 - **ref_name**: A human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from `ref_id`. It will be supplied automatically when the `ref_ncbi_query` column is used.
 - **ref_description**: A longer human-readable label for user-defined reference genomes that is used in plots and tables. If not supplied, it will be inferred from `ref_name`. It will be supplied automatically when the `ref_ncbi_query` column is used.
 - **ref_path**: Path to user-defined reference genomes for each sample. This can be a local file path or a URL to an online location.
@@ -76,19 +75,19 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile RUN_TOOL -resume --sample_data <TSV/CSV> --out_dir <OUTDIR>
+nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --sample_data <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
 ```
 
 Where:
 
-- `<RUN_TOOL>` is one of docker, singularity, podman, shifter, charliecloud, or conda
-- `<TSV/CSV>` is the path to the input samplesheet
-- `<OUTDIR>` is the path to where to save the output
+- `<REPLACE WITH RUN TOOL>` is one of docker, singularity, podman, shifter, charliecloud, or conda
+- `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
+- `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
 
 An actual command might look like this:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile docker -resume --sample_data ./sample_metadata.tsv --out_dir ./results
+nextflow run nf-core/pathogensurveillance -profile docker -resume --sample_data ./sample_metadata.tsv --outdir ./results
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.

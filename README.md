@@ -41,33 +41,39 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software.
-This is usually done in the form of a config profile (`RUN_TOOL` in the examples below).
+This is usually done in the form of a config profile (`<REPLACE WITH RUN TOOL>` in the examples below).
 You can chain multiple config profiles in a comma-separated string.
 Before using you own data, consider trying out a small example dataset included with the pipeline as a profile.
 Available test dataset profiles include:
 
-- `serratia`: Test profile of 10 serratia isolates from Williams et al. 2022 (https://doi.org/10.1038/s41467-022-32929-2)
-- `bordetella`: Test profile of 5 Bordetella pertussis isolates sequenced with with Illumina and Nanopore from Wagner et al. 2023
-- `salmonella`: Test profile of 5 salmonella isolates from Hawkey et al. 2024 (https://doi.org/10.1038/s41467-024-54418-4)
-- `boxwood_blight`: Test profile of 5 samples of the boxwood blight fungus Cylindrocladium buxicola from LeBlanc et al. 2020 (https://doi.org/10.1094/PHYTO-06-20-0219-FI)
-- `mycobacteroides`: Test profile of 5 Mycobacteroides abscessus samples from Bronson et al. 2021 (https://doi.org/10.1038/s41467-021-25484-9)
-- `bacteria`: Test profile of 10 mixed bacteria from various sources
-- `klebsiella`: Test profile of 10 K. pneumoniae and related species from Holt et al. 2015 (https://doi.org/10.1073/pnas.1501049112)
-- `small_genomes`: Test profile consisting of 6 samples from species with small genomes from various sources.
+- `test_serratia`: Test profile of 10 serratia isolates from Williams et al. 2022 (https://doi.org/10.1038/s41467-022-32929-2)
+- `test_bordetella`: Test profile of 5 Bordetella pertussis isolates sequenced with with Illumina and Nanopore from Wagner et al. 2023
+- `test_salmonella`: Test profile of 5 salmonella isolates from Hawkey et al. 2024 (https://doi.org/10.1038/s41467-024-54418-4)
+- `test_boxwood_blight`: Test profile of 5 samples of the boxwood blight fungus Cylindrocladium buxicola from LeBlanc et al. 2020 (https://doi.org/10.1094/PHYTO-06-20-0219-FI)
+- `test_mycobacteroides`: Test profile of 5 Mycobacteroides abscessus samples from Bronson et al. 2021 (https://doi.org/10.1038/s41467-021-25484-9)
+- `test_bacteria`: Test profile of 10 mixed bacteria from various sources
+- `test_klebsiella`: Test profile of 10 K. pneumoniae and related species from Holt et al. 2015 (https://doi.org/10.1073/pnas.1501049112)
+- `test_small_genomes`: Test profile consisting of 6 samples from species with small genomes from various sources.
 
 Adding `_full` to the end of any of these profiles will run a larger (often much larger) version of these datasets.
 
 For example:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile RUN_TOOL,bacteria -resume --out_dir test_output
+nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL>,bacteria -resume --outdir test_output
 ```
 
 To run your own input data, prepare a samplesheet as described in the "Input format" section below and run the following command:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile RUN_TOOL -resume --sample_data <TSV/CSV> --out_dir <OUTDIR>
+nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --sample_data <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
 ```
+
+Where:
+
+- `<REPLACE WITH RUN TOOL>` is one of docker, singularity, podman, shifter, charliecloud, or conda
+- `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
+- `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
 
 ## Documentation
 
