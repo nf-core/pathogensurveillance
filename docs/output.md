@@ -15,7 +15,7 @@ Not all steps will be run for all input datasets.
 For example, core gene phylogenies are only made for prokaryotes and busco gene phylogenies are only made for eukaryotes, so a dataset without both prokaryotes and eukaryotes will not have both of these outputs.
 Below is the directory structure of the all possible outputs.
 
-```
+```tree
 outdir
 ├── aligned_genes
 │   ├── busco_genes
@@ -87,7 +87,7 @@ Below is a more detailed description of each output directory.
 
 </details>
 
-FASTA files for each gene extracted from assemblies and aligned.
+FASTA files for each gene extracted from assemblies and aligned with [mafft](https://mafft.cbrc.jp/alignment/server/index.html).
 Contains sequences for both samples and references.
 
 ### Aligned reads (`bwa mem`)
@@ -128,7 +128,7 @@ These read alignments are then filtered for quality and reformatted before being
 [Bakta](https://github.com/oschwengers/bakta) is a tool for the rapid and standardised annotation of bacterial genomes and plasmids from both isolates and MAGs.
 It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
 
-### Assemblies (Spades and Flye)
+### Assemblies (`spades` and `flye`)
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -137,7 +137,7 @@ It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
   - `spades/`
     - `<Sample ID>.scaffolds.fa.gz`: Compressed assembled scaffolds in fasta format
     - `<Sample ID>.assembly.gfa.gz`: Compressed assembly graph in gfa format
-    - `<Sample ID>.contigs.fa.gz`: Compressed assembled contigs in fasta forma
+    - `<Sample ID>.contigs.fa.gz`: Compressed assembled contigs in fasta format
     - `<Sample ID>.spades.log`: Log file produced by `spades`
     - `<Sample ID>_filtered.fasta`: Quality filtered spades assembly
   - `flye/`

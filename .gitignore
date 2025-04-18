@@ -22,4 +22,11 @@ path_surveil_data
 deleteme/
 tests/output/
 test_profiles_out/
-
+.nf-test.log
+assets/main_report/.quarto
+assets/main_report/_book
+assets/main_report/_site
+assets/main_report/*_files
+assets/main_report/*.html
+assets/main_report/*.ipynb
+assets/main_report/packages.bib

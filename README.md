@@ -20,7 +20,7 @@
 ## Introduction
 
 **nf-core/pathogensurveillance** is a population genomics pipeline for pathogen identification, variant detection, and biosurveillance.
-The pipeline accepts the paths to raw reads for one or more organisms (in the form of a TSV or CSV file) and creates reports in the form of an interactive HTML document.
+The pipeline accepts paths to raw reads for one or more organisms (in the form of a TSV or CSV file) and creates reports in the form of an interactive HTML document.
 Significant features include the ability to analyze unidentified eukaryotic and prokaryotic samples, creation of reports for multiple user-defined groupings of samples, automated discovery and downloading of reference assemblies from [NCBI RefSeq](https://www.ncbi.nlm.nih.gov/refseq/), and rapid initial identification based on k-mer sketches followed by a more robust multi gene phylogeny and SNP-based phylogeny.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner.
@@ -63,7 +63,7 @@ For example:
 nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL>,bacteria -resume --outdir test_output
 ```
 
-To run your own input data, prepare a samplesheet as described in the "Input format" section below and run the following command:
+To run your own input data, prepare a samplesheet as described in the [usage documentation](docs/usage/#samplesheet-input) section below and run the following command:
 
 ```bash
 nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --sample_data <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>

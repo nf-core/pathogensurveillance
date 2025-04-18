@@ -1,9 +1,0 @@
-/.quarto/
-_book
-_site
-*_files
-*.html
-*.ipynb
-_test_data/**/quast
-_test_data/**/multiqc
-packages.bib
