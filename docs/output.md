@@ -106,7 +106,7 @@ Contains sequences for both samples and references.
 Reads are aligned to references as part of the variant calling process used to compare samples with high resolution.
 These read alignments are then filtered for quality and reformatted before being used to call variants.
 
-### Prokaryotic gene annotations (Bakta)
+### Prokaryotic gene annotations (`Bakta`)
 
 <details markdown="1">
 <summary>Output files</summary>
