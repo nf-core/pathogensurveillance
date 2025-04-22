@@ -2,10 +2,10 @@ process INITIAL_CLASSIFICATION {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::r-rentrez=1.2.3"
+    conda "bioconda::r-pathosurveilr=0.3.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'quay.io/nf-core/rentrez:0.1' :
-        'quay.io/nf-core/rentrez:0.1' }"
+        'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.3.1--r44hdfd78af_0' :
+        'quay.io/biocontainers/r-pathosurveilr:0.3.1--r44hdfd78af_0' }"
 
     input:
     tuple val(meta), path(hits)
