@@ -77,7 +77,7 @@ workflow GENOME_ASSEMBLY {
         }
         .combine(parsed_sample_data, by: 0)
         .map { sample_meta, read_paths, scaffolds, report_meta, read_paths2 ->
-            [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assebled, possibly due to short read lengh or low quality. Check Spades' logs for more details."]
+            [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assembled, possibly due to short read lengh or low quality. Check Spades' logs for more details."]
         }
     messages = messages.mix(spades_warnings)
 

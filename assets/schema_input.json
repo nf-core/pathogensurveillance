@@ -49,7 +49,7 @@
             },
             "report_group_ids": {
                 "type": "string",
-                "default": "_no_group_defined_"
+                "default": "_no_group_defined_",
                 "pattern":"^[a-zA-Z0-9]+(?:;[a-zA-Z0-9]+)*$"
             },
             "color_by": {
