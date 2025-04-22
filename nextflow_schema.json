@@ -295,13 +295,13 @@
                     "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
-                "copymode": {
+                "copy_mode": {
                     "type": "string",
-                    "default": "medium",
+                    "default": "mixed",
                     "description": "Designates which files are copied from work/ directory",
-                    "help_text": "Sets `publishDir` mode for individual files. Storage footprint of the pipeline can be quite large, and files can be saved twice: both within the work/ directory and within the published output directory. By default, this parameter is set so that intermediate files will be linked from the published directory to their location in the work/ directory instead of being stored twice.",
+                    "help_text": "Controls whether output files are copies or links. When the pipeline runs, files are stored in a temporary cache, typically in the `work` directory. Output files are then linked or copied from this temporary cache to make the output directory. Storage footprint of the pipeline can be quite large, and files can be saved twice: both within the work/ directory and within the published output directory. This parameter can be `copy`, which copies everything, `mixed` which only copies small or important results and links everything else, or `link` which links everything except the main report.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["high", "medium", "low", "none"],
+                    "enum": ["copy", "mixed", "link"],
                     "hidden": false
                 },
                 "email_on_fail": {
