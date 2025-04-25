@@ -103,7 +103,7 @@ Contains sequences for both samples and references.
 
 </details>
 
-Reads are aligned to references as part of the variant calling process used to compare samples with high resolution.
+Reads are aligned to references with [bwa mem](https://github.com/lh3/bwa?tab=readme-ov-file) as part of the variant calling process used to compare samples with high resolution.
 These read alignments are then filtered for quality and reformatted before being used to call variants.
 
 ### Prokaryotic gene annotations (`Bakta`)
@@ -150,7 +150,7 @@ It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
 
 </details>
 
-These directories contain the output of whole genome assembly of samples using `spades` for short reads and `flye` for long reads.
+These directories contain the output of whole genome assembly of samples using [spades](https://github.com/ablab/spades) for short reads and [flye](https://github.com/mikolmogorov/Flye) for long reads.
 
 ### BUSCO
 

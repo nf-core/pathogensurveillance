@@ -209,10 +209,39 @@ workflow PATHOGENSURVEILLANCE {
     group_messages = messages
         .unique()
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.tsv", "\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
         .ifEmpty([])
+
+    // Collate and save messages
+    messages
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/pipeline_info",
+            sort: true
+        ) { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            [ "messages.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+        }
+
+    // Save pipeline execution paramters
+    Channel.value(
+        """
+        command_line: ${workflow.commandLine}
+        commit_id: ${workflow.commitId}
+        container_engine: ${workflow.containerEngine}
+        profile: ${workflow.profile}
+        revision: ${workflow.revision}
+        run_name: ${workflow.runName}
+        session_id: ${workflow.sessionId}
+        start_time: ${workflow.start}
+        nextflow_version: ${nextflow.version}
+        pipeline_version: ${workflow.manifest.version}
+        """.stripIndent().trim()
+    )
+    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: "pathogensurveillance_run_info.yml")
 
     // Combine components into a single channel for the main report_meta
     report_inputs = sample_data_tsvs

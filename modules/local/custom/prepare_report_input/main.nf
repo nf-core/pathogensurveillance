@@ -20,7 +20,6 @@ process PREPARE_REPORT_INPUT {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
-    config_file_text = workflow.configFiles.collect{"  - ${it}"}.join("\n")
     """
     # Make directory for ${prefix}_inputs so that a single path can be passed as parameters
     mkdir ${prefix}_inputs
@@ -110,8 +109,6 @@ process PREPARE_REPORT_INPUT {
     group_id: ${group_meta.id}
     command_line: ${workflow.commandLine}
     commit_id: ${workflow.commitId}
-    config_files:
-    ${config_file_text}
     container_engine: ${workflow.containerEngine}
     profile: ${workflow.profile}
     revision: ${workflow.revision}
