@@ -1,6 +1,6 @@
 include { PIRATE                                              } from '../../../modules/nf-core/pirate'
 include { MAFFT_ALIGN as MAFFT_CORE                           } from '../../../modules/nf-core/mafft/align'
-include { IQTREE2 as IQTREE2_CORE                             } from '../../../modules/local/iqtree2/iqtree2'
+include { IQTREE as IQTREE_CORE                               } from '../../../modules/nf-core/iqtree'
 include { REFORMAT_PIRATE_RESULTS                             } from '../../../modules/local/custom/reformat_pirate_results'
 include { EXTRACT_FEATURE_SEQUENCES                           } from '../../../modules/local/custom/extract_feature_sequences'
 include { SUBSET_CORE_GENES                                   } from '../../../modules/local/custom/subset_core_genes'
@@ -168,6 +168,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Rename FASTA file headers to start with just sample ID for use with IQTREE
     RENAME_CORE_GENE_HEADERS ( EXTRACT_FEATURE_SEQUENCES.out.feat_seqs )
+    versions = versions.mix(RENAME_CORE_GENE_HEADERS.out.versions)
 
     // Filter for core single copy genes with no paralogs
     SUBSET_CORE_GENES (
@@ -177,6 +178,7 @@ workflow CORE_GENOME_PHYLOGENY {
         params.phylo_min_genes,
         params.phylo_max_genes
     )
+    versions = versions.mix(SUBSET_CORE_GENES.out.versions)
     messages = messages.mix (
         SUBSET_CORE_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
@@ -199,9 +201,14 @@ workflow CORE_GENOME_PHYLOGENY {
     versions = versions.mix(MAFFT_CORE.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_CORE ( MAFFT_CORE.out.fas.groupTuple(sort: 'hash'), [] )
-    versions = versions.mix(IQTREE2_CORE.out.versions)
-    trees = IQTREE2_CORE.out.phylogeny // subset_meta, tree
+    phylogeny_input = MAFFT_CORE.out.fas
+        .groupTuple(sort: 'hash')
+        .map { meta, alignments ->
+            [meta, alignments, []]
+        }
+    IQTREE_CORE ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
+    versions = versions.mix(IQTREE_CORE.out.versions)
+    trees = IQTREE_CORE.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
 

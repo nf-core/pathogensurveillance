@@ -27,7 +27,7 @@ process FILTER_ASSEMBLY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        python: \$(python --version | sed 's/Python //g')
+        biopython: \$(python -c "import Bio; print(Bio.__version__)")
     END_VERSIONS
     """
 }

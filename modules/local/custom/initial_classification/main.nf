@@ -33,6 +33,7 @@ process INITIAL_CLASSIFICATION {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+        rentrez: \$(echo \$(Rscript -e "cat(format(packageVersion('rentrez')))"))
     END_VERSIONS
     """
 }

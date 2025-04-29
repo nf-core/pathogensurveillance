@@ -2,7 +2,7 @@ process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
 
-    conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 unzip"
+    conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 conda-forge::unzip=6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'quay.io/nf-core/ncbi-datasets-cli:0.1':
         'quay.io/nf-core/ncbi-datasets-cli:0.1' }"
@@ -26,9 +26,6 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     def args = task.ext.args ?: ''
     """
-    # Test that unzip is in the docker image
-    # unzip --version
-
     # Download assemblies as zip archives
     datasets download genome accession $id --include gff3,genome --filename ${prefix}.zip
 
@@ -63,6 +60,8 @@ process DOWNLOAD_ASSEMBLIES {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         datasets: \$(datasets --version | sed -e "s/datasets version: //")
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+        unzip: \$(unzip -v | head -n 1 | awk '{print \$2}')
     END_VERSIONS
     """
 }

@@ -5,7 +5,7 @@ process REFORMAT_PIRATE_RESULTS {
     conda "bioconda::pirate=1.0.5 bioconda::perl-bioperl=1.7.8"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pirate:1.0.4--hdfd78af_2' :
-        'quay.io/biocontainers/pirate:1.0.5--hdfd78af_0' }"
+        'biocontainers/pirate:1.0.5--hdfd78af_0' }"
 
     input:
     tuple val(ref_meta), path(pirate_results)
@@ -13,8 +13,6 @@ process REFORMAT_PIRATE_RESULTS {
     output:
     tuple val(ref_meta), path("${prefix}_gene_family.tsv")    , emit: gene_fam
     tuple val(ref_meta), path("${prefix}_genePA.tsv")         , emit: gene_fam_pa
-    tuple val(ref_meta), path("${prefix}_genePAparalogs.tsv") , emit: gene_fam_para
-    tuple val(ref_meta), path("${prefix}_roary.tsv")          , emit: gene_fam_roary
     path "versions.yml"                                       , emit: versions
 
     when:
@@ -33,12 +31,6 @@ process REFORMAT_PIRATE_RESULTS {
 
     # gene/allele presence-absence
     PIRATE_to_Rtab.pl -i ${prefix}_gene_family.tsv -o ${prefix}_genePA.tsv
-
-    # paralog presence-absence (duplications = d, fission/fusions = ff)
-    paralogs_to_Rtab.pl -i ${prefix}_gene_family.tsv -o ${prefix}_genePAparalogs.tsv --type d
-
-    #create roary format output
-    PIRATE_to_roary.pl -i ${prefix}_gene_family.tsv -o ${prefix}_roary.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

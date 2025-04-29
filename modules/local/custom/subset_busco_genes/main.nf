@@ -14,7 +14,8 @@ process SUBSET_BUSCO_GENES {
 
     output:
     tuple val(group_meta), path("${prefix}_feat_seqs/cluster_*"), emit: feat_seqs
-    tuple val(group_meta), path("message_data.tsv"), emit: message_data
+    tuple val(group_meta), path("message_data.tsv")             , emit: message_data
+    path "versions.yml"                                         , emit: versions
 
 
     when:
@@ -24,5 +25,10 @@ process SUBSET_BUSCO_GENES {
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
     subset_busco_gene.R ${samp_ref_pairs} $min_genes $max_genes ${prefix}_feat_seqs ${busco_out_dirs}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+    END_VERSIONS
     """
 }

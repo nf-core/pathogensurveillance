@@ -52,7 +52,7 @@ process IQTREE {
 
     script:
     def args                        = task.ext.args           ?: ''
-    def alignment_arg               = alignment               ? "-s $alignment"                 : ''
+    def alignment_arg               = alignment               ? "-s ${alignment.join(',')}"     : ''
     def tree_arg                    = tree                    ? "-t $tree"                      : ''
     def tree_te_arg                 = tree_te                 ? "-te $tree_te"                  : ''
     def lmclust_arg                 = lmclust                 ? "-lmclust $lmclust"             : ''

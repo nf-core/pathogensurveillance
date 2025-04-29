@@ -27,7 +27,7 @@ include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow PATHOGENSURVEILLANCE {
+workflow NFCORE_PATHOGENSURVEILLANCE {
 
     take:
     sample_data_tsv

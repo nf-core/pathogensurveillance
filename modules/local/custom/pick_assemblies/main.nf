@@ -2,10 +2,10 @@ process PICK_ASSEMBLIES {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::r-rcppsimdjson=0.1.12"
+    conda "bioconda::r-pathosurveilr=0.3.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'quay.io/nf-core/rcppsimdjson:0.2' :
-        'quay.io/nf-core/rcppsimdjson:0.2' }"
+        'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.3.1--r44hdfd78af_0' :
+        'quay.io/biocontainers/r-pathosurveilr:0.3.1--r44hdfd78af_0' }"
 
     input:
     tuple val(meta), path(found_taxa), path(assem_data_tsvs)

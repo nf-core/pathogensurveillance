@@ -197,7 +197,7 @@ best_clusters <- best_clusters[is_valid]
 # Report removed samples and references
 report_group_id <- gsub(basename(args$metadata), pattern = '\\.tsv$', replacement = '')
 if (length(removed_ids) > 0) {
-    warning('Removed ', length(cluster_sizes), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ',
+    warning('Removed ', sum(! is_valid), ' clusters with fewer than ', min_cluster_size, ' samples, totaling ',
             length(removed_sample_ids), ' samples and ', length(removed_reference_ids), ' references.')
 }
 if (length(removed_sample_ids) > 0) {

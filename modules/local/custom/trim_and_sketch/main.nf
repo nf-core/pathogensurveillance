@@ -6,8 +6,8 @@ process TRIM_AND_SKETCH {
 
     conda "bioconda::khmer=3.0.0a3 bioconda::sourmash=4.8.3"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'quay.io/nf-core/khmer_sourmash:0.1' :
-        'quay.io/nf-core/khmer_sourmash:0.1' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-439995f8275a3266b2bbc34be583c6a592a1e9bf:d520fdadae9d340867a4f077df265e2aa06647f9-0' :
+        'biocontainers/mulled-v2-439995f8275a3266b2bbc34be583c6a592a1e9bf:d520fdadae9d340867a4f077df265e2aa06647f9-0' }"
 
     input:
     tuple val(meta), path(fasta)

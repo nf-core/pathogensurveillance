@@ -15,10 +15,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PATHOGENSURVEILLANCE  } from './workflows/pathogensurveillance'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { NFCORE_PATHOGENSURVEILLANCE  } from './workflows/pathogensurveillance'
+include { PIPELINE_INITIALISATION      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION          } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { getGenomeAttribute           } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 
 /*
@@ -46,7 +46,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    PATHOGENSURVEILLANCE (
+    NFCORE_PATHOGENSURVEILLANCE (
         PIPELINE_INITIALISATION.out.sample_data_tsv,
         PIPELINE_INITIALISATION.out.reference_data_tsv
     )
@@ -61,7 +61,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        PATHOGENSURVEILLANCE.out.multiqc_report
+        NFCORE_PATHOGENSURVEILLANCE.out.multiqc_report
     )
 }
 

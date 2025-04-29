@@ -1,8 +1,8 @@
-include { BUSCO_BUSCO                                          } from '../../../modules/local/busco/busco'
+include { BUSCO_BUSCO                                          } from '../../../modules/nf-core/busco/busco'
 include { BUSCO_DOWNLOAD                                       } from '../../../modules/nf-core/busco/download'
 include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../modules/local/custom/assign_context_references'
 include { MAFFT_ALIGN as MAFFT_BUSCO                           } from '../../../modules/nf-core/mafft/align'
-include { IQTREE2 as IQTREE2_BUSCO                             } from '../../../modules/local/iqtree2/iqtree2'
+include { IQTREE as IQTREE_BUSCO                               } from '../../../modules/nf-core/iqtree'
 include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/custom/subset_busco_genes'
 include { FILES_IN_DIR                                         } from '../../../modules/local/custom/files_in_dir'
 
@@ -85,7 +85,8 @@ workflow BUSCO_PHYLOGENY {
         "genome",
         "eukaryota_odb10",
         BUSCO_DOWNLOAD.out.download_dir.first(), // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
-        []
+        [],
+        true
     )
     versions = versions.mix(BUSCO_BUSCO.out.versions)
 
@@ -103,6 +104,7 @@ workflow BUSCO_PHYLOGENY {
         params.phylo_min_genes,
         params.phylo_max_genes
     )
+    versions = versions.mix(SUBSET_BUSCO_GENES.out.versions)
     messages = messages.mix (
         SUBSET_BUSCO_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
@@ -125,9 +127,14 @@ workflow BUSCO_PHYLOGENY {
     versions = versions.mix(MAFFT_BUSCO.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
-    IQTREE2_BUSCO ( MAFFT_BUSCO.out.fas.groupTuple(sort: 'hash'), [] )
-    versions = versions.mix(IQTREE2_BUSCO.out.versions)
-    trees = IQTREE2_BUSCO.out.phylogeny // subset_meta, tree
+    phylogeny_input = MAFFT_BUSCO.out.fas
+        .groupTuple(sort: 'hash')
+        .map { meta, alignments ->
+            [meta, alignments, []]
+        }
+    IQTREE_BUSCO ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
+    versions = versions.mix(IQTREE_BUSCO.out.versions)
+    trees = IQTREE_BUSCO.out.phylogeny // subset_meta, tree
         .map { [it[0].group_id, it[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
 

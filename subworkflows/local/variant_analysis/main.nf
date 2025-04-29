@@ -1,7 +1,7 @@
 include { REFERENCE_INDEX          } from '../reference_index'
 include { ALIGN_READS              } from '../align_reads'
 include { CALL_VARIANTS            } from '../call_variants'
-include { IQTREE2 as IQTREE2_SNP   } from '../../../modules/local/iqtree2/iqtree2'
+include { IQTREE as IQTREE_SNP     } from '../../../modules/nf-core/iqtree'
 include { VCF_TO_SNP_ALIGN         } from '../../../modules/local/custom/vcf_to_snp_align'
 include { SEQKIT_SLIDING           } from '../../../modules/nf-core/seqkit/sliding'
 include { ASSIGN_MAPPING_REFERENCE } from '../../../modules/local/custom/assign_mapping_reference'
@@ -188,16 +188,20 @@ workflow VARIANT_ANALYSIS {
         .map { meta, fasta -> [null, meta.group, meta.ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] }
     messages = messages.mix(too_few_samp_warnings)
 
-    IQTREE2_SNP ( align_with_samp_meta.enough, [] )
-    versions = versions.mix(IQTREE2_SNP.out.versions)
+    phylogeny_input = align_with_samp_meta.enough
+        .map { meta, alignment ->
+            [meta, alignment, []]
+        }
+    IQTREE_SNP ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
+    versions = versions.mix(IQTREE_SNP.out.versions)
 
-    phylogeny = IQTREE2_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
+    phylogeny = IQTREE_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
     snp_align = VCF_TO_SNP_ALIGN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
     vcf = CALL_VARIANTS.out.vcf.map{ [it[0].group, it[0].ref, it[1]] }
 
     results = CALL_VARIANTS.out.vcf // ref+report_meta, vcf
         .combine(VCF_TO_SNP_ALIGN.out.fasta, by:0) // ref+report_meta, vcf, align
-        .join(IQTREE2_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
+        .join(IQTREE_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
         .map{ [it[0].group, it[0].ref] + it[1..3] } // report_meta, ref_meta, vcf, align, tree
 
     emit:

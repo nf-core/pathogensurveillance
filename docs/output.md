@@ -164,7 +164,7 @@ These directories contain the output of whole genome assembly of samples using [
 
 </details>
 
-BUSCO is used to extract genes from eukaryotic assemblies for phylogenetic analysis and assess assembly completeness.
+[busco](https://busco.ezlab.org/) is used to extract genes from eukaryotic assemblies for phylogenetic analysis and assess assembly completeness.
 
 ### Downloads
 
@@ -201,7 +201,7 @@ This directory contains anything the pipeline downloads, such as assemblies, rea
 
 </details>
 
-`fastp` is used to trim adapters and for other quality control.
+[fastp](https://github.com/OpenGene/fastp) is used to trim adapters and for other quality control.
 It also produces a useful report on the quality of the sample.
 
 ### Sample and reference metadata
@@ -244,7 +244,7 @@ This will allow you to troubleshoot errors with the running of the pipeline, and
 
 </details>
 
-Pirate is used to identify orthologous gene clusters, which are used later in the pipeline to create phylogenies of prokaryotes with the maximum number of shared genes without relying on annotations.
+[Pirate](https://github.com/SionBayliss/PIRATE) is used to identify orthologous gene clusters, which are used later in the pipeline to create phylogenies of prokaryotes with the maximum number of shared genes without relying on annotations.
 
 ### Percentage of conserved proteins (POCP)
 
@@ -256,7 +256,7 @@ Pirate is used to identify orthologous gene clusters, which are used later in th
 
 </details>
 
-POCP is calculated as a metric to compare samples to each other and to references in regards to shared gene content.
+POCP is calculated as a metric to compare samples to each other and to references in regards to shared gene content using a custom script.
 
 ### Quality control reports
 
@@ -274,7 +274,7 @@ POCP is calculated as a metric to compare samples to each other and to reference
 </details>
 
 Various tools are used to check reads and assemblies for quality.
-The outputs of these tools are compiled using MultiQC.
+The outputs of these tools are compiled using [MultiQC](https://github.com/MultiQC/MultiQC).
 
 ### Reference data
 
@@ -344,7 +344,7 @@ It contains selected and renamed outputs from the pipeline present in other outp
 
 </details>
 
-Tables with information used to make initial identifications of samples from the BBMap `sendsketch` tool.
+Tables with information used to make initial identifications of samples from the [BBMap sendsketch](https://sourceforge.net/projects/bbmap/) tool.
 
 ### Hash-based comparisons
 
@@ -361,7 +361,7 @@ Tables with information used to make initial identifications of samples from the
 
 </details>
 
-In order to select references to use with samples and provide a rough identification, all samples and references are sketched with `sourmash sketch` and all pairwise comparisons of sketches are made with `sourmash compare`.
+In order to select references to use with samples and provide a rough identification, all samples and references are sketched with [sourmash sketch](https://sourmash.readthedocs.io/en/latest/) and all pairwise comparisons of sketches are made with [sourmash compare](https://sourmash.readthedocs.io/en/latest/).
 
 ### Trees (`iqtree2`)
 
@@ -380,7 +380,7 @@ In order to select references to use with samples and provide a rough identifica
 
 Various trees are produced by the pipeline to compare the samples to references and to each other.
 To put samples in context of reference genomes and provide data that can be useful in identification, core genes from prokaryotes and BUSCO genes from eukaryotes are used to produce trees with `iqtree2`.
-SNPs identified by variant calling are also used to create a tree with `iqtree2` for high-resolution sample comparison.
+SNPs identified by variant calling are also used to create a tree with [iqtree2](https://github.com/iqtree/iqtree2) for high-resolution sample comparison.
 
 ### Variants (`graphtyper genotype`)
 
@@ -397,4 +397,4 @@ SNPs identified by variant calling are also used to create a tree with `iqtree2`
 
 </details>
 
-Variants are called against selected references to do a high-resolution comparison of samples.
+Variants are called against selected references to do a high-resolution comparison of samples using [graphtyper](https://github.com/DecodeGenetics/graphtyper).

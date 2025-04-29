@@ -2,10 +2,10 @@ process EXTRACT_FEATURE_SEQUENCES {
     tag "$ref_meta.id"
     label 'process_low'
 
-    conda "conda-forge::mafft=7.526 bioconda::perl-bioperl=1.7.8 conda-forge::parallel=20230522"
+    conda "bioconda::pirate=1.0.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'zachary-foster/mafft-perl':
-        'zachary-foster/mafft-perl' }"
+        'https://depot.galaxyproject.org/singularity/pirate:1.0.5--hdfd78af_0' :
+        'biocontainers/pirate:1.0.5--hdfd78af_0' }"
 
     input:
     tuple val(ref_meta), path(pirate_results)
