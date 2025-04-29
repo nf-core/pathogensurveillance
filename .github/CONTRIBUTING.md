@@ -123,10 +123,3 @@ To get started:
 Devcontainer specs:
 
 - [DevContainer config](.devcontainer/devcontainer.json)
-
-## How to add new profile configurations
-
-1. Choose a short (a few words) unique name for the profile that only has lowercase letters and underscores. This will be referred to as the `<profile ID>` here.
-2. Add a new CSV with the input metadata to `test/data/metadata/`, named `<Profile ID>.csv`. If a reference metadata file is needed, add it here too and call it `<Profile ID>_ref_data.csv`.
-3. Copy an existing profile file in `conf/`, rename it to `<profile ID>.config`, and replace any mentions of the copied profile with the profile ID within the text of the file. You can also add any parameters for the pipline here, analogous to how `input` is defined.
-4. Add a line to `nextflow.config` inside the `profiles {` section with the syntax `<Profile ID>   { includeConfig 'conf/<Profile ID>.config' }`
