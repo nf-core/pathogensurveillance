@@ -2,7 +2,7 @@ process REFORMAT_PIRATE_RESULTS {
     tag "$ref_meta.id"
     label 'process_single'
 
-    conda "bioconda::pirate=1.0.5 bioconda::perl-bioperl=1.7.8"
+    conda "bioconda::pirate=1.0.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pirate:1.0.4--hdfd78af_2' :
         'biocontainers/pirate:1.0.5--hdfd78af_0' }"

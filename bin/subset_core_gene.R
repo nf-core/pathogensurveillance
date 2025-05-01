@@ -47,10 +47,10 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella_gene_family.tsv',
-#           '/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella_feat_seqs_renamed/',
-#           '/home/fosterz/projects/pathogensurveillance/work/47/6d5eed373f2d364d1a59575efecaff/validation_salmonella.tsv',
-#           '10', '500', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
+# args <- c('~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_gene_family.tsv',
+#           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_feature_sequences',
+#           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all.tsv',
+#           '10', '100', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "tsv_output_path", "fasta_output_path")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
@@ -248,6 +248,7 @@ for (index in seq_along(output_cluster_data)) {
         out_path <- file.path(out_dir_path, paste0(gene_id, '.fasta'))
         seqs <- read_fasta(in_path)
         names(seqs) <- trimws(names(seqs))
+        names(seqs) <- sub(names(seqs), pattern = '.*genome:(.*)\tgene:.*', replacement = '\\1')
         samples_in_subset <- names(output_cluster_data[[index]])[names(output_cluster_data[[index]]) %in% c(sample_ids, ref_ids)]
         seqs <- seqs[samples_in_subset]
         seqs <- seqs[!is.na(seqs)]

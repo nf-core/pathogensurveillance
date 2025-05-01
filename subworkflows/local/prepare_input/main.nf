@@ -3,7 +3,7 @@
 //
 include { BBMAP_SENDSKETCH       } from '../../../modules/nf-core/bbmap/sendsketch'
 include { SAMPLESHEET_CHECK      } from '../../../modules/local/custom/samplesheet_check'
-include { SRATOOLS_FASTERQDUMP   } from '../../../modules/local/sratools/fasterqdump'
+include { SRATOOLS_FASTERQDUMP   } from '../../../modules/nf-core/sratools/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
 include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/custom/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_assemblies'
@@ -72,7 +72,7 @@ workflow PREPARE_INPUT {
             [ncbi_acc_meta, ncbi_acc_meta.id]
         }
         .unique()
-    SRATOOLS_FASTERQDUMP ( ncbi_acc )
+    SRATOOLS_FASTERQDUMP ( ncbi_acc, [], [] )
     versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)

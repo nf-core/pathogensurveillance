@@ -4,7 +4,6 @@ include { IQTREE as IQTREE_CORE                               } from '../../../m
 include { REFORMAT_PIRATE_RESULTS                             } from '../../../modules/local/custom/reformat_pirate_results'
 include { EXTRACT_FEATURE_SEQUENCES                           } from '../../../modules/local/custom/extract_feature_sequences'
 include { SUBSET_CORE_GENES                                   } from '../../../modules/local/custom/subset_core_genes'
-include { RENAME_CORE_GENE_HEADERS                            } from '../../../modules/local/custom/rename_core_gene_headers'
 include { CALCULATE_POCP                                      } from '../../../modules/local/custom/calculate_pocp'
 include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_CORE_REFERENCES } from '../../../modules/local/custom/assign_context_references'
 include { MAKE_GFF_WITH_FASTA                                 } from '../../../modules/local/custom/make_gff_with_fasta'
@@ -161,18 +160,14 @@ workflow CORE_GENOME_PHYLOGENY {
         REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
     )
 
-    // Extract sequences of all genes (does not align, contrary to current name)
+    // Extract sequences of all genes
     EXTRACT_FEATURE_SEQUENCES ( good_pirate_results )
     versions = versions.mix(EXTRACT_FEATURE_SEQUENCES.out.versions)
-
-    // Rename FASTA file headers to start with just sample ID for use with IQTREE
-    RENAME_CORE_GENE_HEADERS ( EXTRACT_FEATURE_SEQUENCES.out.feat_seqs )
-    versions = versions.mix(RENAME_CORE_GENE_HEADERS.out.versions)
 
     // Filter for core single copy genes with no paralogs
     SUBSET_CORE_GENES (
         REFORMAT_PIRATE_RESULTS.out.gene_fam
-            .join(RENAME_CORE_GENE_HEADERS.out.feat_seqs)
+            .join(EXTRACT_FEATURE_SEQUENCES.out.feat_seqs)
             .join(samp_ref_pairs),
         params.phylo_min_genes,
         params.phylo_max_genes

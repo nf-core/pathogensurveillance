@@ -8,13 +8,13 @@ process SRATOOLS_FASTERQDUMP {
         'biocontainers/mulled-v2-5f89fe0cd045cb1d615630b9261a1d17943a9b6a:2f4a4c900edd6801ff0068c2b3048b4459d119eb-0' }"
 
     input:
-    tuple val(meta), path(sra)
+    tuple val(meta), val(sra)
     path ncbi_settings
     path certificate
 
     output:
-    tuple val(meta), path('*.fastq.gz'), emit: reads
-    path "versions.yml"                , emit: versions
+    tuple val(meta), path("${prefix}*.fastq.gz"), emit: reads
+    path "versions.yml"                         , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,11 +22,7 @@ process SRATOOLS_FASTERQDUMP {
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def outfile = "${prefix}.fastq"
-    def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
-    // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and
-    // avoids the '.' in the path bug: https://github.com/ncbi/sra-tools/issues/865
+    prefix = task.ext.prefix ?: "${meta.id}"
     def key_file = ''
     if (certificate.toString().endsWith('.jwt')) {
         key_file += " --perm ${certificate}"
@@ -39,11 +35,9 @@ process SRATOOLS_FASTERQDUMP {
     fasterq-dump \\
         $args \\
         --threads $task.cpus \\
-        --outfile $outfile \\
         ${key_file} \\
         ${sra}
 
-    $exclude_third
 
     pigz \\
         $args2 \\

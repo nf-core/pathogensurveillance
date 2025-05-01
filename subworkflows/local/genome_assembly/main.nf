@@ -1,7 +1,7 @@
 include { FASTP                 } from '../../../modules/nf-core/fastp'
 include { SPADES                } from '../../../modules/nf-core/spades'
 include { FILTER_ASSEMBLY       } from '../../../modules/local/custom/filter_assembly'
-include { QUAST                 } from '../../../modules/local/quast/quast'
+include { QUAST                 } from '../../../modules/nf-core/quast'
 include { UNTAR                 } from '../../../modules/nf-core/untar'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'
 include { FLYE as FLYE_PACBIO   } from '../../../modules/nf-core/flye'
@@ -104,10 +104,7 @@ workflow GENOME_ASSEMBLY {
         }
         .unique()
     QUAST (
-        filtered_assembly
-            .map { sample_meta, assembly ->
-                [sample_meta, assembly, [], []]
-            }
+        filtered_assembly, [[], []], [[],[]]
     )
     versions = versions.mix(QUAST.out.versions)
 
