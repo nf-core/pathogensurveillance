@@ -1,0 +1,460 @@
+---
+title: Pathogen Surveillance Report
+params:
+    inputs: ""
+execute:
+    echo: false
+bibliography: references.bib
+nocite: |
+    @qin2014proposed, @kurtzer2017singularity, @anaconda
+# adds literature citations that aren't referenced within the report - important when citation isn't associated with a program
+---
+
+```{r knitr_settings}
+knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FALSE)
+```
+
+```{r load_libraries, include=FALSE}
+library(PathoSurveilR)
+```
+
+# Summary
+
+```{r}
+run_info <- run_info_parsed(params$inputs)
+group <- run_info$group_id
+sample_data <- sample_meta_parsed(params$inputs)
+```
+
+This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-co.re/pathogensurveillance/{{< var version >}}) pipeline.
+
+* **Report group:** `r group`
+* **Sample count:** `r nrow(sample_data)`
+* **Last updated:** `r format(Sys.time(), '%B %d , %Y')`
+* **Pipeline version:** {{< var version >}}
+
+## {{< bi info-circle >}} Pipeline status
+
+The pipeline finished execution.
+Warning or error messages describing problems encountered in the analysis might be provided below.
+
+```{r}
+no_messages = nrow(status_message_parsed(params$inputs)) == 0
+```
+
+
+::: {.panel-tabset}
+
+## Summary
+
+```{r, eval=!no_messages}
+cat(no_messages)
+status_message_table(params$inputs, summarize_by = 'workflow', interactive = TRUE)
+```
+
+```{r, eval=!no_messages, results='asis'}
+cat(
+'
+::: {.callout-tip collapse="true"}
+## About this table
+
+The number and severity of issues experienced by the pipeline.
+:::
+')
+```
+
+```{r, results='asis', eval=no_messages}
+cat('✅  **No issues reported.**')
+```
+
+
+## Details
+
+```{r detailed-groups-table}
+status_message_table(params$inputs, interactive = TRUE)
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+A list of issues reported by the pipeline during execution. When relevant, the sample IDs or reference IDs associated with the issue are included.
+:::
+
+:::
+
+## {{< bi clipboard-data >}} Input data
+
+```{r}
+sample_meta_table(params$inputs, interactive = TRUE)
+```
+
+
+# Identification
+
+## {{< fa question-circle >}}  Initial identification
+
+The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
+These are intended to be preliminary identifications.
+For more robust identifications based on whole genome sequences, see "Phylogenetic context" section below.
+
+::: panel-tabset
+### Taxonomic classification summary
+
+```{r}
+top_hits <- sendsketch_parsed(params$inputs, only_best = TRUE)
+unique_tax <- unique(sub(top_hits$taxonomy, pattern = ';s:(.+);.+$', replacement = ';s:\\1')) # ignore below species level information
+is_single_taxon <- length(unique_tax) == 1
+```
+
+```{r fig.height = 8, eval = !is_single_taxon}
+sendsketch_taxonomy_plot(params$inputs, interactive = TRUE)
+```
+
+```{r, results='asis', eval = !is_single_taxon}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the distribution of tentative taxonomic classifications for all samples.
+Only the "highest scoring" results for each sample is considered.
+
+Hover your cursor over parts of the sunburst plot will display the number of samples in each taxon.
+Clicking on a section will subset the plot to that taxon.
+Clicking on the middle will undo the subset.
+:::
+')
+```
+
+```{r, results='asis', eval = is_single_taxon}
+n_samp <- nrow(top_hits)
+formatted_classification <- gsub(unique_tax, pattern = "[a-z]+:", replacement = "")
+formatted_classification <- gsub(unique_tax, pattern = ";", replacement = " > ")
+cat(paste0(
+    "Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
+    " identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
+    "**", formatted_classification, "**"
+))
+```
+
+
+### Per-sample classification
+
+```{r sketchtable, fig.width = 5}
+sendsketch_table(params$inputs, interactive = TRUE)
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the "highest scoring" tentative taxonomic classification for each sample.
+Included metrics can provide insights into how each sample compares with reference genomes on online databases and the likelihood these comparisons are valid.
+
+* **Sample:** The sample ID submitted by the user.
+* **WKID:** Weighted k-mer Identity, adjusted for genome size differences.
+* **ANI:** An estimate of average nucleotide identity (ANI), derived from WKID and kmer length.
+* **Completeness:** The percentage of the reference genome represented in the query.
+* **Top Hit:** The name of the reference genome most similar to each sample based on the scoring criteria used.
+:::
+
+:::
+
+## {{< iconify fluent-emoji-high-contrast id-button >}} Most similar organisms
+
+::: panel-tabset
+### ANI top matches
+
+```{r}
+estimated_ani_match_table(params$inputs, interactive = TRUE)
+```
+
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Average Nucleotide Identity (ANI) between each sample and the two references most similar to it based on this measure.
+ANI is used to measure how similar the shared portion of two genomes are.
+Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
+:::
+
+
+### ANI heatmap
+
+```{r ani_heatmap}
+estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
+```
+
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the similarity of all samples and references to each other.
+These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
+These measurements are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
+:::
+
+
+### POCP top matches
+
+```{r}
+pocp_matrix <- pocp_matrix_parsed(params$inputs)
+```
+
+```{r eval=length(pocp_matrix) > 0}
+pocp_match_table(params$inputs, interactive = TRUE)
+```
+
+```{r, results='asis', eval=length(pocp_matrix) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this table
+
+This table shows the Percentage Of Conserved Proteins (POCP) between each sample and the 2 references most similar to it based on this measure.
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
+:::
+')
+```
+
+```{r, results='asis', eval=length(pocp_matrix) == 0}
+cat('
+POPC not calculated.
+')
+```
+
+
+### POCP heatmap
+
+```{r pocp_heatmap, eval=length(pocp_matrix) > 0}
+pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
+```
+
+```{r, results='asis', eval = length(pocp_matrix) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This plot shows the results of comparing the protein content of all samples and references to each other.
+POCP is used to measure the proportion of proteins shared between two genomes.
+Which proteins are shared is determined from pairwise comparisons of all proteins between all genomes.
+The POCP between two genomes is the sum of the number of shared proteins in each genome divided by the sum of the number of total proteins in each genome [@qin2014proposed].
+Currently, POCP is only calculated for Prokaryotes.
+:::
+')
+```
+
+```{r, results='asis', eval = length(pocp_matrix) == 0}
+cat('
+POPC not calculated.
+')
+```
+
+:::
+
+## {{< iconify tdesign tree-round-dot-vertical >}} Phylogenetic context
+
+Shown are phylogenetic trees of samples with references sequences downloaded from [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) meant to provide a reliable identification using genome-scale data.
+The accuracy of this identification depends on the presence of close reference sequences in RefSeq and the accuracy of the initial identification.
+
+### Multigene phylogeny
+
+```{r}
+core_plots <- multigene_tree_plot(params$inputs, interactive = FALSE)
+```
+
+```{r results='asis', eval = length(core_plots) > 0}
+plot_one <- function(x) {
+    print(core_plots[[x]])
+}
+tip_count <- sum(core_plots[[1]]$data$isTip)
+max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
+print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```
+
+```{r, results='asis', eval = length(core_plots) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This a multigene phylogeny of samples with reference genomes for context.
+It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
+:::
+')
+```
+
+```{r, results='asis', eval = length(core_plots) == 0}
+cat('
+Could not generate core genome phylogeny.
+')
+```
+
+# Genetic diversity
+
+## {{< iconify healthicons dna-outline >}} SNP trees
+
+```{r}
+snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
+```
+
+
+```{r, eval = length(snp_plots) > 0, results='asis'}
+plot_one <- function(x) {
+    print(snp_plots[[x]])
+}
+tip_count <- sum(snp_plots[[1]]$data$isTip)
+max_label_size <- max(nchar(snp_plots[[1]]$data$label), na.rm = TRUE)
+print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```
+
+
+```{r, results='asis', eval = length(snp_plots) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This is a representation of a Single Nucleotide Polymorphism (SNP) tree, depicting the genetic relationships among samples in comparison to a reference assembly.
+
+The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together.
+
+Question-does it make sense to be showing the reference within the tree?
+:::
+')
+```
+
+```{r results='asis', eval = length(snp_plots) <= 0}
+cat('
+There is no tree to draw.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
+')
+```
+
+
+## {{< iconify ph share-network-duotone >}} Minimum spanning network
+
+```{r eval = length(variant_align_path(params$inputs)) > 0}
+threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
+align_data <- variant_align_path_data(params$inputs)
+alignments <- variant_align_parsed(params$inputs)
+alignments <- alignments[!unlist(lapply(alignments, is.null))]
+alignments <- alignments[unlist(lapply(alignments, nrow)) > 3]
+align_data <- align_data[align_data$path %in% names(alignments), ]
+sample_data <- sample_meta_parsed(params$inputs)
+ref_data <- ref_meta_parsed(params$inputs)
+```
+
+```{r plot_msns, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
+# Find which columns are used to provide colors to the trees, if any
+ids_used <- unique(unlist(lapply(alignments, function(a) {
+    if (is.null(a)) {
+        return(character(0))
+    } else {
+        return(rownames(a))
+    }
+})))
+color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
+color_by_cols <- color_by_cols[! is.na(color_by_cols)]
+
+plot_one <- function(ref_id, threshold, color_by = NULL) {
+    align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
+    align_without_ref <- align[rownames(align) != ref_id, ]
+    PathoSurveilR:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
+}
+
+plot_vars <- list(
+    Reference = align_data$ref_id,
+    Threshold = threshold_options
+)
+if (length(color_by_cols) > 0) {
+    plot_vars$Color = unlist(color_by_cols)
+}
+print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn', width = 1500, height = 1200, res = 175)
+```
+
+
+```{r, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
+cat('
+::: {.callout-tip collapse="true"}
+
+## About this plot
+
+This figure depicts a minimium spanning network (MSN).
+The nodes represent unique multiocus genotypes, and the size of nodes is proportional to the # number of samples that share the same genotype.
+
+The edges represent the SNP differences between two given genotypes, and the darker the color of the edges, the fewer SNP differences between the two.
+
+Note: within these MSNs, edge lengths are not proportional to SNP differences.
+:::
+')
+```
+
+```{r, results='asis', eval = length(variant_align_path(params$inputs)) <= 0}
+cat('
+Could not generate minimum spanning networks.
+This can happen when there are too few samples or too few SNPs.
+See staus messages at the start of the report for details.
+')
+```
+
+
+# Software and references
+
+## {{< fa flask >}} Methods
+
+The `pathogen surveillance` pipeline used the following tools that should be referenced as appropriate:
+
+- A sample is first identified to genus using sendsketch and further identified to species using sourmash [@brown2016sourmash].
+- The `nextflow` data-driven computational pipeline enables deployment of complex parallel and reactive workflows [@di2017nextflow].
+
+## {{< bi gear-wide-connected >}} Analysis software
+
+```{r}
+# Parse version data
+version_data <- software_version_parsed(params$inputs)
+
+# Generate citation list based on contents of version data table, .bib file, and .csv file used to index .bib file with program names
+reflist <- read.csv(file = 'references.csv')
+version_data$citation <- reflist[match(version_data$program, reflist$program), 'citation']
+knitr::kable(version_data)
+```
+
+## R packages used
+
+```{r, include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+    .packages(), 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
+
+```{r}
+sessionInfo()
+```
+
+## {{< bi file-earmark-pdf >}} References
+
+::: {#refs}
+:::
+
+# About
+
+## {{< bi file-earmark-person >}} Contributors
+The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+
+## {{< bi wallet2 >}} Funding
+This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grants 2021-67021-34433, 2023-67013-39918 to JHC and NJG and ARS Project 2072-22000-045-000-D to NJG.
+
+## {{< bi github >}} Contribute
+
+To contribute, provide feedback, or report bugs please visit our [github repository](https://github.com/nf-core/pathogensurveillance).
+
+## {{< ai open-access >}} Citations
+
+Please cite this pipeline and nf-core in publications as follows:
+
+{{< bi file-earmark-pdf-fill >}} Foster et al. 2025. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+
+{{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35: 316--19. [https://doi.org/10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820).
+
+## {{< bi wrench-adjustable >}} Other tools
+
+Icons for this report were sampled from [Bootstrap Icons](https://icons.getbootstrap.com), [Freepick](https://www.freepik.com), [Iconify](https://icon-sets.iconify.design), [Academicons](https://jpswalsh.github.io/academicons/), and [Font Awesome](https://fontawesome.com) and the report was rendered in quarto {{< iconify simple-icons:quarto >}}.

@@ -4,10 +4,12 @@ lint:
   pipeline_todos: false
   template_strings: false
 nf_core_version: 3.2.1
+  files_unchanged:
+    - .github/PULL_REQUEST_TEMPLATE.md
 repository_type: pipeline
 template:
-  author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.\
-    \ Bocardo, Hung Phan, Je\uFB00 H. Chang, Niklaus J. Gr\xFCnwald"
+  author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.
+    Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald"
   description: Surveillance of plant pathogens using high-throughput sequencing
   force: false
   is_nfcore: true
