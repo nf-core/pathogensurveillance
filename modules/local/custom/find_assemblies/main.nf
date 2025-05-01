@@ -8,7 +8,7 @@ process FIND_ASSEMBLIES {
         'docker.io/staphb/ncbi-datasets:16.35.0' }"
 
     input:
-    val taxon // There is no meta because we dont want to cache based only the taxon
+    val taxon
 
     output:
     tuple val(taxon), path(output_path), emit: stats

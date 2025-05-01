@@ -6,7 +6,6 @@ include { EXTRACT_FEATURE_SEQUENCES                           } from '../../../m
 include { SUBSET_CORE_GENES                                   } from '../../../modules/local/custom/subset_core_genes'
 include { RENAME_CORE_GENE_HEADERS                            } from '../../../modules/local/custom/rename_core_gene_headers'
 include { CALCULATE_POCP                                      } from '../../../modules/local/custom/calculate_pocp'
-include { FILES_IN_DIR                                        } from '../../../modules/local/custom/files_in_dir'
 include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_CORE_REFERENCES } from '../../../modules/local/custom/assign_context_references'
 include { MAKE_GFF_WITH_FASTA                                 } from '../../../modules/local/custom/make_gff_with_fasta'
 include { BAKTA_BAKTA                                         } from '../../../modules/nf-core/bakta/bakta'
@@ -195,9 +194,14 @@ workflow CORE_GENOME_PHYLOGENY {
     // Align each gene family with mafft
     core_genes = SUBSET_CORE_GENES.out.feat_seq // group_meta, [gene_dirs]
         .transpose() // group_meta, gene_dir
-        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] } // subset_meta, gene_dir
-    FILES_IN_DIR ( core_genes )
-    MAFFT_CORE ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
+        .map { report_meta, feat_seq_dir ->
+            [
+                [id: "${report_meta.id}_${feat_seq_dir.baseName}", group_id: report_meta],
+                files(feat_seq_dir.resolve('*.*'), checkIfExists: true)
+            ]
+        }
+        .transpose()
+    MAFFT_CORE ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
     versions = versions.mix(MAFFT_CORE.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes

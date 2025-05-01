@@ -25,7 +25,7 @@ process EXTRACT_FEATURE_SEQUENCES {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mafft: \$(mafft --version 2>&1 | sed 's/^v//' | sed 's/ (.*)//')
+        pirate: \$( echo \$( PIRATE --version 2>&1) | sed 's/PIRATE //' )
     END_VERSIONS
     """
 }

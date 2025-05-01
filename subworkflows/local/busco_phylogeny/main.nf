@@ -4,7 +4,6 @@ include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../
 include { MAFFT_ALIGN as MAFFT_BUSCO                           } from '../../../modules/nf-core/mafft/align'
 include { IQTREE as IQTREE_BUSCO                               } from '../../../modules/nf-core/iqtree'
 include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/custom/subset_busco_genes'
-include { FILES_IN_DIR                                         } from '../../../modules/local/custom/files_in_dir'
 
 workflow BUSCO_PHYLOGENY {
 
@@ -90,7 +89,6 @@ workflow BUSCO_PHYLOGENY {
     )
     versions = versions.mix(BUSCO_BUSCO.out.versions)
 
-
     // Combine BUSCO output by gene for each report group
     sorted_busco_data = busco_input
         .combine(BUSCO_BUSCO.out.busco_dir, by: 0)
@@ -121,9 +119,14 @@ workflow BUSCO_PHYLOGENY {
     // Align each gene family with mafft
     core_genes = SUBSET_BUSCO_GENES.out.feat_seqs
         .transpose()
-        .map { [[id: "${it[0].id}_${it[1].baseName}", group_id: it[0]], it[1]] }
-    FILES_IN_DIR ( core_genes )
-    MAFFT_BUSCO ( FILES_IN_DIR.out.files.transpose(), [[], []], [[], []], [[], []], [[], []], [[], []], false )
+        .map { report_meta, feat_seq_dir ->
+            [
+                [id: "${report_meta.id}_${feat_seq_dir.baseName}", group_id: report_meta],
+                files(feat_seq_dir.resolve('*.*'), checkIfExists: true)
+            ]
+        }
+        .transpose()
+    MAFFT_BUSCO ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
     versions = versions.mix(MAFFT_BUSCO.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes

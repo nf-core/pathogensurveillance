@@ -13,7 +13,6 @@ include { GENOME_ASSEMBLY             } from '../subworkflows/local/genome_assem
 include { BUSCO_PHYLOGENY             } from '../subworkflows/local/busco_phylogeny'
 include { INITIAL_QC_CHECKS           } from '../subworkflows/local/initial_qc_checks'
 include { MAIN_REPORT                 } from '../modules/local/custom/main_report'
-include { RECORD_MESSAGES             } from '../modules/local/custom/record_messages'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/custom/download_assemblies'
 include { PREPARE_REPORT_INPUT        } from '../modules/local/custom/prepare_report_input'
 include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'

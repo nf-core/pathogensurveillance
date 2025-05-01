@@ -1,5 +1,4 @@
 include { GRAPHTYPER_GENOTYPE       } from '../../../modules/local/graphtyper/genotype'
-include { MAKE_REGION_FILE          } from '../../../modules/local/custom/make_region_file'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/nf-core/graphtyper/vcfconcatenate'
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
 include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'
@@ -16,23 +15,50 @@ workflow CALL_VARIANTS {
     versions = Channel.empty()
 
     // group samples by reference genome and group
-    //    ch_ref_grouped: [val(ref+group_meta), file(ref), file(samtools_fai), file(picard_dict), [val(meta)], [file(bam)],  [file(bam_bai)]]
     ch_ref_grouped = ch_input
-        .map { [[id: "${it[5].id}_${it[3].id}", group: it[5], ref: it[3]], it[0], it[1], it[2], it[4], it[6], it[7]] }
+        .map { sample_meta, bam, bai, ref_meta, ref, report_meta, fai, dict ->
+            [[id: "${report_meta.id}_${ref_meta.id}", group: report_meta, ref: ref_meta], sample_meta, bam, bai, ref, fai, dict]
+        }
         .groupTuple(by: 0, sort: 'hash')
-        .map { [it[0], it[4].sort()[0], it[5].sort()[0], it[6].sort()[0], it[1], it[2], it[3]] } // remove redundant reference genome paths
+        .map { combined_meta, sample_meta, bam, bai, ref, fai, dict ->
+            [combined_meta, sample_meta, bam, bai, ref.sort()[0], fai.sort()[0], dict.sort()[0]]
+        }
 
     // make list of chromosome (fasta headers) names compatible with graphtyper
-    ch_ref = ch_ref_grouped.map { it[0..1] }
-    MAKE_REGION_FILE ( ch_ref )
+    combined_meta_key = ch_ref_grouped
+        .map{ combined_meta, sample_meta, bam, bai, ref, fai, dict ->
+            [combined_meta.id, combined_meta]
+        }
+        .unique()
+    region_files = ch_ref_grouped
+        .map { combined_meta, sample_meta, bam, bai, ref, fai, dict ->
+            [combined_meta, ref]
+        }
+        .splitFasta( record: [id: true], elem: 1 )
+        .collectFile(newLine: true) { combined_meta, header ->
+            [ "${combined_meta.id}.txt", header.id ]
+        }
+        .map { [it.getSimpleName(), it] }
+        .combine(combined_meta_key, by:0) // add back the full combined meta since collectFile only preserves the ID as a file name
+        .map { combined_meta_id, region_path, combined_meta ->
+            [combined_meta, region_path]
+        }
 
     // Run graphtyper on each group of samples for all chromosomes
-    ch_ref_grouped = ch_ref_grouped.join(MAKE_REGION_FILE.out.regions) // make inputs in same order
+    ch_ref_grouped = ch_ref_grouped.join(region_files) // make inputs in same order
     GRAPHTYPER_GENOTYPE (
-        ch_ref_grouped.map { [it[0], it[5], it[6]] },
-        ch_ref_grouped.map { [it[0], it[1]] },
-        ch_ref_grouped.map { [it[0], it[2]] },
-        ch_ref_grouped.map { it[7] },
+        ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [combined_meta, bam, bai]
+        },
+        ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [combined_meta, ref]
+        },
+        ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [combined_meta, fai]
+        },
+        ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [region_file]
+        },
     )
     versions = versions.mix(GRAPHTYPER_GENOTYPE.out.versions)
 
@@ -45,20 +71,38 @@ workflow CALL_VARIANTS {
     versions = versions.mix(TABIX_TABIX.out.versions)
 
     // Make .gzi file from reference in case it is gzipped
-    TABIX_BGZIP ( ch_ref )
+    TABIX_BGZIP (
+        ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [combined_meta, ref]
+        }
+    )
     versions = versions.mix(TABIX_BGZIP.out.versions)
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
-    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  //
-        .join(TABIX_TABIX.out.tbi) // [val(ref+group_meta), file(vcf), file(tbi)]
-        .join(ch_ref_grouped.map { it[0..3] })
-        .join(TABIX_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(samtools_fai), file(picard_dict), file(gzi)]]
+    vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // make inputs in same order
+        .join(TABIX_TABIX.out.tbi)
+        .join(
+            ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+                [combined_meta, ref, fai, dict]
+            }
+        )
+        .join(TABIX_BGZIP.out.gzi) // [val(ref+group_meta), file(vcf), file(tbi), file(ref), file(fai), file(dict), file(gzi)]]
     GATK4_VARIANTFILTRATION (
-        vf_input.map { it[0..2] },
-        vf_input.map { [it[0], it[3]] },
-        vf_input.map { [it[0], it[4]] },
-        vf_input.map { [it[0], it[5]] },
-        vf_input.map { [it[0], it[6]] }
+        vf_input.map { combined_meta, vcf, tbi, ref, fai, dict, gzi ->
+            [combined_meta, vcf, tbi]
+        },
+        vf_input.map { combined_meta, vcf, tbi, ref, fai, dict, gzi ->
+            [combined_meta, ref]
+        },
+        vf_input.map { combined_meta, vcf, tbi, ref, fai, dict, gzi ->
+            [combined_meta, fai]
+        },
+        vf_input.map { combined_meta, vcf, tbi, ref, fai, dict, gzi ->
+            [combined_meta, dict]
+        },
+        vf_input.map { combined_meta, vcf, tbi, ref, fai, dict, gzi ->
+            [combined_meta, gzi]
+        }
     )
     versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 
@@ -67,8 +111,11 @@ workflow CALL_VARIANTS {
     versions = versions.mix(VCFLIB_VCFFILTER.out.versions)
 
     emit:
-    vcf      = VCFLIB_VCFFILTER.out.vcf               // val(ref+group_meta), file(vcf)
-    samples  = ch_ref_grouped.map { [it[0], it[4]] }  // val(ref+group_meta), [meta]
-    versions = versions                               // versions.yml
+    vcf      = VCFLIB_VCFFILTER.out.vcf
+    samples  = ch_ref_grouped
+        .map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
+            [combined_meta, sample_meta]
+        }
+    versions = versions
 }
 

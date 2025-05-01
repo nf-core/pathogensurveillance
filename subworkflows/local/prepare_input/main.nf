@@ -10,7 +10,7 @@ include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_asse
 include { PARSE_ASSEMBLIES       } from '../../../modules/local/custom/parse_assemblies'
 include { PICK_ASSEMBLIES        } from '../../../modules/local/custom/pick_assemblies'
 include { SEQKIT_HEAD            } from '../../../modules/nf-core/seqkit/head'
-include { COUNT_READS            } from '../../../modules/local/custom/count_reads'
+include { SEQKIT_STATS           } from '../../../modules/nf-core/seqkit/stats'
 
 workflow PREPARE_INPUT {
     take:
@@ -298,7 +298,7 @@ workflow PREPARE_INPUT {
             sample_meta
         }
 
-    // Count the number of reads and basepairs to decide whether not to subset_reads
+    // Count the number of reads and basepairs to decide whether not to subset reads
     samples_to_subset = sample_data
         .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
         .unique()
@@ -309,18 +309,23 @@ workflow PREPARE_INPUT {
         .filter {
             it.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
         }
-    COUNT_READS (
+    SEQKIT_STATS (
         samples_to_subset
             .map { sample_meta, fastq_paths, depth ->
                 [sample_meta, fastq_paths]
             }
             .unique(),
     )
+    read_count = SEQKIT_STATS.out.stats
+        .splitCsv ( header:true, sep:'\t', elem: 1 )
+        .map { sample_meta, stats ->
+            [sample_meta, stats.sum_len]
+        }
 
     // Subset sample reads to increase speed of following steps
     SEQKIT_HEAD (
         samples_to_subset
-            .combine(COUNT_READS.out.read_count, by: 0)
+            .combine(read_count, by: 0)
             .map { sample_meta, fastq_paths, depth, read_count ->
                 [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * read_count.toFloat()).toInteger() ]
             }

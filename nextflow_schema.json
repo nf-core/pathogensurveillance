@@ -261,11 +261,11 @@
                 },
                 "publish_dir_mode": {
                     "type": "string",
-                    "default": "mixed",
+                    "default": "symlink",
                     "description": "Method used to save pipeline results to output directory.",
-                    "help_text": "Controls whether output files are copies or links. When the pipeline runs, files are stored in a temporary cache, typically in the `work` directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details. By default (`mixed`), small/important files like reports are copied and everything else is linked.",
+                    "help_text": "Controls whether output files are copies or links. When the pipeline runs, files are stored in a temporary cache, typically in the `work` directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/reference/process.html#publishdir) for details. By default (`mixed`), small/important files like reports are copied and everything else is linked.",
                     "fa_icon": "fas fa-copy",
-                    "enum": ["mixed", "symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
+                    "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
                 },
                 "email_on_fail": {
