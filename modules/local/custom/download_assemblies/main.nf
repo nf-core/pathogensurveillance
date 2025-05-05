@@ -1,6 +1,7 @@
 process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
+    secret 'NCBI_API_KEY'
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 conda-forge::unzip=6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -26,6 +27,8 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     def args = task.ext.args ?: ''
     """
+    echo \$NCBI_API_KEY
+
     # Download assemblies as zip archives
     datasets download genome accession $id --include gff3,genome --filename ${prefix}.zip
 
