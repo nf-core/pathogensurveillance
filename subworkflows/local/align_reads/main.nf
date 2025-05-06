@@ -1,5 +1,5 @@
 include { BWA_MEM         } from '../../../modules/nf-core/bwa/mem'
-include { PICARD_FORMAT   } from '../../../modules/local/custom/picard_format'
+include { PICARD_FORMAT   } from '../../../modules/local/picard_format'
 include { SAMTOOLS_INDEX  } from '../../../modules/nf-core/samtools/index'
 
 workflow ALIGN_READS {

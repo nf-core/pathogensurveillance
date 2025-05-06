@@ -1,6 +1,0 @@
-name: graphtyper_genotype
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - bioconda::graphtyper=2.7.2

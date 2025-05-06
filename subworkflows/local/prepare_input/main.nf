@@ -2,13 +2,13 @@
 // Check input samplesheets and convert to channels
 //
 include { BBMAP_SENDSKETCH       } from '../../../modules/nf-core/bbmap/sendsketch'
-include { SAMPLESHEET_CHECK      } from '../../../modules/local/custom/samplesheet_check'
+include { SAMPLESHEET_CHECK      } from '../../../modules/local/samplesheet_check'
 include { SRATOOLS_FASTERQDUMP   } from '../../../modules/nf-core/sratools/fasterqdump'
-include { INITIAL_CLASSIFICATION } from '../../../modules/local/custom/initial_classification'
-include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/custom/download_assemblies'
-include { FIND_ASSEMBLIES        } from '../../../modules/local/custom/find_assemblies'
-include { PARSE_ASSEMBLIES       } from '../../../modules/local/custom/parse_assemblies'
-include { PICK_ASSEMBLIES        } from '../../../modules/local/custom/pick_assemblies'
+include { INITIAL_CLASSIFICATION } from '../../../modules/local/initial_classification'
+include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/download_assemblies'
+include { FIND_ASSEMBLIES        } from '../../../modules/local/find_assemblies'
+include { PARSE_ASSEMBLIES       } from '../../../modules/local/parse_assemblies'
+include { PICK_ASSEMBLIES        } from '../../../modules/local/pick_assemblies'
 include { SEQKIT_HEAD            } from '../../../modules/nf-core/seqkit/head'
 include { SEQKIT_STATS           } from '../../../modules/nf-core/seqkit/stats'
 

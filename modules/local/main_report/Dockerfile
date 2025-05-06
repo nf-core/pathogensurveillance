@@ -1,5 +1,5 @@
-# Build with:
-# docker buildx build -t zacharyfoster/main-report-r-packages:<put verison number here> .
+# Dockerfile to create container with quarto and PathoSurveilR
+# Push to nfcore/quarto-pathosurveilr:<VER>
 
 ################## BASE IMAGE ######################
 

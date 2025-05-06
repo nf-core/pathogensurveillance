@@ -94,7 +94,8 @@
                         "git_sha": "804110b986610ccc3d4f30e07c3b63f8cb53c637",
                         "installed_by": [
                             "modules"
-                        ]
+                        ],
+                        "patch": "modules/nf-core/graphtyper/genotype/graphtyper-genotype.diff"
                     },
                     "graphtyper/vcfconcatenate": {
                         "branch": "master",

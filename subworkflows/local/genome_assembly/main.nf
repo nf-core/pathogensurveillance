@@ -1,6 +1,6 @@
 include { FASTP                 } from '../../../modules/nf-core/fastp'
 include { SPADES                } from '../../../modules/nf-core/spades'
-include { FILTER_ASSEMBLY       } from '../../../modules/local/custom/filter_assembly'
+include { FILTER_ASSEMBLY       } from '../../../modules/local/filter_assembly'
 include { QUAST                 } from '../../../modules/nf-core/quast'
 include { UNTAR                 } from '../../../modules/nf-core/untar'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'

@@ -1,9 +1,9 @@
 include { BUSCO_BUSCO                                          } from '../../../modules/nf-core/busco/busco'
 include { BUSCO_DOWNLOAD                                       } from '../../../modules/nf-core/busco/download'
-include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../modules/local/custom/assign_context_references'
+include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_BUSCO_REFERENCES } from '../../../modules/local/assign_context_references'
 include { MAFFT_ALIGN as MAFFT_BUSCO                           } from '../../../modules/nf-core/mafft/align'
 include { IQTREE as IQTREE_BUSCO                               } from '../../../modules/nf-core/iqtree'
-include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/custom/subset_busco_genes'
+include { SUBSET_BUSCO_GENES                                   } from '../../../modules/local/subset_busco_genes'
 
 workflow BUSCO_PHYLOGENY {
 

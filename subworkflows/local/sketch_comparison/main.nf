@@ -1,6 +1,6 @@
-include { TRIM_AND_SKETCH            } from '../../../modules/local/custom/trim_and_sketch'
-include { ASSIGN_MAPPING_REFERENCE   } from '../../../modules/local/custom/assign_mapping_reference'
-include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/custom/assign_context_references'
+include { TRIM_AND_SKETCH            } from '../../../modules/local/trim_and_sketch'
+include { ASSIGN_MAPPING_REFERENCE   } from '../../../modules/local/assign_mapping_reference'
+include { ASSIGN_CONTEXT_REFERENCES  } from '../../../modules/local/assign_context_references'
 include { SOURMASH_SKETCH            } from '../../../modules/nf-core/sourmash/sketch/main'
 include { SOURMASH_COMPARE           } from '../../../modules/nf-core/sourmash/compare'
 

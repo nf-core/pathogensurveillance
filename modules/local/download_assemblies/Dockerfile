@@ -1,9 +1,7 @@
-################## BASE IMAGE ######################
+# Dockerfile to create container with Cell Ranger v8.0.0 and bcl2fastq v2.20.0
+# Push to nfcore/ncbi-datasets-cli:<VER>
 
 FROM condaforge/mambaforge:23.1.0-4
-
-################## METADATA ######################
-
 LABEL base_image="mambaforge"
 LABEL version="23.1.0-4"
 LABEL about.summary="NCBI Datasets is a new resource that lets you easily gather data from across NCBI databases."
@@ -17,8 +15,6 @@ LABEL about.license="public_domain"
 LABEL about.licence_file="https://github.com/ncbi/datasets/blob/master/LICENSE.md"
 LABEL about.author="NCBI"
 LABEL extra.identifiers.biotools="ncbi_datasets"
-
-################## MAINTAINER ######################
 MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
 USER root

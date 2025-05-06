@@ -1,4 +1,4 @@
-include { GRAPHTYPER_GENOTYPE       } from '../../../modules/local/graphtyper/genotype'
+include { GRAPHTYPER_GENOTYPE       } from '../../../modules/nf-core/graphtyper/genotype'
 include { GRAPHTYPER_VCFCONCATENATE } from '../../../modules/nf-core/graphtyper/vcfconcatenate'
 include { TABIX_TABIX               } from '../../../modules/nf-core/tabix/tabix'
 include { TABIX_BGZIP               } from '../../../modules/nf-core/tabix/bgzip'

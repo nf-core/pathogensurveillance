@@ -2,9 +2,9 @@ include { REFERENCE_INDEX          } from '../reference_index'
 include { ALIGN_READS              } from '../align_reads'
 include { CALL_VARIANTS            } from '../call_variants'
 include { IQTREE as IQTREE_SNP     } from '../../../modules/nf-core/iqtree'
-include { VCF_TO_SNP_ALIGN         } from '../../../modules/local/custom/vcf_to_snp_align'
+include { VCF_TO_SNP_ALIGN         } from '../../../modules/local/vcf_to_snp_align'
 include { SEQKIT_SLIDING           } from '../../../modules/nf-core/seqkit/sliding'
-include { ASSIGN_MAPPING_REFERENCE } from '../../../modules/local/custom/assign_mapping_reference'
+include { ASSIGN_MAPPING_REFERENCE } from '../../../modules/local/assign_mapping_reference'
 
 workflow VARIANT_ANALYSIS {
 
