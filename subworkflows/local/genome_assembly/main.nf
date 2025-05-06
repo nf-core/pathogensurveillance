@@ -118,10 +118,11 @@ workflow GENOME_ASSEMBLY {
     messages = messages.mix(not_assembled_warnings)
 
     emit:
-    reads     = FASTP.out.reads           // channel: [ val(meta), [reads] ]
-    scaffolds = filtered_assembly
-    quast     = QUAST.out.results
-    versions  = versions
-    messages  = messages    // meta, group_meta, ref_meta, workflow, level, message
+    reads      = FASTP.out.reads.map{sample_meta, reads -> [[id: sample_meta.id], reads]} // strip off extra sample metadata to make joins easier downstream
+    fastp_json = FASTP.out.json.map{sample_meta, json -> [[id: sample_meta.id], json]} // strip off extra sample metadata to make joins easier downstream
+    scaffolds  = filtered_assembly
+    quast      = QUAST.out.results
+    versions   = versions
+    messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 

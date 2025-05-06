@@ -8,8 +8,7 @@ process PREPARE_REPORT_INPUT {
         'nf-core/ubuntu:20.04' }"
 
     input:
-    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.tsv'), path(pocp), path(core_phylos, stageAs: 'core_phylos/*'), path(busco_refs, stageAs: 'busco_refs.tsv'), path(busco_phylos, stageAs: 'busco_phylos/*'), path(multiqc), path(messages)
-    path versions
+    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.tsv'), path(pocp), path(core_phylos, stageAs: 'core_phylos/*'), path(busco_refs, stageAs: 'busco_refs.tsv'), path(busco_phylos, stageAs: 'busco_phylos/*'), path(multiqc), path(messages), path(versions)
 
     output:
     tuple val(group_meta), path("${prefix}_inputs"), emit: report_input
@@ -107,14 +106,8 @@ process PREPARE_REPORT_INPUT {
     # Record run metadata
     cat <<-END_INFO > ${prefix}_inputs/pathogensurveillance_run_info.yml
     group_id: ${group_meta.id}
-    command_line: ${workflow.commandLine}
-    commit_id: ${workflow.commitId}
     container_engine: ${workflow.containerEngine}
     profile: ${workflow.profile}
-    revision: ${workflow.revision}
-    run_name: ${workflow.runName}
-    session_id: ${workflow.sessionId}
-    start_time: ${workflow.start}
     nextflow_version: ${nextflow.version}
     pipeine_verison: ${workflow.manifest.version}
     END_INFO

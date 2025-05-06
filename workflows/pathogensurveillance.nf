@@ -90,13 +90,13 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
-    softwareVersionsToYAML(versions)
+    collated_versions = softwareVersionsToYAML(versions)
         .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
+            //storeDir: "${params.outdir}/pipeline_info",
             name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
-        ).set { collated_versions }
+        )
 
     // MultiQC
     multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
@@ -107,6 +107,12 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
         .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
+        .unique()
+        .groupTuple(sort: 'hash')
+    fastp_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(GENOME_ASSEMBLY.out.fastp_json, by: 0)
+        .map{ sample_meta, report_meta, fastp_json -> [report_meta, fastp_json] }
         .unique()
         .groupTuple(sort: 'hash')
     nanoplot_results = PREPARE_INPUT.out.sample_data
@@ -122,11 +128,12 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .unique()
         .groupTuple(sort: 'hash')
     multiqc_files = fastqc_results
+        .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
         .combine(collated_versions)
-        .map { report_meta, fastqc, nanoplot, quast, versions ->
-            files = fastqc ?: [] + nanoplot ?: [] + quast ?: [] + [versions]
+        .map { report_meta, fastqc, fastp, nanoplot, quast, versions ->
+            files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
             [report_meta, files.flatten()]
         }
     MULTIQC (
@@ -263,10 +270,10 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
         .filter{ it.size() == 17 } // remove any malformed inputs
         .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+        .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
-        report_inputs,
-        collated_versions.first() // .first converts it to a value channel so it can be reused for multiple reports.
+        report_inputs
     )
 
     MAIN_REPORT (

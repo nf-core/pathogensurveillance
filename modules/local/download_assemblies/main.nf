@@ -27,8 +27,6 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     def args = task.ext.args ?: ''
     """
-    echo \$NCBI_API_KEY
-
     # Download assemblies as zip archives
     datasets download genome accession $id --include gff3,genome --filename ${prefix}.zip
 
