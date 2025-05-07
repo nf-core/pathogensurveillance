@@ -51,7 +51,9 @@ tsv_paths <- unlist(args[7:length(args)])
 assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     out <- read.table(path, header = TRUE, sep = '\t', comment.char = '')
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
-    out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]
+    if (nrow(out) > 0) {
+        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]
+    }
     return(out)
 }))
 
