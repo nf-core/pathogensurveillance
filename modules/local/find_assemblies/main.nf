@@ -23,7 +23,7 @@ process FIND_ASSEMBLIES {
     output_path = "${prefix}.json"
     """
     # NOTE: This command errors when a taxon is found but has no data rather than just outputing an empty file,
-    #   so the below code forces it to not fail and then fails if any other error occurs
+    #   so the below code forces it to not fail and then fails if any other error occur
     datasets summary genome taxon ${args} ${taxon.toLowerCase()} 1> ${output_path} 2> >(tee error.txt >&2) || true
     if [ -s error.txt ] && ! grep -q 'no genome data is currently available for this taxon.' error.txt; then
         exit 1

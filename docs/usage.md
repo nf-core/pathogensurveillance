@@ -157,6 +157,20 @@ To make sure that you're running the latest version of the pipeline, make sure t
 nextflow pull nf-core/pathogensurveillance
 ```
 
+### API keys
+
+The pipeline uses multiple tools that communicate with external services, such as NCBI.
+These services impose usage limits in order to ensure fair access to services.
+The pipeline is designed to not exceed these rate limits.
+Users can register for free API keys to increase these rate limits and the pipeline with automatically adjust to reflect this.
+Currently, only the NCBI API key is used by the pipeline.
+It can be set using [Nextflow secrets](https://www.nextflow.io/docs/latest/secrets.html):
+
+```
+nextflow secrets set NCBI_API_KEY INSERT_YOUR_KEY_HERE
+```
+
+
 ### Reproducibility
 
 It is a good idea to specify the pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.

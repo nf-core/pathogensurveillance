@@ -22,7 +22,10 @@ process SAMPLESHEET_CHECK {
     path "versions.yml"          , emit: versions
 
     script:
+    def entrez_key_set = secrets.NCBI_API_KEY ? "export ENTREZ_KEY='${secrets.NCBI_API_KEY}'" : ''
     """
+    ${entrez_key_set}
+
     check_samplesheet.R ${sample_tsv} ${max_samples} ${reference_tsv}
 
     cat <<-END_VERSIONS > versions.yml

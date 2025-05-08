@@ -22,7 +22,10 @@ process INITIAL_CLASSIFICATION {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
+    def entrez_key_set = secrets.NCBI_API_KEY ? "export ENTREZ_KEY='${secrets.NCBI_API_KEY}'" : ''
     """
+    ${entrez_key_set}
+
     initial_classification.R $hits
 
     DOMAIN="\$(cat domain.txt)"
