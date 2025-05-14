@@ -55,9 +55,14 @@ process GRAPHTYPER_GENOTYPE {
 
     # Move result files into working directory for output
     find results -maxdepth 2 -name '*.vcf*' > output_paths.txt
-    sed 's_results/__g' output_paths.txt | sed 's|/|-|g' > output_names.txt
+    sed -e 's|results/||g' -e sed 's|/|-|g' > output_names.txt
     paste -d ' ' output_paths.txt output_names.txt | xargs -I {} echo "mv {}" > mv_commands.sh
     source mv_commands.sh
+
+    # Clean up
+    if [[ $ref =~ \\.gz\$ ]]; then
+       rm __my__reference__.fasta
+    fi
 
     # Save version information for graphtyper
     cat <<-END_VERSIONS > versions.yml

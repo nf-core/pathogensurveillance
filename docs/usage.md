@@ -99,12 +99,12 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
+nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH PACKAGE MANAGER> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
 ```
 
 Where:
 
-- `<REPLACE WITH RUN TOOL>` is one of docker, singularity, podman, shifter, charliecloud, or conda
+- `<REPLACE WITH PACKAGE MANAGER>` is one of docker, singularity, podman, shifter, charliecloud, or conda
 - `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
 - `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
 

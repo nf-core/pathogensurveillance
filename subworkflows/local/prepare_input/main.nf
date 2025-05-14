@@ -25,6 +25,7 @@ workflow PREPARE_INPUT {
 
     // Parse input tables
     SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, params.max_samples )
+    versions = versions.mix(SAMPLESHEET_CHECK.out.versions)
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { create_sample_metadata_channel(it) }
@@ -160,6 +161,7 @@ workflow PREPARE_INPUT {
     PARSE_ASSEMBLIES (
         FIND_ASSEMBLIES.out.stats
     )
+    versions = versions.mix(PARSE_ASSEMBLIES.out.versions)
 
     // Add placeholders for NCBI reference metadata if none was looked up
     ncbi_ref_meta = family_taxon_ids
@@ -195,6 +197,7 @@ workflow PREPARE_INPUT {
         params.n_ref_genera,
         params.only_latin_binomial_refs
     )
+    versions = versions.mix(PICK_ASSEMBLIES.out.versions)
 
     // Add placeholders for PICK_ASSEMBLIES output if not run
     picked_assemblies_stat_files = sample_data
@@ -316,6 +319,7 @@ workflow PREPARE_INPUT {
             }
             .unique(),
     )
+    versions = versions.mix(SEQKIT_STATS.out.versions)
     read_count = SEQKIT_STATS.out.stats
         .splitCsv ( header:true, sep:'\t', elem: 1 )
         .map { sample_meta, stats ->

@@ -32,6 +32,9 @@ process REFORMAT_PIRATE_RESULTS {
     # gene/allele presence-absence
     PIRATE_to_Rtab.pl -i ${prefix}_gene_family.tsv -o ${prefix}_genePA.tsv
 
+    # Clean up
+    rm -r reformatted_gffs
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         pirate: \$( echo \$( PIRATE --version 2>&1) | sed 's/PIRATE //' )

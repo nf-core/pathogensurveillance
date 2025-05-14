@@ -18,10 +18,10 @@ process EXTRACT_FEATURE_SEQUENCES {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     """
-    # Set dosage ultra high to include all high copy sequences per strain, just get everything
-    align_feature_sequences_mod.pl --dosage 1000000 --full-annot -i PIRATE.gene_families.ordered.tsv -g modified_gffs/ -o ${prefix}_feature_sequences/ -p ${task.cpus} -n --align-off
+    align_feature_sequences_mod.pl ${args} -i PIRATE.gene_families.ordered.tsv -g modified_gffs/ -o ${prefix}_feature_sequences/ -p ${task.cpus}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

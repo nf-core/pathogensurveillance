@@ -1,4 +1,3 @@
-
 process PICARD_FORMAT {
     tag "$meta.id"
     label 'process_low'

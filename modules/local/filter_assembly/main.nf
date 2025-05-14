@@ -25,6 +25,8 @@ process FILTER_ASSEMBLY {
         $args \\
         ${prefix}_unzipped.fasta > ${prefix}_filtered.fasta
 
+    rm ${prefix}_unzipped.fasta
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         biopython: \$(python -c "import Bio; print(Bio.__version__)")

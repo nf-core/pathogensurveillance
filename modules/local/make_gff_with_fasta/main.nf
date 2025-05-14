@@ -12,6 +12,7 @@ process MAKE_GFF_WITH_FASTA {
 
     output:
     tuple val(meta), path("${prefix}.gff"), emit: gff
+    path "versions.yml"                   , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -39,5 +40,10 @@ process MAKE_GFF_WITH_FASTA {
     # Rename output file to be just the sample ID and make sure input file does not have same name
     mv ${gff} input_${gff}
     mv ${prefix}_with_ref.gff ${prefix}.gff
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        sed: \$(sed --version | head -n 1 | sed 's/sed (GNU sed) //')
+    END_VERSIONS
     """
 }

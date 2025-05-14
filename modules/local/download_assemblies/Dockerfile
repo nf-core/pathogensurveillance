@@ -1,4 +1,4 @@
-# Dockerfile to create container with Cell Ranger v8.0.0 and bcl2fastq v2.20.0
+# Dockerfile to create container with ncbi-datasets-cli=16.0.0 and unzip and bioconda::samtools=1.18
 # Push to nfcore/ncbi-datasets-cli:<VER>
 
 FROM condaforge/mambaforge:23.1.0-4

@@ -37,7 +37,9 @@ process MAIN_REPORT {
 
     # Rename outputs
     mv main_report/${prefix}_report/index.html ${prefix}_pathsurveil_report.html
-    #mv main_report/${prefix}_report/index.pdf ${prefix}_pathsurveil_report.pdf
+
+    # Clean up
+    rm -r main_report
 
     # Save version of quarto used
     cat <<-END_VERSIONS > versions.yml

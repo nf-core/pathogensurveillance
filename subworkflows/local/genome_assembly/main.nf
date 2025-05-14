@@ -85,11 +85,13 @@ workflow GENOME_ASSEMBLY {
         filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
         "--nano-raw"
     )
+    versions = versions.mix(FLYE_NANOPORE.out.versions)
 
     FLYE_PACBIO (
         filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
         "--pacbio-raw"
     )
+    versions = versions.mix(FLYE_PACBIO.out.versions)
 
     FILTER_ASSEMBLY (
         SPADES.out.scaffolds

@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: ""
+    inputs: "~/downloads/_no_group_defined__inputs"
 execute:
     echo: false
 bibliography: references.bib

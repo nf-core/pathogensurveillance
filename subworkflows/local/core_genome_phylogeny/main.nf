@@ -46,6 +46,7 @@ workflow CORE_GENOME_PHYLOGENY {
         params.n_ref_closest_named,
         params.n_ref_context
     )
+    versions = versions.mix(ASSIGN_CORE_REFERENCES.out.versions)
 
     // Get relevant information from all references assigned to samples
     all_ref_data =  sample_data
@@ -119,6 +120,7 @@ workflow CORE_GENOME_PHYLOGENY {
                 [ref_meta, ref_path, ref_gff]
             }
     )
+    versions = versions.mix(MAKE_GFF_WITH_FASTA.out.versions)
 
     // group samples by report group
     bakta_gffs = all_assem_data
@@ -159,6 +161,7 @@ workflow CORE_GENOME_PHYLOGENY {
     CALCULATE_POCP (
         REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
     )
+    versions = versions.mix(CALCULATE_POCP.out.versions)
 
     // Extract sequences of all genes
     EXTRACT_FEATURE_SEQUENCES ( good_pirate_results )

@@ -41,6 +41,7 @@ workflow ALIGN_READS {
         .join(ch_reference)
         .join(ch_ref_index)
     PICARD_FORMAT ( picard_input )
+    versions = versions.mix(PICARD_FORMAT.out.versions)
 
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
     versions = versions.mix(SAMTOOLS_INDEX.out.versions)

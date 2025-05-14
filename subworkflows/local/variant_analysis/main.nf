@@ -51,6 +51,7 @@ workflow VARIANT_ANALYSIS {
         ani_matrix.join(samp_ref_pairs),
         params.ref_min_ani
     )
+    versions = versions.mix(ASSIGN_MAPPING_REFERENCE.out.versions)
     ref_paths = references
         .map {sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
             [[id: sample_id], [id:report_group_id], [id: ref_id], ref_path, usage]
@@ -99,6 +100,7 @@ workflow VARIANT_ANALYSIS {
         }
         .unique()
     )
+    versions = versions.mix(SEQKIT_SLIDING.out.versions)
     chopped_reads = SEQKIT_SLIDING.out.fastx
         .combine(longreads, by: 0)
         .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
