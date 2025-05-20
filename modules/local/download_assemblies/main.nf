@@ -4,8 +4,8 @@ process DOWNLOAD_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 conda-forge::unzip=6.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'quay.io/nf-core/ncbi-datasets-cli:0.1':
-        'quay.io/nf-core/ncbi-datasets-cli:0.1' }"
+        'community.wave.seqera.io/library/samtools_ncbi-datasets-cli_unzip:155f739985f03f20':
+        'community.wave.seqera.io/library/samtools_ncbi-datasets-cli_unzip:155f739985f03f20' }"
 
     input:
     tuple val(ref_meta), val(id)
