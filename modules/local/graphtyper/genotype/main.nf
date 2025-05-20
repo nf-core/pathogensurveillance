@@ -61,7 +61,7 @@ process GRAPHTYPER_GENOTYPE {
 
     # Clean up
     if [[ $ref =~ \\.gz\$ ]]; then
-       rm __my__reference__.fasta
+        rm __my__reference__.fasta
     fi
 
     # Save version information for graphtyper
