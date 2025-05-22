@@ -145,7 +145,13 @@
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
-                "nextflow"
+                "nextflow",
+                "diagnostics",
+                "pathogen",
+                "genotyping",
+                "multi locus sequence trees",
+                "minimum spanning networks",
+                "population genomics"
             ],
             "license": [
                 "MIT"
