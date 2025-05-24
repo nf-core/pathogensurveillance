@@ -34,6 +34,8 @@ clustering_weights <- c(
 clustering_weights <- clustering_weights / sum(clustering_weights)
 clustering_stats_path <- 'clustering_statistics.tsv'
 message_data_path <- 'message_data.tsv'
+tsv_output_path <- 'core_genes'
+fasta_output_path <- 'feat_seqs'
 
 # Initialize message data to store messages shown to the user
 message_data <- data.frame(
@@ -50,8 +52,8 @@ args <- commandArgs(trailingOnly = TRUE)
 # args <- c('~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_gene_family.tsv',
 #           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_feature_sequences',
 #           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all.tsv',
-#           '10', '100', '_no_group_defined__core_genes', '_no_group_defined__feat_seqs')
-names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "tsv_output_path", "fasta_output_path")
+#           '10', '100', '_no_group_defined_')
+names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "prefix")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
 metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
@@ -199,9 +201,9 @@ output_cluster_data <- lapply(best_clusters, function(ids) {
     }
     return(output)
 })
-dir.create(args$tsv_output_path, showWarnings = FALSE)
+dir.create(tsv_output_path, showWarnings = FALSE)
 for (index in seq_along(output_cluster_data)) {
-    out_path <- file.path(args$tsv_output_path, paste0('cluster_', index, '.tsv'))
+    out_path <- file.path(tsv_output_path, paste0(args$prefix, '--cluster_', index, '.tsv'))
     write.table(output_cluster_data[[index]], file = out_path, row.names = FALSE, sep = '\t', quote = FALSE)
 }
 
@@ -239,9 +241,9 @@ write_fasta <- function(seqs, path) {
     output <- paste0('>', names(seqs), '\n', seqs)
     writeLines(output, path)
 }
-dir.create(args$fasta_output_path, showWarnings = FALSE)
+dir.create(fasta_output_path, showWarnings = FALSE)
 for (index in seq_along(output_cluster_data)) {
-    out_dir_path <- file.path(args$fasta_output_path, paste0('cluster_', index))
+    out_dir_path <- file.path(fasta_output_path, paste0(args$prefix, '--cluster_', index))
     dir.create(out_dir_path, showWarnings = FALSE)
     for (gene_id in output_cluster_data[[index]]$gene_family) {
         in_path <- file.path(args$gene_seq_dir_path, paste0(gene_id, '.fasta'))

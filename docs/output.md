@@ -79,15 +79,15 @@ Below is a more detailed description of each output directory.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `aligned_genes/`
-  - `busco_genes/`
-    - `<gene ID>_aligned.fas`: FASTA files of aligned genes used in the BUSCO gene phylogenies.
-  - `core_genes/`
-    - `<gene ID>_aligned.fas`: FASTA files of aligned genes used in the core gene phylogenies.
+- `shared_genes/`
+  - `busco/`
+    - `<gene ID>.aligned.fas`: FASTA files of aligned genes used in the BUSCO gene phylogenies.
+  - `core/`
+    - `<gene ID>.aligned.fas`: FASTA files of aligned genes used in the core gene phylogenies.
 
 </details>
 
-FASTA files for each gene extracted from assemblies and aligned with [mafft](https://mafft.cbrc.jp/alignment/server/index.html).
+FASTA files for each gene extracted from assemblies that are shared among all samples and aligned with [mafft](https://mafft.cbrc.jp/alignment/server/index.html).
 Contains sequences for both samples and references.
 
 ### Aligned reads (`bwa mem`)
@@ -96,10 +96,10 @@ Contains sequences for both samples and references.
 <summary>Output files</summary>
 
 - `aligned_reads/`
-  - `<Reference ID>_<Sample ID>.bam`: Alignments of reads to references in the BAM format.
-  - `<Reference ID>_<Sample ID>.formatted.bam`: Quality filtered BAM files produced by `picard`.
-  - `<Reference ID>_<Sample ID>.formatted.bam.csi`: Index for the above file produced by `samtools index`
-  - `<Reference ID>_<Sample ID>.formatted.MarkDuplicates.metrics.txt`: Output from `picard MarkDuplicates`
+  - `<Reference ID>.<Sample ID>.bam`: Alignments of reads to references in the BAM format.
+  - `<Reference ID>.<Sample ID>.formatted.bam`: Quality filtered BAM files produced by `picard`.
+  - `<Reference ID>.<Sample ID>.formatted.bam.csi`: Index for the above file produced by `samtools index`
+  - `<Reference ID>.<Sample ID>.formatted.MarkDuplicates.metrics.txt`: Output from `picard MarkDuplicates`
 
 </details>
 
@@ -118,9 +118,9 @@ These read alignments are then filtered for quality and reformatted before being
   - `<samplename>.fna`: Replicon/contig DNA sequences as FASTA
   - `<samplename>.embl`: Annotations and sequences in (multi) EMBL format
   - `<samplename>.faa`: CDS/sORF amino acid sequences as FASTA
-  - `<samplename>_hypothetical.faa`: Further information on hypothetical protein CDS as simple human readable tab separated values
-  - `<samplename>_hypothetical.tsv`: Hypothetical protein CDS amino acid sequences as FASTA
-  - `<samplename>.tsv`: Annotations as simple human readble TSV
+  - `<samplename>.hypotheticals.faa`: Hypothetical protein CDS amino acid sequences as FASTA
+  - `<samplename>.hypotheticals.tsv`: Further information on hypothetical protein CDS as simple human readable tab separated values
+  - `<samplename>.tsv`: Annotations as simple human readable TSV
   - `<samplename>.txt`: Summary in TXT format
 
 </details>
@@ -158,7 +158,8 @@ These directories contain the output of whole genome assembly of samples using [
 <summary>output files</summary>
 
 - `busco/`
-  - `short_summary.specific.<busco_db>.<species_name>.fasta.txt`: completeness report in tsv format
+  - `short_summary.specific.<busco_db>.<species_name>.fasta.txt`: completeness report in TSV format
+  - `short_summary.specific.<busco_db>.<species_name>.fasta.json`: completeness report in JSON format
   - `<species_name>-<busco_db>-busco.batch_summary.txt`: summarized completeness report in tsv format
   - `<sample id>-<database lineage>-busco`: directory with other busco results
 
@@ -288,9 +289,9 @@ The outputs of these tools are compiled using [MultiQC](https://github.com/Multi
   - `downloaded/`
     - `<sample_id>.tsv`: The metadata for references selected for download
   - `selected/`
-    - `<report group>_mapping_references.tsv`: The IDs of references used to align reads to during variant calling
-    - `<report group>_core_references.tsv`: The IDs of references used to provide context in core gene phylogenies
-    - `<report group>_busco_references.tsv`: The IDs of references used to provide context in BUSCO gene phylogenies
+    - `<report ID>_mapping_references.tsv`: The IDs of references used to align reads to during variant calling
+    - `<report ID>_core_references.tsv`: The IDs of references used to provide context in core gene phylogenies
+    - `<report ID>_busco_references.tsv`: The IDs of references used to provide context in BUSCO gene phylogenies
   - `indexes/`
     - `bwa/`
       - `<Refernce ID>_bwa`: Index files used to align reads to references with `bwa mem`
@@ -370,11 +371,11 @@ In order to select references to use with samples and provide a rough identifica
 
 - `trees/`
   - `busco/`
-    - `<Report ID>_<Cluster ID>.treefile`: Tree in Newick format inferred from BUSCO genes by `iqtree2`
+    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from BUSCO genes by `iqtree2`
   - `core/`
-    - `<Report ID>_<Cluster ID>.treefile`: Tree in Newick format inferred from core genes by `iqtree2`
+    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from core genes by `iqtree2`
   - `snp/`
-    - `<Report ID>_<Cluster ID>.treefile`: Tree in Newick format inferred from variants by `iqtree2`
+    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from variants by `iqtree2`
 
 </details>
 

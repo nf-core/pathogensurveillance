@@ -1,0 +1,640 @@
+{
+  "source": "pathogensurveillance",
+  "outputs": {
+    "shared_genes": {
+      "description": "Aligned shared genes in FASTA format",
+      "category": "Multigene phylogeny",
+      "parsers": {
+        "r": "ape::read.FASTA"
+      },
+      "sources": [
+        {
+          "path": "shared_genes",
+          "pattern": "^(.+?)/(.+?)\\.aligned\\.fas$",
+          "capture_groups": [
+            "method",
+            "gene_id"
+          ]
+        }
+      ]
+    },
+    "aligned_reads": {
+      "description": "Quality filtered reads alignements to references in BAM format",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "aligned_reads",
+          "pattern": "^(.+?)--(.+?)\\.formatted\\.bam$",
+          "capture_groups": [
+            "reference_id",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "aligned_reads_index": {
+      "description": "Index for the filtered BAM files produced by samtools index",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "aligned_reads",
+          "pattern": "^(.+?)--(.+?)\\.formatted\\.bam\\.csi$",
+          "capture_groups": [
+            "reference_id",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "mark_duplicates_metrics": {
+      "description": "Output from picard MarkDuplicates",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "aligned_reads",
+          "pattern": "^(.+?)--(.+?)\\.formatted\\.MarkDuplicates\\.metrics\\.txt$",
+          "capture_groups": [
+            "reference_id",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_gff": {
+      "description": "Annotations of sequences in GFF3 format",
+      "category": "Genome annotation",
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.gff3$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_gbff": {
+      "description": "Annotations of sequences in (multi) GenBank format",
+      "category": "Genome annotation",
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.gbff$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_ffn": {
+      "description": "FASTA files of feature nucleotide sequences",
+      "category": "Genome annotation",
+      "parsers": {
+        "r": "ape::read.FASTA"
+      },
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.ffn$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_fna": {
+      "description": "FASTA files of replicon/contig DNA sequences",
+      "category": "Genome annotation",
+      "parsers": {
+        "r": "ape::read.FASTA"
+      },
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.fna$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_embl": {
+      "description": "Annotations and sequences in (multi) EMBL format",
+      "category": "Genome annotation",
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.embl$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotation_faa": {
+      "description": "FASTA files of CDS/sORF amino acid sequences",
+      "category": "Genome annotation",
+      "parsers": {
+        "r": "ape::read.FASTA"
+      },
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/([^.]+?)\\.faa$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotations_hypothetical_faa": {
+      "description": "FASTA files of hypothetical protein CDS amino acid sequences",
+      "category": "Genome annotation",
+      "parsers": {
+        "r": "ape::read.FASTA"
+      },
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.hypotheticals\\.faa$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotations_hypothetical_tsv": {
+      "description": "TSV files of information on hypothetical protein CDS",
+      "category": "Genome annotation",
+      "parsers": {
+        "r": "PathoSurveilR:::read_table"
+      },
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.hypotheticals\\.tsv$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotations_tsv": {
+      "description": "TSV files of information for protein CDS",
+      "category": "Genome annotation",
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/([^.]+?)\\.tsv$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "annotations_summary": {
+      "description": "Summary in TXT format",
+      "category": "Genome annotation",
+      "sources": [
+        {
+          "path": "annotations",
+          "pattern": "^(.+?)/(.+?)\\.txt$",
+          "capture_groups": [
+            "method",
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "assemblies": {
+      "description": "Genome assemblies in compressed FASTA format",
+      "category": "Genome assembly",
+      "sources": [
+        {
+          "path": "assemblies",
+          "pattern": "^flye/(.+?)\\.assembly\\.fasta\\.gz$",
+          "capture_groups": [
+            "sample_id"
+          ],
+          "constants": {
+            "method": "flye"
+          }
+        },
+        {
+          "path": "assemblies",
+          "pattern": "^spades/(.+?)\\.scaffolds\\.fa\\.gz$",
+          "capture_groups": [
+            "sample_id"
+          ],
+          "constants": {
+            "method": "spades"
+          }
+        }
+      ]
+    },
+    "assembly_graphs_gfa": {
+      "description": "Genome assembly graphs in gzipped gfa format",
+      "category": "Genome assembly",
+      "sources": [
+        {
+          "path": "assemblies/spades",
+          "pattern": "^(.+?)\\.assembly\\.gfa\\.gz$",
+          "capture_groups": [
+            "sample_id"
+          ],
+          "constants": {
+            "method": "spades"
+          }
+        },
+        {
+          "path": "assemblies/flye",
+          "pattern": "^(.+?)\\.assembly_graph\\.gfa\\.gz$",
+          "capture_groups": [
+            "sample_id"
+          ],
+          "constants": {
+            "method": "flye"
+          }
+        }
+      ]
+    },
+    "assembly_graphs_gv": {
+      "description": "Genome assembly scaffolds in gzipped FASTA format",
+      "category": "Genome assembly",
+      "sources": [
+        {
+          "path": "assemblies/flye",
+          "pattern": "^(.+?)\\.assembly_graph\\.gv\\.gz$",
+          "capture_groups": [
+            "sample_id"
+          ],
+          "constants": {
+            "method": "flye"
+          }
+        }
+      ]
+    },
+    "busco_dir": {
+      "description": "BUSCO output directory",
+      "category": "Quality control",
+      "sources": [
+        {
+          "path": "busco",
+          "pattern": "^(.+?)--(.+?)-busco$",
+          "capture_groups": [
+            "sample_id",
+            "database"
+          ]
+        }
+      ]
+    },
+    "downloaded_assemblies": {
+      "description": "Assemblies downloaded by the pipeline in FASTA format",
+      "category": "Downloads",
+      "sources": [
+        {
+          "path": "downloads/assemblies",
+          "pattern": "^(.+?)\\.fasta\\.gz$",
+          "capture_groups": [
+            "reference_id"
+          ]
+        }
+      ]
+    },
+    "downloaded_annotations": {
+      "description": "Annotations downloaded by the pipeline in GFF format",
+      "category": "Downloads",
+      "sources": [
+        {
+          "path": "downloads/annotations",
+          "pattern": "^(.+?)\\.gff\\.gz$",
+          "capture_groups": [
+            "reference_id"
+          ]
+        }
+      ]
+    },
+    "downloaded_reads": {
+      "description": "Reads downloaded by the pipeline in FASTQ format",
+      "category": "Downloads",
+      "sources": [
+        {
+          "path": "downloads/reads",
+          "pattern": "^([^_]+?)_?([0-9]*?)\\.fastq\\.gz$",
+          "capture_groups": [
+            "reference_id",
+            "orientation"
+          ]
+        }
+      ]
+    },
+    "fastp_report_html": {
+      "description": "FASTP report in HTML format",
+      "category": "Quality control",
+      "sources": [
+        {
+          "path": "fastp",
+          "pattern": "^(.+?)\\.fastp\\.html$",
+          "capture_groups": [
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "fastp_report_json": {
+      "description": "FASTP report in JSON format",
+      "category": "Quality control",
+      "sources": [
+        {
+          "path": "fastp",
+          "pattern": "^(.+?)\\.fastp\\.json$",
+          "capture_groups": [
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "sample_metadata": {
+      "description": "Sample metadata in TSV format",
+      "category": "Sample/Reference metadata",
+      "sources": [
+        {
+          "path": "metadata",
+          "pattern": "^sample_metadata\\.tsv$"
+        }
+      ]
+    },
+    "reference_metadata": {
+      "description": "Reference metadata in TSV format",
+      "category": "Sample/Reference metadata",
+      "sources": [
+        {
+          "path": "metadata",
+          "pattern": "^reference_metadata\\.tsv$"
+        }
+      ]
+    },
+    "execution_report": {
+      "description": "Statistics like time and ram usage for pipeline execution as a HTML report",
+      "category": "Pipeline metadata",
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^execution_report_(.+?)\\.html$",
+          "capture_groups": [
+            "date"
+          ]
+        }
+      ]
+    },
+    "execution_trace": {
+      "description": "Statistics like time and ram usage for pipeline execution in TSV format",
+      "category": "Pipeline metadata",
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^execution_trace_(.+?)\\.txt$",
+          "capture_groups": [
+            "date"
+          ]
+        }
+      ]
+    },
+    "pipeline_parameters": {
+      "description": "Parameters use when running the pipeline format",
+      "category": "Pipeline metadata",
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^params_(.+?)\\.json$",
+          "capture_groups": [
+            "date"
+          ]
+        }
+      ]
+    },
+    "pirate": {
+      "description": "Pirate output directory with gene orthology information",
+      "category": "Multigene phylogeny",
+      "sources": [
+        {
+          "path": "pirate",
+          "pattern": "^(.+?)_results$",
+          "capture_groups": [
+            "report_id"
+          ]
+        }
+      ]
+    },
+    "pocp": {
+      "description": "Percentage of conserved proteins in TSV format",
+      "category": "Multigene phylogeny",
+      "sources": [
+        {
+          "path": "pocp",
+          "pattern": "^(.+?)_pocp\\.tsv$",
+          "capture_groups": [
+            "report_id"
+          ]
+        }
+      ]
+    },
+    "ncbi_assembly_metadata": {
+      "description": "Metadata of available assemblies on NCBI in TSV format",
+      "category": "Sample/Reference metadata",
+      "sources": [
+        {
+          "path": "reference_data/considered",
+          "pattern": "^(.+?)\\.tsv$",
+          "capture_groups": [
+            "taxon_id"
+          ]
+        }
+      ]
+    },
+    "downloaded_ref_metadata": {
+      "description": "Metadata of references selected for download from NCBI in TSV format",
+      "category": "Sample/Reference metadata",
+      "sources": [
+        {
+          "path": "reference_data/downloaded",
+          "pattern": "^(.+?)\\.tsv$",
+          "capture_groups": [
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "contextual_refs": {
+      "description": "IDs of references selected for multigene phylogenies",
+      "category": "Multigene phylogeny",
+      "sources": [
+        {
+          "path": "reference_data/selected",
+          "pattern": "^(.+?)_core_references\\.tsv$",
+          "capture_groups": [
+            "report_id"
+          ],
+          "constants": {
+            "method": "core"
+          }
+        },
+        {
+          "path": "reference_data/selected",
+          "pattern": "^(.+?)_busco_references\\.tsv$",
+          "capture_groups": [
+            "report_id"
+          ],
+          "constants": {
+            "method": "busco"
+          }
+        }
+      ]
+    },
+    "mapping_refs": {
+      "description": "IDs of references selected for multigene phylogenies",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "reference_data/selected",
+          "pattern": "^(.+?)_mapping_references\\.tsv$",
+          "capture_groups": [
+            "report_id"
+          ]
+        }
+      ]
+    },
+    "sendsketch": {
+      "description": "Table returned by BBmap sendsketch with initial identifications of samples",
+      "category": "Initial identification",
+      "sources": [
+        {
+          "path": "sendsketch",
+          "pattern": "^(.+?)\\.txt$",
+          "capture_groups": [
+            "sample_id"
+          ]
+        }
+      ]
+    },
+    "ani_matrix_csv": {
+      "description": "ANI similarity matrix in CSV format made by sourmash compare",
+      "category": "Sketch analysis",
+      "sources": [
+        {
+          "path": "sketch_comparisons/ani_matricies",
+          "pattern": "^(.+?)_comp\\.csv$",
+          "capture_groups": [
+            "report_id"
+          ]
+        }
+      ]
+    },
+    "sketches": {
+      "description": "FracMinHash signature of the given sequence made by sourmash sketch",
+      "category": "Sketch analysis",
+      "sources": [
+        {
+          "path": "sketch_comparisons/sketches",
+          "pattern": "^(.+?)\\.sig$",
+          "capture_groups": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "multigene_tree": {
+      "description": "Trees infered from multigene phylogeny in Newick format",
+      "category": "Multigene phylogeny",
+      "sources": [
+        {
+          "path": "trees/core",
+          "pattern": "^(.+?)--(.+?)\\.treefile$",
+          "capture_groups": [
+            "report_id",
+            "cluster_id"
+          ],
+          "constants": {
+            "method": "core"
+          }
+        },
+        {
+          "path": "trees/busco",
+          "pattern": "^(.+?)--(.+?)\\.treefile$",
+          "capture_groups": [
+            "report_id",
+            "cluster_id"
+          ],
+          "constants": {
+            "method": "busco"
+          }
+        }
+      ]
+    },
+    "variant_tree": {
+      "description": "Tree inferred from variant analysis in Newick format",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "trees/snp",
+          "pattern": "^(.+?)--(.+?)\\.treefile$",
+          "capture_groups": [
+            "report_id",
+            "cluster_id"
+          ]
+        }
+      ]
+    },
+    "variants": {
+      "description": "Filtered variants in VCF format",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "variants",
+          "pattern": "^(.+?)--(.+?)\\.vcffilter\\.vcf\\.gz$",
+          "capture_groups": [
+            "report_id",
+            "reference_id"
+          ]
+        }
+      ]
+    },
+    "variants_unfiltered": {
+      "description": "Unfiltered variants in VCF format",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "variants",
+          "pattern": "^(.+?)--([^.]+?)\\.vcf\\.gz$",
+          "capture_groups": [
+            "report_id",
+            "reference_id"
+          ]
+        }
+      ]
+    },
+    "variants_fasta": {
+      "description": "Filtered variants in FASTA format",
+      "category": "Variant analysis",
+      "sources": [
+        {
+          "path": "variants",
+          "pattern": "^(.+?)--([^.]+?)\\.fasta$",
+          "capture_groups": [
+            "report_id",
+            "reference_id"
+          ]
+        }
+      ]
+    }
+  }
+}

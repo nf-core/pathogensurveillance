@@ -17,7 +17,7 @@ workflow CALL_VARIANTS {
     // group samples by reference genome and group
     ch_ref_grouped = ch_input
         .map { sample_meta, bam, bai, ref_meta, ref, report_meta, fai, dict ->
-            [[id: "${report_meta.id}_${ref_meta.id}", group: report_meta, ref: ref_meta], sample_meta, bam, bai, ref, fai, dict]
+            [[id: "${report_meta.id}--${ref_meta.id}", group: report_meta, ref: ref_meta], sample_meta, bam, bai, ref, fai, dict]
         }
         .groupTuple(by: 0, sort: 'hash')
         .map { combined_meta, sample_meta, bam, bai, ref, fai, dict ->

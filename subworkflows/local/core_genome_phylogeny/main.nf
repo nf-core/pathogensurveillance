@@ -194,7 +194,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .transpose() // group_meta, gene_dir
         .map { report_meta, feat_seq_dir ->
             [
-                [id: "${report_meta.id}_${feat_seq_dir.baseName}", group_id: report_meta],
+                [id: feat_seq_dir.baseName, group_id: report_meta],
                 files(feat_seq_dir.resolve('*.*'), checkIfExists: true)
             ]
         }

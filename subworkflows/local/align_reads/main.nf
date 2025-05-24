@@ -14,7 +14,7 @@ workflow ALIGN_READS {
     // Addd composite ID for read/ref combos to input
     samp_ref_combo = ch_input
         .map { meta, reads, ref_meta, ref, ref_index, bam_index ->
-            [[id: "${ref_meta.id}_${meta.id}", ref: ref_meta, sample: meta], meta, reads, ref_meta, ref, ref_index, bam_index]
+            [[id: "${ref_meta.id}--${meta.id}", ref: ref_meta, sample: meta], meta, reads, ref_meta, ref, ref_index, bam_index]
         }
 
     // Make channel with reads, removing any extra fastq files, which are ususally unpaired reads

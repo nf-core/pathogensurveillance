@@ -63,7 +63,8 @@ if (length(args) < 5) {
 }
 busco_dirs <- unlist(args[5:length(args)])
 args <- args[1:4]
-names(args) <- c("metadata", "min_genes", "max_genes",  "feat_seqs_out_path")
+names(args) <- c("metadata", "min_genes", "max_genes",  "prefix")
+feat_seqs_out_path <- paste0(args$prefix, "_feat_seqs")
 metadata <- read.csv(args$metadata, header = FALSE, col.names = c('sample_id', 'ref_id', 'ref_name', 'ref_desc', 'usage'), sep = '\t')
 min_genes <- as.integer(args$min_genes)
 max_genes <- as.integer(args$max_genes)
@@ -71,7 +72,7 @@ max_genes <- as.integer(args$max_genes)
 # Figure out which ref/sample id goes with which busco directory
 file_path_wth_db_id <- list.files(busco_dirs[1], recursive = TRUE, include.dirs = TRUE, pattern = '^run_')
 lineage_db_id <- sub(basename(file_path_wth_db_id), pattern = '^run_', replacement = '')
-names(busco_dirs) <- sub(basename(busco_dirs), pattern = paste0('-', lineage_db_id, '-busco$'), replacement = '')
+names(busco_dirs) <- sub(basename(busco_dirs), pattern = paste0('--', lineage_db_id, '-busco$'), replacement = '')
 
 # Infer number of samples and references
 all_ids <- names(busco_dirs)
@@ -255,7 +256,7 @@ write_fasta <- function(seqs, path) {
     output <- paste0('>', names(seqs), '\n', seqs)
     writeLines(output, path)
 }
-dir.create(args$feat_seqs_out_path, showWarnings = FALSE)
+dir.create(feat_seqs_out_path, showWarnings = FALSE)
 output_clusters <- lapply(best_clusters, function(ids) {
     is_core_gene <- rowSums(present_and_single_original[, ids]) == length(ids)
     output <- cluster_data[is_core_gene, ids]
@@ -265,7 +266,7 @@ output_clusters <- lapply(best_clusters, function(ids) {
     return(output)
 })
 for (index in seq_along(output_clusters)) {
-    out_dir_path <- file.path(args$feat_seqs_out_path, paste0('cluster_', index))
+    out_dir_path <- file.path(feat_seqs_out_path, paste0(args$prefix, '--cluster_', index))
     gene_ids <- rownames(output_clusters[[index]])
     sample_ids <- colnames(output_clusters[[index]])
     dir.create(out_dir_path, showWarnings = FALSE)

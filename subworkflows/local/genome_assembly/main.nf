@@ -1,6 +1,5 @@
 include { FASTP                 } from '../../../modules/nf-core/fastp'
 include { SPADES                } from '../../../modules/nf-core/spades'
-include { FILTER_ASSEMBLY       } from '../../../modules/local/filter_assembly'
 include { QUAST                 } from '../../../modules/nf-core/quast'
 include { UNTAR                 } from '../../../modules/nf-core/untar'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'
@@ -93,12 +92,7 @@ workflow GENOME_ASSEMBLY {
     )
     versions = versions.mix(FLYE_PACBIO.out.versions)
 
-    FILTER_ASSEMBLY (
-        SPADES.out.scaffolds
-    )
-    versions = versions.mix(FILTER_ASSEMBLY.out.versions)
-
-    filtered_assembly = FILTER_ASSEMBLY.out.filtered
+    assemblies = SPADES.out.scaffolds
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
         .map { sample_meta, path ->  // remove the "single_end" in the sample meta data so that it is just the ID like most of the pipeline
@@ -106,7 +100,7 @@ workflow GENOME_ASSEMBLY {
         }
         .unique()
     QUAST (
-        filtered_assembly, [[], []], [[],[]]
+        assemblies, [[], []], [[],[]]
     )
     versions = versions.mix(QUAST.out.versions)
 
@@ -122,7 +116,7 @@ workflow GENOME_ASSEMBLY {
     emit:
     reads      = FASTP.out.reads.map{sample_meta, reads -> [[id: sample_meta.id], reads]} // strip off extra sample metadata to make joins easier downstream
     fastp_json = FASTP.out.json.map{sample_meta, json -> [[id: sample_meta.id], json]} // strip off extra sample metadata to make joins easier downstream
-    scaffolds  = filtered_assembly
+    scaffolds  = assemblies
     quast      = QUAST.out.results
     versions   = versions
     messages   = messages    // meta, group_meta, ref_meta, workflow, level, message

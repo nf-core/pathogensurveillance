@@ -13,7 +13,7 @@ process SUBSET_BUSCO_GENES {
     val max_genes
 
     output:
-    tuple val(group_meta), path("${prefix}_feat_seqs/cluster_*"), emit: feat_seqs
+    tuple val(group_meta), path("${prefix}_feat_seqs/${prefix}--cluster_*"), emit: feat_seqs
     tuple val(group_meta), path("message_data.tsv")             , emit: message_data
     path "versions.yml"                                         , emit: versions
 
@@ -24,7 +24,7 @@ process SUBSET_BUSCO_GENES {
     script:
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    subset_busco_gene.R ${samp_ref_pairs} $min_genes $max_genes ${prefix}_feat_seqs ${busco_out_dirs}
+    subset_busco_gene.R ${samp_ref_pairs} $min_genes $max_genes ${prefix} ${busco_out_dirs}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

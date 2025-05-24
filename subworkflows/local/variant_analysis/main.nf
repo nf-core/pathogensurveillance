@@ -159,7 +159,7 @@ workflow VARIANT_ANALYSIS {
 
     sample_ploidy_data = filtered_sample_data_with_refs
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
-            [ "${report_meta.id}_${ref_meta.id}.tsv", "mapping_id\tploidy\n${ref_meta.id}_${sample_meta.id}\t${ploidy}\n" ]
+            [ "${report_meta.id}--${ref_meta.id}.tsv", "mapping_id\tploidy\n${ref_meta.id}--${sample_meta.id}\t${ploidy}\n" ]
         }
         .map { [it.getSimpleName(), it] }
         .combine(CALL_VARIANTS.out.vcf.map { combined_meta, vcf -> [combined_meta.id, combined_meta]}, by: 0) // add on full combined metadata uing combined ID
