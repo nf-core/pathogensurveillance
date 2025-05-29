@@ -97,8 +97,8 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // Collate and save software versions
     collated_versions = softwareVersionsToYAML(versions)
         .collectFile(
-            //storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'versions_info.yml',
             sort: true,
             newLine: true
         )
@@ -232,9 +232,10 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
             keepHeader: true,
             skip: 1,
             storeDir: "${params.outdir}/pipeline_info",
+            name: "messages.tsv",
             sort: true
         ) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "messages.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
         }
 
     // Save pipeline execution paramters

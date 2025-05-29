@@ -173,9 +173,6 @@
     "annotations_hypothetical_tsv": {
       "description": "TSV files of information on hypothetical protein CDS",
       "category": "Genome annotation",
-      "parsers": {
-        "r": "PathoSurveilR:::read_table"
-      },
       "sources": [
         {
           "path": "annotations",
@@ -366,6 +363,12 @@
     "sample_metadata": {
       "description": "Sample metadata in TSV format",
       "category": "Sample/Reference metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "metadata",
@@ -376,6 +379,12 @@
     "reference_metadata": {
       "description": "Reference metadata in TSV format",
       "category": "Sample/Reference metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "metadata",
@@ -422,6 +431,54 @@
         }
       ]
     },
+    "pipeline_version_info": {
+      "description": "Versions of software used in the pipeline",
+      "category": "Pipeline metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_version_info"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^versions_info\\.yml$"
+        }
+      ]
+    },
+    "pipeline_run_info": {
+      "description": "Pipeline run metadata",
+      "category": "Pipeline metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_run_info"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^pathogensurveillance_run_info\\.yml$"
+        }
+      ]
+    },
+    "messages": {
+      "description": "Errors, warnings, and messages produced by the pipeline.",
+      "category": "Pipeline metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
+      "sources": [
+        {
+          "path": "pipeline_info",
+          "pattern": "^messages\\.tsv$"
+        }
+      ]
+    },
     "pirate": {
       "description": "Pirate output directory with gene orthology information",
       "category": "Multigene phylogeny",
@@ -438,6 +495,12 @@
     "pocp": {
       "description": "Percentage of conserved proteins in TSV format",
       "category": "Multigene phylogeny",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv_matrix"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_matrices"
+      },
       "sources": [
         {
           "path": "pocp",
@@ -451,6 +514,12 @@
     "ncbi_assembly_metadata": {
       "description": "Metadata of available assemblies on NCBI in TSV format",
       "category": "Sample/Reference metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_ncbi_assembly_metadata"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "reference_data/considered",
@@ -464,6 +533,12 @@
     "downloaded_ref_metadata": {
       "description": "Metadata of references selected for download from NCBI in TSV format",
       "category": "Sample/Reference metadata",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "reference_data/downloaded",
@@ -477,6 +552,12 @@
     "contextual_refs": {
       "description": "IDs of references selected for multigene phylogenies",
       "category": "Multigene phylogeny",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "reference_data/selected",
@@ -503,6 +584,12 @@
     "mapping_refs": {
       "description": "IDs of references selected for multigene phylogenies",
       "category": "Variant analysis",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tsv"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "reference_data/selected",
@@ -516,6 +603,12 @@
     "sendsketch": {
       "description": "Table returned by BBmap sendsketch with initial identifications of samples",
       "category": "Initial identification",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_sendsketch"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_tables"
+      },
       "sources": [
         {
           "path": "sendsketch",
@@ -529,6 +622,12 @@
     "ani_matrix_csv": {
       "description": "ANI similarity matrix in CSV format made by sourmash compare",
       "category": "Sketch analysis",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_csv_matrix"
+      },
+      "combiners": {
+        "r": "PathoSurveilR:::combine_matrices"
+      },
       "sources": [
         {
           "path": "sketch_comparisons/ani_matricies",
@@ -555,6 +654,9 @@
     "multigene_tree": {
       "description": "Trees infered from multigene phylogeny in Newick format",
       "category": "Multigene phylogeny",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tree"
+      },
       "sources": [
         {
           "path": "trees/core",
@@ -583,6 +685,9 @@
     "variant_tree": {
       "description": "Tree inferred from variant analysis in Newick format",
       "category": "Variant analysis",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_tree"
+      },
       "sources": [
         {
           "path": "trees/snp",
