@@ -31,12 +31,6 @@ missing_sample_file_path <- 'removed_sample_ids.txt'
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#    '~/projects/pathogensurveillance/work/09/440702826216a7101811d85a080794/subgroup_GCF_903978215_1.vcffilter.vcf.gz',
-#    '~/projects/pathogensurveillance/work/09/440702826216a7101811d85a080794/subgroup_GCF_903978215_1.tsv',
-#    '1000000',
-#    'deleteme.fasta'
-# )
 names(args) <- c('vcf_path', 'ploidy_data_path', 'max_variants', 'out_path')
 args <- as.list(args)
 
@@ -192,10 +186,12 @@ vcf_data[sample_ids] <- lapply(vcf_data[sample_ids], function(x) ifelse(is.na(x)
 # Remove indels relative to the reference
 vcf_data <- vcf_data[nchar(vcf_data$REF) == 1, , drop = FALSE]
 
-# Convert to sequences
+# Convert to sequences and name by sample/reference IDs
+reference <- sub(args$ploidy_data_path, pattern = '(.+?)--(.+?)\\.tsv', replacement = '\\2')
 reference_seq <- paste0(vcf_data$REF, collapse = '')
-names(reference_seq) <- "REF"
+names(reference_seq) <- reference
 sample_seqs <- vapply(vcf_data[sample_ids], FUN.VALUE = character(1), paste0, collapse = '')
+names(sample_seqs) <- gsub(names(sample_seqs), pattern = paste0('^', reference, '--'), replacement = '')
 seqs <- c(reference_seq, sample_seqs)
 
 # Write output FASTA file

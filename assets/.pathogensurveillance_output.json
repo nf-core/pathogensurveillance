@@ -496,7 +496,7 @@
       "description": "Percentage of conserved proteins in TSV format",
       "category": "Multigene phylogeny",
       "parsers": {
-        "r": "PathoSurveilR:::parse_tsv_matrix"
+        "r": "PathoSurveilR:::parse_matrix_tsv"
       },
       "combiners": {
         "r": "PathoSurveilR:::combine_matrices"
@@ -553,7 +553,7 @@
       "description": "IDs of references selected for multigene phylogenies",
       "category": "Multigene phylogeny",
       "parsers": {
-        "r": "PathoSurveilR:::parse_tsv"
+        "r": "PathoSurveilR:::parse_ref_list"
       },
       "combiners": {
         "r": "PathoSurveilR:::combine_tables"
@@ -623,7 +623,7 @@
       "description": "ANI similarity matrix in CSV format made by sourmash compare",
       "category": "Sketch analysis",
       "parsers": {
-        "r": "PathoSurveilR:::parse_csv_matrix"
+        "r": "PathoSurveilR:::parse_matrix_csv"
       },
       "combiners": {
         "r": "PathoSurveilR:::combine_matrices"
@@ -694,7 +694,7 @@
           "pattern": "^(.+?)--(.+?)\\.treefile$",
           "capture_groups": [
             "report_id",
-            "cluster_id"
+            "reference_id"
           ]
         }
       ]
@@ -730,6 +730,9 @@
     "variants_fasta": {
       "description": "Filtered variants in FASTA format",
       "category": "Variant analysis",
+      "parsers": {
+        "r": "PathoSurveilR:::parse_fasta"
+      },
       "sources": [
         {
           "path": "variants",

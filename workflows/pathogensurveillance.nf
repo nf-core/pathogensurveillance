@@ -225,36 +225,6 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .map {[[id: it.getSimpleName()], it]}
         .ifEmpty([])
 
-    // Collate and save messages
-    messages
-        .unique()
-        .collectFile(
-            keepHeader: true,
-            skip: 1,
-            storeDir: "${params.outdir}/pipeline_info",
-            name: "messages.tsv",
-            sort: true
-        ) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
-        }
-
-    // Save pipeline execution paramters
-    Channel.value(
-        """
-        command_line: ${workflow.commandLine}
-        commit_id: ${workflow.commitId}
-        container_engine: ${workflow.containerEngine}
-        profile: ${workflow.profile}
-        revision: ${workflow.revision}
-        run_name: ${workflow.runName}
-        session_id: ${workflow.sessionId}
-        start_time: ${workflow.start}
-        nextflow_version: ${nextflow.version}
-        pipeline_version: ${workflow.manifest.version}
-        """.stripIndent().trim()
-    )
-    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: "pathogensurveillance_run_info.yml")
-
     // Combine components into a single channel for the main report_meta
     report_inputs = sample_data_tsvs
         .join(reference_data_tsvs, remainder: true)
@@ -279,13 +249,86 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
-        report_inputs
+        report_inputs,
+        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
     MAIN_REPORT (
         PREPARE_REPORT_INPUT.out.report_input,
         Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
+
+    // Collate and save messages
+    messages
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/pipeline_info",
+            name: "messages.tsv",
+            sort: true
+        ) { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
+        }
+    messages
+        .ifEmpty("\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n")
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: "messages.tsv",
+            sort: true
+        )
+
+
+    // Save pipeline execution paramters
+    Channel.value(
+        """
+        command_line: ${workflow.commandLine}
+        commit_id: ${workflow.commitId}
+        container_engine: ${workflow.containerEngine}
+        profile: ${workflow.profile}
+        revision: ${workflow.revision}
+        run_name: ${workflow.runName}
+        session_id: ${workflow.sessionId}
+        start_time: ${workflow.start}
+        nextflow_version: ${nextflow.version}
+        pipeline_version: ${workflow.manifest.version}
+        """.stripIndent().trim()
+    )
+    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: "pathogensurveillance_run_info.yml")
+
+    // Gather sample data for each report
+    PREPARE_INPUT.out.sample_data
+        .map{ sample_meta ->
+            sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}
+        }
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/metadata",
+            name: "sample_metadata.tsv"
+        ) { sample_meta ->
+            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join('\t') + "\n"
+        }
+
+    // Gather reference data for each report
+    reference_data_tsvs = PREPARE_INPUT.out.sample_data
+        .map { sample_meta ->
+            [sample_meta.ref_metas]
+        }
+        .transpose(by: 0)
+        .map { ref_meta ->
+            ref_meta[0].findAll {it.key != 'ref_path' && it.key != 'gff'}
+        }
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/metadata",
+            name: "reference_metadata.tsv"
+        ) { ref_meta ->
+            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join('\t') + "\n"
+        }
 
     emit:
     multiqc_report = MULTIQC.out.report

@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/downloads/_no_group_defined__inputs"
+    inputs: "~/projects/pathogensurveillance/test_profiles_out/test_bacteria/report_group_data/all_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -21,9 +21,9 @@ library(PathoSurveilR)
 # Summary
 
 ```{r}
-run_info <- run_info_parsed(params$inputs)
+run_info <- find_ps_data(params$inputs, target = 'pipeline_run_info', simplify = TRUE)
 group <- run_info$group_id
-sample_data <- sample_meta_parsed(params$inputs)
+sample_data <- find_ps_data(params$inputs, target = 'sample_metadata', simplify = TRUE)
 ```
 
 This report is produced by the [**`nf-core/pathogensurveillance`**](https://nf-co.re/pathogensurveillance/{{< var version >}}) pipeline.
@@ -39,7 +39,8 @@ The pipeline finished execution.
 Warning or error messages describing problems encountered in the analysis might be provided below.
 
 ```{r}
-no_messages = nrow(status_message_parsed(params$inputs)) == 0
+message_data <- find_ps_data(params$inputs, target = 'messages', simplify = TRUE)
+no_messages = nrow(message_data) == 0
 ```
 
 
@@ -179,7 +180,7 @@ Note that this measure only takes into account the shared portion of genomes, so
 ### ANI heatmap
 
 ```{r ani_heatmap}
-estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
+estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -194,7 +195,7 @@ These measurements are not as reliable as the methods used to create phylogeneti
 ### POCP top matches
 
 ```{r}
-pocp_matrix <- pocp_matrix_parsed(params$inputs)
+pocp_matrix <- find_ps_data(params$inputs, target = 'pocp', simplify = TRUE)
 ```
 
 ```{r eval=length(pocp_matrix) > 0}
@@ -258,7 +259,7 @@ The accuracy of this identification depends on the presence of close reference s
 ### Multigene phylogeny
 
 ```{r}
-core_plots <- multigene_tree_plot(params$inputs, interactive = FALSE)
+core_plots <- plot_tree(params$inputs, target = 'multigene_tree', interactive = FALSE)
 ```
 
 ```{r results='asis', eval = length(core_plots) > 0}
@@ -292,7 +293,7 @@ Could not generate core genome phylogeny.
 ## {{< iconify healthicons dna-outline >}} SNP trees
 
 ```{r}
-snp_plots <- variant_tree_plot(params$inputs, interactive = FALSE)
+snp_plots <- plot_tree(params$inputs, target = 'variant_tree', interactive = FALSE)
 ```
 
 
@@ -331,18 +332,21 @@ See staus messages at the start of the report for details.
 
 ## {{< iconify ph share-network-duotone >}} Minimum spanning network
 
-```{r eval = length(variant_align_path(params$inputs)) > 0}
+```{r}
+align_data <- find_ps_paths(params$inputs, target = 'variants_fasta', simplify = TRUE, must_exist = FALSE)
+```
+
+```{r eval = ! is.null(align_data)}
 threshold_options <- c(0.0001, 0.001, 0.01, 0.1)
-align_data <- variant_align_path_data(params$inputs)
-alignments <- variant_align_parsed(params$inputs)
+alignments <- find_ps_data(params$inputs, target = 'variants_fasta')
 alignments <- alignments[!unlist(lapply(alignments, is.null))]
 alignments <- alignments[unlist(lapply(alignments, nrow)) > 3]
 align_data <- align_data[align_data$path %in% names(alignments), ]
-sample_data <- sample_meta_parsed(params$inputs)
-ref_data <- ref_meta_parsed(params$inputs)
+sample_data <- find_ps_data(params$inputs, target = 'sample_metadata', simplify = TRUE)
+ref_data <- find_ps_data(params$inputs, target = 'reference_metadata', simplify = TRUE)
 ```
 
-```{r plot_msns, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
+```{r plot_msns, results='asis', eval = ! is.null(align_data)}
 # Find which columns are used to provide colors to the trees, if any
 ids_used <- unique(unlist(lapply(alignments, function(a) {
     if (is.null(a)) {
@@ -355,13 +359,13 @@ color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_
 color_by_cols <- color_by_cols[! is.na(color_by_cols)]
 
 plot_one <- function(ref_id, threshold, color_by = NULL) {
-    align <- alignments[[align_data$path[align_data$ref_id == ref_id]]]
+    align <- alignments[[align_data$path[align_data$reference_id == ref_id]]]
     align_without_ref <- align[rownames(align) != ref_id, ]
     PathoSurveilR:::make_MSN(align_without_ref, sample_data, user_seed = 1, snp_diff_prop = threshold, population = color_by)
 }
 
 plot_vars <- list(
-    Reference = align_data$ref_id,
+    Reference = align_data$reference_id,
     Threshold = threshold_options
 )
 if (length(color_by_cols) > 0) {
@@ -371,7 +375,7 @@ print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn
 ```
 
 
-```{r, results='asis', eval = length(variant_align_path(params$inputs)) > 0}
+```{r, results='asis', eval = ! is.null(align_data)}
 cat('
 ::: {.callout-tip collapse="true"}
 
@@ -387,7 +391,7 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
 ')
 ```
 
-```{r, results='asis', eval = length(variant_align_path(params$inputs)) <= 0}
+```{r, results='asis', eval = is.null(align_data)}
 cat('
 Could not generate minimum spanning networks.
 This can happen when there are too few samples or too few SNPs.
@@ -409,7 +413,7 @@ The `pathogen surveillance` pipeline used the following tools that should be ref
 
 ```{r}
 # Parse version data
-version_data <- software_version_parsed(params$inputs)
+version_data <- find_ps_data(params$inputs, target = 'pipeline_version_info', simplify = TRUE)
 
 # Generate citation list based on contents of version data table, .bib file, and .csv file used to index .bib file with program names
 reflist <- read.csv(file = 'references.csv')
