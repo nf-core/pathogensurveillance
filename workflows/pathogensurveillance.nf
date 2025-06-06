@@ -98,7 +98,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     collated_versions = softwareVersionsToYAML(versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'versions_info.yml',
+            name: 'version_info.yml',
             sort: true,
             newLine: true
         )
@@ -158,7 +158,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
         }
         .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
 
@@ -173,7 +173,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
         }
         .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
@@ -220,7 +220,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     group_messages = messages
         .unique()
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
         .map {[[id: it.getSimpleName()], it]}
         .ifEmpty([])
@@ -261,23 +261,17 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // Collate and save messages
     messages
         .unique()
+        .map  { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
+        }
+        .ifEmpty("\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n")
         .collectFile(
             keepHeader: true,
             skip: 1,
             storeDir: "${params.outdir}/pipeline_info",
             name: "messages.tsv",
             sort: true
-        ) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : 'NA'}\"\t\"${ref_meta ? ref_meta.id : 'NA'}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
-        }
-    messages
-        .ifEmpty("\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n")
-        .collectFile(
-            storeDir: "${params.outdir}/pipeline_info",
-            name: "messages.tsv",
-            sort: true
         )
-
 
     // Save pipeline execution paramters
     Channel.value(
@@ -308,7 +302,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "sample_metadata.tsv"
         ) { sample_meta ->
-            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + it + '"'}.join('\t') + "\n"
+            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
         }
 
     // Gather reference data for each report
@@ -327,7 +321,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "reference_metadata.tsv"
         ) { ref_meta ->
-            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + it + '"'}.join('\t') + "\n"
+            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
         }
 
     emit:

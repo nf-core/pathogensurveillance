@@ -2,7 +2,7 @@ process PICK_ASSEMBLIES {
     tag "$meta.id"
     label 'process_single'
 
-    conda "bioconda::r-pathosurveilr=0.3.1"
+    conda "bioconda::r-pathosurveilr=0.4.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.3.1--r44hdfd78af_0' :
         'quay.io/biocontainers/r-pathosurveilr:0.3.1--r44hdfd78af_0' }"
@@ -33,6 +33,7 @@ process PICK_ASSEMBLIES {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+        r-PathoSurveilR: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
     END_VERSIONS
     """
 }

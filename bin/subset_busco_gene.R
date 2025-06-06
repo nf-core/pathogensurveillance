@@ -47,16 +47,6 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#     "~/projects/pathogensurveillance/work/3c/39705646a22b25e90ae0e88a7bd931/_no_group_defined_.tsv",
-#     "10",
-#     "300",
-#     "deleteme",
-#     "~/projects/pathogensurveillance/work/3c/39705646a22b25e90ae0e88a7bd931/GCF_000002765_6-eukaryota_odb10-busco",
-#     "~/projects/pathogensurveillance/work/3c/39705646a22b25e90ae0e88a7bd931/SRR27942447-eukaryota_odb10-busco",
-#     "~/projects/pathogensurveillance/work/3c/39705646a22b25e90ae0e88a7bd931/SRR29397006-eukaryota_odb10-busco",
-#     "~/projects/pathogensurveillance/work/3c/39705646a22b25e90ae0e88a7bd931/SRR29695256-eukaryota_odb10-busco"
-# )
 args <- as.list(args)
 if (length(args) < 5) {
     stop('No busco result directories supplied.')

@@ -443,7 +443,7 @@
       "sources": [
         {
           "path": "pipeline_info",
-          "pattern": "^versions_info\\.yml$"
+          "pattern": "^version_info\\.yml$"
         }
       ]
     },

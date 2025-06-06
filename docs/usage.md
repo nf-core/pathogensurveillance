@@ -4,6 +4,13 @@
 
 ## Introduction
 
+This pipeline is designed to be as simple to run as possible while still being highly customizable.
+If you are running the pipeline for the first time, consider running one of the test profiles described in the Introduction page (i.e. the README on Github).
+You can see the samplesheets used in these profiles here:
+
+https://github.com/nf-core/test-datasets/tree/pathogensurveillance
+
+
 ## Samplesheet input
 
 The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma-separated value) file, specified using the `--input` option.
@@ -166,7 +173,7 @@ Users can register for free API keys to increase these rate limits and the pipel
 Currently, only the NCBI API key is used by the pipeline.
 It can be set using [Nextflow secrets](https://www.nextflow.io/docs/latest/secrets.html):
 
-```
+```bash
 nextflow secrets set NCBI_API_KEY INSERT_YOUR_KEY_HERE
 ```
 

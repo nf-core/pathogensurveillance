@@ -200,7 +200,8 @@ if (nrow(result) == 0) {
         ref_ncbi_query_max = character(0),
         ref_primary_usage = character(0),
         ref_contextual_usage = character(0),
-        ref_color_by = character(0)
+        ref_color_by = character(0),
+        ref_enabled = character(0)
     )
 } else {
     suffix <- paste0(
@@ -222,7 +223,8 @@ if (nrow(result) == 0) {
         ref_ncbi_query_max = '',
         ref_primary_usage = 'optional',
         ref_contextual_usage = 'optional',
-        ref_color_by = ''
+        ref_color_by = '',
+        ref_enabled = 'TRUE'
     )
 }
 

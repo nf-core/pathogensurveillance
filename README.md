@@ -75,6 +75,10 @@ Where:
 - `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
 - `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
 
+You can see the samplesheets used in these profiles here:
+
+https://github.com/nf-core/test-datasets/tree/pathogensurveillance
+
 ## Documentation
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/pathogensurveillance/usage) and the [parameter documentation](https://nf-co.re/pathogensurveillance/parameters).
@@ -112,4 +116,7 @@ You can cite the `nf-core` publication as follows:
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 
-![](docs/images/combined_logos.png)
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/combined_logos_dark.png">
+    <img alt="Logos of University of Oregon and USAD" src="docs/images/combined_logos_light.png">
+</picture>

@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/projects/pathogensurveillance/test_profiles_out/test_bacteria/report_group_data/all_inputs"
+    inputs: ""
 execute:
     echo: false
 bibliography: references.bib
@@ -49,7 +49,6 @@ no_messages = nrow(message_data) == 0
 ## Summary
 
 ```{r, eval=!no_messages}
-cat(no_messages)
 status_message_table(params$inputs, summarize_by = 'workflow', interactive = TRUE)
 ```
 
@@ -129,7 +128,7 @@ Clicking on the middle will undo the subset.
 ```{r, results='asis', eval = is_single_taxon}
 n_samp <- nrow(top_hits)
 formatted_classification <- gsub(unique_tax, pattern = "[a-z]+:", replacement = "")
-formatted_classification <- gsub(unique_tax, pattern = ";", replacement = " > ")
+formatted_classification <- gsub(formatted_classification, pattern = ";", replacement = " > ")
 cat(paste0(
     "Initial classification of ", ifelse(n_samp == 1, "the sample", paste0(n_samp, " samples")),
     " identified ", ifelse(n_samp == 1, "it", "all of them"), " as:\n\n",
@@ -195,14 +194,15 @@ These measurements are not as reliable as the methods used to create phylogeneti
 ### POCP top matches
 
 ```{r}
-pocp_matrix <- find_ps_data(params$inputs, target = 'pocp', simplify = TRUE)
+pocp_path_data <- find_ps_paths(params$inputs, target = 'pocp', simplify = TRUE, must_exist = FALSE)
 ```
 
-```{r eval=length(pocp_matrix) > 0}
+```{r eval = ! is.null(pocp_path_data)}
+pocp_matrix <- find_ps_data(params$inputs, target = 'pocp', simplify = TRUE)
 pocp_match_table(params$inputs, interactive = TRUE)
 ```
 
-```{r, results='asis', eval=length(pocp_matrix) > 0}
+```{r, results = 'asis', eval = ! is.null(pocp_path_data)}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
@@ -216,7 +216,7 @@ Currently, POCP is only calculated for Prokaryotes.
 ')
 ```
 
-```{r, results='asis', eval=length(pocp_matrix) == 0}
+```{r, results='asis', eval = is.null(pocp_path_data)}
 cat('
 POPC not calculated.
 ')
@@ -225,11 +225,11 @@ POPC not calculated.
 
 ### POCP heatmap
 
-```{r pocp_heatmap, eval=length(pocp_matrix) > 0}
-pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)[[1]]
+```{r pocp_heatmap, eval = ! is.null(pocp_path_data)}
+pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
 ```
 
-```{r, results='asis', eval = length(pocp_matrix) > 0}
+```{r, results='asis', eval = ! is.null(pocp_path_data)}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -243,7 +243,7 @@ Currently, POCP is only calculated for Prokaryotes.
 ')
 ```
 
-```{r, results='asis', eval = length(pocp_matrix) == 0}
+```{r, results='asis', eval =  is.null(pocp_path_data)}
 cat('
 POPC not calculated.
 ')
@@ -262,7 +262,7 @@ The accuracy of this identification depends on the presence of close reference s
 core_plots <- plot_tree(params$inputs, target = 'multigene_tree', interactive = FALSE)
 ```
 
-```{r results='asis', eval = length(core_plots) > 0}
+```{r plot_multigene_tree, results='asis', eval = length(core_plots) > 0}
 plot_one <- function(x) {
     print(core_plots[[x]])
 }
@@ -293,11 +293,12 @@ Could not generate core genome phylogeny.
 ## {{< iconify healthicons dna-outline >}} SNP trees
 
 ```{r}
-snp_plots <- plot_tree(params$inputs, target = 'variant_tree', interactive = FALSE)
+snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must_exist = FALSE)
 ```
 
 
-```{r, eval = length(snp_plots) > 0, results='asis'}
+```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), results='asis'}
+snp_plots <- plot_tree(params$inputs, target = 'variant_tree', interactive = FALSE)
 plot_one <- function(x) {
     print(snp_plots[[x]])
 }
@@ -307,7 +308,7 @@ print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)),
 ```
 
 
-```{r, results='asis', eval = length(snp_plots) > 0}
+```{r, results='asis', eval = ! is.null(snp_tree_path_data)}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -321,7 +322,7 @@ Question-does it make sense to be showing the reference within the tree?
 ')
 ```
 
-```{r results='asis', eval = length(snp_plots) <= 0}
+```{r results='asis', eval = is.null(snp_tree_path_data)}
 cat('
 There is no tree to draw.
 This can happen when there are too few samples or too few SNPs.
@@ -346,7 +347,7 @@ sample_data <- find_ps_data(params$inputs, target = 'sample_metadata', simplify 
 ref_data <- find_ps_data(params$inputs, target = 'reference_metadata', simplify = TRUE)
 ```
 
-```{r plot_msns, results='asis', eval = ! is.null(align_data)}
+```{r plot_msns, results='asis', eval = ! is.null(align_data) && nrow(align_data) > 0}
 # Find which columns are used to provide colors to the trees, if any
 ids_used <- unique(unlist(lapply(alignments, function(a) {
     if (is.null(a)) {
@@ -355,7 +356,8 @@ ids_used <- unique(unlist(lapply(alignments, function(a) {
         return(rownames(a))
     }
 })))
-color_by_cols <- unique(unlist(strsplit(sample_data$color_by[sample_data$sample_id %in% ids_used], split = ';')))
+color_by_text <- as.character(sample_data$color_by[sample_data$sample_id %in% ids_used])
+color_by_cols <- unique(unlist(strsplit(color_by_text, split = ';')))
 color_by_cols <- color_by_cols[! is.na(color_by_cols)]
 
 plot_one <- function(ref_id, threshold, color_by = NULL) {
@@ -375,7 +377,7 @@ print_figures_with_selector(plot_one, selector = plot_vars, id_prefix = 'snp-msn
 ```
 
 
-```{r, results='asis', eval = ! is.null(align_data)}
+```{r, results='asis', eval = ! is.null(align_data) && nrow(align_data) > 0}
 cat('
 ::: {.callout-tip collapse="true"}
 
@@ -391,7 +393,7 @@ Note: within these MSNs, edge lengths are not proportional to SNP differences.
 ')
 ```
 
-```{r, results='asis', eval = is.null(align_data)}
+```{r, results='asis', eval = is.null(align_data) || nrow(align_data) == 0}
 cat('
 Could not generate minimum spanning networks.
 This can happen when there are too few samples or too few SNPs.
@@ -413,7 +415,7 @@ The `pathogen surveillance` pipeline used the following tools that should be ref
 
 ```{r}
 # Parse version data
-version_data <- find_ps_data(params$inputs, target = 'pipeline_version_info', simplify = TRUE)
+version_data <- find_ps_data(params$inputs, target = 'pipeline_version_info')[[1]]
 
 # Generate citation list based on contents of version data table, .bib file, and .csv file used to index .bib file with program names
 reflist <- read.csv(file = 'references.csv')

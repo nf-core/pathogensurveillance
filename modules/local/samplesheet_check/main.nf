@@ -5,7 +5,7 @@ Validates the input data and returns a reformatted version that is used for the 
 process SAMPLESHEET_CHECK {
     tag "$sample_tsv"
 
-    conda "bioconda::r-pathosurveilr=0.3.1"
+    conda "bioconda::r-pathosurveilr=0.4.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.3.1--r44hdfd78af_0' :
         'quay.io/biocontainers/r-pathosurveilr:0.3.1--r44hdfd78af_0' }"
@@ -31,6 +31,7 @@ process SAMPLESHEET_CHECK {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+        r-PathoSurveilR: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
     END_VERSIONS
     """
 }
