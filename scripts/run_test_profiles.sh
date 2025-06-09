@@ -7,5 +7,5 @@ while IFS= read -r PROF; do
     echo "=================================================================================================="
     echo "Running profile ${PROF} and saving output to ${OUTDIR}/${PROF}"
     echo "=================================================================================================="
-    nextflow run main.nf -profile ${PROF},docker -resume --outdir ${OUTDIR}/${PROF}
+    nextflow run main.nf -profile ${PROF},conda -resume --outdir ${OUTDIR}/${PROF}
 done <<<"${PROFILES}"
