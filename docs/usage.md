@@ -10,7 +10,6 @@ You can see the samplesheets used in these profiles here:
 
 https://github.com/nf-core/test-datasets/tree/pathogensurveillance
 
-
 ## Samplesheet input
 
 The primary input to the pipeline is a TSV (tab-separated value) or CSV (comma-separated value) file, specified using the `--input` option.
