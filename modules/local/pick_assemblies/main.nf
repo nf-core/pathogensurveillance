@@ -4,8 +4,8 @@ process PICK_ASSEMBLIES {
 
     conda "bioconda::r-pathosurveilr=0.4.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.3.1--r44hdfd78af_0' :
-        'quay.io/biocontainers/r-pathosurveilr:0.3.1--r44hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.4.0--r44hdfd78af_0' :
+        'quay.io/biocontainers/r-pathosurveilr:0.4.0--r44hdfd78af_0' }"
 
     input:
     tuple val(meta), path(found_taxa), path(assem_data_tsvs)
