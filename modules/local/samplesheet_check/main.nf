@@ -5,10 +5,10 @@ Validates the input data and returns a reformatted version that is used for the 
 process SAMPLESHEET_CHECK {
     tag "$sample_tsv"
 
-    conda "bioconda::r-pathosurveilr=0.4.0"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-pathosurveilr:0.4.0--r44hdfd78af_0' :
-        'quay.io/biocontainers/r-pathosurveilr:0.4.0--r44hdfd78af_0' }"
+        'docker.io/zacharyfoster/main-report-r-packages:0.20':
+        'docker.io/zacharyfoster/main-report-r-packages:0.20' }"
 
     input:
     path sample_tsv

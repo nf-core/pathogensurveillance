@@ -4,7 +4,7 @@ process REFORMAT_PIRATE_RESULTS {
 
     conda "bioconda::pirate=1.0.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pirate:1.0.4--hdfd78af_2' :
+        'https://depot.galaxyproject.org/singularity/pirate:1.0.5--hdfd78af_0' :
         'biocontainers/pirate:1.0.5--hdfd78af_0' }"
 
     input:
