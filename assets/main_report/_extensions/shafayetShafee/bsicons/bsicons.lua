@@ -19,29 +19,29 @@ return {
     local color = str(kwargs["color"])
     local label = str(kwargs["label"])
     local class = str(kwargs["class"])
-    
+
     if not isEmpty(size) then
       size = "font-size: " .. size .. ";"
     else
       size = ''
     end
-    
+
     if not isEmpty(color) then
       color = "color: " .. color  .. ";"
     else
       color = ''
     end
-    
+
     local style = "style=\"" .. size .. color .. "\""
-    
+
     if not isEmpty(label) then
       label = " aria-label=\"" .. label  .. "\""
     end
-    
+
     if isEmpty(class) then
       class = ''
     end
-    
+
     local role = "role=\"img\""
     local aria_hidden = "aria-hidden=\"true\""
 

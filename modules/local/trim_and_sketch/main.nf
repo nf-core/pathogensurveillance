@@ -44,4 +44,3 @@ process TRIM_AND_SKETCH {
     END_VERSIONS
     """
 }
-

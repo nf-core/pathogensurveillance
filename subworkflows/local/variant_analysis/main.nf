@@ -220,4 +220,3 @@ workflow VARIANT_ANALYSIS {
     messages      = messages    // meta, report_meta, ref_meta, workflow, level, message
 
 }
-

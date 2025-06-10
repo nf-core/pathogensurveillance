@@ -277,5 +277,3 @@ write.table(message_data, file = message_data_path, row.names = FALSE, na = '', 
 
 # Save clustering statistics
 write.table(clustering_stats, file = clustering_stats_path, row.names = FALSE, na = '', sep = '\t')
-
-

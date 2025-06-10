@@ -61,4 +61,3 @@ workflow ALIGN_READS {
     csi      = out_csi        // channel: [ val(meta), val(ref_meta), [ csi ] ]
     versions = versions    // channel: [ versions.yml ]
 }
-

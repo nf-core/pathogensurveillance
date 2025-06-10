@@ -29,4 +29,3 @@ process EXTRACT_FEATURE_SEQUENCES {
     END_VERSIONS
     """
 }
-

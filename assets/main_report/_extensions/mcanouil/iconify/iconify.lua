@@ -143,7 +143,7 @@ return {
       if is_empty(inline) or inline ~= "false" then
         attributes = ' inline ' .. attributes
       end
-      
+
 
       return pandoc.RawInline(
         'html',

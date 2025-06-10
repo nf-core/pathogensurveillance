@@ -51,5 +51,3 @@ Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.4.0")'
 EOF
 
 USER root
-
-

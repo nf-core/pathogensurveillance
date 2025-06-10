@@ -41,4 +41,3 @@ out_data <- cbind(reference_id = modified_id, out_data)
 
 # Write output table
 write.table(out_data, file = 'merged_assembly_stats.tsv', sep = '\t', row.names = FALSE)
-

@@ -118,4 +118,3 @@ workflow CALL_VARIANTS {
         }
     versions = versions
 }
-

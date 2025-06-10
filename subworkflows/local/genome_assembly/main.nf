@@ -121,4 +121,3 @@ workflow GENOME_ASSEMBLY {
     versions   = versions
     messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
-

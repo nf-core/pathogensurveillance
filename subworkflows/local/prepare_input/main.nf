@@ -385,5 +385,3 @@ def create_reference_metadata_channel(LinkedHashMap ref_meta) {
     ref_meta.ref_path = ref_meta.ref_path ? file(ref_meta.ref_path) : null
     return ref_meta
 }
-
-
