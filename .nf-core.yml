@@ -2,6 +2,7 @@ lint:
   pipeline_todos: false
   template_strings: false
   pipeline_if_empty_null: false
+  nf_test_content: false
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
 nf_core_version: 3.3.1
