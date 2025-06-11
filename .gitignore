@@ -23,6 +23,7 @@ deleteme/
 tests/output/
 test_profiles_out/
 .nf-test.log
+.nf-test*
 tests/.nf-test.log
 assets/main_report/.quarto
 assets/main_report/_book
