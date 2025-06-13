@@ -23,6 +23,8 @@ process MAIN_REPORT {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
+    ls -Rla ../${inputs}
+
     # Tell quarto where to put cache so it does not try to put it where it does not have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
 
