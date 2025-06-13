@@ -3,6 +3,10 @@
 channels:
   - conda-forge
   - bioconda
-
 dependencies:
-  - bioconda::pirate=1.0.5
+  - conda-forge::coreutils=9.5
+  - conda-forge::grep=3.11
+  - conda-forge::gzip=1.13
+  - conda-forge::lbzip2=2.5
+  - conda-forge::sed=4.8
+  - conda-forge::tar=1.34

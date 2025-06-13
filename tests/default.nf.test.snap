@@ -47,7 +47,6 @@
                     "pirate": "1.0.5"
                 },
                 "SAMPLESHEET_CHECK": {
-                    "r-base": "4.4.3",
                     "r-PathoSurveilR": "1.1.4"
                 },
                 "SOURMASH_COMPARE": {
@@ -195,7 +194,6 @@
                 "sendsketch",
                 "sendsketch/LF1.txt",
                 "shared_genes",
-                "shared_genes/core",
                 "shared_genes/core/g00031_1.aligned.fas",
                 "shared_genes/core/g00202.aligned.fas",
                 "shared_genes/core/g00211.aligned.fas",
@@ -248,6 +246,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-11T11:20:57.012587288"
+        "timestamp": "2025-06-12T16:59:29.477115283"
     }
 }

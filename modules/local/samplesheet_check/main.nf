@@ -30,7 +30,6 @@ process SAMPLESHEET_CHECK {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
         r-PathoSurveilR: \$(Rscript -e "cat(as.character(packageVersion('dplyr')))")
     END_VERSIONS
     """
