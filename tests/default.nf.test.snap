@@ -194,26 +194,7 @@
                 "sendsketch",
                 "sendsketch/LF1.txt",
                 "shared_genes",
-                "shared_genes/core/g00031_1.aligned.fas",
-                "shared_genes/core/g00202.aligned.fas",
-                "shared_genes/core/g00211.aligned.fas",
-                "shared_genes/core/g00261.aligned.fas",
-                "shared_genes/core/g00294.aligned.fas",
-                "shared_genes/core/g00310.aligned.fas",
-                "shared_genes/core/g00327.aligned.fas",
-                "shared_genes/core/g00343.aligned.fas",
-                "shared_genes/core/g00362.aligned.fas",
-                "shared_genes/core/g00391.aligned.fas",
-                "shared_genes/core/g00392.aligned.fas",
-                "shared_genes/core/g00397.aligned.fas",
-                "shared_genes/core/g00409.aligned.fas",
-                "shared_genes/core/g00418.aligned.fas",
-                "shared_genes/core/g00457.aligned.fas",
-                "shared_genes/core/g00531.aligned.fas",
-                "shared_genes/core/g01001.aligned.fas",
-                "shared_genes/core/g01128.aligned.fas",
-                "shared_genes/core/g01130.aligned.fas",
-                "shared_genes/core/g01161.aligned.fas",
+                "shared_genes/core",
                 "sketch_comparisons",
                 "sketch_comparisons/ani_matricies",
                 "sketch_comparisons/ani_matricies/all_comp.csv",
@@ -246,6 +227,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-12T16:59:29.477115283"
+        "timestamp": "2025-06-13T10:02:33.708729849"
     }
 }
