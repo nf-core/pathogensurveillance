@@ -132,12 +132,15 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
         .unique()
         .groupTuple(sort: 'hash')
-    multiqc_files = fastqc_results
+    multiqc_files = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.report_group_ids]] }
+        .unique()
+        .combine(collated_versions)
+        .join(fastqc_results, remainder: true)
         .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .combine(collated_versions)
-        .map { report_meta, fastqc, fastp, nanoplot, quast, versions ->
+        .map { report_meta, versions, fastqc, fastp, nanoplot, quast ->
             files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
             [report_meta, files.flatten()]
         }
