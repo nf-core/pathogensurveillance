@@ -68,7 +68,6 @@ jobs:
 
   nf-test:
     name: "${{ matrix.profile }} | ${{ matrix.NXF_VER }} | ${{ matrix.shard }}/${{ needs.nf-test-changes.outputs.total_shards }}"
-    continue-on-error: true
     needs: [nf-test-changes]
     if: ${{ needs.nf-test-changes.outputs.total_shards != '0' }}
     runs-on: # use self-hosted runners
@@ -110,6 +109,7 @@ jobs:
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
       - name: Setup ssh session
+        if: ${{ failure() }}
         uses: Warpbuilds/action-debugger@v1.3
   confirm-pass:
     needs: [nf-test]
