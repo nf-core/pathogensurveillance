@@ -98,6 +98,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup ssh session
+        uses: Warpbuilds/action-debugger@v1.3
       - name: Run nf-test
         uses: ./.github/actions/nf-test
         env:
@@ -108,8 +110,6 @@ jobs:
           profile: ${{ matrix.profile }}
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
-      - name: Setup ssh session
-        uses: Warpbuilds/action-debugger@v1.3
   confirm-pass:
     needs: [nf-test]
     if: always()
