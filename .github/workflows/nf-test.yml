@@ -99,7 +99,6 @@ jobs:
           fetch-depth: 0
 
       - name: Run nf-test
-        continue-on-error: true
         uses: ./.github/actions/nf-test
         env:
           NFT_DIFF: ${{ env.NFT_DIFF }}
