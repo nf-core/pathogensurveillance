@@ -6,9 +6,6 @@
 
 This pipeline is designed to be as simple to run as possible while still being highly customizable.
 If you are running the pipeline for the first time, consider running one of the test profiles described in the Introduction page (i.e. the README on Github).
-You can see the samplesheets used in these profiles here:
-
-https://github.com/nf-core/test-datasets/tree/pathogensurveillance
 
 ## Samplesheet input
 
@@ -17,7 +14,7 @@ This can be made in a spreadsheet program like LibreOffice Calc or Microsoft Exc
 Use this parameter to specify its location:
 
 ```bash
---input '[path to samplesheet file]'
+--input <PATH TO SAMPLESHEET FILE>
 ```
 
 Columns can be in any order and unneeded columns can be left out or left blank.
@@ -210,9 +207,6 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended, since it can lead to different results on different machines dependent on the computer environment.
 
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
 - `docker`
   - A generic configuration profile to be used with [Docker](https://docker.com/)
 - `singularity`
