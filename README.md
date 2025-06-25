@@ -86,7 +86,6 @@ Where:
 - `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
 - `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
 
-
 ## Documentation
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/pathogensurveillance/usage) and the [parameter documentation](https://nf-co.re/pathogensurveillance/parameters).
