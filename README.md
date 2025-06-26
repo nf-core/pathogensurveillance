@@ -45,7 +45,7 @@ Note that some form of configuration will be needed so that Nextflow knows how t
 This is usually done in the form of a config profile.
 You can chain multiple config profiles in a comma-separated string.
 In most cases you will include one profile that defines a tool to reproducibly install and use software needed by the pipeline.
-This must be one of `docker`, `singularity`, or `conda`.
+This is typically one of `docker`, `singularity`, or `conda`.
 Ideally `conda` should not be used unless `docker` or `singularity` cannot be used.
 
 Profiles can also be used to store parameters for the pipeline, such as input data and pipeline options.
@@ -67,7 +67,7 @@ Adding `_full` to the end of any of these profiles will run a larger (often much
 For example, you can run the `test_bacteria` profile with the `docker` profile:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile test_bacteria,docker -resume --outdir test_output
+nextflow run nf-core/pathogensurveillance -profile docker,test_bacteria -resume --outdir test_output
 ```
 
 You can see the samplesheets used in these profiles here:

@@ -35,9 +35,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     main:
 
     // Write output format file for PathoSurveilR parsing
-    file("${params.outdir}/.pathogensurveillance_output.json").withOutputStream { os ->
-        os << file("$projectDir/assets/.pathogensurveillance_output.json").newInputStream()
-    }
+    file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
 
     // Initalize channel to accumulate information about software versions used
     versions = Channel.empty()
