@@ -17,7 +17,7 @@
                         "size": "Large",
                         "weight": "Bolder",
                         "color": "<% if (success) { %>Good<% } else { %>Attention<%} %>",
-                        "text": "nf-core/plantpathsurveil v${version} - ${runName}",
+                        "text": "nf-core/pathogensurveillance v${version} - ${runName}",
                         "wrap": true
                     },
                     {

@@ -1,36 +1,73 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/plantpathsurveil/master/assets/schema_input.json",
-    "title": "nf-core/plantpathsurveil pipeline - params.input schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/main/assets/schema_input.json",
+    "title": "nf-core/pathogensurveillance pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
-                "type": "string",
-                "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+            "sample_id": {
+                "type": "string"
             },
-            "fastq_1": {
+            "name": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "path": {
                 "type": "string",
+                "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ]
+            "path_2": {
+                "type": "string",
+                "exists": true,
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "ncbi_accession": {
+                "type": "string",
+                "pattern": "^[A-Z]{3,6}[0-9]+$",
+                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (captial letters followed by numbers)."
+            },
+            "ncbi_query": {
+                "type": "string"
+            },
+            "ncbi_query_max": {
+                "type": "integer",
+                "default": 10,
+                "minimum": 1,
+                "errorMessage": "The `ncbi_query_max` column must be an integer greater than 0."
+            },
+            "sequence_type": {
+                "type": "string",
+                "pattern": "(?i)illumina|nanopore|pacbio|bgiseq",
+                "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', or 'bgiseq'."
+            },
+            "report_group_ids": {
+                "type": "string",
+                "default": "_no_group_defined_",
+                "pattern": "^[a-zA-Z0-9_ -]+(?:;[a-zA-Z0-9_ -]+)*$"
+            },
+            "color_by": {
+                "type": "string"
+            },
+            "ploidy": {
+                "type": "integer",
+                "default": 1,
+                "minimum": 1,
+                "errorMessage": "The `ploidy` column must be an integer greater than or equal to 1."
+            },
+            "enabled": {
+                "type": "boolean",
+                "default": true
+            },
+            "ref_group_ids": {
+                "type": "string"
             }
-        },
-        "required": ["sample", "fastq_1"]
+        }
     }
 }

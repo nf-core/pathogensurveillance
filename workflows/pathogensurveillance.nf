@@ -1,68 +1,24 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
-// Validate input parameters
-WorkflowPathogensurveillance.initialise(params, log)
-
-// TODO nf-core: Add all file path parameters for the pipeline to the list below
-// Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config ]
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-include { INPUT_CHECK              } from '../subworkflows/local/input_check'
-include { COARSE_SAMPLE_TAXONOMY   } from '../subworkflows/local/coarse_sample_taxonomy'
-include { CORE_GENOME_PHYLOGENY    } from '../subworkflows/local/core_genome_phylogeny'
-include { VARIANT_CALLING_ANALYSIS } from '../subworkflows/local/variant_calling_analysis'
-include { DOWNLOAD_REFERENCES      } from '../subworkflows/local/download_references'
-include { ASSIGN_REFERENCES            } from '../subworkflows/local/assign_references'
-include { GENOME_ASSEMBLY              } from '../subworkflows/local/genome_assembly'
-
-include { MAIN_REPORT as MAIN_REPORT_1 } from '../modules/local/mainreport'
-include { MAIN_REPORT as MAIN_REPORT_2 } from '../modules/local/mainreport'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// MODULE: Installed directly from nf-core/modules
-//
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-
+include { PREPARE_INPUT               } from '../subworkflows/local/prepare_input'
+include { CORE_GENOME_PHYLOGENY       } from '../subworkflows/local/core_genome_phylogeny'
+include { VARIANT_ANALYSIS            } from '../subworkflows/local/variant_analysis'
+include { SKETCH_COMPARISON           } from '../subworkflows/local/sketch_comparison'
+include { GENOME_ASSEMBLY             } from '../subworkflows/local/genome_assembly'
+include { BUSCO_PHYLOGENY             } from '../subworkflows/local/busco_phylogeny'
+include { INITIAL_QC_CHECKS           } from '../subworkflows/local/initial_qc_checks'
+include { MAIN_REPORT                 } from '../modules/local/main_report'
+include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
+include { PREPARE_REPORT_INPUT        } from '../modules/local/prepare_report_input'
+include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { paramsSummaryMap            } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,159 +26,305 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
+workflow NFCORE_PATHOGENSURVEILLANCE {
 
-workflow PATHOGENSURVEILLANCE {
+    take:
+    sample_data_tsv
+    reference_data_tsv
 
-    ch_versions = Channel.empty()
+    main:
+
+    // Write output format file for PathoSurveilR parsing
+    file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
+
+    // Initalize channel to accumulate information about software versions used
+    versions = Channel.empty()
+    messages = Channel.empty()
 
     // Read in samplesheet, validate and stage input files
-    INPUT_CHECK (
-        ch_input
-    )
-    ch_reads = INPUT_CHECK.out.sample_data // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        .map { it[0..1] }
-        .distinct()
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
+    versions = versions.mix(PREPARE_INPUT.out.versions)
+    messages = messages.mix(PREPARE_INPUT.out.messages)
 
-    // Run FastQC
-    FASTQC (
-        ch_reads
+    // Assemble and annotate genomes
+    GENOME_ASSEMBLY (
+        PREPARE_INPUT.out.sample_data
     )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.toSortedList().map{it[0]})
+    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
+    messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
-    // Make initial taxonomic classification to decide how to treat sample
-    COARSE_SAMPLE_TAXONOMY (
-        ch_reads
+    // Initial quick analysis of sequences and references based on sketchs
+    SKETCH_COMPARISON (
+        PREPARE_INPUT.out.sample_data,
+        GENOME_ASSEMBLY.out.scaffolds
     )
-    ch_versions = ch_versions.mix(COARSE_SAMPLE_TAXONOMY.out.versions)
+    versions = versions.mix(SKETCH_COMPARISON.out.versions)
+    messages = messages.mix(SKETCH_COMPARISON.out.messages)
 
-    // Search for and download reference assemblies for all samples
-    DOWNLOAD_REFERENCES (
-        COARSE_SAMPLE_TAXONOMY.out.species,
-        COARSE_SAMPLE_TAXONOMY.out.genera,
-        COARSE_SAMPLE_TAXONOMY.out.families
-    )
-
-    // Create main summary report                                               
-    //MAIN_REPORT_1 (                                                               
-    //    INPUT_CHECK.out.sample_data.map {[ it[4], it[2], null ]}.groupTuple().map {it + [null, null]}, 
-    //    ch_input,                                                               
-    //    DOWNLOAD_REFERENCES.out.stats                                           
-    //)                                                                           
-
-    // Assign closest reference for samples without a user-assigned reference
-    ASSIGN_REFERENCES (
-        INPUT_CHECK.out.sample_data,
-        DOWNLOAD_REFERENCES.out.assem_samp_combos,
-        DOWNLOAD_REFERENCES.out.sequence,
-        DOWNLOAD_REFERENCES.out.signatures,
-        COARSE_SAMPLE_TAXONOMY.out.depth
-    )
+    // Initial quality control of reads
+    INITIAL_QC_CHECKS ( PREPARE_INPUT.out.sample_data )
+    versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
+    messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_CALLING_ANALYSIS (
-        ASSIGN_REFERENCES.out.sample_data,
-        ch_input
+    VARIANT_ANALYSIS (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix
     )
-
-    // Assemble and annotate bacterial genomes
-    GENOME_ASSEMBLY (                                                           
-        ASSIGN_REFERENCES.out.sample_data                           
-            .combine(COARSE_SAMPLE_TAXONOMY.out.kingdom, by: 0)                                                   
-    )                                                                           
-    ch_versions = ch_versions.mix(GENOME_ASSEMBLY.out.versions)                 
+    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
+    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Create core gene phylogeny for bacterial samples
-    ref_gffs = DOWNLOAD_REFERENCES.out.assem_samp_combos
-        .combine(DOWNLOAD_REFERENCES.out.gff, by: 0) // [ val(genome_id), val(meta), file(gff) ]
-        .map { it[1..2] } // [ val(meta), file(gff) ]
-        .groupTuple() // [ val(meta), [file(gff)] ]
-    gff_and_group = ASSIGN_REFERENCES.out.sample_data  // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta)]
-        .combine(GENOME_ASSEMBLY.out.gff, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff)]
-        .combine(ref_gffs, by: 0) // [val(meta), [file(fastq)], val(ref_meta), file(reference), val(group_meta), file(gff), [file(ref_gff)] ]
-        .map { [it[0], it[5], it[4], it[6]] } // [ val(meta), file(gff), val(group_meta), [file(ref_gff)] ]            
-    CORE_GENOME_PHYLOGENY (                                                     
-        gff_and_group,                             
-        ch_input                                                          
-    )                                                                           
+    CORE_GENOME_PHYLOGENY (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix,
+        GENOME_ASSEMBLY.out.scaffolds
+    )
+    versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
 
-    // Read2tree phylogeny for eukaryotes
-    //READ2TREE_ANALYSIS (
-    //)
+    // Read2tree BUSCO phylogeny for eukaryotes
+    BUSCO_PHYLOGENY (
+        PREPARE_INPUT.out.sample_data,
+        SKETCH_COMPARISON.out.ani_matrix,
+        GENOME_ASSEMBLY.out.scaffolds
+    )
+    versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
+    messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
-    // Create main summary report
-    report_in = VARIANT_CALLING_ANALYSIS.out.phylogeny // [ group_meta, ref_meta, tree ]
-        .groupTuple() // [ group_meta, [ref_meta], [tree] ]
-        .join(ASSIGN_REFERENCES.out.ani_matrix) // [ group_meta, [ref_meta], [tree], ani_matrix ]
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true) // [ group_meta, [ref_meta], [snp_tree], ani_matrix, core_tree ]
+    // Collate and save software versions
+    collated_versions = softwareVersionsToYAML(versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'version_info.yml',
+            sort: true,
+            newLine: true
+        )
 
-    MAIN_REPORT_2 ( 
-        report_in,
-        ch_input,
-        DOWNLOAD_REFERENCES.out.stats
-    )  
-    
-    // Save version info
-    CUSTOM_DUMPSOFTWAREVERSIONS (                                               
-        ch_versions.unique().collect(sort:true)
+    // MultiQC
+    multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
+    multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+    multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    fastqc_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
+        .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
+        .unique()
+        .groupTuple(sort: 'hash')
+    fastp_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(GENOME_ASSEMBLY.out.fastp_json, by: 0)
+        .map{ sample_meta, report_meta, fastp_json -> [report_meta, fastp_json] }
+        .unique()
+        .groupTuple(sort: 'hash')
+    nanoplot_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
+        .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
+        .unique()
+        .groupTuple(sort: 'hash')
+    quast_results = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(GENOME_ASSEMBLY.out.quast, by: 0)
+        .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
+        .unique()
+        .groupTuple(sort: 'hash')
+    multiqc_files = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.report_group_ids]] }
+        .unique()
+        .combine(collated_versions)
+        .join(fastqc_results, remainder: true)
+        .join(fastp_results, remainder: true)
+        .join(nanoplot_results, remainder: true)
+        .join(quast_results, remainder: true)
+        .map { report_meta, versions, fastqc, fastp, nanoplot, quast ->
+            files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
+            [report_meta, files.flatten()]
+        }
+    MULTIQC (
+        multiqc_files,
+        multiqc_config.collect(sort: true).ifEmpty([]),
+        multiqc_custom_config.collect(sort: true).ifEmpty([]),
+        multiqc_logo.collect(sort: true).ifEmpty([]),
+        [],
+        []
+    )
+    versions = versions.mix(MULTIQC.out.versions)
+
+    // Gather sample data for each report
+    sample_data_tsvs = PREPARE_INPUT.out.sample_data
+        .map{ sample_meta ->
+            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
+        }
+        .unique()
+        .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+        }
+        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+
+    // Gather reference data for each report
+    reference_data_tsvs = PREPARE_INPUT.out.sample_data
+        .map { sample_meta ->
+            [[id: sample_meta.report_group_ids], sample_meta.ref_metas]
+        }
+        .transpose(by: 1)
+        .map { report_meta, ref_meta ->
+            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+        }
+        .unique()
+        .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+        }
+        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+
+    // Gather sendsketch signatures
+    sendsketch_hits = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.sendsketch, by: 0)
+        .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
+        .unique()
+        .groupTuple(sort: 'hash')
+
+    // Gather NCBI reference metadata for all references considered
+    ncbi_ref_meta = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.family_stats_per_sample, by: 0)
+        .groupTuple(by: 1, sort: 'hash')
+        .map { sample_meta, report_meta, family_stats ->
+            [report_meta, family_stats.flatten().unique()]
+        }
+
+    // Gather selected reference metadata
+    selected_ref_meta = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
+        .map{ sample_meta, report_meta, ref_meta_file ->
+            [report_meta, ref_meta_file] }
+        .unique()
+        .groupTuple(sort: 'hash')
+        .map { report_meta, ref_meta_files ->
+            [report_meta, ref_meta_files.findAll{it != null}]
+        }
+
+    // Gather SNP alignments from the variant analysis
+    snp_align = VARIANT_ANALYSIS.out.snp_align
+        .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
+        .groupTuple(sort: 'hash')
+
+    // Gather phylogenies from the variant analysis
+    snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+        .map { report_meta, ref_meta, tree -> [report_meta, tree] }
+        .groupTuple(sort: 'hash')
+
+    // Gather status messages for each group
+    group_messages = messages
+        .unique()
+        .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+        }
+        .map {[[id: it.getSimpleName()], it]}
+        .ifEmpty([])
+
+    // Combine components into a single channel for the main report_meta
+    report_inputs = sample_data_tsvs
+        .join(reference_data_tsvs, remainder: true)
+        .join(sendsketch_hits, remainder: true)
+        .join(ncbi_ref_meta, remainder: true)
+        .join(selected_ref_meta, remainder: true)
+        .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
+        .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
+        .join(snp_align, remainder: true)
+        .join(snp_phylogeny, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
+        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
+        .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
+        .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
+        .join(MULTIQC.out.outdir, remainder: true)
+        .join(group_messages, remainder: true)
+        .filter{it[0] != null} // remove extra item if messages is empty
+        .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
+        .filter{ it.size() == 17 } // remove any malformed inputs
+        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+        .combine(collated_versions)
+
+    PREPARE_REPORT_INPUT (
+        report_inputs,
+        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
     )
 
-    println "$workflow.manifest"
-                                                                          
-    // MultiQC
-    //workflow_summary    = WorkflowPathogensurveillance.paramsSummaryMultiqc(workflow, summary_params)
-    //ch_workflow_summary = Channel.value(workflow_summary)
+    MAIN_REPORT (
+        PREPARE_REPORT_INPUT.out.report_input,
+        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+    )
 
-    //methods_description    = WorkflowPathogensurveillance.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    //ch_methods_description = Channel.value(methods_description)
+    // Collate and save messages
+    messages
+        .unique()
+        .map  { sample_meta, report_meta, ref_meta, workflow, level, message ->
+            "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n"
+        }
+        .ifEmpty("\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n")
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/pipeline_info",
+            name: "messages.tsv",
+            sort: true
+        )
 
-    //ch_multiqc_files = Channel.empty()
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    //ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    // Save pipeline execution paramters
+    Channel.value(
+        """
+        command_line: ${workflow.commandLine}
+        commit_id: ${workflow.commitId}
+        container_engine: ${workflow.containerEngine}
+        profile: ${workflow.profile}
+        revision: ${workflow.revision}
+        run_name: ${workflow.runName}
+        session_id: ${workflow.sessionId}
+        start_time: ${workflow.start}
+        nextflow_version: ${nextflow.version}
+        pipeline_version: ${workflow.manifest.version}
+        """.stripIndent().trim()
+    )
+    .collectFile(storeDir: "${params.outdir}/pipeline_info", name: "pathogensurveillance_run_info.yml")
 
-    //MULTIQC (
-    //    ch_multiqc_files.collect(),
-    //    ch_multiqc_config.collect().ifEmpty([]),
-    //    ch_multiqc_custom_config.collect().ifEmpty([]),
-    //    ch_multiqc_logo.collect().ifEmpty([])
-    //)
-    //multiqc_report = MULTIQC.out.report.toList()
-    //ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    // Gather sample data for each report
+    PREPARE_INPUT.out.sample_data
+        .map{ sample_meta ->
+            sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}
+        }
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/metadata",
+            name: "sample_metadata.tsv"
+        ) { sample_meta ->
+            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+        }
 
+    // Gather reference data for each report
+    reference_data_tsvs = PREPARE_INPUT.out.sample_data
+        .map { sample_meta ->
+            [sample_meta.ref_metas]
+        }
+        .transpose(by: 0)
+        .map { ref_meta ->
+            ref_meta[0].findAll {it.key != 'ref_path' && it.key != 'gff'}
+        }
+        .unique()
+        .collectFile(
+            keepHeader: true,
+            skip: 1,
+            storeDir: "${params.outdir}/metadata",
+            name: "reference_metadata.tsv"
+        ) { ref_meta ->
+            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+        }
 
+    emit:
+    multiqc_report = MULTIQC.out.report
 }
-
-
-
-
-
-
-
-
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.adaptivecard(workflow, params, summary_params, projectDir, log)
-    }
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/

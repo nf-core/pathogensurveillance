@@ -1,7 +1,0 @@
-# Spatial distribution
-
-Color by: 
-* sample metadata
-* time isolated/submitted
-* gene content
-* relatedness 

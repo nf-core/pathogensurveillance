@@ -1,0 +1,3 @@
+.DS_Store
+quality_control/**/*
+pipeline_info/*.{html,json,txt,yml}
