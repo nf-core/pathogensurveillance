@@ -4,7 +4,7 @@ lint:
   pipeline_if_empty_null: false
   nf_test_content: false
   files_unchanged:
-    - .github/PULL_REQUEST_TEMPLATE.md
+  - .github/PULL_REQUEST_TEMPLATE.md
 nf_core_version: 3.3.1
 repository_type: pipeline
 template:
@@ -16,4 +16,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  version: 1.0.0
+  version: 1.1.0dev

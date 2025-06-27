@@ -62,7 +62,7 @@
                     "r-base": "4.2.1"
                 },
                 "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.0.0"
+                    "nf-core/pathogensurveillance": "v1.1.0dev"
                 }
             },
             [
@@ -227,6 +227,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-13T10:02:33.708729849"
+        "timestamp": "2025-06-27T13:28:39.578733196"
     }
 }
