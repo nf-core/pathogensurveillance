@@ -36,6 +36,13 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ![](docs/images/pipeline_diagram.png)
 
+## Installation
+
+The pipeline is automatically installed when run by nextflow, but you will need to install the following dependencies:
+
+- [nextflow](https://nf-co.re/docs/usage/installation)
+- At least one of the following [container engines](https://www.nextflow.io/docs/latest/container.html): [`apptainer`](https://apptainer.org/), [`charliecloud`](https://charliecloud.io/), [`docker`](https://www.docker.com/), [`podman`](http://podman.io/), [`sarus`](https://sarus.readthedocs.io/en/stable/), [`shifter`](https://shifter.readthedocs.io/en/latest/), [`singularity`](https://singularityware.github.io/index.html), or [`conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (only use `conda` if no other option is available)
+
 ## Quick start guide
 
 > [!NOTE]
@@ -67,7 +74,7 @@ Adding `_full` to the end of any of these profiles will run a larger (often much
 For example, you can run the `test_bacteria` profile with the `docker` profile:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile docker,test_bacteria -resume --outdir test_output
+nextflow run nf-core/pathogensurveillance -r 1.1.0 -profile docker,test_bacteria -resume --outdir test_output
 ```
 
 You can see the samplesheets used in these profiles here:
@@ -77,7 +84,7 @@ https://github.com/nf-core/test-datasets/tree/pathogensurveillance
 To run your own input data, prepare a samplesheet as described in the [usage documentation](docs/usage/#samplesheet-input) section below and run the following command:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
+nextflow run nf-core/pathogensurveillance -r <REPLACE WITH VERSION> -profile <REPLACE WITH RUN TOOL> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
 ```
 
 Where:
@@ -85,6 +92,8 @@ Where:
 - `<REPLACE WITH RUN TOOL>` is one of `docker`, `singularity`, or `conda`
 - `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
 - `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
+- `<REPLACE WITH VERSION>` is the version of the pipeline to run
+
 
 ## Documentation
 
