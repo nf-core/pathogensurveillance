@@ -1,11 +1,11 @@
 lint:
-  pipeline_todos: false
-  template_strings: false
-  pipeline_if_empty_null: false
-  nf_test_content: false
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
-nf_core_version: 3.3.1
+  nf_test_content: false
+  pipeline_if_empty_null: false
+  pipeline_todos: false
+  template_strings: false
+nf_core_version: 3.3.2
 repository_type: pipeline
 template:
   author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.
