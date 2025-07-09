@@ -1,0 +1,150 @@
+Changes in component 'nf-core/seqkit/head'
+Changes in 'seqkit/head/main.nf':
+--- modules/nf-core/seqkit/head/main.nf
++++ modules/nf-core/seqkit/head/main.nf
+@@ -11,14 +11,13 @@
+     tuple val(meta), path(fastqs), val(seq_count)
+ 
+     output:
+-    tuple val(meta), path("${prefix}_subset_*"), emit: subset
+-    path "versions.yml"                        , emit: versions
++    tuple val(meta), path("*_subset.fastq.gz"), emit: subset
++    path "versions.yml"                       , emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+ 
+     script:
+-    prefix = task.ext.prefix ?: "${meta.id}"
+     def args = task.ext.args ?: ''
+     """
+     for f in ${fastqs.join(' ')}
+@@ -27,7 +26,7 @@
+             ${args} \\
+             --threads $task.cpus \\
+             -n ${seq_count} \\
+-            -o "${prefix}_subset_\$(basename \$f)" \\
++            -o "\$(basename \$f .fastq.gz)_subset.fastq.gz" \\
+             \$f
+     done
+ 
+@@ -38,11 +37,10 @@
+     """
+ 
+     stub:
+-    prefix = task.ext.prefix ?: "${meta.id}"
+     """
+     for f in ${fastqs.join(' ')}
+     do
+-       echo "" | gzip > "${prefix}_subset_\$(basename \$f)"
++       echo "" | gzip > "\$(basename \$f .fastq.gz)_subset.fastq.gz"
+     done
+ 
+     cat <<-END_VERSIONS > versions.yml
+
+'modules/nf-core/seqkit/head/environment.yml' is unchanged
+Changes in 'seqkit/head/meta.yml':
+--- modules/nf-core/seqkit/head/meta.yml
++++ modules/nf-core/seqkit/head/meta.yml
+@@ -34,21 +34,21 @@
+ 
+ output:
+   - subset:
+-    - meta:
+-        type: map
+-        description: |
+-          Groovy Map containing sample information
+-          e.g. `[ id:'sample1', single_end:false ]`
+-    - '${prefix}_subset_*':
+-        type: file
+-        description: Subset FASTA/FASTQ files
+-        pattern: "*.{fa,fasta,fq,fastq}"
++      - meta:
++          type: map
++          description: |
++            Groovy Map containing sample information
++            e.g. `[ id:'sample1', single_end:false ]`
++      - "*_subset.fastq.gz":
++          type: file
++          description: Subset FASTA/FASTQ files
++          pattern: "*.{fa,fasta,fq,fastq}"
+ 
+   - versions:
+-    - "versions.yml":
+-        type: file
+-        description: File containing software versions
+-        pattern: "versions.yml"
++      - "versions.yml":
++          type: file
++          description: File containing software versions
++          pattern: "versions.yml"
+ 
+ authors:
+   - "@zachary-foster"
+
+'modules/nf-core/seqkit/head/tests/main.nf.test' is unchanged
+Changes in 'seqkit/head/tests/main.nf.test.snap':
+--- modules/nf-core/seqkit/head/tests/main.nf.test.snap
++++ modules/nf-core/seqkit/head/tests/main.nf.test.snap
+@@ -8,8 +8,8 @@
+                             "id": "test"
+                         },
+                         [
+-                            "test_subset_test2_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+-                            "test_subset_test2_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
++                            "test2_1_subset.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
++                            "test2_2_subset.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                         ]
+                     ]
+                 ],
+@@ -22,8 +22,8 @@
+                             "id": "test"
+                         },
+                         [
+-                            "test_subset_test2_1.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
+-                            "test_subset_test2_2.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
++                            "test2_1_subset.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940",
++                            "test2_2_subset.fastq.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                         ]
+                     ]
+                 ],
+@@ -36,7 +36,7 @@
+             "nf-test": "0.9.2",
+             "nextflow": "24.10.5"
+         },
+-        "timestamp": "2025-03-17T10:01:11.354226203"
++        "timestamp": "2025-03-14T16:26:30.984914564"
+     },
+     "sarscov2 - paired fastq.gz": {
+         "content": [
+@@ -47,8 +47,8 @@
+                             "id": "test"
+                         },
+                         [
+-                            "test_subset_test2_1.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+-                            "test_subset_test2_2.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
++                            "test2_1_subset.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
++                            "test2_2_subset.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                         ]
+                     ]
+                 ],
+@@ -61,8 +61,8 @@
+                             "id": "test"
+                         },
+                         [
+-                            "test_subset_test2_1.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
+-                            "test_subset_test2_2.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
++                            "test2_1_subset.fastq.gz:md5,4161df271f9bfcd25d5845a1e220dbec",
++                            "test2_2_subset.fastq.gz:md5,2ebae722295ea66d84075a3b042e2b42"
+                         ]
+                     ]
+                 ],
+@@ -75,6 +75,6 @@
+             "nf-test": "0.9.2",
+             "nextflow": "24.10.5"
+         },
+-        "timestamp": "2025-03-17T10:01:06.057403706"
++        "timestamp": "2025-03-14T16:27:21.797696578"
+     }
+ }
+************************************************************
