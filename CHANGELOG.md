@@ -11,6 +11,8 @@ Initial release of nf-core/pathogensurveillance, created with the [nf-core](http
 
 ### `Added`
 
+- `--max_parallel_downloads` parameter to control how many downloads can occur in parallel. This can be used in cluster/cloud contexts to raise the default maximum that is process-specific and generally below 10 to avoid exceeding API limits when running locally. The `cloud` and `cluster` profiles were added to provide environment-specific defaults for this parameter and any other relevant ones in the future.
+
 ### `Fixed`
 
 ### `Dependencies`
