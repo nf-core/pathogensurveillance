@@ -23,6 +23,11 @@
                     "help_text": "This TSV/CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the usage page](https://nf-co.re/pathogensurveillance/usage/) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "max_parallel_downloads": {
+                    "type": "integer",
+                    "description": "Maximum number of parallel downloads allowed for certain processes. This can be set to control the number of concurrent downloads to avoid overloading servers or hitting API rate limits.",
+                    "fa_icon": "fas fa-download"
+                },
                 "reference_data": {
                     "type": "string",
                     "format": "file-path",
