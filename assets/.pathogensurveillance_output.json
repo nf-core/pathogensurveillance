@@ -15,6 +15,17 @@
                 }
             ]
         },
+        "aligned_reads_raw": {
+            "description": "Raw reads alignements to references in BAM format",
+            "category": "Variant analysis",
+            "sources": [
+                {
+                    "path": "aligned_reads",
+                    "pattern": "^(.+?)--([^.]+?)\\.bam$",
+                    "capture_groups": ["reference_id", "sample_id"]
+                }
+            ]
+        },
         "aligned_reads": {
             "description": "Quality filtered reads alignements to references in BAM format",
             "category": "Variant analysis",
@@ -228,13 +239,102 @@
                 }
             ]
         },
+        "flye_assembly_info": {
+            "description": "TSV containing statistics on contigs produced by Flye",
+            "category": "Genome assembly",
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.assembly_info\\.txt$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "flye_assembly_log": {
+            "description": "Log file produced by Flye",
+            "category": "Genome assembly",
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.flye\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "flye_assembly_params": {
+            "description": "Parameters used to run Flye",
+            "category": "Genome assembly",
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.params\\.json$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "spades_assembly_log": {
+            "description": "Log file produced by Spades",
+            "category": "Genome assembly",
+            "sources": [
+                {
+                    "path": "assemblies/spades",
+                    "pattern": "^(.+?)\\.spades\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "spades_assembly_warnings": {
+            "description": "Warnings produced by Spades",
+            "category": "Genome assembly",
+            "sources": [
+                {
+                    "path": "assemblies/spades",
+                    "pattern": "^(.+?)\\.warnings\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
         "busco_dir": {
             "description": "BUSCO output directory",
-            "category": "Quality control",
+            "category": "Genome annotation",
             "sources": [
                 {
                     "path": "busco",
                     "pattern": "^(.+?)--(.+?)-busco$",
+                    "capture_groups": ["sample_id", "database"]
+                }
+            ]
+        },
+        "busco_log": {
+            "description": "Log file produced by BUSCO",
+            "category": "Genome annotation",
+            "sources": [
+                {
+                    "path": "busco",
+                    "pattern": "^(.+?)--(.+?)-busco\\.log$",
+                    "capture_groups": ["sample_id", "database"]
+                }
+            ]
+        },
+        "busco_batch_summary": {
+            "description": "TSV of sample analysis information produced by BUSCO",
+            "category": "Genome annotation",
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "busco",
+                    "pattern": "^(.+?)--(.+?)-busco\\.batch_summary\\.txt$",
                     "capture_groups": ["sample_id", "database"]
                 }
             ]
@@ -272,6 +372,83 @@
                 }
             ]
         },
+        "quast_report": {
+            "description": "Quast report in HTML format",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "quality_control/quast",
+                    "pattern": "^(.+?)/report\\.html$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "quast_summary": {
+            "description": "Quast summary in TSV format",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "quality_control/quast",
+                    "pattern": "^(.+?)\\.tsv$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "fastqc_report": {
+            "description": "FastQC report in HTML format",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "quality_control/fastqc",
+                    "pattern": "^(.+?)_fastqc\\.html$",
+                    "capture_groups": ["reads_id"]
+                }
+            ]
+        },
+        "nanoplot_report": {
+            "description": "Nanoplot report in html format.",
+            "category": "quality control",
+            "sources": [
+                {
+                    "path": "quality_control/nanoplot",
+                    "pattern": "^(.+?)_nanoplot-report\\.html$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "nanoplot_stats": {
+            "description": "Nanoplot report in plain text format.",
+            "category": "quality control",
+            "sources": [
+                {
+                    "path": "quality_control/nanoplot",
+                    "pattern": "^(.+?)_NanoStats\\.txt$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "multiqc_output": {
+            "description": "Directory of MultiQC output.",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "quality_control/multiqc",
+                    "pattern": "^(.+?)_multiqc$",
+                    "capture_groups": ["report_id"]
+                }
+            ]
+        },
+        "fastqc_output": {
+            "description": "Zipped directory of FastQC output.",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "quality_control/fastqc",
+                    "pattern": "^(.+?)_fastqc\\.zip$",
+                    "capture_groups": ["reads_id"]
+                }
+            ]
+        },
         "fastp_report_html": {
             "description": "FASTP report in HTML format",
             "category": "Quality control",
@@ -290,6 +467,17 @@
                 {
                     "path": "fastp",
                     "pattern": "^(.+?)\\.fastp\\.json$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "fastp_log": {
+            "description": "Log file produced by FASTP",
+            "category": "Quality control",
+            "sources": [
+                {
+                    "path": "fastp",
+                    "pattern": "^(.+?)\\.fastp\\.log$",
                     "capture_groups": ["sample_id"]
                 }
             ]
@@ -333,6 +521,17 @@
                 {
                     "path": "pipeline_info",
                     "pattern": "^execution_report_(.+?)\\.html$",
+                    "capture_groups": ["date"]
+                }
+            ]
+        },
+        "execution_flowchart": {
+            "description": "Plot of pipeline flowchart automatically generated by Nextflow.",
+            "category": "Pipeline metadata",
+            "sources": [
+                {
+                    "path": "pipeline_info",
+                    "pattern": "^pipeline_dag_(.+?)\\.html$",
                     "capture_groups": ["date"]
                 }
             ]
