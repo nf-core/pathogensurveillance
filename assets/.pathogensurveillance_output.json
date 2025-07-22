@@ -2,6 +2,7 @@
     "source": "pathogensurveillance",
     "outputs": {
         "shared_genes": {
+            "name": "Shared gene alignments",
             "description": "Aligned sequences for each gene shared amoung a group of organisms in FASTA format",
             "category": "Multigene phylogeny",
             "parsers": {
@@ -16,6 +17,7 @@
             ]
         },
         "aligned_reads_raw": {
+            "name": "Unfiltered read alignments",
             "description": "Unfiltered read alignements to references in BAM format",
             "category": "Variant analysis",
             "sources": [
@@ -27,6 +29,7 @@
             ]
         },
         "aligned_reads": {
+            "name": "Filtered read alignments",
             "description": "Quality filtered read alignements to references in BAM format",
             "category": "Variant analysis",
             "sources": [
@@ -38,6 +41,7 @@
             ]
         },
         "aligned_reads_index": {
+            "name": "Read alignment indices",
             "description": "Index for the filtered BAM files produced by samtools index",
             "category": "Variant analysis",
             "sources": [
@@ -49,6 +53,7 @@
             ]
         },
         "mark_duplicates_metrics": {
+            "name": "MarkDuplicates output",
             "description": "Output from picard MarkDuplicates containing summary data tables",
             "category": "Variant analysis",
             "sources": [
@@ -60,6 +65,7 @@
             ]
         },
         "annotation_gff": {
+            "name": "Genome annotations (gff3)",
             "description": "Annotations of genomes in GFF3 format",
             "category": "Genome annotation",
             "sources": [
@@ -71,6 +77,7 @@
             ]
         },
         "annotation_gbff": {
+            "name": "Genome annotations (gbff)",
             "description": "Annotations of genomes in (multi) GenBank format",
             "category": "Genome annotation",
             "sources": [
@@ -82,6 +89,7 @@
             ]
         },
         "annotation_ffn": {
+            "name": "Feature nucleotide sequences",
             "description": "Feature nucleotide sequences in FASTA format",
             "category": "Genome annotation",
             "parsers": {
@@ -96,6 +104,7 @@
             ]
         },
         "annotation_fna": {
+            "name": "Annotation DNA sequences",
             "description": "Replicon/contig DNA sequences in FASTA format",
             "category": "Genome annotation",
             "parsers": {
@@ -110,6 +119,7 @@
             ]
         },
         "annotation_embl": {
+            "name": "EMBL annotations",
             "description": "Genome annotations and sequences in (multi) EMBL format",
             "category": "Genome annotation",
             "sources": [
@@ -121,6 +131,7 @@
             ]
         },
         "annotation_faa": {
+            "name": "CDS protein sequences",
             "description": "CDS/ORF amino acid sequences in FASTA format",
             "category": "Genome annotation",
             "parsers": {
@@ -135,6 +146,7 @@
             ]
         },
         "annotations_hypothetical_faa": {
+            "name": "Hypothetical protein sequences",
             "description": "Hypothetical protein CDS amino acid sequences in FASTA format",
             "category": "Genome annotation",
             "parsers": {
@@ -149,6 +161,7 @@
             ]
         },
         "annotations_hypothetical_tsv": {
+            "name": "Hypothetical protein information",
             "description": "Information on hypothetical protein CDSs in TSV format",
             "category": "Genome annotation",
             "sources": [
@@ -160,6 +173,7 @@
             ]
         },
         "annotations_tsv": {
+            "name": "Protein information",
             "description": "Information for protein CDSs in TSV format",
             "category": "Genome annotation",
             "sources": [
@@ -171,6 +185,7 @@
             ]
         },
         "annotations_summary": {
+            "name": "Annotation summary statistics",
             "description": "Genome annotation summary statistics in plain text format",
             "category": "Genome annotation",
             "sources": [
@@ -182,6 +197,7 @@
             ]
         },
         "assemblies": {
+            "name": "Genome assemblies",
             "description": "Genome assemblies in gzipped FASTA format",
             "category": "Genome assembly",
             "sources": [
@@ -204,6 +220,7 @@
             ]
         },
         "assembly_graphs_gfa": {
+            "name": "Assembly graphs",
             "description": "Genome assembly graphs in gzipped GFA format",
             "category": "Genome assembly",
             "sources": [
@@ -226,6 +243,7 @@
             ]
         },
         "assembly_graphs_gv": {
+            "name": "Assembly graph visualizations",
             "description": "Genome assembly in gzipped Graphviz format",
             "category": "Genome assembly",
             "sources": [
@@ -240,6 +258,7 @@
             ]
         },
         "flye_assembly_info": {
+            "name": "Flye contig statistics",
             "description": "Statistics on contigs produced by Flye in TSV fomrat",
             "category": "Genome assembly",
             "parsers": {
@@ -257,6 +276,7 @@
             ]
         },
         "flye_assembly_log": {
+            "name": "Flye assembly logs",
             "description": "Log file produced by Flye in plain text format",
             "category": "Genome assembly",
             "sources": [
@@ -268,6 +288,7 @@
             ]
         },
         "flye_assembly_params": {
+            "name": "Flye parameters",
             "description": "Parameters used to run Flye in JSON format",
             "category": "Genome assembly",
             "sources": [
@@ -279,6 +300,7 @@
             ]
         },
         "spades_assembly_log": {
+            "name": "Spades assembly logs",
             "description": "Log file produced by Spades in plain text format",
             "category": "Genome assembly",
             "sources": [
@@ -290,6 +312,7 @@
             ]
         },
         "spades_assembly_warnings": {
+            "name": "Spades warnings",
             "description": "Warnings produced by Spades in plain text format",
             "category": "Genome assembly",
             "sources": [
@@ -301,6 +324,7 @@
             ]
         },
         "busco_dir": {
+            "name": "BUSCO output",
             "description": "BUSCO output directory",
             "category": "Genome annotation",
             "sources": [
@@ -312,6 +336,7 @@
             ]
         },
         "busco_log": {
+            "name": "BUSCO logs",
             "description": "Log file produced by BUSCO in plain text format",
             "category": "Genome annotation",
             "sources": [
@@ -323,6 +348,7 @@
             ]
         },
         "busco_batch_summary": {
+            "name": "BUSCO summary statistics",
             "description": "BUSCO analysis summary statistics in TSV format",
             "category": "Genome annotation",
             "parsers": {
@@ -340,6 +366,7 @@
             ]
         },
         "downloaded_assemblies": {
+            "name": "Downloaded assemblies",
             "description": "Genome assemblies downloaded by the pipeline in gzipped FASTA format",
             "category": "Downloads",
             "sources": [
@@ -351,6 +378,7 @@
             ]
         },
         "downloaded_annotations": {
+            "name": "Downloaded annotations",
             "description": "Genome annotations downloaded by the pipeline in gzipped GFF format",
             "category": "Downloads",
             "sources": [
@@ -362,6 +390,7 @@
             ]
         },
         "downloaded_reads": {
+            "name": "Downloaded reads",
             "description": "Reads downloaded by the pipeline in gzipped FASTQ format",
             "category": "Downloads",
             "sources": [
@@ -373,6 +402,7 @@
             ]
         },
         "quast_report": {
+            "name": "Assembly quality reports",
             "description": "Quast report with data on genome assembly quality in HTML format",
             "category": "Quality control",
             "sources": [
@@ -384,6 +414,7 @@
             ]
         },
         "quast_summary": {
+            "name": "Assembly quality statistics",
             "description": "Quast summary statistics on genome assembly quality in headerless TSV format",
             "category": "Quality control",
             "sources": [
@@ -395,6 +426,7 @@
             ]
         },
         "fastqc_report": {
+            "name": "Read quality reports",
             "description": "FastQC report on read quality in HTML format",
             "category": "Quality control",
             "sources": [
@@ -406,6 +438,7 @@
             ]
         },
         "nanoplot_report": {
+            "name": "Nanopore read quality reports",
             "description": "Nanoplot report on read quality in HTML format",
             "category": "Quality control",
             "sources": [
@@ -417,6 +450,7 @@
             ]
         },
         "nanoplot_stats": {
+            "name": "Nanopore read statistics",
             "description": "Nanoplot report on read quality in plain text format",
             "category": "Quality control",
             "sources": [
@@ -428,6 +462,7 @@
             ]
         },
         "main_report": {
+            "name": "Main analysis report",
             "description": "Primary report for pathogensurveillance in HTML format",
             "category": "Reports",
             "sources": [
@@ -439,6 +474,7 @@
             ]
         },
         "multiqc_report": {
+            "name": "Combined quality control report",
             "description": "MultiQC report combining the summary quality control output from many programs in HTML format",
             "category": "Reports",
             "sources": [
@@ -450,6 +486,7 @@
             ]
         },
         "multiqc_output": {
+            "name": "MultiQC output directory",
             "description": "Directory of MultiQC output with intermediate files used to make the MultiQC report",
             "category": "Quality control",
             "sources": [
@@ -461,6 +498,7 @@
             ]
         },
         "fastqc_output": {
+            "name": "FastQC output directory",
             "description": "Zipped directory of FastQC output",
             "category": "Quality control",
             "sources": [
@@ -472,6 +510,7 @@
             ]
         },
         "fastp_report_html": {
+            "name": "Read trimming reports",
             "description": "FASTP report with read quality and adapter trimming statistics in HTML format",
             "category": "Quality control",
             "sources": [
@@ -483,6 +522,7 @@
             ]
         },
         "fastp_report_json": {
+            "name": "Read trimming statistics",
             "description": "FASTP report with read quality and adapter trimming statistic in JSON format",
             "category": "Quality control",
             "sources": [
@@ -494,6 +534,7 @@
             ]
         },
         "fastp_log": {
+            "name": "Read trimming logs",
             "description": "Log file produced by FASTP",
             "category": "Quality control",
             "sources": [
@@ -505,6 +546,7 @@
             ]
         },
         "sample_metadata": {
+            "name": "Sample metadata",
             "description": "Sample metadata in TSV format",
             "category": "Sample/Reference metadata",
             "parsers": {
@@ -521,6 +563,7 @@
             ]
         },
         "reference_metadata": {
+            "name": "Reference metadata",
             "description": "Reference metadata in TSV format",
             "category": "Sample/Reference metadata",
             "parsers": {
@@ -537,6 +580,7 @@
             ]
         },
         "execution_report": {
+            "name": "Pipeline execution statistics",
             "description": "Statistics like time and ram usage for pipeline execution as a HTML report",
             "category": "Pipeline metadata",
             "sources": [
@@ -548,6 +592,7 @@
             ]
         },
         "execution_flowchart": {
+            "name": "Pipeline flowchart",
             "description": "Flowchart of the pathogensurveillance pipeline automatically generated by Nextflow in HTML format",
             "category": "Pipeline metadata",
             "sources": [
@@ -559,6 +604,7 @@
             ]
         },
         "execution_trace": {
+            "name": "Pipeline execution trace",
             "description": "Statistics like time and ram usage for pipeline execution in TSV format",
             "category": "Pipeline metadata",
             "sources": [
@@ -570,6 +616,7 @@
             ]
         },
         "pipeline_parameters": {
+            "name": "Pipeline parameters",
             "description": "Parameters used when running the pipeline in JSON format",
             "category": "Pipeline metadata",
             "sources": [
@@ -581,6 +628,7 @@
             ]
         },
         "pipeline_version_info": {
+            "name": "Software versions",
             "description": "Versions of software used in the pipeline in YML format",
             "category": "Pipeline metadata",
             "parsers": {
@@ -597,6 +645,7 @@
             ]
         },
         "pipeline_run_info": {
+            "name": "Pipeline run information",
             "description": "Pipeline run metadata in YML format",
             "category": "Pipeline metadata",
             "parsers": {
@@ -613,6 +662,7 @@
             ]
         },
         "messages": {
+            "name": "Pipeline messages",
             "description": "Errors, warnings, and messages produced by the pipeline in TSV format",
             "category": "Pipeline metadata",
             "parsers": {
@@ -629,6 +679,7 @@
             ]
         },
         "pirate": {
+            "name": "Gene orthology analysis",
             "description": "Pirate output directory with gene orthology information",
             "category": "Multigene phylogeny",
             "sources": [
@@ -640,6 +691,7 @@
             ]
         },
         "pocp": {
+            "name": "Conserved protein percentages",
             "description": "Percentage of conserved proteins in TSV format",
             "category": "Multigene phylogeny",
             "parsers": {
@@ -657,6 +709,7 @@
             ]
         },
         "ncbi_assembly_metadata": {
+            "name": "NCBI assembly metadata",
             "description": "Metadata of available assemblies on NCBI in TSV format",
             "category": "Sample/Reference metadata",
             "parsers": {
@@ -674,6 +727,7 @@
             ]
         },
         "downloaded_ref_metadata": {
+            "name": "Downloaded reference metadata",
             "description": "Metadata of references selected for download from NCBI in TSV format",
             "category": "Sample/Reference metadata",
             "parsers": {
@@ -691,6 +745,7 @@
             ]
         },
         "contextual_refs": {
+            "name": "Phylogeny reference IDs",
             "description": "IDs of references selected for multigene phylogenies in TSV format",
             "category": "Multigene phylogeny",
             "parsers": {
@@ -719,6 +774,7 @@
             ]
         },
         "mapping_refs": {
+            "name": "Mapping reference IDs",
             "description": "IDs of references selected for multigene phylogenies in TSV format",
             "category": "Variant analysis",
             "parsers": {
@@ -736,6 +792,7 @@
             ]
         },
         "sendsketch": {
+            "name": "Initial sample identifications",
             "description": "Table returned by BBmap sendsketch with initial identifications of samples in TSV format",
             "category": "Initial identification",
             "parsers": {
@@ -753,6 +810,7 @@
             ]
         },
         "ani_matrix_csv": {
+            "name": "ANI similarity matrix",
             "description": "Estimated ANI similarity matrix made by sourmash compare in CSV format",
             "category": "Sketch analysis",
             "parsers": {
@@ -770,6 +828,7 @@
             ]
         },
         "sketches": {
+            "name": "Sequence sketches",
             "description": "FracMinHash signature of the given sequence made by sourmash sketch in JSON",
             "category": "Sketch analysis",
             "sources": [
@@ -781,6 +840,7 @@
             ]
         },
         "multigene_tree": {
+            "name": "Multigene phylogenetic trees",
             "description": "Trees infered from multigene phylogeny in Newick format",
             "category": "Multigene phylogeny",
             "parsers": {
@@ -806,6 +866,7 @@
             ]
         },
         "variant_tree": {
+            "name": "Variant-based phylogenetic trees",
             "description": "Trees inferred from variant analysis in Newick format",
             "category": "Variant analysis",
             "parsers": {
@@ -820,6 +881,7 @@
             ]
         },
         "variants": {
+            "name": "Filtered variants",
             "description": "Filtered variants in VCF format",
             "category": "Variant analysis",
             "sources": [
@@ -831,6 +893,7 @@
             ]
         },
         "variants_unfiltered": {
+            "name": "Unfiltered variants",
             "description": "Unfiltered variants in VCF format",
             "category": "Variant analysis",
             "sources": [
@@ -842,6 +905,7 @@
             ]
         },
         "variants_fasta": {
+            "name": "Variant sequences",
             "description": "Filtered variants in FASTA format",
             "category": "Variant analysis",
             "parsers": {
