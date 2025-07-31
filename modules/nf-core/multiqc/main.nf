@@ -2,10 +2,11 @@ process MULTIQC {
     tag "$meta.id"
     label 'process_single'
 
+    // NOTE: held at 1.28 to avoid "Illegal instruction" error on OSU CQLS HPC Slurm cluster
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/multiqc:1.30--pyhdfd78af_0' :
-        'biocontainers/multiqc:1.30--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/multiqc:1.28--pyhdfd78af_0' :
+        'biocontainers/multiqc:1.28--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(multiqc_files, stageAs: "?/*")
