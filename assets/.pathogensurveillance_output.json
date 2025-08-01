@@ -60,7 +60,7 @@
             "name": "MarkDuplicates output",
             "description": "Output from picard MarkDuplicates containing summary data tables",
             "category": "Variant analysis",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "aligned_reads",
@@ -176,7 +176,7 @@
             "name": "Hypothetical protein information",
             "description": "Information on hypothetical protein CDSs in TSV format",
             "category": "Genome annotation",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -239,7 +239,7 @@
             "name": "Assembly graphs",
             "description": "Genome assembly graphs in gzipped GFA format",
             "category": "Genome assembly",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "assemblies/spades",
@@ -263,7 +263,7 @@
             "name": "Assembly graph visualizations",
             "description": "Genome assembly in gzipped Graphviz format",
             "category": "Genome assembly",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "assemblies/flye",
@@ -350,7 +350,7 @@
             "name": "BUSCO output",
             "description": "BUSCO output directory",
             "category": "Genome annotation",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "busco",
@@ -395,7 +395,7 @@
             "name": "Downloaded assemblies",
             "description": "Genome assemblies downloaded by the pipeline in gzipped FASTA format",
             "category": "Downloads",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/assemblies",
@@ -408,7 +408,7 @@
             "name": "Downloaded annotations",
             "description": "Genome annotations downloaded by the pipeline in gzipped GFF format",
             "category": "Downloads",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/annotations",
@@ -421,7 +421,7 @@
             "name": "Downloaded reads",
             "description": "Reads downloaded by the pipeline in gzipped FASTQ format",
             "category": "Downloads",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/reads",
@@ -434,7 +434,7 @@
             "name": "Assembly quality reports",
             "description": "Quast report with data on genome assembly quality in HTML format",
             "category": "Quality control",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "quality_control/quast",
@@ -460,7 +460,7 @@
             "name": "Read quality reports",
             "description": "FastQC report on read quality in HTML format",
             "category": "Quality control",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "quality_control/fastqc",
@@ -473,7 +473,7 @@
             "name": "Nanopore read quality reports",
             "description": "Nanoplot report on read quality in HTML format",
             "category": "Quality control",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "quality_control/nanoplot",
@@ -551,7 +551,7 @@
             "name": "Read trimming reports",
             "description": "FASTP report with read quality and adapter trimming statistics in HTML format",
             "category": "Quality control",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "fastp",
@@ -626,7 +626,7 @@
             "name": "Pipeline execution statistics",
             "description": "Statistics like time and ram usage for pipeline execution as a HTML report",
             "category": "Pipeline metadata",
-            "primary": false,
+            "primary": true,
             "sources": [
                 {
                     "path": "pipeline_info",
@@ -714,7 +714,7 @@
             "name": "Pipeline messages",
             "description": "Errors, warnings, and messages produced by the pipeline in TSV format",
             "category": "Pipeline metadata",
-            "primary": false,
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
