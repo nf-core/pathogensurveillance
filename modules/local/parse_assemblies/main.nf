@@ -25,7 +25,7 @@ process PARSE_ASSEMBLIES {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
-        rcppsimdjson: \$(echo \$(Rscript -e "cat(format(packageVersion('rcppsimdjson')))"))
+        rcppsimdjson: \$(echo \$(Rscript -e "cat(format(packageVersion('RcppSimdJson')))"))
     END_VERSIONS
     """
 }
