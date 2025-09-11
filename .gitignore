@@ -27,6 +27,7 @@ test_profiles_out/
 nf-test*
 tests/.nf-test.log
 assets/main_report/.quarto
+assets/main_report/.gitignore
 assets/main_report/_book
 assets/main_report/_site
 assets/main_report/*_files

@@ -34,7 +34,50 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ## Pipeline summary
 
-![](docs/images/pipeline_diagram.png)
+![](docs/images/pipeline_diagram.png
+
+
+## Why use pathogensurveillance?
+
+**TL;DR:** **unknown gDNA FASTQ -\> sample ID + phylogeny + publication-quality figures**
+
+Most genomic tools are designed to be used with a reference genome.
+Yet this is at odds with the work of pathogen diagnosticians, who often deal with unknown samples.
+Finding the right reference manually may be cumbersome and require a suprising amount of technical skill.
+
+**PathogenSurveillance picks a good reference genome for you**. It does this through the program sourmash. In simple terms, this takes a sample's DNA "fingerprint" and finds the closest match in a "DNA fingerprint library" spanning the tree of life. In more technical terms, the pipeline generates k-mer sketches from your reads assembled into genomes, then uses the identified reference to do a boilerplate, but robust phylogenetic analysis of your submitted samples.
+
+In our experience, the pipeline usually chooses the best possible reference genome.
+At a minimum it will choose a reference that is good enough to build an informative phylogeny and allow you to see the contextual placement your samples.
+
+Pathogensurveillance is designed to use as many types of genomic DNA input as possible.
+It works for common shortread and longread sequencing technologies and for both prokaryotes and eukaryotes.
+There is a good deal of emergent complexity required to work with such a broad sample range, but pathogensurveillance handles this automatically.
+
+While PathogenSurveillance may be a useful tool for researchers of all levels, it was designed with those who may have limited bioinformatics training in mind.
+**Pathogensurveillance is very simple to run**.
+At a minimum, all that needs to be supplied is a .CSV file with a single column specifying the path to your sample's sequencing reads.
+Other information is optional, but if provided will used to customize the output report or conditionally use particular reference genomes.
+
+**pathogensurveillance is particularly good for:**
+
+-   unknown sample identification
+-   exploratory population analysis using minimal input parameters
+-   inexperienced bioinformatics users
+-   efficient parallelization of tasks
+-   repeated analysis (given caching) where you would like to add new samples to a past run
+
+**Note that pathogensurveillance works for non pathogens too!**
+
+**pathogensurveillance is not designed for:**
+
+-   viral sequence
+-   non gDNA datasets (DNA assembly fasta files, RNA-seq, RAD-seq, ChIP-seq, etc.)
+-   mixed/impure samples (this may change in future versions)
+-   Highly specialized population genetic analysis, or researchers who would like to extensively test parameters at each stage
+
+
+
 
 ## Installation
 
