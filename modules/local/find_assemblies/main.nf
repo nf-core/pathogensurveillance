@@ -4,8 +4,8 @@ process FIND_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=18.7.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/staphb/ncbi-datasets:18.5.0':
-        'docker.io/staphb/ncbi-datasets:18.5.0' }"
+        'community.wave.seqera.io/library/ncbi-datasets-cli:18.7.0--03372988f820bf79':
+        'community.wave.seqera.io/library/ncbi-datasets-cli:18.7.0--03372988f820bf79' }"
 
     input:
     val taxon
