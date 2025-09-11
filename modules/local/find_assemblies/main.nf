@@ -2,10 +2,10 @@ process FIND_ASSEMBLIES {
     tag "$taxon"
     label 'process_single'
 
-    conda "conda-forge::ncbi-datasets-cli=16.35.2"
+    conda "conda-forge::ncbi-datasets-cli=18.7.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/staphb/ncbi-datasets:16.35.0':
-        'docker.io/staphb/ncbi-datasets:16.35.0' }"
+        'docker.io/staphb/ncbi-datasets:18.5.0':
+        'docker.io/staphb/ncbi-datasets:18.5.0' }"
 
     input:
     val taxon
