@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Initial release of nf-core/pathogensurveillance, created with the [nf-core](https://nf-co.re/) template.
 
-## 1.1.0
+## 1.1.0 - Current
 
 ### `Added`
 
 - `--max_parallel_downloads` parameter to control how many downloads can occur in parallel. This can be used in cluster/cloud contexts to raise the default maximum that is process-specific and generally below 10 to avoid exceeding API limits when running locally. The `cloud` and `cluster` profiles were added to provide environment-specific defaults for this parameter and any other relevant ones in the future.
 
 ### `Fixed`
+
+- Removed redundant `reference_id` column in output of `PICK_ASSEMBLIES`
 
 ### `Dependencies`
 
