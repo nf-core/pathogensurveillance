@@ -184,6 +184,10 @@ assem_data <- select_for_rank(
 
 result <- assem_data[! is.na(assem_data$selection_taxon), ]
 
+# Add taxon ID columns
+result$selection_taxon_id <- taxa_found_data$taxon_id[match(result$selection_taxon, taxa_found_data$name)]
+result$family_taxon_id <- taxa_found_data$taxon_id[match(result$family, taxa_found_data$name)]
+
 # Reformat results to the same format as the user-defined metadata
 if (nrow(result) == 0) {
     formatted_result <- data.frame(

@@ -775,7 +775,7 @@
                 {
                     "path": "reference_data/considered",
                     "pattern": "^(.+?)\\.tsv$",
-                    "capture_groups": ["taxon_id"]
+                    "capture_groups": ["family_tax_id"]
                 }
             ]
         },
