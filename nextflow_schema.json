@@ -200,6 +200,13 @@
                     "default": 100000,
                     "description": "The maximum number of variants to use for the SNP tree and minimum spanning nextwork produced by the variant analysis. The first N variants are used when more than N are available.",
                     "fa_icon": "fas fa-align-center"
+                },
+                "cpu_scale": {
+                    "type": "number",
+                    "default": 1.0,
+                    "minimum": 0.01,
+                    "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
+                    "fa_icon": "fas fa-microchip"
                 }
             }
         },
