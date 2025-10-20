@@ -18,6 +18,7 @@ proportionally (e.g., setting to 0.5 will halve CPU usage, setting to 2 will dou
 ### `Fixed`
 
 - Removed redundant `reference_id` column in output of `PICK_ASSEMBLIES`
+- Made `FIND_ASSEMBLIES` not error when exit code is 0 (e.g. when "New version of client..." output in standard error).
 
 ### `Dependencies`
 
