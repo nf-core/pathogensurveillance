@@ -110,7 +110,9 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
 
-> If you use nf-core/pathogensurveillance, please cite it as follows: 
+Please cite use of nf-core/pathogensurveillance as follows: 
+
+> **The PathogenSurveillance pipeline.**
 >
 > Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification. BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
