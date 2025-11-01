@@ -1,6 +1,6 @@
 # nf-core/pathogensurveillance: Citations
 
-## [nf-core]([https://pubmed.ncbi.nlm.nih.gov/32055031/](https://doi.org/10.1101/2025.10.31.685798)
+## [pathogensurveillance](https://doi.org/10.1101/2025.10.31.685798)
 
 > Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification. BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
