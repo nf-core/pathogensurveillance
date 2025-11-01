@@ -112,7 +112,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 > If you use nf-core/pathogensurveillance, please cite it as follows: 
 >
-> 
+> Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification. BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
