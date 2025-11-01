@@ -1,5 +1,9 @@
 # nf-core/pathogensurveillance: Citations
 
+## [nf-core]([https://pubmed.ncbi.nlm.nih.gov/32055031/](https://doi.org/10.1101/2025.10.31.685798)
+
+> Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification. BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
+
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
 > Ewels PA, Peltzer A, Fillinger S, Patel H, Alneberg J, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. The nf-core framework for community-curated bioinformatics pipelines. Nat Biotechnol. 2020 Mar;38(3):276-278. doi: 10.1038/s41587-020-0439-x. PubMed PMID: 32055031.
