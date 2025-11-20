@@ -5,7 +5,7 @@ lint:
   pipeline_if_empty_null: false
   pipeline_todos: false
   template_strings: false
-nf_core_version: 3.4.1
+nf_core_version: 3.5.1
 repository_type: pipeline
 template:
   author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I.\
