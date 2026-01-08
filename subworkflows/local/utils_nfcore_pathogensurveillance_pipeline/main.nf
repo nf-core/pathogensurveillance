@@ -36,10 +36,11 @@ workflow PIPELINE_INITIALISATION {
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
+    reference_data    //  string: Path to reference data samplesheet
 
     main:
 
-    ch_versions = channel.empty()
+    versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file

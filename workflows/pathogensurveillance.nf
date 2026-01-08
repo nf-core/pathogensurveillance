@@ -124,19 +124,19 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
     multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
     multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    
+
     // Note: the belowsection was from a template update that has not been merged into this logic yet
     methods_description     = channel.value(methodsDescriptionText(multiqc_custom_methods_description))
     summary_params      = paramsSummaryMap(
         workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
-    ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
-    ch_methods_description.collectFile(
+    workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
+    workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
+    methods_description.collectFile(
             name: 'methods_description_mqc.yaml',
             sort: true
         )
     // End note section -------------------
-        
+
     fastqc_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
