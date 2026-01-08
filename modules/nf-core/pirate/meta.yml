@@ -1,0 +1,56 @@
+name: pirate
+description: Pangenome toolbox for bacterial genomes
+keywords:
+  - gff
+  - pan-genome
+  - alignment
+tools:
+  - pirate:
+      description: Pangenome analysis and threshold evaluation toolbox
+      homepage: https://github.com/SionBayliss/PIRATE
+      documentation: https://github.com/SionBayliss/PIRATE/wiki
+      tool_dev_url: https://github.com/SionBayliss/PIRATE
+      doi: "10.1093/gigascience/giz119"
+      licence: ["GPL v3"]
+      identifier: biotools:PIRATE
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - gff:
+        type: file
+        description: A set of GFF3 formatted files
+        pattern: "*.{gff}"
+output:
+  - results:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - ${prefix}_results/*:
+          type: directory
+          description: Directory containing PIRATE result files
+          pattern: "*/*"
+  - aln:
+      - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - ${prefix}_results/core_alignment.fasta:
+          type: file
+          description: Core-genome alignment produced by PIRATE (Optional)
+          pattern: "*.{fasta}"
+  - versions:
+      - versions.yml:
+          type: file
+          description: File containing software versions
+          pattern: "versions.yml"
+authors:
+  - "@rpetit3"
+  - "@zachary-foster"
+maintainers:
+  - "@rpetit3"

@@ -100,7 +100,6 @@ jobs:
           profile: ${{ matrix.profile }}
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
-
       - name: Report test status
         if: ${{ always() }}
         run: |
@@ -115,7 +114,10 @@ jobs:
               exit 1
             fi
           fi
-
+      #- name: Setup ssh session
+      #  if: ${{ failure() }}
+      #  uses: Warpbuilds/action-debugger@v1.3
+      
   confirm-pass:
     needs: [nf-test]
     if: always()
