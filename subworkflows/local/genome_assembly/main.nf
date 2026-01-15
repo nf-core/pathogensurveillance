@@ -1,7 +1,6 @@
 include { FASTP                 } from '../../../modules/nf-core/fastp'
 include { SPADES                } from '../../../modules/nf-core/spades'
 include { QUAST                 } from '../../../modules/nf-core/quast'
-include { UNTAR                 } from '../../../modules/nf-core/untar'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'
 include { FLYE as FLYE_PACBIO   } from '../../../modules/nf-core/flye'
 

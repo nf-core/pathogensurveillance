@@ -76,7 +76,7 @@ class_data <- unique(class_data)
 # Filter data by threshold and extract passing taxon names
 filter_and_extract <- function(rank) {
     subset_ids <- sendsketch_data$TaxID[sendsketch_data$ANI > ani_threshold[rank] & sendsketch_data$Complt > complt_threshold[rank]]
-    if (length(subset_ids) == 0) { # If none pass filter, pick the one with the best ANI 
+    if (length(subset_ids) == 0) { # If none pass filter, pick the one with the best ANI
       subset_ids <- sendsketch_data$TaxID[sendsketch_data$ANI > max(sendsketch_data$ANI) - ani_fallback_offset]
     }
     subset_class_data <- class_data[class_data$tip_taxon_id %in% subset_ids & class_data$rank == rank, , drop = FALSE]

@@ -37,7 +37,6 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ![](docs/images/pipeline_diagram.png
 
-
 ## Why use pathogensurveillance?
 
 **TL;DR:** **unknown gDNA FASTQ -\> sample ID + phylogeny + publication-quality figures**
@@ -62,23 +61,20 @@ Other information is optional, but if provided will used to customize the output
 
 **pathogensurveillance is particularly good for:**
 
--   unknown sample identification
--   exploratory population analysis using minimal input parameters
--   inexperienced bioinformatics users
--   efficient parallelization of tasks
--   repeated analysis (given caching) where you would like to add new samples to a past run
+- unknown sample identification
+- exploratory population analysis using minimal input parameters
+- inexperienced bioinformatics users
+- efficient parallelization of tasks
+- repeated analysis (given caching) where you would like to add new samples to a past run
 
 **Note that pathogensurveillance works for non pathogens too!**
 
 **pathogensurveillance is not designed for:**
 
--   viral sequence
--   non gDNA datasets (DNA assembly fasta files, RNA-seq, RAD-seq, ChIP-seq, etc.)
--   mixed/impure samples (this may change in future versions)
--   Highly specialized population genetic analysis, or researchers who would like to extensively test parameters at each stage
-
-
-
+- viral sequence
+- non gDNA datasets (DNA assembly fasta files, RNA-seq, RAD-seq, ChIP-seq, etc.)
+- mixed/impure samples (this may change in future versions)
+- Highly specialized population genetic analysis, or researchers who would like to extensively test parameters at each stage
 
 ## Installation
 
