@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: ""
+    inputs: "/home/fosterz/projects/pathogensurveillance/work/2c/2b1d1b5bb4b18ef2dfcdab93975b61/all_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -259,10 +259,14 @@ The accuracy of this identification depends on the presence of close reference s
 ### Multigene phylogeny
 
 ```{r}
+has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
+```
+
+```{r eval=has_multigene_tree}
 core_plots <- plot_tree(params$inputs, target = 'multigene_tree', interactive = FALSE)
 ```
 
-```{r plot_multigene_tree, results='asis', eval = length(core_plots) > 0}
+```{r plot_multigene_tree, results='asis', eval =has_multigene_tree}
 plot_one <- function(x) {
     print(core_plots[[x]])
 }
@@ -271,7 +275,7 @@ max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
 print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
 ```
 
-```{r, results='asis', eval = length(core_plots) > 0}
+```{r, results='asis', eval = has_multigene_tree}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -282,7 +286,7 @@ It is the most robust identification provided by this pipeline, but taxonomic co
 ')
 ```
 
-```{r, results='asis', eval = length(core_plots) == 0}
+```{r, results='asis', eval = !has_multigene_tree}
 cat('
 Could not generate core genome phylogeny.
 ')
