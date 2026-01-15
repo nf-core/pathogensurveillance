@@ -1,7 +1,6 @@
 {
     "-profile test": {
         "content": [
-            76,
             {
                 "ASSIGN_CORE_REFERENCES": {
                     "r-base": "4.2.1"
@@ -26,13 +25,6 @@
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
-                },
-                "IQTREE_CORE": {
-                    "iqtree": "2.4.0"
-                },
-                "MAFFT_CORE": {
-                    "mafft": 7.52,
-                    "pigz": "2.8)"
                 },
                 "MAKE_GFF_WITH_FASTA": {
                     "sed": 4.8
@@ -62,7 +54,7 @@
                     "r-base": "4.2.1"
                 },
                 "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.1.0dev"
+                    "nf-core/pathogensurveillance": "v1.0.0"
                 }
             },
             [
@@ -91,28 +83,30 @@
                 "downloads/annotations/GCF_000159355.1.gff.gz",
                 "downloads/annotations/GCF_000236455.2.gff.gz",
                 "downloads/annotations/GCF_001435915.1.gff.gz",
-                "downloads/annotations/GCF_001888925.1.gff.gz",
+                "downloads/annotations/GCF_001807655.1.gff.gz",
                 "downloads/annotations/GCF_003641165.1.gff.gz",
+                "downloads/annotations/GCF_006740305.1.gff.gz",
                 "downloads/annotations/GCF_013394085.1.gff.gz",
                 "downloads/annotations/GCF_016756395.1.gff.gz",
                 "downloads/annotations/GCF_018987235.1.gff.gz",
                 "downloads/annotations/GCF_023498005.1.gff.gz",
+                "downloads/annotations/GCF_028736235.1.gff.gz",
                 "downloads/annotations/GCF_030389495.1.gff.gz",
-                "downloads/annotations/GCF_030770295.1.gff.gz",
                 "downloads/annotations/GCF_043386705.1.gff.gz",
                 "downloads/annotations/GCF_043950205.1.gff.gz",
                 "downloads/assemblies",
                 "downloads/assemblies/GCF_000159355.1.fasta.gz",
                 "downloads/assemblies/GCF_000236455.2.fasta.gz",
                 "downloads/assemblies/GCF_001435915.1.fasta.gz",
-                "downloads/assemblies/GCF_001888925.1.fasta.gz",
+                "downloads/assemblies/GCF_001807655.1.fasta.gz",
                 "downloads/assemblies/GCF_003641165.1.fasta.gz",
+                "downloads/assemblies/GCF_006740305.1.fasta.gz",
                 "downloads/assemblies/GCF_013394085.1.fasta.gz",
                 "downloads/assemblies/GCF_016756395.1.fasta.gz",
                 "downloads/assemblies/GCF_018987235.1.fasta.gz",
                 "downloads/assemblies/GCF_023498005.1.fasta.gz",
+                "downloads/assemblies/GCF_028736235.1.fasta.gz",
                 "downloads/assemblies/GCF_030389495.1.fasta.gz",
-                "downloads/assemblies/GCF_030770295.1.fasta.gz",
                 "downloads/assemblies/GCF_043386705.1.fasta.gz",
                 "downloads/assemblies/GCF_043950205.1.fasta.gz",
                 "downloads/reads",
@@ -193,8 +187,6 @@
                 "reports/all_pathsurveil_report.html",
                 "sendsketch",
                 "sendsketch/LF1.txt",
-                "shared_genes",
-                "shared_genes/core",
                 "sketch_comparisons",
                 "sketch_comparisons/ani_matricies",
                 "sketch_comparisons/ani_matricies/all_comp.csv",
@@ -204,29 +196,24 @@
                 "sketch_comparisons/sketches/GCF_000159355_1.sig",
                 "sketch_comparisons/sketches/GCF_000236455_2.sig",
                 "sketch_comparisons/sketches/GCF_001435915_1.sig",
-                "sketch_comparisons/sketches/GCF_001888925_1.sig",
+                "sketch_comparisons/sketches/GCF_001807655_1.sig",
                 "sketch_comparisons/sketches/GCF_003641165_1.sig",
+                "sketch_comparisons/sketches/GCF_006740305_1.sig",
                 "sketch_comparisons/sketches/GCF_013394085_1.sig",
                 "sketch_comparisons/sketches/GCF_016756395_1.sig",
                 "sketch_comparisons/sketches/GCF_018987235_1.sig",
                 "sketch_comparisons/sketches/GCF_023498005_1.sig",
+                "sketch_comparisons/sketches/GCF_028736235_1.sig",
                 "sketch_comparisons/sketches/GCF_030389495_1.sig",
-                "sketch_comparisons/sketches/GCF_030770295_1.sig",
                 "sketch_comparisons/sketches/GCF_043386705_1.sig",
                 "sketch_comparisons/sketches/GCF_043950205_1.sig",
-                "sketch_comparisons/sketches/LF1.sig",
-                "trees",
-                "trees/core",
-                "trees/core/all--cluster_1.iqtree",
-                "trees/core/all--cluster_1.log",
-                "trees/core/all--cluster_1.mldist",
-                "trees/core/all--cluster_1.treefile"
+                "sketch_comparisons/sketches/LF1.sig"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.3"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
         },
-        "timestamp": "2025-06-27T13:28:39.578733196"
+        "timestamp": "2026-01-14T20:51:25.172175352"
     }
 }
