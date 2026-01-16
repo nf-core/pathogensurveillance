@@ -47,6 +47,5 @@ h1.title {
 }
 
 .html-widget {
-  height: auto !important;
   max-height: min(80vh, 1200px) !important;
 }
