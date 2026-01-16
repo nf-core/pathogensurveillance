@@ -207,6 +207,12 @@
                     "minimum": 0.01,
                     "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
                     "fa_icon": "fas fa-microchip"
+                },
+                "skip_core_phylogeny": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip the core genome phylogeny analysis. This will not affect downstream processes like MultiQC and the main report.",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
