@@ -262,17 +262,8 @@ The accuracy of this identification depends on the presence of close reference s
 has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
 ```
 
-```{r eval=has_multigene_tree}
-core_plots <- plot_tree(params$inputs, target = 'multigene_tree', interactive = FALSE)
-```
-
-```{r plot_multigene_tree, results='asis', eval =has_multigene_tree}
-plot_one <- function(x) {
-    print(core_plots[[x]])
-}
-tip_count <- sum(core_plots[[1]]$data$isTip)
-max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
-print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```{r plot_multigene_tree, eval=has_multigene_tree, fig.height=8}
+plot_tree(params$inputs, target = 'multigene_tree')
 ```
 
 ```{r, results='asis', eval = has_multigene_tree}
@@ -301,14 +292,8 @@ snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must
 ```
 
 
-```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), results='asis'}
-snp_plots <- plot_tree(params$inputs, target = 'variant_tree', interactive = FALSE)
-plot_one <- function(x) {
-    print(snp_plots[[x]])
-}
-tip_count <- sum(snp_plots[[1]]$data$isTip)
-max_label_size <- max(nchar(snp_plots[[1]]$data$label), na.rm = TRUE)
-print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), fig.height=8}
+plot_tree(params$inputs, target = 'variant_tree')
 ```
 
 

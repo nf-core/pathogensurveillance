@@ -75,13 +75,22 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Create core gene phylogeny for bacterial samples
-    CORE_GENOME_PHYLOGENY (
-        PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.ani_matrix,
-        GENOME_ASSEMBLY.out.scaffolds
-    )
-    versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
-    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+    if (!params.skip_core_phylogeny) {
+        CORE_GENOME_PHYLOGENY (
+            PREPARE_INPUT.out.sample_data,
+            SKETCH_COMPARISON.out.ani_matrix,
+            GENOME_ASSEMBLY.out.scaffolds
+        )
+        versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+        messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+        core_selected_refs = CORE_GENOME_PHYLOGENY.out.selected_refs
+        core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
+        core_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
+    } else {
+        core_selected_refs = Channel.empty()
+        core_pocp = Channel.empty()
+        core_phylogeny = Channel.empty()
+    }
 
     // Read2tree BUSCO phylogeny for eukaryotes
     BUSCO_PHYLOGENY (
@@ -169,7 +178,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .map { report_meta, versions, fastqc, fastp, nanoplot, quast ->
+        .map {report_meta, versions, fastqc, fastp, nanoplot, quast ->
             files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
             [report_meta, files.flatten()]
         }
@@ -267,27 +276,27 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
         .join(snp_align, remainder: true)
         .join(snp_phylogeny, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
+        .join(core_selected_refs, remainder: true)
+        .join(core_pocp, remainder: true)
+        .join(core_phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-        .filter{it[0] != null} // remove extra item if messages is empty
-        .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
-        .filter{ it.size() == 17 } // remove any malformed inputs
-        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+        .filter{it[0] != null}
+        .map{ it.size() == 16 ? it + [null] : it }
+        .filter{ it.size() == 17 }
+        .map{ it.collect{ it ?: [] } }
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
         report_inputs,
-        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first()
     )
 
     MAIN_REPORT (
         PREPARE_REPORT_INPUT.out.report_input,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first()
     )
 
     // Collate and save messages
