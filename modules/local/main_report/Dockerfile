@@ -46,8 +46,8 @@ rm google-chrome-stable_current_amd64.deb
 EOF
 
 RUN <<EOF
-install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.4.2")'
+install.r remotes
+Rscript -e 'remotes::install_github("grunwaldlab/PathoSurveilR@v0.4.4")'
 EOF
 
 USER root
