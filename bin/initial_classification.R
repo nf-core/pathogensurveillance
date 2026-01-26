@@ -28,10 +28,11 @@ library(rentrez)
 # Options
 ani_threshold <- c(species = 95, genus = 90, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+ani_fallback_offset <- 1 # If nothing is found for a given rank threshold, pick all that have an ANI greater than (the best ANI - this value)
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- list('~/projects/pathogensurveillance/work/57/16704de16a603b86e9c2220afc64a1/LF1.txt')
+# args <- list('~/downloads/24_A_O_TC_305_L.txt')
 sendsketch_data <- read.csv(args[[1]], skip = 2, header = TRUE, sep = '\t')
 
 # Format table
@@ -45,12 +46,21 @@ get_capture_group <- function(x, pattern) {
     sub(matches, pattern = pattern, replacement = '\\1')
 }
 class_xml <- get_capture_group(raw_xml, '<LineageEx>(.+?)</LineageEx>')
-class_names <- lapply(class_xml, get_capture_group, pattern = '<ScientificName>(.+?)</ScientificName>')
-class_ranks <- lapply(class_xml, get_capture_group, pattern = '<Rank>(.+?)</Rank>')
-class_ids <- lapply(class_xml, get_capture_group, pattern = '<TaxId>(.+?)</TaxId>')
-tip_taxon_ids <- get_capture_group(raw_xml, '<Taxon>\n    <TaxId>(.+?)</TaxId>')
+tip_taxon_name <- get_capture_group(raw_xml, '</TaxId>\n    <ScientificName>(.+?)</ScientificName>')
+tip_taxon_rank <- get_capture_group(raw_xml, '</ParentTaxId>\n    <Rank>(.+?)</Rank>')
+tip_taxon_id <- get_capture_group(raw_xml, '<Taxon>\n    <TaxId>(.+?)</TaxId>')
+class_names <- lapply(seq_along(class_xml), function(i) {
+  c(get_capture_group(class_xml[i], pattern = '<ScientificName>(.+?)</ScientificName>'), tip_taxon_name[i])
+})
+class_ranks <- lapply(seq_along(class_xml), function(i) {
+  c(get_capture_group(class_xml[i], pattern = '<Rank>(.+?)</Rank>'), tip_taxon_rank[i])
+})
+class_ids <- lapply(seq_along(class_xml), function(i) {
+  c(get_capture_group(class_xml[i], pattern = '<TaxId>(.+?)</TaxId>'), tip_taxon_id[i])
+})
+
 class_data <- data.frame(
-    tip_taxon_id = rep(tip_taxon_ids, sapply(class_names, length)),
+    tip_taxon_id = rep(tip_taxon_id, sapply(class_names, length)),
     taxon_id = unlist(class_ids),
     name = unlist(class_names),
     rank = unlist(class_ranks)
@@ -66,6 +76,9 @@ class_data <- unique(class_data)
 # Filter data by threshold and extract passing taxon names
 filter_and_extract <- function(rank) {
     subset_ids <- sendsketch_data$TaxID[sendsketch_data$ANI > ani_threshold[rank] & sendsketch_data$Complt > complt_threshold[rank]]
+    if (length(subset_ids) == 0) { # If none pass filter, pick the one with the best ANI
+      subset_ids <- sendsketch_data$TaxID[sendsketch_data$ANI > max(sendsketch_data$ANI) - ani_fallback_offset]
+    }
     subset_class_data <- class_data[class_data$tip_taxon_id %in% subset_ids & class_data$rank == rank, , drop = FALSE]
     subset_class_data[, c('taxon_id', 'name', 'rank'), drop = FALSE]
 }

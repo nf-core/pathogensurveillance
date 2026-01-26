@@ -117,7 +117,7 @@ jobs:
       #- name: Setup ssh session
       #  if: ${{ failure() }}
       #  uses: Warpbuilds/action-debugger@v1.3
-      
+
   confirm-pass:
     needs: [nf-test]
     if: always()

@@ -13,10 +13,10 @@ process SUBSET_CORE_GENES {
     val max_core_genes
 
     output:
-    tuple val(group_meta), path("core_genes/${prefix}--cluster_*.tsv"), emit: gene_fam
-    tuple val(group_meta), path("feat_seqs/${prefix}--cluster_*")     , emit: feat_seq
-    tuple val(group_meta), path("message_data.tsv")                              , emit: message_data
-    path "versions.yml"                                                          , emit: versions
+    tuple val(group_meta), path("core_genes/${prefix}--cluster_*.tsv"), emit: gene_fam, optional: true
+    tuple val(group_meta), path("feat_seqs/${prefix}--cluster_*")     , emit: feat_seq, optional: true
+    tuple val(group_meta), path("message_data.tsv")                   , emit: message_data
+    path "versions.yml"                                               , emit: versions
 
 
     when:

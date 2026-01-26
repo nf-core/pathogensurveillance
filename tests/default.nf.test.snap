@@ -1,25 +1,9 @@
 {
     "-profile test": {
         "content": [
-            76,
             {
-                "ASSIGN_CORE_REFERENCES": {
-                    "r-base": "4.2.1"
-                },
-                "BAKTA_BAKTA": {
-                    "bakta": "1.10.4"
-                },
-                "BAKTA_BAKTADBDOWNLOAD": {
-                    "bakta": "1.10.4"
-                },
                 "BUSCO_DOWNLOAD": {
                     "busco": "5.8.3"
-                },
-                "CALCULATE_POCP": {
-                    "r-base": "4.2.1"
-                },
-                "EXTRACT_FEATURE_SEQUENCES": {
-                    "pirate": "1.0.5"
                 },
                 "FASTP": {
                     "fastp": "0.23.4"
@@ -27,24 +11,8 @@
                 "FASTQC": {
                     "fastqc": "0.12.1"
                 },
-                "IQTREE_CORE": {
-                    "iqtree": "2.4.0"
-                },
-                "MAFFT_CORE": {
-                    "mafft": 7.52,
-                    "pigz": "2.8)"
-                },
-                "MAKE_GFF_WITH_FASTA": {
-                    "sed": 4.8
-                },
-                "PIRATE": {
-                    "pirate": "1.0.5"
-                },
                 "QUAST": {
                     "quast": "5.3.0"
-                },
-                "REFORMAT_PIRATE_RESULTS": {
-                    "pirate": "1.0.5"
                 },
                 "SAMPLESHEET_CHECK": {
                     "r-PathoSurveilR": "1.1.4"
@@ -58,27 +26,12 @@
                 "SPADES": {
                     "spades": "4.0.0"
                 },
-                "SUBSET_CORE_GENES": {
-                    "r-base": "4.2.1"
-                },
                 "Workflow": {
                     "nf-core/pathogensurveillance": "v1.0.0"
                 }
             },
             [
                 ".pathogensurveillance_output.json",
-                "annotations",
-                "annotations/bakta",
-                "annotations/bakta/LF1.embl",
-                "annotations/bakta/LF1.faa",
-                "annotations/bakta/LF1.ffn",
-                "annotations/bakta/LF1.fna",
-                "annotations/bakta/LF1.gbff",
-                "annotations/bakta/LF1.gff3",
-                "annotations/bakta/LF1.hypotheticals.faa",
-                "annotations/bakta/LF1.hypotheticals.tsv",
-                "annotations/bakta/LF1.tsv",
-                "annotations/bakta/LF1.txt",
                 "assemblies",
                 "assemblies/spades",
                 "assemblies/spades/LF1.assembly.gfa.gz",
@@ -91,28 +44,30 @@
                 "downloads/annotations/GCF_000159355.1.gff.gz",
                 "downloads/annotations/GCF_000236455.2.gff.gz",
                 "downloads/annotations/GCF_001435915.1.gff.gz",
-                "downloads/annotations/GCF_001888925.1.gff.gz",
+                "downloads/annotations/GCF_001807655.1.gff.gz",
                 "downloads/annotations/GCF_003641165.1.gff.gz",
+                "downloads/annotations/GCF_006740305.1.gff.gz",
                 "downloads/annotations/GCF_013394085.1.gff.gz",
                 "downloads/annotations/GCF_016756395.1.gff.gz",
                 "downloads/annotations/GCF_018987235.1.gff.gz",
                 "downloads/annotations/GCF_023498005.1.gff.gz",
+                "downloads/annotations/GCF_028736235.1.gff.gz",
                 "downloads/annotations/GCF_030389495.1.gff.gz",
-                "downloads/annotations/GCF_030770295.1.gff.gz",
                 "downloads/annotations/GCF_043386705.1.gff.gz",
                 "downloads/annotations/GCF_043950205.1.gff.gz",
                 "downloads/assemblies",
                 "downloads/assemblies/GCF_000159355.1.fasta.gz",
                 "downloads/assemblies/GCF_000236455.2.fasta.gz",
                 "downloads/assemblies/GCF_001435915.1.fasta.gz",
-                "downloads/assemblies/GCF_001888925.1.fasta.gz",
+                "downloads/assemblies/GCF_001807655.1.fasta.gz",
                 "downloads/assemblies/GCF_003641165.1.fasta.gz",
+                "downloads/assemblies/GCF_006740305.1.fasta.gz",
                 "downloads/assemblies/GCF_013394085.1.fasta.gz",
                 "downloads/assemblies/GCF_016756395.1.fasta.gz",
                 "downloads/assemblies/GCF_018987235.1.fasta.gz",
                 "downloads/assemblies/GCF_023498005.1.fasta.gz",
+                "downloads/assemblies/GCF_028736235.1.fasta.gz",
                 "downloads/assemblies/GCF_030389495.1.fasta.gz",
-                "downloads/assemblies/GCF_030770295.1.fasta.gz",
                 "downloads/assemblies/GCF_043386705.1.fasta.gz",
                 "downloads/assemblies/GCF_043950205.1.fasta.gz",
                 "downloads/reads",
@@ -131,41 +86,6 @@
                 "pipeline_info/messages.tsv",
                 "pipeline_info/pathogensurveillance_run_info.yml",
                 "pipeline_info/version_info.yml",
-                "pirate",
-                "pirate/all_results",
-                "pirate/all_results/PIRATE.gene_families.ordered.tsv",
-                "pirate/all_results/PIRATE.gene_families.tsv",
-                "pirate/all_results/PIRATE.genomes_per_allele.tsv",
-                "pirate/all_results/PIRATE.log",
-                "pirate/all_results/PIRATE.pangenome_summary.txt",
-                "pirate/all_results/PIRATE.unique_alleles.tsv",
-                "pirate/all_results/binary_presence_absence.fasta",
-                "pirate/all_results/binary_presence_absence.nwk",
-                "pirate/all_results/cluster_alleles.tab",
-                "pirate/all_results/co-ords",
-                "pirate/all_results/genome2loci.tab",
-                "pirate/all_results/genome_list.txt",
-                "pirate/all_results/gff_parser_log.txt",
-                "pirate/all_results/link_clusters.log",
-                "pirate/all_results/loci_list.tab",
-                "pirate/all_results/loci_paralog_categories.tab",
-                "pirate/all_results/modified_gffs",
-                "pirate/all_results/pan_sequences.fasta",
-                "pirate/all_results/pangenome.connected_blocks.tsv",
-                "pirate/all_results/pangenome.edges",
-                "pirate/all_results/pangenome.gfa",
-                "pirate/all_results/pangenome.order.tsv",
-                "pirate/all_results/pangenome.reversed.tsv",
-                "pirate/all_results/pangenome.syntenic_blocks.tsv",
-                "pirate/all_results/pangenome.temp",
-                "pirate/all_results/pangenome_iterations",
-                "pirate/all_results/pangenome_log.txt",
-                "pirate/all_results/paralog_clusters.tab",
-                "pirate/all_results/representative_sequences.faa",
-                "pirate/all_results/representative_sequences.ffn",
-                "pirate/all_results/split_groups.log",
-                "pocp",
-                "pocp/all_pocp.tsv",
                 "quality_control",
                 "quality_control/fastqc",
                 "quality_control/fastqc/LF1_1_fastqc.html",
@@ -185,16 +105,12 @@
                 "reference_data/considered/33958.tsv",
                 "reference_data/downloaded",
                 "reference_data/downloaded/LF1.tsv",
-                "reference_data/selected",
-                "reference_data/selected/all_core_references.tsv",
                 "report_group_data",
                 "report_group_data/all_inputs",
                 "reports",
                 "reports/all_pathsurveil_report.html",
                 "sendsketch",
                 "sendsketch/LF1.txt",
-                "shared_genes",
-                "shared_genes/core",
                 "sketch_comparisons",
                 "sketch_comparisons/ani_matricies",
                 "sketch_comparisons/ani_matricies/all_comp.csv",
@@ -204,29 +120,24 @@
                 "sketch_comparisons/sketches/GCF_000159355_1.sig",
                 "sketch_comparisons/sketches/GCF_000236455_2.sig",
                 "sketch_comparisons/sketches/GCF_001435915_1.sig",
-                "sketch_comparisons/sketches/GCF_001888925_1.sig",
+                "sketch_comparisons/sketches/GCF_001807655_1.sig",
                 "sketch_comparisons/sketches/GCF_003641165_1.sig",
+                "sketch_comparisons/sketches/GCF_006740305_1.sig",
                 "sketch_comparisons/sketches/GCF_013394085_1.sig",
                 "sketch_comparisons/sketches/GCF_016756395_1.sig",
                 "sketch_comparisons/sketches/GCF_018987235_1.sig",
                 "sketch_comparisons/sketches/GCF_023498005_1.sig",
+                "sketch_comparisons/sketches/GCF_028736235_1.sig",
                 "sketch_comparisons/sketches/GCF_030389495_1.sig",
-                "sketch_comparisons/sketches/GCF_030770295_1.sig",
                 "sketch_comparisons/sketches/GCF_043386705_1.sig",
                 "sketch_comparisons/sketches/GCF_043950205_1.sig",
-                "sketch_comparisons/sketches/LF1.sig",
-                "trees",
-                "trees/core",
-                "trees/core/all--cluster_1.iqtree",
-                "trees/core/all--cluster_1.log",
-                "trees/core/all--cluster_1.mldist",
-                "trees/core/all--cluster_1.treefile"
+                "sketch_comparisons/sketches/LF1.sig"
             ]
         ],
         "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "25.04.3"
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
         },
-        "timestamp": "2025-06-13T10:02:33.708729849"
+        "timestamp": "2026-01-15T19:11:47.942295729"
     }
 }

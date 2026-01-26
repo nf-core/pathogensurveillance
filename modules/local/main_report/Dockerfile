@@ -7,7 +7,7 @@ FROM eddelbuettel/r2u:22.04
 
 ################## METADATA #######################
 
-LABEL about.summary="A test environment to generate the output report for pathogensurveillance."
+LABEL about.summary="An environment to generate the output report for pathogensurveillance."
 LABEL about.author="Zachary S.L. Foster"
 MAINTAINER Zachary S.L. Foster <zacharyfoster1989@gmail.com>
 
@@ -46,8 +46,8 @@ rm google-chrome-stable_current_amd64.deb
 EOF
 
 RUN <<EOF
-install.r devtools
-Rscript -e 'devtools::install_github("grunwaldlab/PathoSurveilR@v0.4.0")'
+install.r remotes
+Rscript -e 'remotes::install_github("grunwaldlab/PathoSurveilR@v0.4.4")'
 EOF
 
 USER root

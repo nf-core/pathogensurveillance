@@ -24,7 +24,7 @@
 
 
 # Constants
-min_cluster_size <- 3
+min_cluster_size <- 4
 clustering_weights <- c(
     sample_proportion = 5,
     reference_proportion = 2,

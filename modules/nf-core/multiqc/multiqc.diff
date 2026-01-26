@@ -9,53 +9,53 @@ Changes in 'multiqc/main.nf':
  
      conda "${moduleDir}/environment.yml"
 @@ -7,7 +8,7 @@
-         'biocontainers/multiqc:1.28--pyhdfd78af_0' }"
+         'community.wave.seqera.io/library/multiqc:1.33--ee7739d47738383b' }"
  
      input:
--    path  multiqc_files, stageAs: "?/*"
+-    path multiqc_files, stageAs: "?/*"
 +    tuple val(meta), path(multiqc_files, stageAs: "?/*")
      path(multiqc_config)
      path(extra_multiqc_config)
      path(multiqc_logo)
-@@ -15,17 +16,18 @@
+@@ -15,9 +16,10 @@
      path(sample_names)
  
      output:
--    path "*multiqc_report.html", emit: report
--    path "*_data"              , emit: data
--    path "*_plots"             , optional:true, emit: plots
--    path "versions.yml"        , emit: versions
+-    path "*.html"      , emit: report
+-    path "*_data"      , emit: data
+-    path "*_plots"     , optional:true, emit: plots
 +    tuple val(meta), path("${prefix}_multiqc")                     , emit: outdir
 +    tuple val(meta), path("${prefix}_multiqc/*multiqc_report.html"), emit: report
 +    tuple val(meta), path("${prefix}_multiqc/*_data")              , emit: data
 +    tuple val(meta), path("${prefix}_multiqc/*_plots")             , optional:true, emit: plots
-+    path "versions.yml"                                            , emit: versions
+     tuple val("${task.process}"), val('multiqc'), eval('multiqc --version | sed "s/.* //g"'), emit: versions
+     // MultiQC should not push its versions to the `versions` topic. Its input depends on the versions topic to be resolved thus outputting to the topic will let the pipeline hang forever
  
-     when:
-     task.ext.when == null || task.ext.when
+@@ -26,7 +28,7 @@
  
      script:
      def args = task.ext.args ?: ''
 -    def prefix = task.ext.prefix ? "--filename ${task.ext.prefix}.html" : ''
 +    prefix = task.ext.prefix ?: "${meta.id}"
-     def config = multiqc_config ? "--config $multiqc_config" : ''
-     def extra_config = extra_multiqc_config ? "--config $extra_multiqc_config" : ''
+     def config = multiqc_config ? "--config ${multiqc_config}" : ''
+     def extra_config = extra_multiqc_config ? "--config ${extra_multiqc_config}" : ''
      def logo = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
-@@ -34,9 +36,9 @@
+@@ -35,9 +37,9 @@
      """
      multiqc \\
          --force \\
 +        --outdir ${prefix}_multiqc \\
-         $args \\
-         $config \\
--        $prefix \\
-         $extra_config \\
-         $logo \\
-         $replace \\
+         ${args} \\
+         ${config} \\
+-        ${prefix} \\
+         ${extra_config} \\
+         ${logo} \\
+         ${replace} \\
 
 'modules/nf-core/multiqc/environment.yml' is unchanged
 'modules/nf-core/multiqc/meta.yml' is unchanged
 'modules/nf-core/multiqc/tests/nextflow.config' is unchanged
 'modules/nf-core/multiqc/tests/main.nf.test' is unchanged
 'modules/nf-core/multiqc/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/multiqc/tests/custom_prefix.config' is unchanged
 ************************************************************

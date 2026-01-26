@@ -1,6 +1,7 @@
 lint:
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
+    - assets/nf-core-pathogensurveillance_logo_light.png
   nf_test_content: false
   pipeline_if_empty_null: false
   pipeline_todos: false
@@ -16,4 +17,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  version: 1.0.0
+  version: 1.1.0dev

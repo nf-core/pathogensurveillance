@@ -35,7 +35,53 @@ This ensures that the pipeline runs on AWS, has sensible resource allocation def
 
 ## Pipeline summary
 
-![](docs/images/pipeline_diagram.png)
+![](docs/images/pipeline_diagram.png
+
+## Why use pathogensurveillance?
+
+**TL;DR:** **unknown gDNA FASTQ -\> sample ID + phylogeny + publication-quality figures**
+
+Most genomic tools are designed to be used with a reference genome.
+Yet this is at odds with the work of pathogen diagnosticians, who often deal with unknown samples.
+Finding the right reference manually may be cumbersome and require a suprising amount of technical skill.
+
+**PathogenSurveillance picks a good reference genome for you**. It does this through the program sourmash. In simple terms, this takes a sample's DNA "fingerprint" and finds the closest match in a "DNA fingerprint library" spanning the tree of life. In more technical terms, the pipeline generates k-mer sketches from your reads assembled into genomes, then uses the identified reference to do a boilerplate, but robust phylogenetic analysis of your submitted samples.
+
+In our experience, the pipeline usually chooses the best possible reference genome.
+At a minimum it will choose a reference that is good enough to build an informative phylogeny and allow you to see the contextual placement your samples.
+
+Pathogensurveillance is designed to use as many types of genomic DNA input as possible.
+It works for common shortread and longread sequencing technologies and for both prokaryotes and eukaryotes.
+There is a good deal of emergent complexity required to work with such a broad sample range, but pathogensurveillance handles this automatically.
+
+While PathogenSurveillance may be a useful tool for researchers of all levels, it was designed with those who may have limited bioinformatics training in mind.
+**Pathogensurveillance is very simple to run**.
+At a minimum, all that needs to be supplied is a .CSV file with a single column specifying the path to your sample's sequencing reads.
+Other information is optional, but if provided will used to customize the output report or conditionally use particular reference genomes.
+
+**pathogensurveillance is particularly good for:**
+
+- unknown sample identification
+- exploratory population analysis using minimal input parameters
+- inexperienced bioinformatics users
+- efficient parallelization of tasks
+- repeated analysis (given caching) where you would like to add new samples to a past run
+
+**Note that pathogensurveillance works for non pathogens too!**
+
+**pathogensurveillance is not designed for:**
+
+- viral sequence
+- non gDNA datasets (DNA assembly fasta files, RNA-seq, RAD-seq, ChIP-seq, etc.)
+- mixed/impure samples (this may change in future versions)
+- Highly specialized population genetic analysis, or researchers who would like to extensively test parameters at each stage
+
+## Installation
+
+The pipeline is automatically installed when run by nextflow, but you will need to install the following dependencies:
+
+- [nextflow](https://nf-co.re/docs/usage/installation)
+- At least one of the following [container engines](https://www.nextflow.io/docs/latest/container.html): [`apptainer`](https://apptainer.org/), [`charliecloud`](https://charliecloud.io/), [`docker`](https://www.docker.com/), [`podman`](http://podman.io/), [`sarus`](https://sarus.readthedocs.io/en/stable/), [`shifter`](https://shifter.readthedocs.io/en/latest/), [`singularity`](https://singularityware.github.io/index.html), or [`conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (only use `conda` if no other option is available)
 
 ## Quick start guide
 
@@ -68,7 +114,7 @@ Adding `_full` to the end of any of these profiles will run a larger (often much
 For example, you can run the `test_bacteria` profile with the `docker` profile:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile docker,test_bacteria -resume --outdir test_output
+nextflow run nf-core/pathogensurveillance -r 1.1.0 -profile docker,test_bacteria -resume --outdir test_output
 ```
 
 You can see the samplesheets used in these profiles here:
@@ -78,7 +124,7 @@ https://github.com/nf-core/test-datasets/tree/pathogensurveillance
 To run your own input data, prepare a samplesheet as described in the [usage documentation](docs/usage/#samplesheet-input) section below and run the following command:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile <REPLACE WITH RUN TOOL> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
+nextflow run nf-core/pathogensurveillance -r <REPLACE WITH VERSION> -profile <REPLACE WITH RUN TOOL> -resume --input <REPLACE WITH TSV/CSV> --outdir <REPLACE WITH OUTPUT PATH>
 ```
 
 Where:
@@ -86,6 +132,7 @@ Where:
 - `<REPLACE WITH RUN TOOL>` is one of `docker`, `singularity`, or `conda`
 - `<REPLACE WITH TSV/CSV>` is the path to the input samplesheet
 - `<REPLACE WITH OUTPUT PATH>` is the path to where to save the output
+- `<REPLACE WITH VERSION>` is the version of the pipeline to run
 
 ## Documentation
 
@@ -109,11 +156,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use nf-core/pathogensurveillance for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
-
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
-
+If you use nf-core/pathogensurveillance for your analysis, please cite it using the following doi: [10.5281/zenodo.15757418](https://doi.org/10.5281/zenodo.15757418)
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 You can cite the `nf-core` publication as follows:

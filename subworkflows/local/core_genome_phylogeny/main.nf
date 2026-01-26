@@ -109,7 +109,9 @@ workflow CORE_GENOME_PHYLOGENY {
             .unique(),
         bakta_db, // Bakta database
         [], // proteins (optional)
-        [] // prodigal_tf (optional)
+        [], // prodigal_tf (optional)
+        [], // regions (optional)
+        []  // hmms (optional)
     )
     versions = versions.mix(BAKTA_BAKTA.out.versions)
 

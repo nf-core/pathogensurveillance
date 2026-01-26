@@ -2,10 +2,10 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.0"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.4"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/main-report-r-packages:0.20':
-        'docker.io/zacharyfoster/main-report-r-packages:0.20' }"
+        'docker.io/zacharyfoster/main-report-r-packages:0.24':
+        'docker.io/zacharyfoster/main-report-r-packages:0.24' }"
 
     input:
     tuple val(group_meta), file(inputs)
@@ -23,9 +23,6 @@ process MAIN_REPORT {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    ls -la ${inputs}/
-    ls -la ${inputs}/trees/
-
     # Tell quarto where to put cache so it does not try to put it where it does not have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
 

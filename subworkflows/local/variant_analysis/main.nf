@@ -181,7 +181,7 @@ workflow VARIANT_ANALYSIS {
     align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta
         .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
         .branch { meta, fasta, seq_count ->
-            enough: seq_count.toInteger() >= 3
+            enough: seq_count.toInteger() >= 4
                 return [meta, fasta]
             too_few: true
                 return [meta, fasta]

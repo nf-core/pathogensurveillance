@@ -2,8 +2,10 @@
     "source": "pathogensurveillance",
     "outputs": {
         "shared_genes": {
-            "description": "Aligned shared genes in FASTA format",
+            "name": "Shared gene alignments",
+            "description": "Aligned sequences for each gene shared amoung a group of organisms in FASTA format",
             "category": "Multigene phylogeny",
+            "primary": true,
             "parsers": {
                 "r": "ape::read.FASTA"
             },
@@ -15,9 +17,24 @@
                 }
             ]
         },
-        "aligned_reads": {
-            "description": "Quality filtered reads alignements to references in BAM format",
+        "aligned_reads_raw": {
+            "name": "Unfiltered read alignments",
+            "description": "Unfiltered read alignements to references in BAM format",
             "category": "Variant analysis",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "aligned_reads",
+                    "pattern": "^(.+?)--([^.]+?)\\.bam$",
+                    "capture_groups": ["reference_id", "sample_id"]
+                }
+            ]
+        },
+        "aligned_reads": {
+            "name": "Filtered read alignments",
+            "description": "Quality filtered read alignements to references in BAM format",
+            "category": "Variant analysis",
+            "primary": true,
             "sources": [
                 {
                     "path": "aligned_reads",
@@ -27,8 +44,10 @@
             ]
         },
         "aligned_reads_index": {
+            "name": "Read alignment indices",
             "description": "Index for the filtered BAM files produced by samtools index",
             "category": "Variant analysis",
+            "primary": false,
             "sources": [
                 {
                     "path": "aligned_reads",
@@ -38,8 +57,10 @@
             ]
         },
         "mark_duplicates_metrics": {
-            "description": "Output from picard MarkDuplicates",
+            "name": "MarkDuplicates output",
+            "description": "Output from picard MarkDuplicates containing summary data tables",
             "category": "Variant analysis",
+            "primary": true,
             "sources": [
                 {
                     "path": "aligned_reads",
@@ -49,8 +70,10 @@
             ]
         },
         "annotation_gff": {
-            "description": "Annotations of sequences in GFF3 format",
+            "name": "Genome annotations (gff3)",
+            "description": "Annotations of genomes in GFF3 format",
             "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -60,8 +83,10 @@
             ]
         },
         "annotation_gbff": {
-            "description": "Annotations of sequences in (multi) GenBank format",
+            "name": "Genome annotations (gbff)",
+            "description": "Annotations of genomes in (multi) GenBank format",
             "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -71,8 +96,10 @@
             ]
         },
         "annotation_ffn": {
-            "description": "FASTA files of feature nucleotide sequences",
+            "name": "Feature nucleotide sequences",
+            "description": "Feature nucleotide sequences in FASTA format",
             "category": "Genome annotation",
+            "primary": true,
             "parsers": {
                 "r": "ape::read.FASTA"
             },
@@ -85,8 +112,10 @@
             ]
         },
         "annotation_fna": {
-            "description": "FASTA files of replicon/contig DNA sequences",
+            "name": "Annotation DNA sequences",
+            "description": "Replicon/contig DNA sequences in FASTA format",
             "category": "Genome annotation",
+            "primary": true,
             "parsers": {
                 "r": "ape::read.FASTA"
             },
@@ -99,8 +128,10 @@
             ]
         },
         "annotation_embl": {
-            "description": "Annotations and sequences in (multi) EMBL format",
+            "name": "EMBL annotations",
+            "description": "Genome annotations and sequences in (multi) EMBL format",
             "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -110,8 +141,10 @@
             ]
         },
         "annotation_faa": {
-            "description": "FASTA files of CDS/sORF amino acid sequences",
+            "name": "CDS protein sequences",
+            "description": "CDS/ORF amino acid sequences in FASTA format",
             "category": "Genome annotation",
+            "primary": true,
             "parsers": {
                 "r": "ape::read.FASTA"
             },
@@ -124,8 +157,10 @@
             ]
         },
         "annotations_hypothetical_faa": {
-            "description": "FASTA files of hypothetical protein CDS amino acid sequences",
+            "name": "Hypothetical protein sequences",
+            "description": "Hypothetical protein CDS amino acid sequences in FASTA format",
             "category": "Genome annotation",
+            "primary": true,
             "parsers": {
                 "r": "ape::read.FASTA"
             },
@@ -138,8 +173,10 @@
             ]
         },
         "annotations_hypothetical_tsv": {
-            "description": "TSV files of information on hypothetical protein CDS",
+            "name": "Hypothetical protein information",
+            "description": "Information on hypothetical protein CDSs in TSV format",
             "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -149,8 +186,10 @@
             ]
         },
         "annotations_tsv": {
-            "description": "TSV files of information for protein CDS",
+            "name": "Protein information",
+            "description": "Information for protein CDSs in TSV format",
             "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "annotations",
@@ -160,8 +199,10 @@
             ]
         },
         "annotations_summary": {
-            "description": "Summary in TXT format",
+            "name": "Annotation summary statistics",
+            "description": "Genome annotation summary statistics in plain text format",
             "category": "Genome annotation",
+            "primary": false,
             "sources": [
                 {
                     "path": "annotations",
@@ -171,8 +212,10 @@
             ]
         },
         "assemblies": {
-            "description": "Genome assemblies in compressed FASTA format",
+            "name": "Genome assemblies",
+            "description": "Genome assemblies in gzipped FASTA format",
             "category": "Genome assembly",
+            "primary": true,
             "sources": [
                 {
                     "path": "assemblies",
@@ -193,8 +236,10 @@
             ]
         },
         "assembly_graphs_gfa": {
-            "description": "Genome assembly graphs in gzipped gfa format",
+            "name": "Assembly graphs",
+            "description": "Genome assembly graphs in gzipped GFA format",
             "category": "Genome assembly",
+            "primary": true,
             "sources": [
                 {
                     "path": "assemblies/spades",
@@ -215,8 +260,10 @@
             ]
         },
         "assembly_graphs_gv": {
-            "description": "Genome assembly scaffolds in gzipped FASTA format",
+            "name": "Assembly graph visualizations",
+            "description": "Genome assembly in gzipped Graphviz format",
             "category": "Genome assembly",
+            "primary": true,
             "sources": [
                 {
                     "path": "assemblies/flye",
@@ -228,9 +275,82 @@
                 }
             ]
         },
+        "flye_assembly_info": {
+            "name": "Flye contig statistics",
+            "description": "Statistics on contigs produced by Flye in TSV fomrat",
+            "category": "Genome assembly",
+            "primary": false,
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.assembly_info\\.txt$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "flye_assembly_log": {
+            "name": "Flye assembly logs",
+            "description": "Log file produced by Flye in plain text format",
+            "category": "Genome assembly",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.flye\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "flye_assembly_params": {
+            "name": "Flye parameters",
+            "description": "Parameters used to run Flye in JSON format",
+            "category": "Genome assembly",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "assemblies/flye",
+                    "pattern": "^(.+?)\\.params\\.json$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "spades_assembly_log": {
+            "name": "Spades assembly logs",
+            "description": "Log file produced by Spades in plain text format",
+            "category": "Genome assembly",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "assemblies/spades",
+                    "pattern": "^(.+?)\\.spades\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "spades_assembly_warnings": {
+            "name": "Spades warnings",
+            "description": "Warnings produced by Spades in plain text format",
+            "category": "Genome assembly",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "assemblies/spades",
+                    "pattern": "^(.+?)\\.warnings\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
         "busco_dir": {
+            "name": "BUSCO output",
             "description": "BUSCO output directory",
-            "category": "Quality control",
+            "category": "Genome annotation",
+            "primary": true,
             "sources": [
                 {
                     "path": "busco",
@@ -239,9 +359,43 @@
                 }
             ]
         },
+        "busco_log": {
+            "name": "BUSCO logs",
+            "description": "Log file produced by BUSCO in plain text format",
+            "category": "Genome annotation",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "busco",
+                    "pattern": "^(.+?)--(.+?)-busco\\.log$",
+                    "capture_groups": ["sample_id", "database"]
+                }
+            ]
+        },
+        "busco_batch_summary": {
+            "name": "BUSCO summary statistics",
+            "description": "BUSCO analysis summary statistics in TSV format",
+            "category": "Genome annotation",
+            "primary": true,
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "busco",
+                    "pattern": "^(.+?)--(.+?)-busco\\.batch_summary\\.txt$",
+                    "capture_groups": ["sample_id", "database"]
+                }
+            ]
+        },
         "downloaded_assemblies": {
-            "description": "Assemblies downloaded by the pipeline in FASTA format",
+            "name": "Downloaded assemblies",
+            "description": "Genome assemblies downloaded by the pipeline in gzipped FASTA format",
             "category": "Downloads",
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/assemblies",
@@ -251,8 +405,10 @@
             ]
         },
         "downloaded_annotations": {
-            "description": "Annotations downloaded by the pipeline in GFF format",
+            "name": "Downloaded annotations",
+            "description": "Genome annotations downloaded by the pipeline in gzipped GFF format",
             "category": "Downloads",
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/annotations",
@@ -262,8 +418,10 @@
             ]
         },
         "downloaded_reads": {
-            "description": "Reads downloaded by the pipeline in FASTQ format",
+            "name": "Downloaded reads",
+            "description": "Reads downloaded by the pipeline in gzipped FASTQ format",
             "category": "Downloads",
+            "primary": true,
             "sources": [
                 {
                     "path": "downloads/reads",
@@ -272,9 +430,128 @@
                 }
             ]
         },
-        "fastp_report_html": {
-            "description": "FASTP report in HTML format",
+        "quast_report": {
+            "name": "Assembly quality reports",
+            "description": "Quast report with data on genome assembly quality in HTML format",
             "category": "Quality control",
+            "primary": true,
+            "sources": [
+                {
+                    "path": "quality_control/quast",
+                    "pattern": "^(.+?)/report\\.html$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "quast_summary": {
+            "name": "Assembly quality statistics",
+            "description": "Quast summary statistics on genome assembly quality in headerless TSV format",
+            "category": "Quality control",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "quality_control/quast",
+                    "pattern": "^(.+?)\\.tsv$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "fastqc_report": {
+            "name": "Read quality reports",
+            "description": "FastQC report on read quality in HTML format",
+            "category": "Quality control",
+            "primary": true,
+            "sources": [
+                {
+                    "path": "quality_control/fastqc",
+                    "pattern": "^(.+?)_fastqc\\.html$",
+                    "capture_groups": ["reads_id"]
+                }
+            ]
+        },
+        "nanoplot_report": {
+            "name": "Nanopore read quality reports",
+            "description": "Nanoplot report on read quality in HTML format",
+            "category": "Quality control",
+            "primary": true,
+            "sources": [
+                {
+                    "path": "quality_control/nanoplot",
+                    "pattern": "^(.+?)_nanoplot-report\\.html$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "nanoplot_stats": {
+            "name": "Nanopore read statistics",
+            "description": "Nanoplot report on read quality in plain text format",
+            "category": "Quality control",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "quality_control/nanoplot",
+                    "pattern": "^(.+?)_NanoStats\\.txt$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
+        "main_report": {
+            "name": "Main analysis report",
+            "description": "Primary report for pathogensurveillance in HTML format",
+            "category": "Reports",
+            "primary": true,
+            "sources": [
+                {
+                    "path": "reports",
+                    "pattern": "^(.+?)_pathsurveil_report\\.html$",
+                    "capture_groups": ["report_id"]
+                }
+            ]
+        },
+        "multiqc_report": {
+            "name": "Combined quality control report",
+            "description": "MultiQC report combining the summary quality control output from many programs in HTML format",
+            "category": "Reports",
+            "primary": true,
+            "sources": [
+                {
+                    "path": "quality_control/multiqc",
+                    "pattern": "^(.+?)_multiqc/multiqc_report\\.html$",
+                    "capture_groups": ["report_id"]
+                }
+            ]
+        },
+        "multiqc_output": {
+            "name": "MultiQC output directory",
+            "description": "Directory of MultiQC output with intermediate files used to make the MultiQC report",
+            "category": "Quality control",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "quality_control/multiqc",
+                    "pattern": "^(.+?)_multiqc$",
+                    "capture_groups": ["report_id"]
+                }
+            ]
+        },
+        "fastqc_output": {
+            "name": "FastQC output directory",
+            "description": "Zipped directory of FastQC output",
+            "category": "Quality control",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "quality_control/fastqc",
+                    "pattern": "^(.+?)_fastqc\\.zip$",
+                    "capture_groups": ["reads_id"]
+                }
+            ]
+        },
+        "fastp_report_html": {
+            "name": "Read trimming reports",
+            "description": "FASTP report with read quality and adapter trimming statistics in HTML format",
+            "category": "Quality control",
+            "primary": true,
             "sources": [
                 {
                     "path": "fastp",
@@ -284,8 +561,10 @@
             ]
         },
         "fastp_report_json": {
-            "description": "FASTP report in JSON format",
+            "name": "Read trimming statistics",
+            "description": "FASTP report with read quality and adapter trimming statistic in JSON format",
             "category": "Quality control",
+            "primary": false,
             "sources": [
                 {
                     "path": "fastp",
@@ -294,9 +573,24 @@
                 }
             ]
         },
+        "fastp_log": {
+            "name": "Read trimming logs",
+            "description": "Log file produced by FASTP",
+            "category": "Quality control",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "fastp",
+                    "pattern": "^(.+?)\\.fastp\\.log$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
         "sample_metadata": {
+            "name": "Sample metadata",
             "description": "Sample metadata in TSV format",
             "category": "Sample/Reference metadata",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
@@ -311,8 +605,10 @@
             ]
         },
         "reference_metadata": {
+            "name": "Reference metadata",
             "description": "Reference metadata in TSV format",
             "category": "Sample/Reference metadata",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
@@ -327,8 +623,10 @@
             ]
         },
         "execution_report": {
+            "name": "Pipeline execution statistics",
             "description": "Statistics like time and ram usage for pipeline execution as a HTML report",
             "category": "Pipeline metadata",
+            "primary": true,
             "sources": [
                 {
                     "path": "pipeline_info",
@@ -337,9 +635,24 @@
                 }
             ]
         },
+        "execution_flowchart": {
+            "name": "Pipeline flowchart",
+            "description": "Flowchart of the pathogensurveillance pipeline automatically generated by Nextflow in HTML format",
+            "category": "Pipeline metadata",
+            "primary": false,
+            "sources": [
+                {
+                    "path": "pipeline_info",
+                    "pattern": "^pipeline_dag_(.+?)\\.html$",
+                    "capture_groups": ["date"]
+                }
+            ]
+        },
         "execution_trace": {
+            "name": "Pipeline execution trace",
             "description": "Statistics like time and ram usage for pipeline execution in TSV format",
             "category": "Pipeline metadata",
+            "primary": false,
             "sources": [
                 {
                     "path": "pipeline_info",
@@ -349,8 +662,10 @@
             ]
         },
         "pipeline_parameters": {
-            "description": "Parameters use when running the pipeline format",
+            "name": "Pipeline parameters",
+            "description": "Parameters used when running the pipeline in JSON format",
             "category": "Pipeline metadata",
+            "primary": false,
             "sources": [
                 {
                     "path": "pipeline_info",
@@ -360,8 +675,10 @@
             ]
         },
         "pipeline_version_info": {
-            "description": "Versions of software used in the pipeline",
+            "name": "Software versions",
+            "description": "Versions of software used in the pipeline in YML format",
             "category": "Pipeline metadata",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_version_info"
             },
@@ -376,8 +693,10 @@
             ]
         },
         "pipeline_run_info": {
-            "description": "Pipeline run metadata",
+            "name": "Pipeline run information",
+            "description": "Pipeline run metadata in YML format",
             "category": "Pipeline metadata",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_run_info"
             },
@@ -392,8 +711,10 @@
             ]
         },
         "messages": {
-            "description": "Errors, warnings, and messages produced by the pipeline.",
+            "name": "Pipeline messages",
+            "description": "Errors, warnings, and messages produced by the pipeline in TSV format",
             "category": "Pipeline metadata",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
@@ -408,8 +729,10 @@
             ]
         },
         "pirate": {
+            "name": "Gene orthology analysis",
             "description": "Pirate output directory with gene orthology information",
             "category": "Multigene phylogeny",
+            "primary": true,
             "sources": [
                 {
                     "path": "pirate",
@@ -419,8 +742,10 @@
             ]
         },
         "pocp": {
+            "name": "Conserved protein percentages",
             "description": "Percentage of conserved proteins in TSV format",
             "category": "Multigene phylogeny",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_matrix_tsv"
             },
@@ -436,8 +761,10 @@
             ]
         },
         "ncbi_assembly_metadata": {
+            "name": "NCBI assembly metadata",
             "description": "Metadata of available assemblies on NCBI in TSV format",
             "category": "Sample/Reference metadata",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_ncbi_assembly_metadata"
             },
@@ -448,13 +775,15 @@
                 {
                     "path": "reference_data/considered",
                     "pattern": "^(.+?)\\.tsv$",
-                    "capture_groups": ["taxon_id"]
+                    "capture_groups": ["family_tax_id"]
                 }
             ]
         },
         "downloaded_ref_metadata": {
+            "name": "Downloaded reference metadata",
             "description": "Metadata of references selected for download from NCBI in TSV format",
             "category": "Sample/Reference metadata",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
@@ -470,8 +799,10 @@
             ]
         },
         "contextual_refs": {
-            "description": "IDs of references selected for multigene phylogenies",
+            "name": "Phylogeny reference IDs",
+            "description": "IDs of references selected for multigene phylogenies in TSV format",
             "category": "Multigene phylogeny",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_ref_list"
             },
@@ -498,8 +829,10 @@
             ]
         },
         "mapping_refs": {
-            "description": "IDs of references selected for multigene phylogenies",
+            "name": "Mapping reference IDs",
+            "description": "IDs of references selected for multigene phylogenies in TSV format",
             "category": "Variant analysis",
+            "primary": false,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tsv"
             },
@@ -515,8 +848,10 @@
             ]
         },
         "sendsketch": {
-            "description": "Table returned by BBmap sendsketch with initial identifications of samples",
+            "name": "Initial sample identifications",
+            "description": "Table returned by BBmap sendsketch with initial identifications of samples in TSV format",
             "category": "Initial identification",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_sendsketch"
             },
@@ -532,8 +867,10 @@
             ]
         },
         "ani_matrix_csv": {
-            "description": "ANI similarity matrix in CSV format made by sourmash compare",
+            "name": "ANI similarity matrix",
+            "description": "Estimated ANI similarity matrix made by sourmash compare in CSV format",
             "category": "Sketch analysis",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_matrix_csv"
             },
@@ -549,8 +886,10 @@
             ]
         },
         "sketches": {
-            "description": "FracMinHash signature of the given sequence made by sourmash sketch",
+            "name": "Sequence sketches",
+            "description": "FracMinHash signature of the given sequence made by sourmash sketch in JSON",
             "category": "Sketch analysis",
+            "primary": true,
             "sources": [
                 {
                     "path": "sketch_comparisons/sketches",
@@ -560,8 +899,10 @@
             ]
         },
         "multigene_tree": {
+            "name": "Multigene phylogenetic trees",
             "description": "Trees infered from multigene phylogeny in Newick format",
             "category": "Multigene phylogeny",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tree"
             },
@@ -585,8 +926,10 @@
             ]
         },
         "variant_tree": {
-            "description": "Tree inferred from variant analysis in Newick format",
+            "name": "Variant-based phylogenetic trees",
+            "description": "Trees inferred from variant analysis in Newick format",
             "category": "Variant analysis",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_tree"
             },
@@ -599,8 +942,10 @@
             ]
         },
         "variants": {
+            "name": "Filtered variants",
             "description": "Filtered variants in VCF format",
             "category": "Variant analysis",
+            "primary": true,
             "sources": [
                 {
                     "path": "variants",
@@ -610,8 +955,10 @@
             ]
         },
         "variants_unfiltered": {
+            "name": "Unfiltered variants",
             "description": "Unfiltered variants in VCF format",
             "category": "Variant analysis",
+            "primary": false,
             "sources": [
                 {
                     "path": "variants",
@@ -621,8 +968,10 @@
             ]
         },
         "variants_fasta": {
+            "name": "Variant sequences",
             "description": "Filtered variants in FASTA format",
             "category": "Variant analysis",
+            "primary": true,
             "parsers": {
                 "r": "PathoSurveilR:::parse_fasta"
             },
