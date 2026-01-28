@@ -158,7 +158,10 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citations
 
-If you use nf-core/pathogensurveillance for your analysis, please cite it using the following doi: [10.5281/zenodo.15757418](https://doi.org/10.5281/zenodo.15757418)
+Please cite use of nf-core/pathogensurveillance as follows:
+
+> Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. **PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification.** BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
+
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 You can cite the `nf-core` publication as follows:
