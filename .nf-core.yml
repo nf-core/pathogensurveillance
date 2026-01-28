@@ -18,4 +18,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  version: 1.1.0dev
+  version: 1.1.0
