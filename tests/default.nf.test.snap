@@ -6,7 +6,7 @@
                     "busco": "5.8.3"
                 },
                 "FASTP": {
-                    "fastp": "0.23.4"
+                    "fastp": "1.0.1"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -18,16 +18,16 @@
                     "r-PathoSurveilR": "1.1.4"
                 },
                 "SOURMASH_COMPARE": {
-                    "sourmash": "4.8.14"
+                    "sourmash": "4.9.4"
                 },
                 "SOURMASH_SKETCH": {
-                    "sourmash": "4.8.14"
+                    "sourmash": "4.9.4"
                 },
                 "SPADES": {
-                    "spades": "4.0.0"
+                    "spades": "4.1.0"
                 },
                 "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.0.0"
+                    "nf-core/pathogensurveillance": "v1.1.0"
                 }
             },
             [
@@ -77,8 +77,8 @@
                 "fastp/LF1.fastp.html",
                 "fastp/LF1.fastp.json",
                 "fastp/LF1.fastp.log",
-                "fastp/LF1_1.fastp.fastq.gz",
-                "fastp/LF1_2.fastp.fastq.gz",
+                "fastp/LF1_R1.fastp.fastq.gz",
+                "fastp/LF1_R2.fastp.fastq.gz",
                 "metadata",
                 "metadata/reference_metadata.tsv",
                 "metadata/sample_metadata.tsv",
@@ -138,6 +138,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.2"
         },
-        "timestamp": "2026-01-15T19:11:47.942295729"
+        "timestamp": "2026-01-27T15:54:40.492462123"
     }
 }

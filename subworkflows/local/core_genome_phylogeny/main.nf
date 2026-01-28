@@ -202,7 +202,6 @@ workflow CORE_GENOME_PHYLOGENY {
         }
         .transpose()
     MAFFT_CORE ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_CORE.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
     phylogeny_input = MAFFT_CORE.out.fas

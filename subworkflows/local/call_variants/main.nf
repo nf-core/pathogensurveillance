@@ -68,7 +68,6 @@ workflow CALL_VARIANTS {
 
     // Make tbi index for combined VCF
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
-    versions = versions.mix(TABIX_TABIX.out.versions)
 
     // Make .gzi file from reference in case it is gzipped
     TABIX_BGZIP (
@@ -80,7 +79,7 @@ workflow CALL_VARIANTS {
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // make inputs in same order
-        .join(TABIX_TABIX.out.tbi)
+        .join(TABIX_TABIX.out.index)
         .join(
             ch_ref_grouped.map { combined_meta, sample_meta, bam, bai, ref, fai, dict, region_file ->
                 [combined_meta, ref, fai, dict]

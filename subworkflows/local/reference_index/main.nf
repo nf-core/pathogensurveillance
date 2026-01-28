@@ -35,10 +35,8 @@ workflow REFERENCE_INDEX {
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
     SAMTOOLS_FAIDX ( reference, [[], []], false )
-    ch_versions = ch_versions.mix (SAMTOOLS_FAIDX.out.versions)
 
     BWA_INDEX ( reference )
-    ch_versions = ch_versions.mix (BWA_INDEX.out.versions)
 
     emit:
     picard_dict   = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict

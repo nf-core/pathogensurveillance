@@ -33,10 +33,9 @@ workflow GENOME_ASSEMBLY {
         .mix(filtered_input.short_eukaryote)
     fastp_input = spades_input
         .map{ sample_meta, read_paths ->    // If there are both single and paired in reads, just use the paired end reads
-            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }]
+            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }, [] ]
         }
-    FASTP( fastp_input, [], false, false, false )
-    versions = versions.mix(FASTP.out.versions)
+    FASTP( fastp_input, false, false, false )
 
     // Check for samples with too few reads after quality control
     filtered_reads = FASTP.out.json
@@ -83,13 +82,11 @@ workflow GENOME_ASSEMBLY {
         filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
         "--nano-raw"
     )
-    versions = versions.mix(FLYE_NANOPORE.out.versions)
 
     FLYE_PACBIO (
         filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
         "--pacbio-raw"
     )
-    versions = versions.mix(FLYE_PACBIO.out.versions)
 
     assemblies = SPADES.out.scaffolds
         .mix(FLYE_NANOPORE.out.fasta)
@@ -101,7 +98,6 @@ workflow GENOME_ASSEMBLY {
     QUAST (
         assemblies, [[], []], [[],[]]
     )
-    versions = versions.mix(QUAST.out.versions)
 
     // Warn if a sample was not assembled
     not_assembled_warnings = sample_data

@@ -2,10 +2,10 @@ process INITIAL_CLASSIFICATION {
     tag "$meta.id"
     label 'process_single'
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.4"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/main-report-r-packages:0.24':
-        'docker.io/zacharyfoster/main-report-r-packages:0.24' }"
+        'docker.io/zacharyfoster/main-report-r-packages:0.25':
+        'docker.io/zacharyfoster/main-report-r-packages:0.25' }"
 
     input:
     tuple val(meta), path(hits)
