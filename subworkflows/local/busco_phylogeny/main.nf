@@ -127,7 +127,6 @@ workflow BUSCO_PHYLOGENY {
         }
         .transpose()
     MAFFT_BUSCO ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_BUSCO.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
     phylogeny_input = MAFFT_BUSCO.out.fas
