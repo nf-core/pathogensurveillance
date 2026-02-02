@@ -47,7 +47,7 @@ Most genomic tools are designed to be used with a reference genome.
 Yet this is at odds with the work of pathogen diagnosticians, who often deal with unknown samples.
 Finding the right reference manually may be cumbersome and require a suprising amount of technical skill.
 
-**PathogenSurveillance picks a good reference genome for you**. It does this through the program sourmash. In simple terms, this takes a sample's DNA "fingerprint" and finds the closest match in a "DNA fingerprint library" spanning the tree of life. In more technical terms, the pipeline generates k-mer sketches from your reads assembled into genomes, then uses the identified reference to do a boilerplate, but robust phylogenetic analysis of your submitted samples.
+**Pathogensurveillance picks a good reference genome for you**. It does this using the program sourmash. In simple terms, this takes a sample's DNA "fingerprint" and finds the closest match in a "DNA fingerprint library" spanning the tree of life. In more technical terms, the pipeline generates k-mer sketches from your reads assembled into genomes, then uses the identified reference to do a boilerplate, but robust phylogenetic analysis of your submitted samples.
 
 In our experience, the pipeline usually chooses the best possible reference genome.
 At a minimum it will choose a reference that is good enough to build an informative phylogeny and allow you to see the contextual placement your samples.
@@ -56,8 +56,8 @@ Pathogensurveillance is designed to use as many types of genomic DNA input as po
 It works for common shortread and longread sequencing technologies and for both prokaryotes and eukaryotes.
 There is a good deal of emergent complexity required to work with such a broad sample range, but pathogensurveillance handles this automatically.
 
-While PathogenSurveillance may be a useful tool for researchers of all levels, it was designed with those who may have limited bioinformatics training in mind.
-**Pathogensurveillance is very simple to run**.
+While pathogensurveillance may be a useful tool for researchers of all levels, it was designed with those who may have limited bioinformatics training in mind.
+**pathogensurveillance is very simple to run**.
 At a minimum, all that needs to be supplied is a .CSV file with a single column specifying the path to your sample's sequencing reads.
 Other information is optional, but if provided will used to customize the output report or conditionally use particular reference genomes.
 
@@ -160,7 +160,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 Please cite use of nf-core/pathogensurveillance as follows:
 
-> Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. **PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification.** BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
+> Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. **Pathogensurveillance: an automated pipeline for population genomic analyses and pathogen identification.** BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 

@@ -7,8 +7,8 @@ workflow INITIAL_QC_CHECKS {
     sample_data
 
     main:
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Run FastQC
     shortreads = sample_data

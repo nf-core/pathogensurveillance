@@ -14,8 +14,8 @@ workflow BUSCO_PHYLOGENY {
 
     main:
 
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Remove any samples that are not eukaryotes
     sample_data = original_sample_data
@@ -71,7 +71,7 @@ workflow BUSCO_PHYLOGENY {
         .mix(selected_ref_data)
 
     // Download BUSCO datasets
-    BUSCO_DOWNLOAD ( Channel.from( "eukaryota_odb10" ) )
+    BUSCO_DOWNLOAD ( channel.from( "eukaryota_odb10" ) )
     versions = versions.mix(BUSCO_DOWNLOAD.out.versions)
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group

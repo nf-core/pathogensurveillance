@@ -9,8 +9,8 @@ workflow SKETCH_COMPARISON {
     assemblies
 
     main:
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Combine sample data with reads and assemblies to idenify which samples were not assembled
     sample_data

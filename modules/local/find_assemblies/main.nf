@@ -4,7 +4,7 @@ process FIND_ASSEMBLIES {
 
     conda "conda-forge::ncbi-datasets-cli=18.7.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'community.wave.seqera.io/library/ncbi-datasets-cli:18.7.0--03372988f820bf79':
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/fc/fc3b4f67d6b34c43dba4fd417994f88e2b5042c0d68a9e53d59de7174c90f119/data':
         'community.wave.seqera.io/library/ncbi-datasets-cli:18.7.0--03372988f820bf79' }"
 
     input:

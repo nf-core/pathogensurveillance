@@ -11,8 +11,8 @@ workflow GENOME_ASSEMBLY {
 
     main:
 
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
     parsed_sample_data = sample_data
         .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
     parsed_sample_data

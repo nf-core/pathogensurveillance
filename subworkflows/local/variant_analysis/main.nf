@@ -13,8 +13,8 @@ workflow VARIANT_ANALYSIS {
     ani_matrix
 
     main:
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Remove samples belonging to groups with only one sample
     grouped_sample_data = original_sample_data

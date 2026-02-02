@@ -49,13 +49,6 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#   '~/downloads/248270064760e407b595418848517f/oomycetes_gene_family.tsv',
-#   '~/downloads/248270064760e407b595418848517f/oomycetes_feature_sequences',
-#   '~/downloads/248270064760e407b595418848517f/oomycetes.tsv',
-#   '10', '500',
-#   'oomycetes'
-#   )
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "prefix")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)

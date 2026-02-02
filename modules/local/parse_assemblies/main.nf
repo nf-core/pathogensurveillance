@@ -3,9 +3,7 @@ process PARSE_ASSEMBLIES {
     label 'process_single'
 
     conda "conda-forge::r-rcppsimdjson=0.1.12"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'quay.io/nf-core/rcppsimdjson:0.2' :
-        'quay.io/nf-core/rcppsimdjson:0.2' }"
+    container "quay.io/nf-core/rcppsimdjson:0.2"
 
     input:
     tuple val(taxon), path(json)

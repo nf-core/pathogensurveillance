@@ -38,8 +38,8 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
 
     // Initalize channel to accumulate information about software versions used
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
@@ -87,9 +87,9 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
         core_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
     } else {
-        core_selected_refs = Channel.empty()
-        core_pocp = Channel.empty()
-        core_phylogeny = Channel.empty()
+        core_selected_refs = channel.empty()
+        core_pocp = channel.empty()
+        core_phylogeny = channel.empty()
     }
 
     // Read2tree BUSCO phylogeny for eukaryotes
@@ -102,7 +102,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
-    def topic_versions = Channel.topic("versions")
+    def topic_versions = channel.topic("versions")
         .distinct()
         .branch { entry ->
             versions_file: entry instanceof Path
@@ -129,9 +129,9 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
          ).set { collated_versions }
 
     // MultiQC
-    multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-    multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+    multiqc_config          = channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    multiqc_custom_config   = params.multiqc_config ? channel.fromPath( params.multiqc_config, checkIfExists: true ) : channel.empty()
+    multiqc_logo            = params.multiqc_logo   ? channel.fromPath( params.multiqc_logo, checkIfExists: true ) : channel.empty()
     multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
     // Note: the belowsection was from a template update that has not been merged into this logic yet
@@ -291,12 +291,12 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
 
     PREPARE_REPORT_INPUT (
         report_inputs,
-        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first()
+        channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first()
     )
 
     MAIN_REPORT (
         PREPARE_REPORT_INPUT.out.report_input,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first()
+        channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first()
     )
 
     // Collate and save messages
@@ -315,7 +315,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         )
 
     // Save pipeline execution paramters
-    Channel.value(
+    channel.value(
         """
         command_line: ${workflow.commandLine}
         commit_id: ${workflow.commitId}

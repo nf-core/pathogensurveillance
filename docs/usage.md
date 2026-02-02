@@ -160,20 +160,19 @@ To make sure that you're running the latest version of the pipeline, make sure t
 nextflow pull nf-core/pathogensurveillance
 ```
 
-### Profiles for HPC cluster and cloud Environments
+### Profiles for cloud environments
 
-The pipeline provides specific profiles for running in `cluster` and `cloud` environments, which help manage API rate limits during data downloads.
-These profiles adjust the `--max_parallel_downloads` parameter to control the number of concurrent downloads, thereby preventing overloading servers or exceeding API rate limits.
+The pipeline provides specific profiles for running in cloud environments, which have different API rate limits during data downloads.
+This profiles adjust the `--max_parallel_downloads` parameter to control the number of concurrent downloads, thereby preventing overloading servers or exceeding API rate limits.
 By default, the pipeline assumes it is running locally and will parallelize as much as possible depending on the process and whether an API key is set (see secretes section below), but this is generally only between 1 and 10 downloads in parallel.
 
-- `cluster`: Suitable for typical high-performance computing environments where moderate parallelism of downloads.
 - `cloud`: Allow for high download parallelism in cloud environments where resources can be scaled dynamically.
 
 For users who need more control over the number of parallel downloads, the `--max_parallel_downloads` parameter can be set directly in the configuration.
-For example, the you can used the cluster profile like so:
+For example, the you can used the `cloud` profile like so:
 
 ```bash
-nextflow run nf-core/pathogensurveillance -profile docker,cluster -resume --input ./sample_metadata.tsv --outdir ./results
+nextflow run nf-core/pathogensurveillance -profile docker,cloud -resume --input ./sample_metadata.tsv --outdir ./results
 ```
 
 ### API keys

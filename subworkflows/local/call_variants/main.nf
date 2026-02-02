@@ -12,7 +12,7 @@ workflow CALL_VARIANTS {
 
     main:
 
-    versions = Channel.empty()
+    versions = channel.empty()
 
     // group samples by reference genome and group
     ch_ref_grouped = ch_input
