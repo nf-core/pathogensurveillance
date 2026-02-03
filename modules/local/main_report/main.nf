@@ -3,7 +3,9 @@ process MAIN_REPORT {
     label 'process_low'
 
     conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
-    container 'docker.io/zacharyfoster/main-report-r-packages:0.25'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'docker.io/zacharyfoster/main-report-r-packages:0.25':
+        'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
     tuple val(group_meta), file(inputs)
