@@ -29,7 +29,7 @@ workflow REFERENCE_INDEX {
     reference     // [ val(ref_meta), file(reference) ]
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     PICARD_CREATESEQUENCEDICTIONARY ( reference )
     ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)

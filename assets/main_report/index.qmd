@@ -446,7 +446,7 @@ To contribute, provide feedback, or report bugs please visit our [github reposit
 
 Please cite this pipeline and nf-core in publications as follows:
 
-{{< bi file-earmark-pdf-fill >}} Foster et al. 2025. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+{{< bi file-earmark-pdf-fill >}} Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. **PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification.** BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
 {{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35: 316--19. [https://doi.org/10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820).
 

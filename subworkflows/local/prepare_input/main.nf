@@ -20,8 +20,8 @@ workflow PREPARE_INPUT {
     main:
 
     // Initalize channel to accumulate information about software versions used
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Parse input tables
     SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, params.max_samples )

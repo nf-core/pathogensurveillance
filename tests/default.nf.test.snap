@@ -15,7 +15,7 @@
                     "quast": "5.3.0"
                 },
                 "SAMPLESHEET_CHECK": {
-                    "r-PathoSurveilR": "1.1.4"
+                    "r-PathoSurveilR": "1.2.0"
                 },
                 "SOURMASH_COMPARE": {
                     "sourmash": "4.9.4"
@@ -136,8 +136,8 @@
         ],
         "meta": {
             "nf-test": "0.9.3",
-            "nextflow": "25.10.2"
+            "nextflow": "25.10.3"
         },
-        "timestamp": "2026-01-27T15:54:40.492462123"
+        "timestamp": "2026-02-05T10:16:08.985601358"
     }
 }
