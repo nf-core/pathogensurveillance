@@ -19,8 +19,8 @@ workflow CORE_GENOME_PHYLOGENY {
 
     main:
 
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Remove any samples that are not prokaryotes
     sample_data = sample_data
@@ -78,12 +78,12 @@ workflow CORE_GENOME_PHYLOGENY {
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
     if (params.bakta_db) {
         if (params.bakta_db.endsWith('.tar.gz')) {
-            bakta_db_tar = Channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
+            bakta_db_tar = channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
             UNTAR( bakta_db_tar )
             bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
             versions = versions.mix(UNTAR.out.versions)
         } else {
-            bakta_db = Channel.fromPath(params.bakta_db).first()
+            bakta_db = channel.fromPath(params.bakta_db).first()
         }
     } else if (params.download_bakta_db) {
         BAKTA_BAKTADBDOWNLOAD()
@@ -109,7 +109,9 @@ workflow CORE_GENOME_PHYLOGENY {
             .unique(),
         bakta_db, // Bakta database
         [], // proteins (optional)
-        [] // prodigal_tf (optional)
+        [], // prodigal_tf (optional)
+        [], // regions (optional)
+        []  // hmms (optional)
     )
     versions = versions.mix(BAKTA_BAKTA.out.versions)
 
@@ -200,7 +202,6 @@ workflow CORE_GENOME_PHYLOGENY {
         }
         .transpose()
     MAFFT_CORE ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
-    versions = versions.mix(MAFFT_CORE.out.versions)
 
     // Inferr phylogenetic tree from aligned core genes
     phylogeny_input = MAFFT_CORE.out.fas

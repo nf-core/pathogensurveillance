@@ -26,13 +26,13 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "~/projects/pathogensurveillance/work/5b/29ffb0e1e1add90d02de99307cffea/LF1_taxa_found.tsv",
+#     "~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff/LF1_taxa_found.tsv",
 #     "1",
 #     "3",
 #     "3",
 #     "false",
 #     "deleteme",
-#     list.files("~/projects/pathogensurveillance/work/5b/29ffb0e1e1add90d02de99307cffea", pattern = '^[0-9]+.tsv$', full.names = TRUE)
+#     list.files("~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
 args <- as.list(args)
@@ -56,10 +56,6 @@ assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     }
     return(out)
 }))
-
-# Add column for modified ID
-modified_id <- gsub(assem_data$accession, pattern = '[\\/:*?"<>| .]', replacement = '_')
-assem_data <- cbind(reference_id = modified_id, assem_data)
 
 # Add taxon info columns
 assem_data$organism_name <- gsub(assem_data$organism_name, pattern = '[', replacement = '', fixed = TRUE)
@@ -187,6 +183,10 @@ assem_data <- select_for_rank(
 )
 
 result <- assem_data[! is.na(assem_data$selection_taxon), ]
+
+# Add taxon ID columns
+result$selection_taxon_id <- taxa_found_data$taxon_id[match(result$selection_taxon, taxa_found_data$name)]
+result$family_taxon_id <- taxa_found_data$taxon_id[match(result$family, taxa_found_data$name)]
 
 # Reformat results to the same format as the user-defined metadata
 if (nrow(result) == 0) {

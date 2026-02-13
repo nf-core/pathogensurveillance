@@ -122,6 +122,9 @@ filter_bins <- function(data, selected) {
     has_ref <- unlist(lapply(data$refs, function(refs) {
         any(refs %in% selected)
     }))
+    if (is.null(has_ref)) {
+        has_ref = character(0)
+    }
     data[! has_ref, ]
 }
 bin_data <- filter_bins(bin_data, selected_refs)

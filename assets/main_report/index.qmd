@@ -259,19 +259,14 @@ The accuracy of this identification depends on the presence of close reference s
 ### Multigene phylogeny
 
 ```{r}
-core_plots <- plot_tree(params$inputs, target = 'multigene_tree', interactive = FALSE)
+has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
 ```
 
-```{r plot_multigene_tree, results='asis', eval = length(core_plots) > 0}
-plot_one <- function(x) {
-    print(core_plots[[x]])
-}
-tip_count <- sum(core_plots[[1]]$data$isTip)
-max_label_size <- max(nchar(core_plots[[1]]$data$label, keepNA = FALSE))
-print_figures_with_selector(plot_one, selector = list('Color By' = names(core_plots)), id_prefix = 'core-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```{r plot_multigene_tree, eval=has_multigene_tree, fig.height=8}
+plot_tree(params$inputs, target = 'multigene_tree')
 ```
 
-```{r, results='asis', eval = length(core_plots) > 0}
+```{r, results='asis', eval = has_multigene_tree}
 cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
@@ -282,7 +277,7 @@ It is the most robust identification provided by this pipeline, but taxonomic co
 ')
 ```
 
-```{r, results='asis', eval = length(core_plots) == 0}
+```{r, results='asis', eval = !has_multigene_tree}
 cat('
 Could not generate core genome phylogeny.
 ')
@@ -297,14 +292,8 @@ snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must
 ```
 
 
-```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), results='asis'}
-snp_plots <- plot_tree(params$inputs, target = 'variant_tree', interactive = FALSE)
-plot_one <- function(x) {
-    print(snp_plots[[x]])
-}
-tip_count <- sum(snp_plots[[1]]$data$isTip)
-max_label_size <- max(nchar(snp_plots[[1]]$data$label), na.rm = TRUE)
-print_figures_with_selector(plot_one, selector = list(Color = names(snp_plots)), id_prefix = 'snp-gene-phylo', width = 1700 + max_label_size * 30, height = min(c(500 + tip_count * 30, 15000)), res = 300)
+```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), fig.height=8}
+plot_tree(params$inputs, target = 'variant_tree')
 ```
 
 
@@ -457,7 +446,7 @@ To contribute, provide feedback, or report bugs please visit our [github reposit
 
 Please cite this pipeline and nf-core in publications as follows:
 
-{{< bi file-earmark-pdf-fill >}} Foster et al. 2025. PathogenSurveillance: A nf-core pipeline for rapid analysis of pathogen genome data. In preparation.
+{{< bi file-earmark-pdf-fill >}} Foster, ZSL, Sudermann, MA, Parada Rojas, CH, Blair, LK, Iruegas Bocardo, F, Dhakal, U, Weisberg, AJ, Phan, H, Chang, JH, Grunwald, NJ. **PathogenSurveillance: an automated pipeline for population genomic analyses and pathogen identification.** BioRxiv 2025 2025.10.31.685798. doi: https://doi.org/10.1101/2025.10.31.685798
 
 {{< bi file-earmark-pdf-fill >}} Di Tommaso, Paolo, Maria Chatzou, Evan W Floden, Pablo Prieto Barja, Emilio Palumbo, and Cedric Notredame. 2017. Nextflow Enables Reproducible Computational Workflows. Nature Biotechnology 35: 316--19. [https://doi.org/10.1038/nbt.3820](https://doi.org/10.1038/nbt.3820).
 

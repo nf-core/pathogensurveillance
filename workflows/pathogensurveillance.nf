@@ -38,8 +38,8 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
 
     // Initalize channel to accumulate information about software versions used
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
@@ -75,13 +75,22 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Create core gene phylogeny for bacterial samples
-    CORE_GENOME_PHYLOGENY (
-        PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.ani_matrix,
-        GENOME_ASSEMBLY.out.scaffolds
-    )
-    versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
-    messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+    if (!params.skip_core_phylogeny) {
+        CORE_GENOME_PHYLOGENY (
+            PREPARE_INPUT.out.sample_data,
+            SKETCH_COMPARISON.out.ani_matrix,
+            GENOME_ASSEMBLY.out.scaffolds
+        )
+        versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
+        messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
+        core_selected_refs = CORE_GENOME_PHYLOGENY.out.selected_refs
+        core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
+        core_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
+    } else {
+        core_selected_refs = channel.empty()
+        core_pocp = channel.empty()
+        core_phylogeny = channel.empty()
+    }
 
     // Read2tree BUSCO phylogeny for eukaryotes
     BUSCO_PHYLOGENY (
@@ -93,19 +102,50 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
-    collated_versions = softwareVersionsToYAML(versions)
+    def topic_versions = channel.topic("versions")
+        .distinct()
+        .branch { entry ->
+            versions_file: entry instanceof Path
+            versions_tuple: true
+        }
+
+    def topic_versions_string = topic_versions.versions_tuple
+        .map { process, tool, version ->
+            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+        }
+        .groupTuple(by:0)
+        .map { process, tool_versions ->
+            tool_versions.unique().sort()
+            "${process}:\n${tool_versions.join('\n')}"
+        }
+
+    softwareVersionsToYAML(versions.mix(topic_versions.versions_file))
+        .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
             name: 'version_info.yml',
             sort: true,
             newLine: true
-        )
+         ).set { collated_versions }
 
     // MultiQC
-    multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-    multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+    multiqc_config          = channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    multiqc_custom_config   = params.multiqc_config ? channel.fromPath( params.multiqc_config, checkIfExists: true ) : channel.empty()
+    multiqc_logo            = params.multiqc_logo   ? channel.fromPath( params.multiqc_logo, checkIfExists: true ) : channel.empty()
     multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+
+    // Note: the belowsection was from a template update that has not been merged into this logic yet
+    methods_description     = channel.value(methodsDescriptionText(multiqc_custom_methods_description))
+    summary_params      = paramsSummaryMap(
+        workflow, parameters_schema: "nextflow_schema.json")
+    workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
+    workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml')
+    methods_description.collectFile(
+            name: 'methods_description_mqc.yaml',
+            sort: true
+        )
+    // End note section -------------------
+
     fastqc_results = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
@@ -138,7 +178,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .map { report_meta, versions, fastqc, fastp, nanoplot, quast ->
+        .map {report_meta, versions, fastqc, fastp, nanoplot, quast ->
             files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
             [report_meta, files.flatten()]
         }
@@ -236,27 +276,27 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
         .join(snp_align, remainder: true)
         .join(snp_phylogeny, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.selected_refs, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.pocp, remainder: true)
-        .join(CORE_GENOME_PHYLOGENY.out.phylogeny, remainder: true)
+        .join(core_selected_refs, remainder: true)
+        .join(core_pocp, remainder: true)
+        .join(core_phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-        .filter{it[0] != null} // remove extra item if messages is empty
-        .map{ it.size() == 16 ? it + [null] : it } // adds placeholder if messages is empty
-        .filter{ it.size() == 17 } // remove any malformed inputs
-        .map{ it.collect{ it ?: [] } } //replace nulls with empty lists
+        .filter{it[0] != null}
+        .map{ it.size() == 16 ? it + [null] : it }
+        .filter{ it.size() == 17 }
+        .map{ it.collect{ it ?: [] } }
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
         report_inputs,
-        Channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+        channel.fromPath("${projectDir}/assets/.pathogensurveillance_output.json", checkIfExists: true).first()
     )
 
     MAIN_REPORT (
         PREPARE_REPORT_INPUT.out.report_input,
-        Channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first() // .first converts it to a value channel so it can be reused for multiple reports.
+        channel.fromPath("${projectDir}/assets/main_report", checkIfExists: true).first()
     )
 
     // Collate and save messages
@@ -275,7 +315,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         )
 
     // Save pipeline execution paramters
-    Channel.value(
+    channel.value(
         """
         command_line: ${workflow.commandLine}
         commit_id: ${workflow.commitId}

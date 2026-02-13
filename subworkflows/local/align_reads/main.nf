@@ -9,7 +9,7 @@ workflow ALIGN_READS {
 
     main:
 
-    versions = Channel.empty()
+    versions = channel.empty()
 
     // Addd composite ID for read/ref combos to input
     samp_ref_combo = ch_input

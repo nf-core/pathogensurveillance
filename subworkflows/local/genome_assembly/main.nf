@@ -1,7 +1,6 @@
 include { FASTP                 } from '../../../modules/nf-core/fastp'
 include { SPADES                } from '../../../modules/nf-core/spades'
 include { QUAST                 } from '../../../modules/nf-core/quast'
-include { UNTAR                 } from '../../../modules/nf-core/untar'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'
 include { FLYE as FLYE_PACBIO   } from '../../../modules/nf-core/flye'
 
@@ -12,8 +11,8 @@ workflow GENOME_ASSEMBLY {
 
     main:
 
-    versions = Channel.empty()
-    messages = Channel.empty()
+    versions = channel.empty()
+    messages = channel.empty()
     parsed_sample_data = sample_data
         .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
     parsed_sample_data
@@ -34,10 +33,9 @@ workflow GENOME_ASSEMBLY {
         .mix(filtered_input.short_eukaryote)
     fastp_input = spades_input
         .map{ sample_meta, read_paths ->    // If there are both single and paired in reads, just use the paired end reads
-            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }]
+            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }, [] ]
         }
-    FASTP( fastp_input, [], false, false, false )
-    versions = versions.mix(FASTP.out.versions)
+    FASTP( fastp_input, false, false, false )
 
     // Check for samples with too few reads after quality control
     filtered_reads = FASTP.out.json
@@ -84,13 +82,11 @@ workflow GENOME_ASSEMBLY {
         filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
         "--nano-raw"
     )
-    versions = versions.mix(FLYE_NANOPORE.out.versions)
 
     FLYE_PACBIO (
         filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
         "--pacbio-raw"
     )
-    versions = versions.mix(FLYE_PACBIO.out.versions)
 
     assemblies = SPADES.out.scaffolds
         .mix(FLYE_NANOPORE.out.fasta)
@@ -102,7 +98,6 @@ workflow GENOME_ASSEMBLY {
     QUAST (
         assemblies, [[], []], [[],[]]
     )
-    versions = versions.mix(QUAST.out.versions)
 
     // Warn if a sample was not assembled
     not_assembled_warnings = sample_data

@@ -23,6 +23,11 @@
                     "help_text": "This TSV/CSV has one row per samples and contains information such as the location of input files, sample ID, labels, etc. Use this parameter to specify its location. See [the usage page](https://nf-co.re/pathogensurveillance/usage/) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "max_parallel_downloads": {
+                    "type": "integer",
+                    "description": "Maximum number of parallel downloads allowed for certain processes. This can be set to control the number of concurrent downloads to avoid overloading servers or hitting API rate limits.",
+                    "fa_icon": "fas fa-download"
+                },
                 "reference_data": {
                     "type": "string",
                     "format": "file-path",
@@ -195,6 +200,19 @@
                     "default": 100000,
                     "description": "The maximum number of variants to use for the SNP tree and minimum spanning nextwork produced by the variant analysis. The first N variants are used when more than N are available.",
                     "fa_icon": "fas fa-align-center"
+                },
+                "cpu_scale": {
+                    "type": "number",
+                    "default": 1.0,
+                    "minimum": 0.01,
+                    "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
+                    "fa_icon": "fas fa-microchip"
+                },
+                "skip_core_phylogeny": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip the core genome phylogeny analysis. This will not affect downstream processes like MultiQC and the main report.",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
@@ -347,6 +365,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }

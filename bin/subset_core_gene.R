@@ -24,7 +24,7 @@
 
 
 # Constants
-min_cluster_size <- 3
+min_cluster_size <- 4
 clustering_weights <- c(
     sample_proportion = 5,
     reference_proportion = 2,
@@ -49,10 +49,6 @@ message_data <- data.frame(
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c('~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_gene_family.tsv',
-#           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all_feature_sequences',
-#           '~/projects/pathogensurveillance/work/4d/964e7cf9fd2abbbd3ab74a09e5ffe2/all.tsv',
-#           '10', '100', '_no_group_defined_')
 names(args) <- c("gene_families", "gene_seq_dir_path", "metadata", "min_genes",  "max_genes", "prefix")
 args <- as.list(args)
 raw_gene_data <- read.csv(args$gene_families, header = TRUE, sep = '\t', check.names = FALSE)
@@ -149,7 +145,11 @@ if (length(ref_ids) == 0) {
     clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)
 }
 clustering_stats$mean_cluster_size <- ifelse(clustering_stats$valid_cluster_count == 0, 0, clustering_stats$sample_count / clustering_stats$valid_cluster_count)
-clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
+if (max(clustering_stats$mean_cluster_size, na.rm = T) == 0) {
+  clustering_stats$mean_cluster_size_score <- 0
+} else {
+  clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
+}
 non_zero_cluster_range <-  range(clustering_stats$valid_cluster_count[clustering_stats$valid_cluster_count != 0])
 clustering_stats$cluster_count_score <- ifelse(clustering_stats$valid_cluster_count == 0, 0, 1 / (clustering_stats$valid_cluster_count - min(non_zero_cluster_range) + 1))
 clustering_stats$shared_gene_score <- ifelse(clustering_stats$weigthed_shared_genes >= max_genes, 1, logistic_scaling_func(clustering_stats$weigthed_shared_genes))

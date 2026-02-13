@@ -2,10 +2,10 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.0"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker.io/zacharyfoster/main-report-r-packages:0.20':
-        'docker.io/zacharyfoster/main-report-r-packages:0.20' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/b9/b95abf1e05ee8b355cc960457a32f0ff613e864f595b8d5c977ed49dd9aa2278/data':
+        'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
     tuple val(group_meta), file(inputs)
@@ -23,8 +23,10 @@ process MAIN_REPORT {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    ls -la ${inputs}/
-    ls -la ${inputs}/trees/
+    # Needed to avoid this issue: https://github.com/conda-forge/quarto-feedstock/issues/30
+    if [[ -v SINGULARITY_ENVIRONMENT ]]; then
+        source /opt/conda/etc/conda/activate.d/quarto.sh
+    fi
 
     # Tell quarto where to put cache so it does not try to put it where it does not have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
