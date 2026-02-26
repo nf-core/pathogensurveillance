@@ -27,7 +27,7 @@
                     "spades": "4.1.0"
                 },
                 "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.1.0"
+                    "nf-core/pathogensurveillance": "v1.2.0dev"
                 }
             },
             [
@@ -138,6 +138,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.3"
         },
-        "timestamp": "2026-02-06T16:00:03.273079881"
+        "timestamp": "2026-02-26T10:14:34.409105277"
     }
 }
