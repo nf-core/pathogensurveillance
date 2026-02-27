@@ -26,7 +26,7 @@ workflow BUSCO_PHYLOGENY {
         .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_group_id, ref_meta ->
-            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_primary_usage]
+            [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_contextual_usage]
         }
         .unique()
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
