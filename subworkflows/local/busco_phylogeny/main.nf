@@ -69,6 +69,7 @@ workflow BUSCO_PHYLOGENY {
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(sample_assemblies, by: 0)
         .mix(selected_ref_data)
+        .unique()
 
     // Download BUSCO datasets
     BUSCO_DOWNLOAD ( channel.from( "eukaryota_odb10" ) )
