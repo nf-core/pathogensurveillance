@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "C:/Users/cwpri/Downloads/test_output/test_output"
+    inputs: "/home/fosterz/Downloads/test_output"
 execute:
     echo: false
 bibliography: references.bib
@@ -15,7 +15,6 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 ```
 
 ```{r load_libraries, include=FALSE}
-remotes::install_github("grunwaldlab/PathoSurveilR@dev")
 library(PathoSurveilR)
 ```
 
@@ -95,7 +94,7 @@ sample_meta_table(params$inputs, interactive = TRUE)
 ## {{< fa question-circle >}}  Initial identification
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
-These are intended to be preliminary identifications.
+These are intended to be preliminary identifications used to select references for more robust analyses
 For more robust identifications based on whole genome sequences, see "Phylogenetic context" section below.
 
 ::: panel-tabset
@@ -259,6 +258,10 @@ The accuracy of this identification depends on the presence of close reference s
 
 ### Multigene phylogeny
 
+::: panel-tabset
+
+### Tree
+
 ```{r}
 has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
 ```
@@ -284,9 +287,27 @@ Could not generate core genome phylogeny.
 ')
 ```
 
+### Reference data
+
+```{r, eval = has_multigene_tree}
+selected_ref_meta_table(params$inputs, target = 'contextual_refs', interactive = TRUE)
+```
+
+```{r, results='asis', eval = !has_multigene_tree}
+cat('
+Could not generate core genome phylogeny.
+')
+```
+
+:::
+
 # Genetic diversity
 
 ## {{< iconify healthicons dna-outline >}} SNP trees
+
+::: panel-tabset
+
+### Tree
 
 ```{r}
 snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must_exist = FALSE)
@@ -295,11 +316,6 @@ snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must
 
 ```{r plot_snp_trees, eval = ! is.null(snp_tree_path_data), fig.height=8}
 plot_tree(params$inputs, target = 'variant_tree')
-```
-
-## Map Widget
-```{r plot_map_widget, eval = !is.null(params$inputs) }
-plot_map_widget(params$inputs)
 ```
 
 ```{r, results='asis', eval = ! is.null(snp_tree_path_data)}
@@ -321,6 +337,21 @@ This can happen when there are too few samples or too few SNPs.
 See staus messages at the start of the report for details.
 ')
 ```
+
+### Reference data
+
+```{r, eval = has_multigene_tree}
+selected_ref_meta_table(params$inputs, target = 'mapping_refs', interactive = TRUE)
+```
+
+```{r, results='asis', eval = !has_multigene_tree}
+cat('
+Could not generate core genome phylogeny.
+')
+```
+
+:::
+
 
 ## {{< iconify ph share-network-duotone >}} Minimum spanning network
 

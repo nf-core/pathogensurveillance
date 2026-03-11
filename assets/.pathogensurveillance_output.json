@@ -834,7 +834,7 @@
             "category": "Variant analysis",
             "primary": false,
             "parsers": {
-                "r": "PathoSurveilR:::parse_tsv"
+                "r": "PathoSurveilR:::parse_sample_ref_list"
             },
             "combiners": {
                 "r": "PathoSurveilR:::combine_tables"
