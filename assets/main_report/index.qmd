@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: ""
+    inputs: "C:/Users/cwpri/Downloads/test_output/test_output"
 execute:
     echo: false
 bibliography: references.bib
@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 ```
 
 ```{r load_libraries, include=FALSE}
+remotes::install_github("grunwaldlab/PathoSurveilR@dev")
 library(PathoSurveilR)
 ```
 
@@ -296,6 +297,10 @@ snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must
 plot_tree(params$inputs, target = 'variant_tree')
 ```
 
+## Map Widget
+```{r plot_map_widget, eval = !is.null(params$inputs) }
+plot_map_widget(params$inputs)
+```
 
 ```{r, results='asis', eval = ! is.null(snp_tree_path_data)}
 cat('
@@ -316,7 +321,6 @@ This can happen when there are too few samples or too few SNPs.
 See staus messages at the start of the report for details.
 ')
 ```
-
 
 ## {{< iconify ph share-network-duotone >}} Minimum spanning network
 
