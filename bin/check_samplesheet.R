@@ -1000,7 +1000,7 @@ metadata_samp$enabled[invalid_seq_type] <- FALSE
 # Report missing sequence type information
 is_invalid_seq_type_to_report <- invalid_seq_type & metadata_samp$enabled
 if (sum(invalid_seq_type) > 0) {
-    stop('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
+    warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
             paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
     addition <- data.frame(
         sample_id = metadata_samp$sample_id[invalid_seq_type],
@@ -1011,6 +1011,7 @@ if (sum(invalid_seq_type) > 0) {
         description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
     )
     message_data <- rbind(message_data, duplicate_rows_by_id_list(addition, 'report_group_id'))
+    metadata_samp <- metadata_samp[!invalid_seq_type, , drop = FALSE]
 }
 
 

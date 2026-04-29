@@ -257,7 +257,7 @@ workflow PREPARE_INPUT {
 
     // Download reference files if an accession is provided
     ref_ncbi_acc = reference_data
-        .filter{ ref_meta -> ref_meta.ref_ncbi_accession }
+        .filter{ ref_meta -> ref_meta.ref_ncbi_accession && ! (ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded') }
         .tap{ ref_data_with_ncbi_acc }
         .map { ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], ref_meta.ref_ncbi_accession]
