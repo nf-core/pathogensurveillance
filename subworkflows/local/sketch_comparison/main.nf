@@ -36,6 +36,7 @@ workflow SKETCH_COMPARISON {
         .map{ [it.ref_metas] }
         .transpose(by: 0)
         .map{ ref_meta -> [[id: ref_meta[0].ref_id], ref_meta[0].ref_path] }
+        .filter{ ref_id, ref_path -> ref_path }
         .unique()
         .mix(input.assemblies)
     SOURMASH_SKETCH (

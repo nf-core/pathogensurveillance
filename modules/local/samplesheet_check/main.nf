@@ -11,8 +11,8 @@ process SAMPLESHEET_CHECK {
         'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
-    path sample_tsv
-    path reference_tsv
+    path sample_tsv    , stageAs: 'input_sample_metadata.tsv'
+    path reference_tsv , stageAs: 'input_reference_metadata.tsv'
     val max_samples
 
     output:
@@ -26,7 +26,7 @@ process SAMPLESHEET_CHECK {
     """
     ${entrez_key_set}
 
-    check_samplesheet.R ${sample_tsv} ${max_samples} ${reference_tsv}
+    check_samplesheet.R input_sample_metadata.tsv ${max_samples} input_reference_metadata.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

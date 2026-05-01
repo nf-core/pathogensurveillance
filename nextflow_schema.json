@@ -208,6 +208,13 @@
                     "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
                     "fa_icon": "fas fa-microchip"
                 },
+                "max_cpus": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Maximum number of CPUs to use for any single process. Set to 0 for no limit. When set, this overrides the calculated CPU count from cpu_scale.",
+                    "fa_icon": "fas fa-microchip"
+                },
                 "skip_core_phylogeny": {
                     "type": "boolean",
                     "default": false,
