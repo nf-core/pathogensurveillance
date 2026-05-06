@@ -330,7 +330,7 @@ workflow PREPARE_INPUT {
     )
     versions = versions.mix(SEQKIT_STATS.out.versions)
     read_count = SEQKIT_STATS.out.stats
-        .splitCsv ( header:true, sep:'\t', elem: 1 )
+        .splitCsv ( header:true, sep:'\t', limit: 1 )
         .map { sample_meta, stats ->
             [sample_meta, stats.sum_len]
         }
