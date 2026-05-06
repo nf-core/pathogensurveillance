@@ -66,8 +66,8 @@ sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), 
     if (any(table$usage == 'exclusive')) {
         table <- table[table$usage == 'exclusive', , drop = FALSE]
     }
-    excluded_ids <- table$sample_id[table$usage == 'excluded']
-    table <- table[! table$usage %in% excluded_ids, , drop = FALSE]
+    excluded_ids <- table$ref_id[table$usage == 'excluded']
+    table <- table[! table$ref_id %in% excluded_ids, , drop = FALSE]
     return(table)
 }))
 rownames(sample_data) <- NULL

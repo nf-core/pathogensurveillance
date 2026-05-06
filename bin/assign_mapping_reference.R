@@ -48,8 +48,8 @@ samp_ref_pairs <- do.call(rbind, lapply(split(samp_ref_pairs, samp_ref_pairs$sam
     if (any(sample_data$usage == 'required')) {
         sample_data <- sample_data[sample_data$usage == 'required', , drop = FALSE]
     }
-    excluded_ids <- sample_data$sample_id[sample_data$usage == 'excluded']
-    sample_data <- sample_data[! sample_data$usage %in% excluded_ids, , drop = FALSE]
+    excluded_ids <- sample_data$ref_id[sample_data$usage == 'excluded']
+    sample_data <- sample_data[! sample_data$ref_id %in% excluded_ids, , drop = FALSE]
     return(sample_data)
 }))
 rownames(samp_ref_pairs) <- NULL
