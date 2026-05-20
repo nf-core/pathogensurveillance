@@ -26,13 +26,13 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff/LF1_taxa_found.tsv",
-#     "1",
-#     "3",
-#     "3",
+#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/c4/aec64bef9846856779c0cf90dd9d9a/SRR3493390_taxa_found.tsv",
+#     "5",
+#     "20",
+#     "20",
 #     "false",
 #     "deleteme",
-#     list.files("~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff", pattern = '^[0-9]+.tsv$', full.names = TRUE)
+#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/c4/aec64bef9846856779c0cf90dd9d9a", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
 args <- as.list(args)
@@ -49,7 +49,7 @@ if (length(args) < 7) {
 }
 tsv_paths <- unlist(args[7:length(args)])
 assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
-    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '')
+    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '')
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
     if (nrow(out) > 0) {
         out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]

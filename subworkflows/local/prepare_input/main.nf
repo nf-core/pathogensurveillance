@@ -102,17 +102,30 @@ workflow PREPARE_INPUT {
     )
     versions = versions.mix(BBMAP_SENDSKETCH.out.versions)
 
-    // Parse results of sendsketch to get list of taxa to download references for
-    INITIAL_CLASSIFICATION ( BBMAP_SENDSKETCH.out.hits )
-    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
-
-    // Add estimated depth and domain to sample metadata
+    // Extract the depth estimate from the sendsketch result and remove samples that dont have it
     sendsketch_depth = BBMAP_SENDSKETCH.out.hits
         .splitText(limit: 2, by: 2)
+        .filter{sample_meta, header -> header =~ /Depth:/}
         .map { sample_meta, header ->
             def match = header =~ /Depth: ([0-9.]+)/
             [sample_meta, match[0][1]]
         }
+    sendsketch_out = BBMAP_SENDSKETCH.out.hits
+        .combine(sendsketch_depth, by: 0) // acts as a filter
+        .map{ sample_meta, hit_data, depth -> [sample_meta, hit_data]}
+    no_sketch_warnings =  BBMAP_SENDSKETCH.out.hits
+        .splitText(limit: 2, by: 2)
+        .filter{sample_meta, header -> header !=~ /Depth:/}
+        .map{ sample_meta, empty ->
+            [sample_meta, [id: sample_meta.report_group_ids], null, "PREPARE_INPUT", "WARNING", "Not enough data to make an initial classification. Check size of input data."]
+        }
+    messages = messages.mix(no_sketch_warnings)
+
+    // Parse results of sendsketch to get list of taxa to download references for
+    INITIAL_CLASSIFICATION ( sendsketch_out )
+    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
+
+    // Add estimated depth and domain to sample metadata
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta, ref_metas]
