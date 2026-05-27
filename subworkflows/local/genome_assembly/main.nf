@@ -88,9 +88,22 @@ workflow GENOME_ASSEMBLY {
         "--pacbio-raw"
     )
 
+    // Warn about any failed Flye assemblies
+    flye_warnings = FLYE_NANOPORE.out.fasta
+        .mix(FLYE_PACBIO.out.fasta)
+        .filter { sample_meta, fasta ->
+            ! fasta || fasta.size() == 0
+        }
+        .combine(parsed_sample_data, by: 0)
+        .map { sample_meta, fasta, report_meta, read_paths2 ->
+            [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assembled. Check Flye logs for more details."]
+        }.view()
+    messages = messages.mix(flye_warnings)
+
     assemblies = SPADES.out.scaffolds
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
+        .filter { sample_meta, path -> path && path.size() > 0 }  // Filter out empty assemblies
         .map { sample_meta, path ->  // remove the "single_end" in the sample meta data so that it is just the ID like most of the pipeline
             [[id: sample_meta.id], path]
         }

@@ -65,6 +65,11 @@ all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
 sample_ids <- unique(metadata$modified_sample_ids[metadata$modified_sample_ids %in% all_ids])
 ref_ids <- all_ids[! all_ids %in% sample_ids]
 
+# Warn if no samples are present
+if (length(sample_ids) == 0) {
+    stop('No samples are present in PIRATE output.')
+}
+
 # Create matrix with TRUE/FALSE for whether a gene is present and single copy
 present_and_single_original <- as.data.frame(lapply(raw_gene_data[, all_ids], function(column) {
     unlist(lapply(strsplit(column, split = '[;:]'), length)) == 1

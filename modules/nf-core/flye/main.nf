@@ -29,6 +29,7 @@ process FLYE {
     def valid_mode = ["--pacbio-raw", "--pacbio-corr", "--pacbio-hifi", "--nano-raw", "--nano-corr", "--nano-hq"]
     if ( !valid_mode.contains(mode) )  { error "Unrecognised mode to run Flye. Options: ${valid_mode.join(', ')}" }
     """
+    set +e
     flye \\
         $mode \\
         $reads \\
@@ -36,6 +37,25 @@ process FLYE {
         --threads \\
         $task.cpus \\
         $args
+    FLYE_EXIT=\$?
+    set -e
+
+    # Check for specific errors that should not be retried
+    if [ \$FLYE_EXIT -ne 0 ] && grep -q "ERROR: No disjointigs were assembled" flye.log; then
+        mv flye.log ${prefix}.flye.log
+        mv params.json ${prefix}.params.json 2>/dev/null || true
+        # Create empty output files to indicate no assembly
+        touch ${prefix}.assembly.fasta.gz
+        touch ${prefix}.assembly_graph.gfa.gz
+        touch ${prefix}.assembly_graph.gv.gz
+        touch ${prefix}.assembly_info.txt
+        exit 0
+    fi
+
+    # Exit with original exit code if not the specific error
+    if [ \$FLYE_EXIT -ne 0 ]; then
+        exit \$FLYE_EXIT
+    fi
 
     gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
     gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz

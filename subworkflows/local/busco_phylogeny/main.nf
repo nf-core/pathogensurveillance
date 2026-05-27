@@ -21,6 +21,12 @@ workflow BUSCO_PHYLOGENY {
     sample_data = original_sample_data
         .filter{it.domain == "Eukaryota"}
 
+    // Remove samples without a successful assembly
+    sample_data = sample_data
+        .map{ [[id: it.sample_id], it] }
+        .join(sample_assemblies, by: 0)
+        .map{ sample_meta, sample_data_map, assembly_path -> sample_data_map }
+
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
         .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
