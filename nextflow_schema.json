@@ -141,7 +141,7 @@
                 },
                 "n_ref_species": {
                     "type": ["integer", "string"],
-                    "default": "20",
+                    "default": "50",
                     "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-hashtag"
                 },
@@ -153,7 +153,7 @@
                 },
                 "n_ref_closest": {
                     "type": "number",
-                    "default": 2,
+                    "default": 5,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
                     "fa_icon": "fas fa-hashtag"
                 },
@@ -165,7 +165,7 @@
                 },
                 "n_ref_context": {
                     "type": "number",
-                    "default": 5,
+                    "default": 10,
                     "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
                     "fa_icon": "fas fa-hashtag"
                 },

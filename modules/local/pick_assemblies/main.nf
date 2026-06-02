@@ -8,7 +8,7 @@ process PICK_ASSEMBLIES {
         'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
-    tuple val(meta), path(found_taxa), path(assem_data_tsvs)
+    tuple val(meta), path(found_taxa), path(assem_data_tsvs), path(user_ref_meta_tsv)
     val n_ref_strains
     val n_ref_species
     val n_ref_genera
@@ -26,8 +26,9 @@ process PICK_ASSEMBLIES {
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
+    def user_ref_meta_arg = user_ref_meta_tsv ? "\"${user_ref_meta_tsv}\"" : 'NONE'
     """
-    pick_assemblies.R ${found_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${assem_data_tsvs}
+    pick_assemblies.R ${found_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${user_ref_meta_arg} ${assem_data_tsvs}
     COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml

@@ -26,7 +26,7 @@
 library(rentrez)
 
 # Options
-ani_threshold <- c(species = 95, genus = 90, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+ani_threshold <- c(species = 96, genus = 93, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 ani_fallback_offset <- 1 # If nothing is found for a given rank threshold, pick all that have an ANI greater than (the best ANI - this value)
 

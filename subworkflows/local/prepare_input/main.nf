@@ -195,6 +195,22 @@ workflow PREPARE_INPUT {
         .map { sample_id, family_stats ->
             [sample_id, family_stats.findAll{it != null}]
         }
+
+    // Create TSVs of user-defined reference metadata for each sample
+    user_ref_meta_tsvs = sample_data
+        .map { sample_meta, ref_metas ->
+            [[id: sample_meta.sample_id], ref_metas]
+        }
+        .transpose(by: 1)
+        .map { sample_id, ref_meta ->
+            [sample_id, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+        }
+        .unique()
+        .collectFile(keepHeader: true, skip: 1) { sample_id, ref_meta ->
+            [ "${sample_id.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+        }
+        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+
     taxon_and_ref_data = sample_data
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
@@ -202,6 +218,10 @@ workflow PREPARE_INPUT {
         .join(family_stats_per_sample)
         .filter { sample_meta, taxa_found, family_stats ->
             family_stats.size() > 0
+        }
+        .join(user_ref_meta_tsvs, remainder: true)
+        .map { sample_meta, taxa_found, family_stats, user_ref_tsv ->
+            [sample_meta, taxa_found, family_stats, user_ref_tsv ?: []]
         }
     PICK_ASSEMBLIES (
         taxon_and_ref_data,

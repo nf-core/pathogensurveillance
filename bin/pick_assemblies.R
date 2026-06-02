@@ -26,13 +26,14 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/c4/aec64bef9846856779c0cf90dd9d9a/SRR3493390_taxa_found.tsv",
+#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95/ERR2531739_taxa_found.tsv",
 #     "5",
 #     "20",
 #     "20",
 #     "false",
 #     "deleteme",
-#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/c4/aec64bef9846856779c0cf90dd9d9a", pattern = '^[0-9]+.tsv$', full.names = TRUE)
+#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95/ERR2531739_reference_data.tsv",
+#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
 args <- as.list(args)
@@ -43,11 +44,27 @@ n_ref_genera <- args[[4]]
 only_binomial <- as.logical(args[[5]])
 out_name <- args[[6]]
 
+# Read user-defined reference metadata and identify excluded accessions
+user_ref_meta_path <- args[[7]]
+excluded_accessions <- character(0)
+if (! is.null(user_ref_meta_path) && user_ref_meta_path != "" && user_ref_meta_path != "NONE" && file.exists(user_ref_meta_path)) {
+    user_ref_data <- read.table(user_ref_meta_path, header = TRUE, sep = '\t', comment.char = '', quote = '"', stringsAsFactors = FALSE)
+    if (nrow(user_ref_data) > 0 && 'ref_ncbi_accession' %in% names(user_ref_data) && 'ref_primary_usage' %in% names(user_ref_data) && 'ref_contextual_usage' %in% names(user_ref_data)) {
+        excluded_accessions <- user_ref_data$ref_ncbi_accession[
+            user_ref_data$ref_primary_usage == 'excluded' &
+            user_ref_data$ref_contextual_usage == 'excluded' &
+            user_ref_data$ref_ncbi_accession != "" &
+            ! is.na(user_ref_data$ref_ncbi_accession)
+        ]
+        excluded_accessions <- sub(excluded_accessions, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    }
+}
+
 # Parse input TSVs
-if (length(args) < 7) {
+if (length(args) < 8) {
     stop('No family-level reference metadata files supplied. Check input data.')
 }
-tsv_paths <- unlist(args[7:length(args)])
+tsv_paths <- unlist(args[8:length(args)])
 assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '')
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
@@ -56,6 +73,12 @@ assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
     }
     return(out)
 }))
+
+# Filter out excluded accessions from user-defined references
+if (length(excluded_accessions) > 0) {
+    accession_core_ids <- sub(assem_data$accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    assem_data <- assem_data[! accession_core_ids %in% excluded_accessions, ]
+}
 
 # Add taxon info columns
 assem_data$organism_name <- gsub(assem_data$organism_name, pattern = '[', replacement = '', fixed = TRUE)

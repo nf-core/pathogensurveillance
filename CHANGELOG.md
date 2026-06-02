@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 ## Changed
 
 - Assembly RAM is now calculated more accurately to avoid retrying to increase RAM
+- Increase number of reference assemblies downloaded by default
 
 ### `Fixed`
 
@@ -15,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Handle samples that return no sendsketch results.
 - Prevent PIRATE and BUSCO phylogeny analyses from running on references associated with samples whose assemblies failed.
 - Fixed intermittent PIRATE 'input file name collision' error
+- Reference NCBI assemblies excluded by the user are no longer downloaded.
 
 ## 1.1.0 - 2026-01-30
 
