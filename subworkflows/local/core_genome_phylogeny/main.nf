@@ -150,7 +150,10 @@ workflow CORE_GENOME_PHYLOGENY {
     PIRATE (
         all_gffs
             .groupTuple(by: 0, sort: 'hash')
-            .map { meta, gffs -> [meta, gffs.unique()] } // Attempts to fix intermittent 'input file name collision' error
+            .map { meta, gffs -> // Attempt to fix intermittent "input file name collision" error
+                def seen = [] as Set
+                [meta, gffs.findAll { seen.add(it.name) }]
+            }
     )
     versions = versions.mix(PIRATE.out.versions)
 
