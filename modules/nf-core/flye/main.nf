@@ -41,28 +41,27 @@ process FLYE {
     set -e
 
     # Check for specific errors that should not be retried
-    if [ \$FLYE_EXIT -ne 0 ] && grep -q "ERROR: No disjointigs were assembled" flye.log; then
-        mv flye.log ${prefix}.flye.log
-        mv params.json ${prefix}.params.json 2>/dev/null || true
-        # Create empty output files to indicate no assembly
-        touch ${prefix}.assembly.fasta.gz
-        touch ${prefix}.assembly_graph.gfa.gz
-        touch ${prefix}.assembly_graph.gv.gz
-        touch ${prefix}.assembly_info.txt
-        exit 0
-    fi
-
-    # Exit with original exit code if not the specific error
     if [ \$FLYE_EXIT -ne 0 ]; then
-        exit \$FLYE_EXIT
+        if grep -q "ERROR: No disjointigs were assembled" flye.log; then
+            # Create empty output files to indicate no assembly
+            touch ${prefix}.assembly.fasta.gz
+            touch ${prefix}.assembly_graph.gfa.gz
+            touch ${prefix}.assembly_graph.gv.gz
+            touch ${prefix}.assembly_info.txt
+            mv flye.log ${prefix}.flye.log
+            mv params.json ${prefix}.params.json
+            (exit 0) || true
+        else
+            (exit \$FLYE_EXIT) || true
+        fi
+    else
+        gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
+        gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz
+        gzip -c assembly_graph.gv > ${prefix}.assembly_graph.gv.gz
+        mv assembly_info.txt ${prefix}.assembly_info.txt
+        mv flye.log ${prefix}.flye.log
+        mv params.json ${prefix}.params.json
     fi
-
-    gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
-    gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz
-    gzip -c assembly_graph.gv > ${prefix}.assembly_graph.gv.gz
-    mv assembly_info.txt ${prefix}.assembly_info.txt
-    mv flye.log ${prefix}.flye.log
-    mv params.json ${prefix}.params.json
     """
 
     stub:

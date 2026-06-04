@@ -97,7 +97,7 @@ workflow GENOME_ASSEMBLY {
         .combine(parsed_sample_data, by: 0)
         .map { sample_meta, fasta, report_meta, read_paths2 ->
             [sample_meta, report_meta, null, "GENOME_ASSEMBLY", "WARNING", "Sample could not be assembled. Check Flye logs for more details."]
-        }.view()
+        }
     messages = messages.mix(flye_warnings)
 
     assemblies = SPADES.out.scaffolds
