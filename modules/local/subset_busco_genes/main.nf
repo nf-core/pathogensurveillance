@@ -13,7 +13,7 @@ process SUBSET_BUSCO_GENES {
     val max_genes
 
     output:
-    tuple val(group_meta), path("${prefix}_feat_seqs/${prefix}--cluster_*"), emit: feat_seqs
+    tuple val(group_meta), path("${prefix}_feat_seqs/${prefix}--cluster_*"), optional: true, emit: feat_seqs
     tuple val(group_meta), path("message_data.tsv")             , emit: message_data
     path "versions.yml"                                         , emit: versions
 

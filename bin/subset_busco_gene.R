@@ -169,7 +169,11 @@ if (length(ref_ids) == 0) {
     clustering_stats$reference_proportion <- clustering_stats$ref_count / length(ref_ids)
 }
 clustering_stats$mean_cluster_size <- ifelse(clustering_stats$valid_cluster_count == 0, 0, clustering_stats$sample_count / clustering_stats$valid_cluster_count)
-clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
+if (max(clustering_stats$mean_cluster_size, na.rm = T) == 0) {
+    clustering_stats$mean_cluster_size_score <- 0
+} else {
+    clustering_stats$mean_cluster_size_score <- clustering_stats$mean_cluster_size / max(clustering_stats$mean_cluster_size, na.rm = T)
+}
 non_zero_cluster_range <-  range(clustering_stats$valid_cluster_count[clustering_stats$valid_cluster_count != 0])
 clustering_stats$cluster_count_score <- ifelse(clustering_stats$valid_cluster_count == 0, 0, 1 / (clustering_stats$valid_cluster_count - min(non_zero_cluster_range) + 1))
 clustering_stats$shared_gene_score <- ifelse(clustering_stats$weigthed_shared_genes >= max_genes, 1, logistic_scaling_func(clustering_stats$weigthed_shared_genes))
