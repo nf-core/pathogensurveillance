@@ -215,6 +215,20 @@
                     "description": "Maximum number of CPUs to use for any single process. Set to 0 for no limit. When set, this overrides the calculated CPU count from cpu_scale.",
                     "fa_icon": "fas fa-microchip"
                 },
+                "ram_scale": {
+                    "type": "number",
+                    "default": 1.0,
+                    "minimum": 0.01,
+                    "description": "A scaling factor to adjust the amount of RAM used by processes. The amount of RAM for each process will be multiplied by this value and rounded to the nearest integer in GB (minimum 1).",
+                    "fa_icon": "fas fa-memory"
+                },
+                "max_ram": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "Maximum amount of RAM in GB to use for any single process. Set to 0 for no limit. When set, this overrides the calculated RAM from ram_scale.",
+                    "fa_icon": "fas fa-memory"
+                },
                 "skip_core_phylogeny": {
                     "type": "boolean",
                     "default": false,
