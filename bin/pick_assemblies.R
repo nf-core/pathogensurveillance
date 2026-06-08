@@ -26,14 +26,14 @@
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
 # args <- c(
-#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95/ERR2531739_taxa_found.tsv",
+#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/58/8ca67086d27d1800529d5536960039/SRR4237000_taxa_found.tsv",
 #     "5",
-#     "20",
+#     "50",
 #     "20",
 #     "false",
 #     "deleteme",
-#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95/ERR2531739_reference_data.tsv",
-#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/ee/bc1b2f985f7de2c6451720228c6f95", pattern = '^[0-9]+.tsv$', full.names = TRUE)
+#     "~/home/fosterz/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/tmp/a1/92bf3a2c9b4c261f6e19b2149fd280/SRR4237000_reference_data.tsv",
+#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/58/8ca67086d27d1800529d5536960039", pattern = '^[0-9]+.tsv$', full.names = TRUE)
 # )
 
 args <- as.list(args)
@@ -116,11 +116,10 @@ get_count <- function(choices, count) {
     if (grepl(count, pattern = "%$")) {
         prop <- as.numeric(sub(count, pattern = "%", replacement = "")) / 100
         count <- ceiling(choices * prop)
-        return(min(c(choices, count)))
     } else {
         count <- as.numeric(count)
-        return(min(c(choices, count)))
     }
+    return(count)
 }
 
 # Sort references by desirability
@@ -144,7 +143,7 @@ assem_data$selection_taxon <- NA
 assem_data$selection_subtaxon <- NA
 
 # Select representatives for each rank
-select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_rank, count_per_subrank = 1)  {
+select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_rank, count_per_subrank = 1, fallback_to_subrank = FALSE)  {
     for (tax in query_taxa) {
         # Get assembly indexes for every subtaxon
         tax_to_consider <- (assem_data[[rank]] == tax | assem_data[[subrank]] == tax) & is.na(assem_data$selection_rank)
@@ -171,15 +170,24 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
         selected <- selected[seq_len(min(c(count_per_rank, length(selected))))]
 
         # Pick representatives of subtaxa with best attributes (based on order in input)
-        selected <- lapply(selected, function(x) {
+        subset_selection <- unlist(lapply(selected, function(x) {
             x[seq_len(min(c(count_per_subrank, length(x))))]
-        })
+        }))
+        
+        # If not enough unique taxa of the target rank are found, fill in with subrank taxa
+        if (fallback_to_subrank && length(subset_selection) < count_per_rank) {
+            selection_rank_names <- rep(names(selected), vapply(selected, length, FUN.VALUE = numeric(1)))
+            rank_instance_count <- ave(seq_along(selection_rank_names), selection_rank_names, FUN = seq_along)
+            selection_unlisted <- unlist(selected)[order(rank_instance_count)]
+            selection_unlisted <- selection_unlisted[! selection_unlisted %in% subset_selection]
+            count_to_add <- min(c(length(selection_unlisted), count_per_rank - length(subset_selection)))
+            subset_selection <- c(subset_selection, selection_unlisted[seq_len(count_to_add)])
+        }
 
         # Record data on selected assemblies
-        selected <- unlist(selected)
-        assem_data$selection_rank[selected] <- rank
-        assem_data$selection_taxon[selected] <- tax
-        assem_data$selection_subtaxon[selected] <- assem_data[[subrank]][selected]
+        assem_data$selection_rank[subset_selection] <- rank
+        assem_data$selection_taxon[subset_selection] <- tax
+        assem_data$selection_subtaxon[subset_selection] <- assem_data[[subrank]][subset_selection]
     }
     return(assem_data)
 }
@@ -188,7 +196,8 @@ assem_data <- select_for_rank(
     query_taxa = taxa_found_data$name[taxa_found_data$rank == 'species'],
     rank = 'species',
     subrank = 'organism_name',
-    count_per_rank = n_ref_strains
+    count_per_rank = n_ref_strains,
+    fallback_to_subrank = TRUE
 )
 assem_data <- select_for_rank(
     assem_data,

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Assembly RAM is now calculated more accurately to avoid retrying to increase RAM
 - Increase number of reference assemblies downloaded by default
 - Added `scaledRam` helper function and `--ram_scale`/`--max_ram` parameters to control RAM allocation across processes, analogous to the existing CPU scaling functionality.
+- When there are fewer unique strains than `n_ref_strains`, the pipeline now makes up the difference with more examples of the same strain. This ensure that multiple representatives of each species-level taxon are downloaded when strain-level info is not present.
 
 ### `Fixed`
 

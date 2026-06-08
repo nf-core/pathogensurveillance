@@ -24,16 +24,16 @@ selected_ref_meta_table <- function(input, target, interactive = FALSE, ...) {
 
   selected_ref_data <- find_ps_data(input, target = target, simplify = TRUE)
   selected_ref_ids <- unique(selected_ref_data$reference_id)
-  
+
   downloaded_ref_metadata <- find_ps_data(input, target = 'downloaded_ref_metadata', simplify = TRUE)
   downloaded_ref_metadata <- downloaded_ref_metadata[match(selected_ref_ids, downloaded_ref_metadata$reference_id), , drop = FALSE]
 
   reference_data <- find_ps_data(input, target = 'reference_metadata', simplify = TRUE)
   reference_data <- reference_data[match(selected_ref_ids, reference_data$ref_id), , drop = FALSE]
   colnames(reference_data)[colnames(reference_data) == 'ref_id'] <- 'reference_id'
-  
+
   merged_data <- merge(by = "reference_id", reference_data, downloaded_ref_metadata)
-  
+
   # Subset to desired columns
   cols <- c(
     reference_id = 'ID',
@@ -54,7 +54,7 @@ selected_ref_meta_table <- function(input, target, interactive = FALSE, ...) {
   )
   merged_data <- merged_data[, colnames(merged_data) %in% names(cols)]
   colnames(merged_data) <- cols
-  
+
   # Print table
   if (interactive) {
     output <- DT::datatable(merged_data, class = "display nowrap", ...)
@@ -62,7 +62,7 @@ selected_ref_meta_table <- function(input, target, interactive = FALSE, ...) {
   } else {
     output <- print_static_table(merged_data)
   }
-  
+
   return(output)
 }
 ```
