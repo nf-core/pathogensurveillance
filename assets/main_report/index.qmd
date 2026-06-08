@@ -18,6 +18,56 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 library(PathoSurveilR)
 ```
 
+```{r}
+# TODO: replace with PathoSurveilR once updated
+selected_ref_meta_table <- function(input, target, interactive = FALSE, ...) {
+
+  selected_ref_data <- find_ps_data(input, target = target, simplify = TRUE)
+  selected_ref_ids <- unique(selected_ref_data$reference_id)
+  
+  downloaded_ref_metadata <- find_ps_data(input, target = 'downloaded_ref_metadata', simplify = TRUE)
+  downloaded_ref_metadata <- downloaded_ref_metadata[match(selected_ref_ids, downloaded_ref_metadata$reference_id), , drop = FALSE]
+
+  reference_data <- find_ps_data(input, target = 'reference_metadata', simplify = TRUE)
+  reference_data <- reference_data[match(selected_ref_ids, reference_data$ref_id), , drop = FALSE]
+  colnames(reference_data)[colnames(reference_data) == 'ref_id'] <- 'reference_id'
+  
+  merged_data <- merge(by = "reference_id", reference_data, downloaded_ref_metadata)
+  
+  # Subset to desired columns
+  cols <- c(
+    reference_id = 'ID',
+    ref_name = 'Name',
+    ref_description = 'Description',
+    ref_ncbi_accession = 'NCBI ID',
+    assembly_level = 'Assembly quality',
+    hosts = 'Hosts',
+    tax_id = 'NCBI taxon ID',
+    contig_l50 = 'Assembly L50',
+    contig_n50 = 'Assembly N50',
+    coverage = 'Assembly coverage',
+    number_of_contigs = 'Contig count',
+    total_sequence_length = 'Assembly length',
+    is_type = 'Type strain',
+    checkm_completeness = 'Assembly completeness (%)',
+    checkm_contamination = 'Assembly contamination (%)'
+  )
+  merged_data <- merged_data[, colnames(merged_data) %in% names(cols)]
+  colnames(merged_data) <- cols
+  
+  # Print table
+  if (interactive) {
+    output <- DT::datatable(merged_data, class = "display nowrap", ...)
+    output <- DT::formatStyle(output, colnames(merged_data), "white-space" = "nowrap")
+  } else {
+    output <- print_static_table(merged_data)
+  }
+  
+  return(output)
+}
+```
+
+
 # Summary
 
 ```{r}
