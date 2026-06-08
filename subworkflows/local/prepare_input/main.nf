@@ -196,20 +196,16 @@ workflow PREPARE_INPUT {
             [sample_id, family_stats.findAll{it != null}]
         }
 
-    // Create TSVs of user-defined reference metadata for each sample
-    user_ref_meta_tsvs = sample_data
+    // Build a stable comma-delimited string of excluded accessions per sample
+    excluded_accessions_per_sample = sample_data
         .map { sample_meta, ref_metas ->
-            [[id: sample_meta.sample_id], ref_metas]
+            def excluded = ref_metas
+                .findAll { it.ref_primary_usage == 'excluded' && it.ref_contextual_usage == 'excluded' && it.ref_ncbi_accession }
+                .collect { it.ref_ncbi_accession }
+                .sort()
+                .join(',')
+            [[id: sample_meta.sample_id], excluded ?: 'NONE']
         }
-        .transpose(by: 1)
-        .map { sample_id, ref_meta ->
-            [sample_id, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
-        }
-        .unique()
-        .collectFile(keepHeader: true, skip: 1) { sample_id, ref_meta ->
-            [ "${sample_id.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
-        }
-        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
     taxon_and_ref_data = sample_data
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
@@ -219,9 +215,9 @@ workflow PREPARE_INPUT {
         .filter { sample_meta, taxa_found, family_stats ->
             family_stats.size() > 0
         }
-        .join(user_ref_meta_tsvs, remainder: true)
-        .map { sample_meta, taxa_found, family_stats, user_ref_tsv ->
-            [sample_meta, taxa_found, family_stats, user_ref_tsv ?: []]
+        .join(excluded_accessions_per_sample)
+        .map { sample_meta, taxa_found, family_stats, excluded_accessions ->
+            [sample_meta, taxa_found, family_stats, excluded_accessions]
         }
     PICK_ASSEMBLIES (
         taxon_and_ref_data,

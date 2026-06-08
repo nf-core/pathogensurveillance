@@ -44,20 +44,12 @@ n_ref_genera <- args[[4]]
 only_binomial <- as.logical(args[[5]])
 out_name <- args[[6]]
 
-# Read user-defined reference metadata and identify excluded accessions
-user_ref_meta_path <- args[[7]]
+# Read excluded accessions from comma-delimited string argument
+excluded_accessions_str <- args[[7]]
 excluded_accessions <- character(0)
-if (! is.null(user_ref_meta_path) && user_ref_meta_path != "" && user_ref_meta_path != "NONE" && file.exists(user_ref_meta_path)) {
-    user_ref_data <- read.table(user_ref_meta_path, header = TRUE, sep = '\t', comment.char = '', quote = '"', stringsAsFactors = FALSE)
-    if (nrow(user_ref_data) > 0 && 'ref_ncbi_accession' %in% names(user_ref_data) && 'ref_primary_usage' %in% names(user_ref_data) && 'ref_contextual_usage' %in% names(user_ref_data)) {
-        excluded_accessions <- user_ref_data$ref_ncbi_accession[
-            user_ref_data$ref_primary_usage == 'excluded' &
-            user_ref_data$ref_contextual_usage == 'excluded' &
-            user_ref_data$ref_ncbi_accession != "" &
-            ! is.na(user_ref_data$ref_ncbi_accession)
-        ]
-        excluded_accessions <- sub(excluded_accessions, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
-    }
+if (! is.null(excluded_accessions_str) && excluded_accessions_str != "" && excluded_accessions_str != "NONE") {
+    excluded_accessions <- strsplit(excluded_accessions_str, split = ',')[[1]]
+    excluded_accessions <- sub(excluded_accessions, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
 }
 
 # Parse input TSVs
@@ -173,7 +165,7 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
         subset_selection <- unlist(lapply(selected, function(x) {
             x[seq_len(min(c(count_per_subrank, length(x))))]
         }))
-        
+
         # If not enough unique taxa of the target rank are found, fill in with subrank taxa
         if (fallback_to_subrank && length(subset_selection) < count_per_rank) {
             selection_rank_names <- rep(names(selected), vapply(selected, length, FUN.VALUE = numeric(1)))
