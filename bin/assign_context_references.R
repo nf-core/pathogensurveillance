@@ -89,11 +89,11 @@ ani_scaled[is.na(ani_scaled)] <- 0
 
 # Make function to check for ambiguous species names
 is_ambiguous_taxon_name <- function(taxon_names) {
-    patterns <- c(".*unknown.*", ".*unidentified.*", ".*incertae[_ -]+sedis.*",
-                  ".*ambiguous.*", ".*ambiguous[_ -]+taxa.*", ".*unassigned.*",
-                  ".*possible.*", ".*putative.*", ".*uncultured.*", ".*candidatus.*",
-                  ".*metagenome.*", ".*sp\\..*", ".*cf\\..*", ".*endosymbiont.*" ,
-                  ".*symbiont.*", ".*bacterium.*", ".*genomosp\\..*")
+    patterns <- c(".*\\bunknown.*", ".*\\bunidentified.*", ".*incertae[_ -]+sedis.*",
+                  ".*\\bambiguous\\b.*", ".*ambiguous[_ -]+taxa.*", ".*unassigned.*",
+                  ".*possible.*", ".*putative.*", ".*uncultured.*", ".*\\bcandidatus.*",
+                  ".*metagenome.*", ".*\\bsp\\..*", ".*\\bcf\\..*", ".*\\bendosymbiont.*" ,
+                  ".*\\bsymbiont.*", ".*\\bbacterium\\b.*", ".*\\bgenomosp\\..*")
     Reduce(`|`, lapply(patterns, function(x) {
         grepl(taxon_names, pattern = x, ignore.case = TRUE)
     }))

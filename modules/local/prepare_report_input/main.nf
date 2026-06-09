@@ -52,8 +52,10 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Add estimated ANI matrix from sourmash
-    mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
-    cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    if [ ! -z "${ani_matrix}" ]; then
+        mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
+        cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    fi
 
     # Add metadata for references assined for variant calling
     if [ ! -z "${mapping_ref}" ]; then

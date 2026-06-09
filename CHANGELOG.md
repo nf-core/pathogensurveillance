@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Fixed errors when using "excluded" NCBI accessions
 - Handle samples that return no sendsketch results.
 - Prevent PIRATE and BUSCO phylogeny analyses from running on references associated with samples whose assemblies failed.
+- Prevent `SOURMASH_COMPARE` from running on report groups that have no successful assemblies.
 - Fixed intermittent PIRATE 'input file name collision' error
 - Reference NCBI assemblies excluded by the user are no longer downloaded.
 

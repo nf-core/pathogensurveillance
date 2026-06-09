@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/output/pathsurveil_output/report_group_data/aliicoccus_persicus_inputs"
+    inputs: "/home/fosterz/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/e6/8c7e7636233afa728daefb1dd5c054/paractinoplanes_abujensis_inputs/"
 execute:
     echo: false
 bibliography: references.bib
@@ -210,13 +210,19 @@ Included metrics can provide insights into how each sample compares with referen
 
 ## {{< iconify fluent-emoji-high-contrast id-button >}} Most similar organisms
 
+```{r}
+ani_matrix_path <- find_ps_paths(params$inputs, target = 'ani_matrix_csv', simplify = TRUE, must_exist = FALSE)
+```
+
 ::: panel-tabset
 ### ANI top matches
 
-```{r}
+```{r eval = !is.null(ani_matrix_path)}
 estimated_ani_match_table(params$inputs, interactive = TRUE)
 ```
 
+```{r, results='asis', eval = !is.null(ani_matrix_path)}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
@@ -224,14 +230,24 @@ This table shows the Average Nucleotide Identity (ANI) between each sample and t
 ANI is used to measure how similar the shared portion of two genomes are.
 Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
 :::
+')
+```
 
+```{r, results='asis', eval = is.null(ani_matrix_path)}
+cat('
+ANI similarity data not available.
+This can happen when no assemblies were successfully generated for any sample in this report group.
+')
+```
 
 ### ANI heatmap
 
-```{r ani_heatmap}
+```{r ani_heatmap, eval = !is.null(ani_matrix_path)}
 estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 950)
 ```
 
+```{r, results='asis', eval = !is.null(ani_matrix_path)}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
@@ -239,7 +255,15 @@ This plot shows the results of comparing the similarity of all samples and refer
 These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
 These measurements are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
 :::
+')
+```
 
+```{r, results='asis', eval = is.null(ani_matrix_path)}
+cat('
+ANI similarity data not available.
+This can happen when no assemblies were successfully generated for any sample in this report group.
+')
+```
 
 ### POCP top matches
 

@@ -37,9 +37,15 @@ workflow SKETCH_COMPARISON {
         .combine(SOURMASH_SKETCH.out.signatures, by: 0)
         .map{ sample_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
+    report_groups_with_assemblies = sample_data
+        .map { [[id: it.sample_id], [id: it.report_group_ids]] }
+        .join(assemblies.map { it[0] }, by: 0)
+        .map { sample_id, report_group_id -> report_group_id }
+        .unique()
     grouped_sigs = ref_sigs
         .mix(assem_sigs)
         .groupTuple(by: 0, sort: 'hash')
+        .join(report_groups_with_assemblies, by: 0)
     SOURMASH_COMPARE (
         grouped_sigs,
         [], // file_list (optional)
