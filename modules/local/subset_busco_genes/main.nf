@@ -8,7 +8,7 @@ process SUBSET_BUSCO_GENES {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(group_meta), path(busco_out_dirs), path(samp_ref_pairs)
+    tuple val(group_meta), path(busco_out_dirs), val(samp_ref_pairs_raw)
     val min_genes
     val max_genes
 
@@ -24,7 +24,9 @@ process SUBSET_BUSCO_GENES {
     script:
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    subset_busco_gene.R ${samp_ref_pairs} $min_genes $max_genes ${prefix} ${busco_out_dirs}
+    echo "${samp_ref_pairs_raw}" | base64 -d > ${prefix}_samp_ref_pairs.tsv
+
+    subset_busco_gene.R ${prefix}_samp_ref_pairs.tsv $min_genes $max_genes ${prefix} ${busco_out_dirs}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

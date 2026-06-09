@@ -47,7 +47,6 @@ n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
 
-
 # Check if user does not want references selected
 if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) {
     writeLines(character(0), args$output_path)
@@ -88,6 +87,18 @@ ani_ref_v_samples[ani_ref_v_samples == 0] <- NA # stops zeros from skewing the s
 ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE), check.names = FALSE)
 ani_scaled[is.na(ani_scaled)] <- 0
 
+# Make function to check for ambiguous species names
+is_ambiguous_taxon_name <- function(taxon_names) {
+    patterns <- c(".*unknown.*", ".*unidentified.*", ".*incertae[_ -]+sedis.*", 
+                  ".*ambiguous.*", ".*ambiguous[_ -]+taxa.*", ".*unassigned.*", 
+                  ".*possible.*", ".*putative.*", ".*uncultured.*", ".*candidatus.*", 
+                  ".*metagenome.*", ".*sp\\..*", ".*cf\\..*", ".*endosymbiont.*" ,
+                  ".*symbiont.*", ".*bacterium.*", ".*genomosp\\..*")
+    Reduce(`|`, lapply(patterns, function(x) {
+        grepl(taxon_names, pattern = x, ignore.case = TRUE)
+    }))
+}
+
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
     rownames(ani_scaled)[tail(order(ani_scaled[, id]), n = n_refs_closest)]
@@ -95,7 +106,8 @@ closest_refs <- unlist(lapply(sample_ids, function(id) {
 closest_named_refs <- unlist(lapply(sample_ids, function(id) {
     ordered_ref_ids <- rownames(ani_scaled)[order(ani_scaled[, id])]
     is_latin_binomial <- grepl(ref_name_key[ordered_ref_ids], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
-    return(tail(ordered_ref_ids[is_latin_binomial], n = n_refs_closest_named))
+    is_ambiguous <- is_ambiguous_taxon_name(ref_name_key[ordered_ref_ids])
+    return(tail(ordered_ref_ids[is_latin_binomial & ! is_ambiguous], n = n_refs_closest_named))
 }))
 required_refs <- unlist(lapply(sample_ids, function(id) {
     sample_data$ref_id[sample_data$sample_id == id & sample_data$usage %in% c('required', 'exclusive')]

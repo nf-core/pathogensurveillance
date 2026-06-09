@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/output/pathsurveil_output/report_group_data/tatumella_ptyseos_inputs"
+    inputs: "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/output/pathsurveil_output/report_group_data/aliicoccus_persicus_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -229,7 +229,7 @@ Note that this measure only takes into account the shared portion of genomes, so
 ### ANI heatmap
 
 ```{r ani_heatmap}
-estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
+estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 950)
 ```
 
 ::: {.callout-tip collapse="true"}
@@ -276,7 +276,7 @@ POPC not calculated.
 ### POCP heatmap
 
 ```{r pocp_heatmap, eval = ! is.null(pocp_path_data)}
-pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
+pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 950)
 ```
 
 ```{r, results='asis', eval = ! is.null(pocp_path_data)}

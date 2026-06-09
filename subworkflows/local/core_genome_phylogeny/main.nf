@@ -32,7 +32,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .join(sample_assemblies, by: 0)
         .map{ sample_meta, sample_data_map, assembly_path -> sample_data_map }
 
-    // Make file with sample IDs and user-defined references or NA for each group
+    // Build stable raw TSV text of sample IDs and user-defined references for each group
     samp_ref_pairs = sample_data
         .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
         .transpose(by: 2)
@@ -40,10 +40,13 @@ workflow CORE_GENOME_PHYLOGENY {
             [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_contextual_usage]
         }
         .unique()
-        .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
-            [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}\n" ]
+        .map { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
+            [[id: report_group_id], "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}"]
         }
-        .map {[[id: it.getSimpleName()], it]}
+        .groupTuple(by: 0, sort: 'hash')
+        .map { group_meta, lines ->
+            [group_meta, (lines.join('\n') + '\n').bytes.encodeBase64().toString()]
+        }
 
     // Assign referneces to groups for context in phylogenetic analyses
     ASSIGN_CORE_REFERENCES (

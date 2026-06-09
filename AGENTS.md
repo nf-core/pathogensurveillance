@@ -117,6 +117,7 @@ Guidelines for AI-assisted development of this Nextflow/nf-core pipeline.
 ### What to run before submitting / when preparing a PR
 
 - **nf-core lint** (requires `nf-core` Python package installed):
+
   ```bash
   nf-core pipelines lint --dir . --markdown lint_results.md
   ```
@@ -131,4 +132,3 @@ Guidelines for AI-assisted development of this Nextflow/nf-core pipeline.
   - Before opening a PR
   - After major logic changes
   - Via CI (GitHub Actions) rather than locally if possible
-

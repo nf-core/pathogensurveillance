@@ -8,7 +8,7 @@ process ASSIGN_CONTEXT_REFERENCES {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(group_meta), path(ani_matrix), path(samp_ref_pairs)
+    tuple val(group_meta), path(ani_matrix), val(samp_ref_pairs_raw)
     val n_ref_closest
     val n_ref_closest_named
     val n_ref_context
@@ -24,7 +24,9 @@ process ASSIGN_CONTEXT_REFERENCES {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_context_references.R ${ani_matrix} ${samp_ref_pairs} ${n_ref_closest} ${n_ref_closest_named} ${n_ref_context} ${prefix}_context_refs.tsv
+    echo "${samp_ref_pairs_raw}" | base64 -d > ${prefix}_samp_ref_pairs.tsv
+
+    assign_context_references.R ${ani_matrix} ${prefix}_samp_ref_pairs.tsv ${n_ref_closest} ${n_ref_closest_named} ${n_ref_context} ${prefix}_context_refs.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -8,7 +8,7 @@ process SUBSET_CORE_GENES {
         'biocontainers/r-base:4.2.1' }"
 
     input:
-    tuple val(group_meta), path(gene_fam), path(feat_seqs), path(sample_data)
+    tuple val(group_meta), path(gene_fam), path(feat_seqs), val(sample_data_raw)
     val min_core_genes
     val max_core_genes
 
@@ -25,7 +25,9 @@ process SUBSET_CORE_GENES {
     script:
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    subset_core_gene.R $gene_fam $feat_seqs $sample_data $min_core_genes $max_core_genes ${prefix}
+    echo "${sample_data_raw}" | base64 -d > ${prefix}_sample_data.tsv
+
+    subset_core_gene.R $gene_fam $feat_seqs ${prefix}_sample_data.tsv $min_core_genes $max_core_genes ${prefix}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
