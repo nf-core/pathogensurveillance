@@ -132,15 +132,13 @@ workflow BUSCO_PHYLOGENY {
         .map { report_meta, feat_seq_dir ->
             [
                 [id: feat_seq_dir.baseName, group_id: report_meta],
-                files(feat_seq_dir.resolve('*.*'), checkIfExists: true)
+                feat_seq_dir
             ]
         }
-        .transpose()
     MAFFT_BUSCO ( core_genes, [[], []], [[], []], [[], []], [[], []], [[], []], false )
 
     // Inferr phylogenetic tree from aligned core genes
     phylogeny_input = MAFFT_BUSCO.out.fas
-        .groupTuple(sort: 'hash')
         .map { meta, alignments ->
             [meta, alignments, []]
         }
