@@ -59,6 +59,12 @@ max_genes <- as.integer(args$max_genes)
 # Replace runs of underscores with a single underscore in sample IDs since this is what PIRATE does
 metadata$modified_sample_ids <- gsub(metadata$sample_id, pattern = '_+', replacement = '_')
 
+# Remove NA's
+raw_gene_data[] <- lapply(raw_gene_data, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
 all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
