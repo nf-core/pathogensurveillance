@@ -342,6 +342,7 @@ It contains selected and renamed outputs from the pipeline present in other outp
 
 - `sendsketch/`
   - `<Sample ID>.txt`: Table returned by BBmap `sendsketch` with initial identifications of samples.
+  - `<Sample ID>_taxa_found.tsv`: Table of taxa found in the sendsketch results that pass a rank-specific ANI threshold.
 
 </details>
 

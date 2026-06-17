@@ -866,6 +866,25 @@
                 }
             ]
         },
+        "sendsketch_taxa": {
+            "name": "Taxa in sendsketch results",
+            "description": "Taxa in the sendsketch results that pass a rank-specific ANI threshold",
+            "category": "Initial identification",
+            "primary": false,
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "sendsketch",
+                    "pattern": "^(.+?)_taxa_found\\.tsv$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
         "ani_matrix_csv": {
             "name": "ANI similarity matrix",
             "description": "Estimated ANI similarity matrix made by sourmash compare in CSV format",

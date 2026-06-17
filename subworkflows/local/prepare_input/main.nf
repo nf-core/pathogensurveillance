@@ -387,6 +387,7 @@ workflow PREPARE_INPUT {
     emit:
     sample_data
     sendsketch = BBMAP_SENDSKETCH.out.hits
+    taxa_found = INITIAL_CLASSIFICATION.out.taxa_found
     family_stats = ncbi_ref_meta
     selected_ref_meta = picked_assemblies_stat_files
     family_stats_per_sample = family_stats_per_sample

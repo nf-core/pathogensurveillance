@@ -218,13 +218,20 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         }
         .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
 
-    // Gather sendsketch signatures
-    sendsketch_hits = PREPARE_INPUT.out.sample_data
+    // Gather sendsketch signatures and taxa found
+    sendsketch_files = PREPARE_INPUT.out.sample_data
         .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
         .combine(PREPARE_INPUT.out.sendsketch, by: 0)
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
-        .groupTuple(sort: 'hash')
+    sendsketch_taxa = PREPARE_INPUT.out.sample_data
+        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.taxa_found, by: 0)
+        .map{ sample_meta, report_meta, taxa_found -> [report_meta, taxa_found] }
+        .unique()
+    sendsketch_hits = sendsketch_files
+        .mix(sendsketch_taxa)
+        .groupTuple(by: 0, sort: 'hash')
 
     // Gather NCBI reference metadata for all references considered
     ncbi_ref_meta = PREPARE_INPUT.out.sample_data
