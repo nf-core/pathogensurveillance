@@ -190,13 +190,22 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 
 read_input_table <- function(path) {
-    if (endsWith(path, '.csv')) {
-        output <- read.csv(path, check.names = FALSE)
-    } else if (endsWith(path, '.tsv')) {
+    lines <- readLines(path, n = 10, warn = FALSE)
+    lines <- lines[lines != '']
+    if (length(lines) == 0) {
+        stop('Input file is empty: ', path)
+    }
+    count_delim <- function(lines, delim) {
+        sum(vapply(strsplit(lines, delim, fixed = TRUE), length, integer(1)) - 1L)
+    }
+    tab_count <- count_delim(lines, '\t')
+    comma_count <- count_delim(lines, ',')
+    if (tab_count > comma_count) {
         output <- read.csv(path, check.names = FALSE, sep = '\t')
     } else {
-        stop('Input file extension not supported. Must be .csv or .tsv.')
+        output <- read.csv(path, check.names = FALSE)
     }
+    return(output)
 }
 
 metadata_original_samp <- read_input_table(args[[1]])

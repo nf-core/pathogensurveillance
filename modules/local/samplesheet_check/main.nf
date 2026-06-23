@@ -3,7 +3,7 @@ Validates the input data and returns a reformatted version that is used for the 
 */
 
 process SAMPLESHEET_CHECK {
-    tag "$sample_tsv"
+    tag "input metadata"
 
     conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -11,8 +11,8 @@ process SAMPLESHEET_CHECK {
         'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
-    path sample_tsv    , stageAs: 'input_sample_metadata.tsv'
-    path reference_tsv , stageAs: 'input_reference_metadata.tsv'
+    path sample_tsv    , stageAs: 'input_sample_metadata.txt'
+    path reference_tsv , stageAs: 'input_reference_metadata.txt'
     val max_samples
 
     output:
@@ -26,7 +26,7 @@ process SAMPLESHEET_CHECK {
     """
     ${entrez_key_set}
 
-    check_samplesheet.R input_sample_metadata.tsv ${max_samples} input_reference_metadata.tsv
+    check_samplesheet.R input_sample_metadata.txt ${max_samples} input_reference_metadata.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
