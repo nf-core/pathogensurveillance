@@ -201,7 +201,7 @@ read_input_table <- function(path) {
 
 metadata_original_samp <- read_input_table(args[[1]])
 max_samples <- as.numeric(args[[2]])
-if (length(args) > 2) {
+if (length(args) > 2 && file.exists(args[[3]])) {
     metadata_original_ref <- read_input_table(args[[3]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
