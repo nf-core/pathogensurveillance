@@ -379,7 +379,7 @@ workflow PREPARE_INPUT {
         }
         .combine(SEQKIT_HEAD.out.subset, by: 0)
         .map { sample_id, sample_meta, subset_reads ->
-            sample_meta.paths = subset_reads
+            sample_meta.paths = subset_reads instanceof Collection ? subset_reads : [subset_reads]
             sample_meta
         }
         .mix(samples_to_not_subset)

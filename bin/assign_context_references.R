@@ -146,7 +146,12 @@ while (nrow(bin_data) > 0) {
     bin_counts <- table(unlist(bin_data$refs))
     best_refs <- names(bin_counts)[bin_counts == max(bin_counts)]
     is_latin_binomial <- grepl(ref_name_key[best_refs], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
-    if (any(is_latin_binomial)) {
+    is_not_ambiguous <- ! is_ambiguous_taxon_name(ref_name_key[best_refs])
+    if (any(is_not_ambiguous & is_latin_binomial)) {
+        best_ref <- best_refs[is_not_ambiguous & is_latin_binomial][1]
+    } else if (any(is_not_ambiguous)) {
+        best_ref <- best_refs[is_not_ambiguous][1]
+    } else if (any(is_latin_binomial)) {
         best_ref <- best_refs[is_latin_binomial][1]
     } else {
         best_ref <- best_refs[1]
