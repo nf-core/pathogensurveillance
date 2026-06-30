@@ -153,13 +153,13 @@
                 },
                 "n_ref_closest": {
                     "type": "number",
-                    "default": 6,
+                    "default": 7,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_closest_named": {
                     "type": "number",
-                    "default": 2,
+                    "default": 4,
                     "description": "Same as the 'n_ref_closest' option except that it only applies to references with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
                     "fa_icon": "fas fa-hashtag"
                 },

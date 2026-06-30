@@ -95,7 +95,7 @@ known_columns_ref <- c(
 
 # Default values for columns
 defaults_ref <- c(
-    ref_ncbi_query_max = '30',
+    ref_ncbi_query_max = '100',
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_enabled = TRUE
@@ -103,7 +103,7 @@ defaults_ref <- c(
 defaults_samp <- c(
     report_group_ids = '_no_group_defined_',
     enabled = TRUE,
-    ncbi_query_max = '10',
+    ncbi_query_max = '30',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
     ref_primary_usage = defaults_ref[['ref_primary_usage']],
     ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
@@ -717,9 +717,47 @@ unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
+
+# Identify excluded accessions and their source row indices
+is_fully_excluded <- metadata_ref$ref_primary_usage == 'excluded' &
+                     metadata_ref$ref_contextual_usage == 'excluded' &
+                     as.logical(metadata_ref$ref_enabled)
+
+excluded_accessions <- character(0)
+excluded_source_rows <- integer(0)
+
+for (i in seq_len(nrow(metadata_ref))) {
+    if (!is_fully_excluded[i]) next
+
+    if (is_present(metadata_ref$ref_ncbi_accession[i])) {
+        excluded_accessions <- c(excluded_accessions, metadata_ref$ref_ncbi_accession[i])
+        excluded_source_rows <- c(excluded_source_rows, i)
+    }
+
+    if (is_present(metadata_ref$ref_ncbi_query[i])) {
+        query_results <- ncbi_result[[metadata_ref$ref_ncbi_query[i]]]
+        if (!is.null(query_results) && nrow(query_results) > 0) {
+            excluded_accessions <- c(excluded_accessions, query_results$ref_ncbi_accession)
+            excluded_source_rows <- c(excluded_source_rows, rep(i, nrow(query_results)))
+        }
+    }
+}
+
 is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata_ref$ref_enabled)
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+
+    # Remove accessions excluded by later rows
+    later_excluded <- excluded_accessions[excluded_source_rows > index]
+    if (length(later_excluded) > 0 && nrow(query_data) > 0) {
+        query_data <- query_data[! query_data$ref_ncbi_accession %in% later_excluded, ]
+    }
+
+    # Skip if no results remain after filtering
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
+
     query_max <- metadata_ref$ref_ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
         query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
