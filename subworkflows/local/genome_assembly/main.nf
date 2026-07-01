@@ -14,7 +14,7 @@ workflow GENOME_ASSEMBLY {
     versions = channel.empty()
     messages = channel.empty()
     parsed_sample_data = sample_data
-        .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id, single_end: sample_meta.single_end, domain: sample_meta.domain, type: sample_meta.sequence_type], [id: sample_meta.report_group_ids], sample_meta.paths] }
     parsed_sample_data
         .map{ sample_meta, report_meta, read_paths -> [sample_meta, read_paths]}
         .unique()
@@ -33,7 +33,7 @@ workflow GENOME_ASSEMBLY {
         .mix(filtered_input.short_eukaryote)
     fastp_input = spades_input
         .map{ sample_meta, read_paths ->    // If there are both single and paired in reads, just use the paired end reads
-            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { it ==~ /.+_[12]\..+$/ }, [] ]
+            [sample_meta, read_paths.size() <= 2 ? read_paths : read_paths.findAll { path -> path ==~ /.+_[12]\..+$/ }, [] ]
         }
     FASTP( fastp_input, false, false, false )
 
@@ -114,10 +114,10 @@ workflow GENOME_ASSEMBLY {
 
     // Warn if a sample was not assembled
     not_assembled_warnings = sample_data
-        .map { [[id: it.sample_id], it] }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta] }
         .combine(filtered_input.other, by: 0)
-        .map{ sample_meta, sample_data, paths ->
-            [sample_meta, [id: sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
+        .map{ sample_meta, sample_meta_map, paths ->
+            [sample_meta, [id: sample_meta_map.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
         }
     messages = messages.mix(not_assembled_warnings)
 

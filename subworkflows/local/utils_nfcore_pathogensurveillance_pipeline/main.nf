@@ -37,6 +37,7 @@ workflow PIPELINE_INITIALISATION {
     versions = channel.empty()
 
     //
+    //
     // Print version and exit if required and dump pipeline parameters to JSON file
     //
     UTILS_NEXTFLOW_PIPELINE (
@@ -98,7 +99,7 @@ workflow PIPELINE_INITIALISATION {
         params.multiqc_config,
         params.bakta_db
     ]
-    for (param in checkPathParamList) {
+    checkPathParamList.each { param ->
         if (param) { file(param, checkIfExists: true) }
     }
 
@@ -142,34 +143,12 @@ workflow PIPELINE_COMPLETION {
     multiqc_report  //  string: Path to MultiQC report
 
     main:
-    summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    def multiqc_reports = multiqc_report.toList()
+    ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    ch_multiqc_reports = multiqc_report.toList()
 
-    //
-    // Completion email and summary
-    //
-    workflow.onComplete {
-        if (email || email_on_fail) {
-            completionEmail(
-                summary_params,
-                email,
-                email_on_fail,
-                plaintext_email,
-                outdir,
-                monochrome_logs,
-                multiqc_reports.getVal(),
-            )
-        }
-
-        completionSummary(monochrome_logs)
-        if (hook_url) {
-            imNotification(summary_params, hook_url)
-        }
-    }
-
-    workflow.onError {
-        log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
-    }
+    emit:
+    summary_params = ch_summary_params
+    multiqc_report_list = ch_multiqc_reports
 }
 
 /*

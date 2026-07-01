@@ -147,39 +147,39 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // End note section -------------------
 
     fastqc_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
         .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
         .unique()
         .groupTuple(sort: 'hash')
     fastp_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.fastp_json, by: 0)
         .map{ sample_meta, report_meta, fastp_json -> [report_meta, fastp_json] }
         .unique()
         .groupTuple(sort: 'hash')
     nanoplot_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
         .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
         .unique()
         .groupTuple(sort: 'hash')
     quast_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.quast, by: 0)
         .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
         .unique()
         .groupTuple(sort: 'hash')
     multiqc_files = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids]] }
         .unique()
         .combine(collated_versions)
         .join(fastqc_results, remainder: true)
         .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .map {report_meta, versions, fastqc, fastp, nanoplot, quast ->
-            files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
+        .map {report_meta, ver_files, fastqc, fastp, nanoplot, quast ->
+            def files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([ver_files])
             [report_meta, files.flatten()]
         }
     MULTIQC (
@@ -195,13 +195,13 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     sample_data_tsvs = PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
+            [[id: sample_meta.report_group_ids], sample_meta.findAll { key -> key.key != 'paths' && key.key != 'ref_metas' && key.key != 'ref_ids'}]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ val -> '"' + (val ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+        .map {path -> [[id: path.getSimpleName().replace('_sample_data', '')], path]}
 
     // Gather reference data for each report
     reference_data_tsvs = PREPARE_INPUT.out.sample_data
@@ -210,22 +210,22 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         }
         .transpose(by: 1)
         .map { report_meta, ref_meta ->
-            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+            [report_meta, ref_meta.findAll { key -> key.key != 'ref_path' && key.key != 'gff'}]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ val -> '"' + (val ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+        .map {path -> [[id: path.getSimpleName().replace('_reference_data', '')], path]}
 
     // Gather sendsketch signatures and taxa found
     sendsketch_files = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.sendsketch, by: 0)
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
     sendsketch_taxa = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.taxa_found, by: 0)
         .map{ sample_meta, report_meta, taxa_found -> [report_meta, taxa_found] }
         .unique()
@@ -235,7 +235,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
 
     // Gather NCBI reference metadata for all references considered
     ncbi_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.family_stats_per_sample, by: 0)
         .groupTuple(by: 1, sort: 'hash')
         .map { sample_meta, report_meta, family_stats ->
@@ -244,14 +244,14 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
 
     // Gather selected reference metadata
     selected_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
         .map{ sample_meta, report_meta, ref_meta_file ->
             [report_meta, ref_meta_file] }
         .unique()
         .groupTuple(sort: 'hash')
         .map { report_meta, ref_meta_files ->
-            [report_meta, ref_meta_files.findAll{it != null}]
+            [report_meta, ref_meta_files.findAll{ ref_file -> ref_file != null}]
         }
 
     // Gather SNP alignments from the variant analysis
@@ -270,7 +270,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
             [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
-        .map {[[id: it.getSimpleName()], it]}
+        .map {path -> [[id: path.getSimpleName()], path]}
         .ifEmpty([])
 
     // Combine components into a single channel for the main report_meta
@@ -290,10 +290,10 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.outdir, remainder: true)
         .join(group_messages, remainder: true)
-        .filter{it[0] != null}
-        .map{ it.size() == 16 ? it + [null] : it }
-        .filter{ it.size() == 17 }
-        .map{ it.collect{ it ?: [] } }
+        .filter{ row -> row[0] != null }
+        .map{ row -> row.size() == 16 ? row + [null] : row }
+        .filter{ row -> row.size() == 17 }
+        .map{ row -> row.collect{ elem -> elem ?: [] } }
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
@@ -341,7 +341,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}
+            sample_meta.findAll { key -> key.key != 'paths' && key.key != 'ref_metas' && key.key != 'ref_ids'}
         }
         .unique()
         .collectFile(
@@ -350,7 +350,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "sample_metadata.tsv"
         ) { sample_meta ->
-            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ val -> '"' + (val ?: '') + '"'}.join('\t') + "\n"
         }
 
     // Gather reference data for each report
@@ -360,7 +360,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         }
         .transpose(by: 0)
         .map { ref_meta ->
-            ref_meta[0].findAll {it.key != 'ref_path' && it.key != 'gff'}
+            ref_meta[0].findAll { key -> key.key != 'ref_path' && key.key != 'gff'}
         }
         .unique()
         .collectFile(
@@ -369,7 +369,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "reference_metadata.tsv"
         ) { ref_meta ->
-            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ val -> '"' + (val ?: '') + '"'}.join('\t') + "\n"
         }
 
     emit:

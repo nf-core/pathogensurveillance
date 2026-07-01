@@ -28,22 +28,22 @@ workflow PREPARE_INPUT {
     versions = versions.mix(SAMPLESHEET_CHECK.out.versions)
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
-        .map { create_sample_metadata_channel(it) }
+        .map { sample_row -> create_sample_metadata_channel(sample_row) }
         .filter { sample_meta -> sample_meta.enabled.toBoolean() }
     reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
-        .map { create_reference_metadata_channel(it) }
+        .map { ref_row -> create_reference_metadata_channel(ref_row) }
         .filter { ref_meta -> ref_meta.ref_enabled.toBoolean() }
     messages = messages.mix (
         SAMPLESHEET_CHECK.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
-            .map { [
-                it.sample_id == '' ? null : [id: it.sample_id],
-                it.report_group_id == '' ? null : [id: it.report_group_id],
-                it.reference_id == '' ? null : [id: it.reference_id],
+            .map { message_row -> [
+                message_row.sample_id == '' ? null : [id: message_row.sample_id],
+                message_row.report_group_id == '' ? null : [id: message_row.report_group_id],
+                message_row.reference_id == '' ? null : [id: message_row.reference_id],
                 "PREPARE_INPUT",
-                it.message_type,
-                it.description
+                message_row.message_type,
+                message_row.description
             ] }
     )
 
@@ -82,7 +82,7 @@ workflow PREPARE_INPUT {
                 if (reads_path.size() <= 2) {
                     sample_meta.paths = reads_path
                 } else {  // if there are a mixture of single and paired end reads
-                    sample_meta.paths = reads_path.findAll{it ==~ /^.+_[12]\..+$/}
+                    sample_meta.paths = reads_path.findAll{ path -> path ==~ /^.+_[12]\..+$/}
                 }
             } else {
                 sample_meta.paths = [reads_path]
@@ -100,7 +100,6 @@ workflow PREPARE_INPUT {
             }
             .unique()
     )
-    versions = versions.mix(BBMAP_SENDSKETCH.out.versions)
 
     // Extract the depth estimate from the sendsketch result and remove samples that dont have it
     sendsketch_depth = BBMAP_SENDSKETCH.out.hits
@@ -153,8 +152,8 @@ workflow PREPARE_INPUT {
             ! (params.n_ref_genera == 0 && params.n_ref_species == 0 && params.n_ref_strains == 0)
         }
         .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata for samples that the user has defined exclusive references for
-            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') &&
-                (ref_metas.collect{it.ref_contextual_usage}.contains('exclusive') || no_auto_contextual_refs))
+            ! (ref_metas.collect{ ref_meta -> ref_meta.ref_primary_usage}.contains('exclusive') &&
+                (ref_metas.collect{ ref_meta -> ref_meta.ref_contextual_usage}.contains('exclusive') || no_auto_contextual_refs))
         }
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
@@ -183,7 +182,7 @@ workflow PREPARE_INPUT {
         }
         .unique()
         .join(PARSE_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] }
+        .filter { pair -> pair != [null, null] }
 
     // Choose reference sequences to provide context for each sample
     family_stats_per_sample = family_taxon_ids
@@ -193,15 +192,15 @@ workflow PREPARE_INPUT {
         .unique()
         .groupTuple(by: 0, sort: 'hash')
         .map { sample_id, family_stats ->
-            [sample_id, family_stats.findAll{it != null}]
+            [sample_id, family_stats.findAll{ stat -> stat != null}]
         }
 
     // Build a stable comma-delimited string of excluded accessions per sample
     excluded_accessions_per_sample = sample_data
         .map { sample_meta, ref_metas ->
             def excluded = ref_metas
-                .findAll { it.ref_primary_usage == 'excluded' && it.ref_contextual_usage == 'excluded' && it.ref_ncbi_accession }
-                .collect { it.ref_ncbi_accession }
+                .findAll { ref_meta -> ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' && ref_meta.ref_ncbi_accession }
+                .collect { ref_meta -> ref_meta.ref_ncbi_accession }
                 .sort()
                 .join(',')
             [[id: sample_meta.sample_id], excluded ?: 'NONE']
@@ -233,7 +232,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(PICK_ASSEMBLIES.out.metadata.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+        .filter { pair -> pair != [null, null] } // above join adds [null, null] if channel is empty
     picked_assemblies_refs = PICK_ASSEMBLIES.out.formatted // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
@@ -245,7 +244,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(picked_assemblies_refs.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+        .filter { pair -> pair != [null, null] } // above join adds [null, null] if channel is empty
         .map { sample_meta, ref_metas ->
             [sample_meta, ref_metas == null ? [] : ref_metas]
         }
@@ -271,8 +270,8 @@ workflow PREPARE_INPUT {
 
     // Warn of samples for which no reference information could be found
     no_assemblies_found = PICK_ASSEMBLIES.out.line_count
-        .filter { sample_id, line_count ->
-            line_count == "1"
+        .filter { sample_id, line_count_file ->
+            line_count_file.text.trim() == "1"
         }
         .combine(sample_data.map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }, by: 0)
         .map { sample_id, line_count, sample_meta, ref_metas ->
@@ -285,9 +284,6 @@ workflow PREPARE_INPUT {
     messages = messages.mix(no_ref_warnings)
 
     // Download reference files if an accession is provided
-    def isFullyExcluded = { ref_meta ->
-        ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
-    }
     ref_ncbi_acc = reference_data
         .filter{ ref_meta -> ref_meta.ref_ncbi_accession && !isFullyExcluded(ref_meta) }
         .tap{ ref_data_with_ncbi_acc }
@@ -341,14 +337,14 @@ workflow PREPARE_INPUT {
 
     // Count the number of reads and basepairs to decide whether not to subset reads
     samples_to_subset = sample_data
-        .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths, sample_meta.sendsketch_depth] }
         .unique()
         .filter { sample_id, fastq_paths, depth ->
             depth.toFloat() > params.max_depth.toFloat()
         }
     samples_to_not_subset = sample_data
-        .filter {
-            it.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
+        .filter { sample_meta ->
+            sample_meta.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
         }
     SEQKIT_STATS (
         samples_to_subset
@@ -357,7 +353,6 @@ workflow PREPARE_INPUT {
             }
             .unique(),
     )
-    versions = versions.mix(SEQKIT_STATS.out.versions)
     read_count = SEQKIT_STATS.out.stats
         .splitCsv ( header:true, sep:'\t', limit: 1 )
         .map { sample_meta, stats ->
@@ -368,8 +363,8 @@ workflow PREPARE_INPUT {
     SEQKIT_HEAD (
         samples_to_subset
             .combine(read_count, by: 0)
-            .map { sample_meta, fastq_paths, depth, read_count ->
-                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * read_count.toFloat()).toInteger() ]
+            .map { sample_meta, fastq_paths, depth, num_reads ->
+                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * num_reads.toFloat()).toInteger() ]
             }
     )
     versions = versions.mix(SEQKIT_HEAD.out.versions)
@@ -423,4 +418,8 @@ def create_reference_metadata_channel(LinkedHashMap ref_meta) {
     ref_meta = ref_meta.collectEntries { key, value -> [(key): value ?: null] }
     ref_meta.ref_path = ref_meta.ref_path ? file(ref_meta.ref_path) : null
     return ref_meta
+}
+
+def isFullyExcluded(ref_meta) {
+    ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
 }

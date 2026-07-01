@@ -38,7 +38,7 @@ workflow CALL_VARIANTS {
         .collectFile(newLine: true) { combined_meta, header ->
             [ "${combined_meta.id}.txt", header.id ]
         }
-        .map { [it.getSimpleName(), it] }
+        .map { path -> [path.getSimpleName(), path] }
         .combine(combined_meta_key, by:0) // add back the full combined meta since collectFile only preserves the ID as a file name
         .map { combined_meta_id, region_path, combined_meta ->
             [combined_meta, region_path]
@@ -64,7 +64,6 @@ workflow CALL_VARIANTS {
 
     // Combine graphtyper VCFs for each group of samples
     GRAPHTYPER_VCFCONCATENATE ( GRAPHTYPER_GENOTYPE.out.vcf )
-    versions = versions.mix(GRAPHTYPER_VCFCONCATENATE.out.versions)
 
     // Make tbi index for combined VCF
     TABIX_TABIX ( GRAPHTYPER_VCFCONCATENATE.out.vcf )
@@ -75,7 +74,6 @@ workflow CALL_VARIANTS {
             [combined_meta, ref]
         }
     )
-    versions = versions.mix(TABIX_BGZIP.out.versions)
 
     // Filter heterozygous calls because bacteria are haploid, these are just errors
     vf_input = GRAPHTYPER_VCFCONCATENATE.out.vcf  // make inputs in same order
@@ -103,11 +101,9 @@ workflow CALL_VARIANTS {
             [combined_meta, gzi]
         }
     )
-    versions = versions.mix(GATK4_VARIANTFILTRATION.out.versions)
 
     // SelectVariants on the variant level, excluding non-variant sites:
     VCFLIB_VCFFILTER ( GATK4_VARIANTFILTRATION.out.vcf.join(GATK4_VARIANTFILTRATION.out.tbi) )
-    versions = versions.mix(VCFLIB_VCFFILTER.out.versions)
 
     emit:
     vcf      = VCFLIB_VCFFILTER.out.vcf

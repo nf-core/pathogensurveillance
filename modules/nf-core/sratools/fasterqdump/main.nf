@@ -55,7 +55,7 @@ process SRATOOLS_FASTERQDUMP {
     stub:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    prefix = task.ext.prefix ?: "${meta.id}"
     def outfile = "${prefix}.fastq"
     def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
     // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and

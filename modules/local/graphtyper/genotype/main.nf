@@ -25,7 +25,7 @@ process GRAPHTYPER_GENOTYPE {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def bam_path_text = bam.join('\\n')
-    def bai_path_text = bam.collect{"${it}.csi"}.join('\\n')
+    def bai_path_text = bam.collect{ bam_file -> "${bam_file}.csi"}.join('\\n')
     def region_text = region_file.size() > 0 ? "--region_file ${region_file}" : ""
     if (region_file.size() == 0 && ! args.contains("region")) {
         error "GRAPHTYPER_GENOTYPE requires either a region file or a region specified using '--region' in ext.args"

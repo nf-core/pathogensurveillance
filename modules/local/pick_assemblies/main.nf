@@ -17,7 +17,7 @@ process PICK_ASSEMBLIES {
     output:
     tuple val(meta), path("${prefix}_formatted.tsv"), emit: formatted
     tuple val(meta), path("${prefix}.tsv")          , emit: metadata
-    tuple val(meta), env(COUNT)                     , emit: line_count
+    tuple val(meta), path("${prefix}_count.txt")    , emit: line_count
     path "versions.yml"                             , emit: versions
 
     when:
@@ -29,7 +29,7 @@ process PICK_ASSEMBLIES {
     def excluded_arg = excluded_accessions != 'NONE' ? "\"${excluded_accessions}\"" : 'NONE'
     """
     pick_assemblies.R ${found_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${excluded_arg} ${assem_data_tsvs}
-    COUNT=\$(cat ${prefix}.tsv | wc -l)
+    wc -l < ${prefix}.tsv | tr -d ' \t' > ${prefix}_count.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

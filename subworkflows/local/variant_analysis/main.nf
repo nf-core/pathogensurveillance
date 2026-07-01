@@ -18,15 +18,15 @@ workflow VARIANT_ANALYSIS {
 
     // Remove samples belonging to groups with only one sample
     grouped_sample_data = original_sample_data
-        .map{[[id: it.report_group_ids], it]}
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids], sample_meta] }
         .groupTuple(by: 0)
     sample_data = grouped_sample_data
-        .filter{ it[1].size() > 1 }
+        .filter{ groupEntry -> groupEntry[1].size() > 1 }
         .transpose(by: 1)
-        .map{ it[1] }
+        .map{ groupEntry -> groupEntry[1] }
     messages = messages.mix(
         grouped_sample_data
-            .filter{ it[1].size() == 1 }
+            .filter{ groupEntry -> groupEntry[1].size() == 1 }
             .map{ report_meta, samp_metas ->
                 [[id: samp_metas[0].sample_id], report_meta, null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because it is the only sample in its report group."]
             }
@@ -34,7 +34,7 @@ workflow VARIANT_ANALYSIS {
 
     // Make file with sample IDs and user-defined references or NA for each group
     samp_ref_pairs = sample_data
-        .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
+        .map{ sample_meta -> [sample_meta.sample_id, sample_meta.report_group_ids, sample_meta.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_group_id, ref_meta ->
             [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_primary_usage]
@@ -44,7 +44,7 @@ workflow VARIANT_ANALYSIS {
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
             [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}\n" ]
         }
-        .map {[[id: it.getSimpleName()], it]}
+        .map {path -> [[id: path.getSimpleName()], path]}
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_MAPPING_REFERENCE (
@@ -59,16 +59,16 @@ workflow VARIANT_ANALYSIS {
         .unique()
     sample_data_with_refs = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs
         .splitText( elem: 1 )
-        .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
+        .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
             [[id: tsv_contents[0]], report_meta, [id: tsv_contents[1]]]
         }
         .join(ref_paths, by: 0..2)
-        .join(sample_data.map{ [[id: it.sample_id], [id: it.report_group_ids], it.paths, it.sequence_type, it.ploidy] }, by: 0..1)
-        .branch { // Remove any samples that do not have reference information
-            filtered: it[2] != null
-            no_ref: it[2] == null
+        .join(sample_data.map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids], sample_meta.paths, sample_meta.sequence_type, sample_meta.ploidy] }, by: 0..1)
+        .branch { entry -> // Remove any samples that do not have reference information
+            filtered: entry[2] != null
+            no_ref: entry[2] == null
         } // sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type
 
     // Remove samples belonging to groups with only one sample
@@ -78,12 +78,12 @@ workflow VARIANT_ANALYSIS {
         }
         .groupTuple(by: [0,1])
     filtered_sample_data_with_refs = grouped_sample_data_with_refs
-        .filter{ it[2].size() >= 2 }
+        .filter{ groupEntry -> groupEntry[2].size() >= 2 }
         .transpose(by: 2)
-        .map{ it[2] }
+        .map{ groupEntry -> groupEntry[2] }
     messages = messages.mix(
         grouped_sample_data_with_refs
-            .filter{ it[2].size() < 2 }
+            .filter{ groupEntry -> groupEntry[2].size() < 2 }
             .map{ report_meta, ref_meta, data ->
                 [data[0][0], report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because there are too few samples aligned to this reference to make a tree."]
             }
@@ -100,7 +100,6 @@ workflow VARIANT_ANALYSIS {
         }
         .unique()
     )
-    versions = versions.mix(SEQKIT_SLIDING.out.versions)
     chopped_reads = SEQKIT_SLIDING.out.fastx
         .combine(longreads, by: 0)
         .map { sample_meta, chopped_reads, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
@@ -143,17 +142,17 @@ workflow VARIANT_ANALYSIS {
 
     ALIGN_READS (
         input_with_indexes
-            .map { it[0..3] + it[5..6] }
+            .map { row -> row[0..3] + row[5..6] }
             .unique()
     )
     versions = versions.mix(ALIGN_READS.out.versions)
 
     CALL_VARIANTS (
         input_with_indexes
-            .map { [it[0], it[2], it[1]] + it[3..5] + [it[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard]
+            .map { row -> [row[0], row[2], row[1]] + row[3..5] + [row[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard]
             .combine(ALIGN_READS.out.bam, by: 0..1)
             .combine(ALIGN_READS.out.csi, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, bam, csi]
-            .map { [it[0], it[7], it[8], it[1]] + it[3..6] }
+            .map { row -> [row[0], row[7], row[8], row[1]] + row[3..6] }
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)
 
@@ -161,7 +160,7 @@ workflow VARIANT_ANALYSIS {
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [ "${report_meta.id}--${ref_meta.id}.tsv", "mapping_id\tploidy\n${ref_meta.id}--${sample_meta.id}\t${ploidy}\n" ]
         }
-        .map { [it.getSimpleName(), it] }
+        .map { path -> [path.getSimpleName(), path] }
         .combine(CALL_VARIANTS.out.vcf.map { combined_meta, vcf -> [combined_meta.id, combined_meta]}, by: 0) // add on full combined metadata uing combined ID
         .map { combined_id, ploidy_data_path, combined_meta ->
             [combined_meta, ploidy_data_path]
@@ -175,13 +174,13 @@ workflow VARIANT_ANALYSIS {
     versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
     removed_samps = VCF_TO_SNP_ALIGN.out.removed_sample_ids
         .splitText()
-        .map { [[id: it[1].replace('\n', '')], it[0].group, it[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
+        .map { row -> [[id: row[1].replace('\n', '')], row[0].group, row[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
 
     // Dont make trees for groups with less than 3 samples
     align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta
         .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
-        .branch { meta, fasta, seq_count ->
-            enough: seq_count.toInteger() >= 4
+        .branch { meta, fasta, seq_count_file ->
+            enough: seq_count_file.text.trim().toInteger() >= 4
                 return [meta, fasta]
             too_few: true
                 return [meta, fasta]
@@ -195,16 +194,14 @@ workflow VARIANT_ANALYSIS {
             [meta, alignment, []]
         }
     IQTREE_SNP ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
-    versions = versions.mix(IQTREE_SNP.out.versions)
-
-    phylogeny = IQTREE_SNP.out.phylogeny.map{ [it[0].group, it[0].ref, it[1]] } // report_meta, ref_meta, tree
-    snp_align = VCF_TO_SNP_ALIGN.out.fasta.map{ [it[0].group, it[0].ref, it[1]] }
-    vcf = CALL_VARIANTS.out.vcf.map{ [it[0].group, it[0].ref, it[1]] }
+    phylogeny = IQTREE_SNP.out.phylogeny.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] } // report_meta, ref_meta, tree
+    snp_align = VCF_TO_SNP_ALIGN.out.fasta.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] }
+    vcf = CALL_VARIANTS.out.vcf.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] }
 
     results = CALL_VARIANTS.out.vcf // ref+report_meta, vcf
         .combine(VCF_TO_SNP_ALIGN.out.fasta, by:0) // ref+report_meta, vcf, align
         .join(IQTREE_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
-        .map{ [it[0].group, it[0].ref] + it[1..3] } // report_meta, ref_meta, vcf, align, tree
+        .map{ meta -> [meta[0].group, meta[0].ref] + meta[1..3] } // report_meta, ref_meta, vcf, align, tree
 
     emit:
     picard_dict   = REFERENCE_INDEX.out.picard_dict

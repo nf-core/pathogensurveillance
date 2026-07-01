@@ -28,7 +28,6 @@ workflow ALIGN_READS {
         [combined_meta, bam_index]
     }
     BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
-    versions = versions.mix(BWA_MEM.out.versions)
 
     // Run a series of picard commands to sort and filter variants
     ch_reference = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
@@ -44,14 +43,13 @@ workflow ALIGN_READS {
     versions = versions.mix(PICARD_FORMAT.out.versions)
 
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
-    versions = versions.mix(SAMTOOLS_INDEX.out.versions)
 
     // Revet combined metas back to seperate ones for sample and reference
     out_bam = PICARD_FORMAT.out.bam
         .map { combined_meta, bam ->
             [combined_meta.sample, combined_meta.ref, bam]
         }
-    out_csi = SAMTOOLS_INDEX.out.csi
+    out_csi = SAMTOOLS_INDEX.out.index
         .map { combined_meta, csi ->
             [combined_meta.sample, combined_meta.ref, csi]
         }

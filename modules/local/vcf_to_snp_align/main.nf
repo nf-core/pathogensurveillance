@@ -14,7 +14,7 @@ process VCF_TO_SNP_ALIGN {
     output:
     tuple val(ref_meta), path("${prefix}.fasta")       , emit: fasta
     tuple val(ref_meta), path("removed_sample_ids.txt"), emit: removed_sample_ids
-    tuple val(ref_meta), env(SEQ_COUNT)                , emit: seq_count
+    tuple val(ref_meta), path("${prefix}_seq_count.txt"), emit: seq_count
     path "versions.yml"                                , emit: versions
 
     when:
@@ -26,7 +26,7 @@ process VCF_TO_SNP_ALIGN {
     """
     vcf_to_snp_align.R ${vcf} ${ploidy_data} ${max_variants} ${prefix}.fasta
 
-    SEQ_COUNT=\$(grep '^>' ${prefix}.fasta | wc -l)
+    grep -c '^>' ${prefix}.fasta > ${prefix}_seq_count.txt
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
