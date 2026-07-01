@@ -3,7 +3,7 @@ process PICARD_FORMAT {
     label 'process_low'
 
     conda "bioconda::picard=3.3.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/picard:3.3.0--hdfd78af_0' :
         'biocontainers/picard:3.3.0--hdfd78af_0' }"
 
