@@ -4,6 +4,14 @@ include { QUAST                 } from '../../../modules/nf-core/quast'
 include { FLYE as FLYE_NANOPORE } from '../../../modules/nf-core/flye'
 include { FLYE as FLYE_PACBIO   } from '../../../modules/nf-core/flye'
 
+def readsSizeGB(read_paths) {
+    if (read_paths instanceof List) {
+        return read_paths.collect { it.size() }.sum() / (1024 * 1024 * 1024)
+    } else {
+        return read_paths.size / (1024 * 1024 * 1024)
+    }
+}
+
 workflow GENOME_ASSEMBLY {
 
     take:
@@ -16,7 +24,10 @@ workflow GENOME_ASSEMBLY {
     parsed_sample_data = sample_data
         .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
     parsed_sample_data
-        .map{ sample_meta, report_meta, read_paths -> [sample_meta, read_paths]}
+        .map{ sample_meta, report_meta, read_paths ->
+            sample_meta.reads_size_gb = readsSizeGB(read_paths)
+            [sample_meta, read_paths]
+        }
         .unique()
         .branch { meta, paths->
             short_prokaryote:    (meta.type == "illumina" || meta.type == "bgiseq") && meta.domain == "Bacteria"
@@ -78,15 +89,8 @@ workflow GENOME_ASSEMBLY {
         }
     messages = messages.mix(spades_warnings)
 
-    FLYE_NANOPORE (
-        filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote),
-        "--nano-raw"
-    )
-
-    FLYE_PACBIO (
-        filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote),
-        "--pacbio-raw"
-    )
+    FLYE_NANOPORE (filtered_input.nanopore_prokaryote.mix(filtered_input.nanopore_eukaryote), "--nano-raw")
+    FLYE_PACBIO (filtered_input.pacbio_prokaryote.mix(filtered_input.pacbio_eukaryote), "--pacbio-raw")
 
     // Warn about any failed Flye assemblies
     flye_warnings = FLYE_NANOPORE.out.fasta
