@@ -103,6 +103,15 @@ if (only_binomial) {
     assem_data <- assem_data[is_latin_binomial(assem_data$species), ]
 }
 
+# Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
+core_id <- sub(assem_data$accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+version <- as.numeric(sub(assem_data$accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+is_refseq <- startsWith(assem_data$accession, 'GCF_')
+# Sort so best version of each core is first
+priority <- order(is_refseq, version, decreasing = TRUE)
+assem_data <- assem_data[priority, , drop = FALSE]
+assem_data <- assem_data[! duplicated(core_id), , drop = FALSE]
+
 # Parse "count" arguments which can be a number or a percentage
 get_count <- function(choices, count) {
     if (grepl(count, pattern = "%$")) {
@@ -114,11 +123,14 @@ get_count <- function(choices, count) {
     return(count)
 }
 
+# Extract version number for sorting preference
+version_num <- as.numeric(sub(assem_data$accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
 # Sort references by desirability
 priority <- order(decreasing = TRUE,
     assem_data$is_atypical == FALSE,
     assem_data$is_type, # Is type strain
     assem_data$source_database == 'SOURCE_DATABASE_REFSEQ', # Is a RefSeq reference
+    version_num, # Prefer higher version numbers
     is_latin_binomial(assem_data$species), # Has a species epithet
     assem_data$is_annotated,
     factor(assem_data$assembly_level, levels = c("Contig", "Scaffold", "Chromosome", "Complete Genome"), ordered = TRUE),
@@ -127,7 +139,7 @@ priority <- order(decreasing = TRUE,
     assem_data$contig_l50,
     assem_data$coverage
 )
-assem_data <- assem_data[priority, ]
+assem_data <- assem_data[priority, , drop = FALSE]
 
 # Initialize column to hold which level an assembly is selected for
 assem_data$selection_rank <- NA

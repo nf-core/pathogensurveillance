@@ -693,6 +693,16 @@ rownames(metadata_samp) <- NULL
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
     search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
+    if (length(search_result$ids) == 0) {
+        return(
+            data.frame(
+                ref_id = character(0),
+                ref_name = character(0),
+                ref_description = character(0),
+                ref_ncbi_accession = character(0)
+            )
+        )
+    }
     starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
     summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
         rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
@@ -711,6 +721,13 @@ get_ncbi_genomes <- function(query) {
         ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
     )
     rownames(output) <- NULL
+
+    # Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
+    core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+    is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
+    output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
+    output <- output[! duplicated(core_id), , drop = FALSE]
     return(output)
 }
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
@@ -730,15 +747,17 @@ for (i in seq_len(nrow(metadata_ref))) {
     if (!is_fully_excluded[i]) next
 
     if (is_present(metadata_ref$ref_ncbi_accession[i])) {
-        excluded_accessions <- c(excluded_accessions, metadata_ref$ref_ncbi_accession[i])
+        core_id <- sub(metadata_ref$ref_ncbi_accession[i], pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        excluded_accessions <- c(excluded_accessions, core_id)
         excluded_source_rows <- c(excluded_source_rows, i)
     }
 
     if (is_present(metadata_ref$ref_ncbi_query[i])) {
         query_results <- ncbi_result[[metadata_ref$ref_ncbi_query[i]]]
         if (!is.null(query_results) && nrow(query_results) > 0) {
-            excluded_accessions <- c(excluded_accessions, query_results$ref_ncbi_accession)
-            excluded_source_rows <- c(excluded_source_rows, rep(i, nrow(query_results)))
+            core_ids <- sub(query_results$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+            excluded_accessions <- c(excluded_accessions, core_ids)
+            excluded_source_rows <- c(excluded_source_rows, rep(i, length(core_ids)))
         }
     }
 }
@@ -747,10 +766,11 @@ is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
 
-    # Remove accessions excluded by later rows
+    # Remove accessions excluded by later rows (compare by core ID)
     later_excluded <- excluded_accessions[excluded_source_rows > index]
     if (length(later_excluded) > 0 && nrow(query_data) > 0) {
-        query_data <- query_data[! query_data$ref_ncbi_accession %in% later_excluded, ]
+        query_core_ids <- sub(query_data$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        query_data <- query_data[! query_core_ids %in% later_excluded, ]
     }
 
     # Skip if no results remain after filtering
