@@ -1,0 +1,15 @@
+{
+    "-profile test_bacteria": {
+        "content": [
+            [
+                
+            ],
+            null
+        ],
+        "timestamp": "2026-07-14T12:44:18.765740308",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.4"
+        }
+    }
+}

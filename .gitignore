@@ -37,3 +37,4 @@ assets/main_report/packages.bib
 .aider*
 .positai
 .rsync-filter
+tests/nextflow.local.*

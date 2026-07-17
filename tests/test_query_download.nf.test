@@ -2,13 +2,25 @@ nextflow_pipeline {
 
     name "Test pipeline"
     script "../main.nf"
+    options "-resume"
     tag "pipeline"
-    tag "test"
+    tag "downloads"
 
-    test("-profile test") {
+    test("-profile test_query_download") {
+
         when {
             params {
                 outdir = "$outputDir"
+                input = "https://raw.githubusercontent.com/worthyc51/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_query_download.csv"
+
+                max_samples = 1
+                phylo_max_genes = 100
+                n_ref_closest = 1
+                n_ref_closest_named = 1
+                n_ref_context = 7
+                n_ref_strains = '1'
+                n_ref_species = '5'
+                n_ref_genera = '5'
             }
         }
 
@@ -24,7 +36,7 @@ nextflow_pipeline {
 
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
                     removeNextflowVersion("$outputDir/pipeline_info/version_info.yml")
-                ).match(): "" }
+                ).match() }
             )
         }
     }
@@ -43,4 +55,3 @@ nextflow_pipeline {
         }
     } */
 }
-
