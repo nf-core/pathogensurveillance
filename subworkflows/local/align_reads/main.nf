@@ -1,4 +1,5 @@
 include { BWA_MEM         } from '../../../modules/nf-core/bwa/mem'
+include { BWAMEM3_MEM     } from '../../../modules/nf-core/bwamem3/mem/main'
 include { PICARD_FORMAT   } from '../../../modules/local/picard_format'
 include { SAMTOOLS_INDEX  } from '../../../modules/nf-core/samtools/index'
 
@@ -27,8 +28,15 @@ workflow ALIGN_READS {
     ch_bwa_index = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
         [combined_meta, bam_index]
     }
-    BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
-    versions = versions.mix(BWA_MEM.out.versions)
+
+    if (params.aligner == 'bwamem3') {
+        BWAMEM3_MEM ( ch_reads, ch_bwa_index, [[], []], false)
+        aligner_out = BWAMEM3_MEM.out.aligned
+    } else {
+        BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
+        aligner_out = BWA_MEM.out.bam
+        versions = versions.mix(BWA_MEM.out.versions)
+    }
 
     // Run a series of picard commands to sort and filter variants
     ch_reference = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
@@ -37,7 +45,7 @@ workflow ALIGN_READS {
     ch_ref_index = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
         [combined_meta, ref_index]
     }
-    picard_input = BWA_MEM.out.bam
+    picard_input = aligner_out
         .join(ch_reference)
         .join(ch_ref_index)
     PICARD_FORMAT ( picard_input )

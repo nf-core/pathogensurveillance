@@ -12,6 +12,7 @@
 include { PICARD_CREATESEQUENCEDICTIONARY } from '../../../modules/nf-core/picard/createsequencedictionary'
 include { SAMTOOLS_FAIDX                  } from '../../../modules/nf-core/samtools/faidx'
 include { BWA_INDEX                       } from '../../../modules/nf-core/bwa/index'
+include { BWAMEM3_INDEX                   } from '../../../modules/nf-core/bwamem3/index/main'
 
 
 /*
@@ -36,13 +37,19 @@ workflow REFERENCE_INDEX {
 
     SAMTOOLS_FAIDX ( reference, [[], []], false )
 
-    BWA_INDEX ( reference )
+    if (params.aligner == 'bwamem3') {
+        BWAMEM3_INDEX ( reference )
+        aligner_index = BWAMEM3_INDEX.out.index
+    } else {
+        BWA_INDEX ( reference )
+        aligner_index = BWA_INDEX.out.index
+    }
 
     emit:
     picard_dict   = PICARD_CREATESEQUENCEDICTIONARY.out.reference_dict
     samtools_fai  = SAMTOOLS_FAIDX.out.fai
     samtools_gzi  = SAMTOOLS_FAIDX.out.gzi
-    bwa_index     = BWA_INDEX.out.index
+    bwa_index     = aligner_index
     versions      = ch_versions                        // channel: [ versions.yml ]
 
 }

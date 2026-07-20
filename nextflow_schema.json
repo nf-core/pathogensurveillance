@@ -88,7 +88,15 @@
                     "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
                     "default": "light",
                     "fa_icon": "fas fa-download"
+                },
+                "aligner": {
+                    "type": "string",
+                    "enum": ["bwamem3", "bwa"],
+                    "default": "bwamem3",
+                    "description": "Read aligner to use. 'bwa' must be used with non-AVX2-capable CPUs.",
+                    "fa_icon": "fas fa-dna"
                 }
+
             }
         },
         "analysis_parameters": {
