@@ -35,3 +35,5 @@ assets/main_report/*.html
 assets/main_report/*.ipynb
 assets/main_report/packages.bib
 .aider*
+.lineage/
+.rsync-filter
