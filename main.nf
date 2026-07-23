@@ -15,11 +15,39 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { NFCORE_PATHOGENSURVEILLANCE  } from './workflows/pathogensurveillance'
-include { PIPELINE_INITIALISATION      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { PIPELINE_COMPLETION          } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { getGenomeAttribute           } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PATHOGENSURVEILLANCE     } from './workflows/pathogensurveillance'
+include { PIPELINE_INITIALISATION  } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    NAMED WORKFLOWS FOR PIPELINE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// WORKFLOW: Run main analysis pipeline depending on type of input
+//
+workflow NFCORE_PATHOGENSURVEILLANCE {
+
+    take:
+    sample_data_tsv
+    reference_data_tsv
+
+    main:
+
+    //
+    // WORKFLOW: Run pipeline
+    //
+    PATHOGENSURVEILLANCE (
+        sample_data_tsv,
+        reference_data_tsv
+    )
+
+    emit:
+    multiqc_report = PATHOGENSURVEILLANCE.out.multiqc_report // channel: /path/to/multiqc_report.html
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +91,6 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url,
         NFCORE_PATHOGENSURVEILLANCE.out.multiqc_report
     )
 }

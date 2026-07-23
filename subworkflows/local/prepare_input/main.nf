@@ -330,8 +330,8 @@ workflow PREPARE_INPUT {
     SEQKIT_HEAD (
         samples_to_subset
             .combine(read_count, by: 0)
-            .map { sample_meta, fastq_paths, depth, read_count ->
-                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * read_count.toFloat()).toInteger() ]
+            .map { sample_meta, fastq_paths, depth, my_read_count ->
+                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * my_read_count.toFloat()).toInteger() ]
             }
     )
     versions = versions.mix(SEQKIT_HEAD.out.versions)

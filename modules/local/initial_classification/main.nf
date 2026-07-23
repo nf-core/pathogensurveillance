@@ -13,7 +13,7 @@ process INITIAL_CLASSIFICATION {
     output:
     tuple val(meta), path("${prefix}_taxa_found.tsv"), emit: taxa_found
     tuple val(meta), path("${prefix}_taxon_data.tsv"), emit: taxon_data
-    tuple val(meta), env(DOMAIN)                     , emit: domain
+    tuple val(meta), env('DOMAIN')                   , emit: domain
     path "versions.yml"                              , emit: versions
 
     when:
