@@ -14,7 +14,7 @@ process VCF_TO_SNP_ALIGN {
     output:
     tuple val(ref_meta), path("${prefix}.fasta")       , emit: fasta
     tuple val(ref_meta), path("removed_sample_ids.txt"), emit: removed_sample_ids
-    tuple val(ref_meta), env(SEQ_COUNT)                , emit: seq_count
+    tuple val(ref_meta), env('SEQ_COUNT')              , emit: seq_count
     path "versions.yml"                                , emit: versions
 
     when:

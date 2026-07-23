@@ -285,11 +285,8 @@ workflow PREPARE_INPUT {
     messages = messages.mix(no_ref_warnings)
 
     // Download reference files if an accession is provided
-    def isFullyExcluded = { ref_meta ->
-        ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
-    }
     ref_ncbi_acc = reference_data
-        .filter{ ref_meta -> ref_meta.ref_ncbi_accession && !isFullyExcluded(ref_meta) }
+        .filter{ ref_meta -> ref_meta.ref_ncbi_accession && !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
         .tap{ ref_data_with_ncbi_acc }
         .map { ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], ref_meta.ref_ncbi_accession]
@@ -300,17 +297,17 @@ workflow PREPARE_INPUT {
     // Separate excluded references to preserve their metadata without downloading/processing
     excluded_refs = sample_data
         .transpose(by: 1)
-        .filter{ sample_meta, ref_meta -> isFullyExcluded(ref_meta) }
+        .filter{ sample_meta, ref_meta -> ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
     local_references = sample_data
         .transpose(by: 1)
         .filter{ sample_meta, ref_meta ->
-            ref_meta.ref_path && !isFullyExcluded(ref_meta)
+            ref_meta.ref_path && !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
         }
     downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
         .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
     sample_data = sample_data
         .transpose(by: 1)
-        .filter{ sample_meta, ref_meta -> !isFullyExcluded(ref_meta) }
+        .filter{ sample_meta, ref_meta -> !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
         .map{ sample_meta, ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
@@ -368,8 +365,8 @@ workflow PREPARE_INPUT {
     SEQKIT_HEAD (
         samples_to_subset
             .combine(read_count, by: 0)
-            .map { sample_meta, fastq_paths, depth, read_count ->
-                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * read_count.toFloat()).toInteger() ]
+            .map { sample_meta, fastq_paths, depth, my_read_count ->
+                [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * my_read_count.toFloat()).toInteger() ]
             }
     )
     versions = versions.mix(SEQKIT_HEAD.out.versions)

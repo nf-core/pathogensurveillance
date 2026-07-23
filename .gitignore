@@ -36,4 +36,5 @@ assets/main_report/*.ipynb
 assets/main_report/packages.bib
 .aider*
 .positai
+.lineage/
 .rsync-filter

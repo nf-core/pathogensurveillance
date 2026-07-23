@@ -96,7 +96,6 @@
                     "description": "Read aligner to use. 'bwa' must be used with non-AVX2-capable CPUs.",
                     "fa_icon": "fas fa-dna"
                 }
-
             }
         },
         "analysis_parameters": {
@@ -341,13 +340,6 @@
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
-                    "hidden": true
-                },
-                "hook_url": {
-                    "type": "string",
-                    "description": "Incoming hook URL for messaging service",
-                    "fa_icon": "fas fa-people-group",
-                    "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
                 "multiqc_config": {

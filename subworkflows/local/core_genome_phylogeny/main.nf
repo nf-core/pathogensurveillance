@@ -9,6 +9,7 @@ include { ASSIGN_CONTEXT_REFERENCES as ASSIGN_CORE_REFERENCES } from '../../../m
 include { MAKE_GFF_WITH_FASTA                                 } from '../../../modules/local/make_gff_with_fasta'
 include { BAKTA_BAKTA                                         } from '../../../modules/nf-core/bakta/bakta'
 include { BAKTA_BAKTADBDOWNLOAD                               } from '../../../modules/nf-core/bakta/baktadbdownload'
+include { UNTAR                                               } from '../../../modules/nf-core/untar'
 
 workflow CORE_GENOME_PHYLOGENY {
 

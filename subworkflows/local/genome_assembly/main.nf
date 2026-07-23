@@ -120,8 +120,8 @@ workflow GENOME_ASSEMBLY {
     not_assembled_warnings = sample_data
         .map { [[id: it.sample_id], it] }
         .combine(filtered_input.other, by: 0)
-        .map{ sample_meta, sample_data, paths ->
-            [sample_meta, [id: sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
+        .map{ sample_meta, my_sample_data, paths ->
+            [sample_meta, [id: my_sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]
         }
     messages = messages.mix(not_assembled_warnings)
 

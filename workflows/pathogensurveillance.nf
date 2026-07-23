@@ -26,7 +26,7 @@ include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow NFCORE_PATHOGENSURVEILLANCE {
+workflow PATHOGENSURVEILLANCE {
 
     take:
     sample_data_tsv
@@ -178,18 +178,22 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(fastp_results, remainder: true)
         .join(nanoplot_results, remainder: true)
         .join(quast_results, remainder: true)
-        .map {report_meta, versions, fastqc, fastp, nanoplot, quast ->
-            files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([versions])
+        .map {report_meta, my_versions, fastqc, fastp, nanoplot, quast ->
+            def files = (fastqc ?: []) + (fastp ?: []) + (nanoplot ?: []) + (quast ?: []) + ([my_versions])
             [report_meta, files.flatten()]
         }
-    MULTIQC (
-        multiqc_files,
-        multiqc_config.collect(sort: true).ifEmpty([]),
-        multiqc_custom_config.collect(sort: true).ifEmpty([]),
-        multiqc_logo.collect(sort: true).ifEmpty([]),
-        [],
-        []
-    )
+    def multiqc_all = multiqc_files
+        .combine(multiqc_config.collect(sort: true).ifEmpty([]))
+        .combine(multiqc_custom_config.collect(sort: true).ifEmpty([]))
+        .combine(multiqc_logo.collect(sort: true).ifEmpty([]))
+        .combine(channel.value([]))
+        .combine(channel.value([]))
+        .map { report_meta, files, config, custom_config, logo, replace, samples ->
+            def all_configs = (config ? [config] : []) + (custom_config ? [custom_config] : [])
+            [report_meta, files, all_configs.flatten(), logo, replace, samples]
+        }
+
+    MULTIQC ( multiqc_all )
     versions = versions.mix(MULTIQC.out.versions)
 
     // Gather sample data for each report
@@ -374,4 +378,5 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
 
     emit:
     multiqc_report = MULTIQC.out.report
+    versions       = versions                 // channel: [ path(versions.yml) ]
 }
