@@ -41,6 +41,16 @@
                         "git_sha": "966ba9887e2b04d89d64db06c01508873bde13b1",
                         "installed_by": ["modules"]
                     },
+                    "bwamem3/index": {
+                        "branch": "master",
+                        "git_sha": "cab334f632708de2679161f713dd969bfa491a25",
+                        "installed_by": ["modules"]
+                    },
+                    "bwamem3/mem": {
+                        "branch": "master",
+                        "git_sha": "cab334f632708de2679161f713dd969bfa491a25",
+                        "installed_by": ["modules"]
+                    },
                     "fastp": {
                         "branch": "master",
                         "git_sha": "a331ecfd1aa48b2b2298aab23bb4516c800e410b",

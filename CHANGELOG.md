@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 
 ## 1.2.0 - Current
 
+## Added
+
+- Added option to use BWA3 for read alignment, increasing speed. This is controlled by the `--aligner` parameter used to switch between BWA and BWA3. 'bwa' must be used with non-AVX2-capable CPUs.
+
 ## Changed
 
 - Removed `TRIM_AND_SKETCH` step. Samples that fail assembly are no longer sketched from raw reads and are instead excluded from sketch-based comparisons and downstream analyses that rely on them. Warnings for failed assemblies remain in the report output.
