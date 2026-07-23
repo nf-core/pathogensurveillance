@@ -5,6 +5,10 @@ repos:
       - id: prettier
         additional_dependencies:
           - prettier@3.8.3
+        exclude: |
+          (?x)^(
+              .*\.html$
+          )$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -15,7 +19,8 @@ repos:
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
-              .*\.snap$
+              .*\.snap$|
+              .*\.html$
           )$
       - id: end-of-file-fixer
         exclude: |
@@ -23,7 +28,8 @@ repos:
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
-              .*\.snap$
+              .*\.snap$|
+              .*\.html$
           )$
   - repo: https://github.com/seqeralabs/nf-lint-pre-commit
     rev: v0.3.0
