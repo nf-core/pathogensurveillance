@@ -215,25 +215,11 @@
                     "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
                     "fa_icon": "fas fa-microchip"
                 },
-                "max_cpus": {
-                    "type": "integer",
-                    "default": 64,
-                    "minimum": 1,
-                    "description": "Maximum number of CPUs to use for any single process. When set, this overrides the calculated CPU count from cpu_scale.",
-                    "fa_icon": "fas fa-microchip"
-                },
                 "ram_scale": {
                     "type": "number",
                     "default": 1.0,
                     "minimum": 0.01,
                     "description": "A scaling factor to adjust the amount of RAM used by processes. The amount of RAM for each process will be multiplied by this value and rounded to the nearest integer in GB (minimum 1).",
-                    "fa_icon": "fas fa-memory"
-                },
-                "max_ram": {
-                    "type": "integer",
-                    "default": 1000,
-                    "minimum": 1,
-                    "description": "Maximum amount of RAM in GB to use for any single process. When set, this overrides the calculated RAM from ram_scale.",
                     "fa_icon": "fas fa-memory"
                 },
                 "skip_core_phylogeny": {

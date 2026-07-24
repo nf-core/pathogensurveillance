@@ -97,25 +97,6 @@ workflow {
         NFCORE_PATHOGENSURVEILLANCE.out.multiqc_report
     )
 
-    ch_summary_params = PIPELINE_COMPLETION.out.summary_params
-    ch_multiqc_report_list = PIPELINE_COMPLETION.out.multiqc_report_list
-
-    onComplete:
-    if (params.email || params.email_on_fail) {
-        completionEmail(
-            ch_summary_params.val,
-            params.email,
-            params.email_on_fail,
-            params.plaintext_email,
-            params.outdir,
-            params.monochrome_logs,
-            ch_multiqc_report_list.getVal(),
-        )
-    }
-    completionSummary(params.monochrome_logs)
-
-    onError:
-    log.error "Pipeline failed. Please refer to troubleshooting docs: https://nf-co.re/docs/usage/troubleshooting"
 }
 
 /*

@@ -81,7 +81,13 @@ workflow BUSCO_PHYLOGENY {
         .unique()
 
     // Download BUSCO datasets
-    BUSCO_DOWNLOAD ( channel.from( "eukaryota_odb10" ) )
+    def busco_cache = file("${params.data_dir}/busco_db/busco_downloads")
+    if (busco_cache.exists()) {
+        busco_download = Channel.fromPath("${params.data_dir}/busco_db/busco_downloads").first()
+    } else {
+        BUSCO_DOWNLOAD ( channel.from( "eukaryota_odb10" ) )
+        busco_download = BUSCO_DOWNLOAD.out.download_dir.first() // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
+    }
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group
     BUSCO_BUSCO (
@@ -92,7 +98,7 @@ workflow BUSCO_PHYLOGENY {
             .unique(),
         "genome",
         "eukaryota_odb10",
-        BUSCO_DOWNLOAD.out.download_dir.first(), // .first() is needed to convert the queue channel to a value channel so it can be used multiple times.
+        busco_download,
         [],
         true
     )

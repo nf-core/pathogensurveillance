@@ -73,9 +73,31 @@ workflow PREPARE_INPUT {
             [ncbi_acc_meta, ncbi_acc_meta.id]
         }
         .unique()
-    SRATOOLS_FASTERQDUMP ( ncbi_acc, [], [] )
-    versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
-    sample_data = SRATOOLS_FASTERQDUMP.out.reads
+
+    // Check for cached reads and split into cached / to-download
+    ncbi_acc_cached = ncbi_acc.map { ncbi_acc_meta, sra ->
+        def cache_dir = file("${params.data_dir}/reads")
+        def cached = cache_dir.exists() ? cache_dir.list().findAll { it.startsWith(ncbi_acc_meta.id) && it.endsWith('.fastq.gz') } : []
+        [ncbi_acc_meta, sra, cached]
+    }.branch { ncbi_acc_meta, sra, cached ->
+        cached: cached.size() > 0
+        to_download: true
+    }
+
+    // Emit cached reads
+    cached_reads = ncbi_acc_cached.cached.map { ncbi_acc_meta, sra, cached ->
+        def paths = cached.collect { file("${params.data_dir}/reads/${it}") }
+        [ncbi_acc_meta, paths]
+    }
+
+    // Download missing reads
+    SRATOOLS_FASTERQDUMP ( ncbi_acc_cached.to_download.map { ncbi_acc_meta, sra, cached ->  [ncbi_acc_meta, sra] }, [], [] )
+    downloaded_reads = SRATOOLS_FASTERQDUMP.out.reads
+
+    // Combine cached and downloaded reads
+    all_reads = cached_reads.mix(downloaded_reads)
+
+    sample_data = all_reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
             if (reads_path instanceof Collection) {
@@ -100,7 +122,6 @@ workflow PREPARE_INPUT {
             }
             .unique()
     )
-    versions = versions.mix(BBMAP_SENDSKETCH.out.versions)
 
     // Extract the depth estimate from the sendsketch result and remove samples that dont have it
     sendsketch_depth = BBMAP_SENDSKETCH.out.hits
@@ -164,9 +185,23 @@ workflow PREPARE_INPUT {
         .flatten()
         .unique()
 
+    // Check for cached parsed assembly metadata
+    family_ids_cached = family_ids_to_download.map { taxon ->
+        def cache_file = file("${params.data_dir}/assembly_metadata/${taxon}.tsv")
+        [taxon, cache_file.exists() ? cache_file : null]
+    }.branch { taxon, cached ->
+        cached: cached != null
+        to_process: true
+    }
+
+    // Emit cached stats directly
+    cached_stats = family_ids_cached.cached.map { taxon, cached ->
+        [taxon, cached]
+    }
+
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES (
-        family_ids_to_download
+        family_ids_cached.to_process.map { it[0] }
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
@@ -175,6 +210,10 @@ workflow PREPARE_INPUT {
         FIND_ASSEMBLIES.out.stats
     )
     versions = versions.mix(PARSE_ASSEMBLIES.out.versions)
+    processed_stats = PARSE_ASSEMBLIES.out.stats
+
+    // Combine cached and processed stats
+    all_stats = cached_stats.mix(processed_stats)
 
     // Add placeholders for NCBI reference metadata if none was looked up
     ncbi_ref_meta = family_taxon_ids
@@ -182,7 +221,7 @@ workflow PREPARE_INPUT {
             [family_ids]
         }
         .unique()
-        .join(PARSE_ASSEMBLIES.out.stats.ifEmpty([null, null]), remainder: true)
+        .join(all_stats.ifEmpty([null, null]), remainder: true)
         .filter { it != [null, null] }
 
     // Choose reference sequences to provide context for each sample
@@ -292,8 +331,32 @@ workflow PREPARE_INPUT {
             [[id: ref_meta.ref_ncbi_accession], ref_meta.ref_ncbi_accession]
         }
         .unique()
-    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc )
+
+    // Check for cached assemblies and split into cached / to-download
+    ref_ncbi_acc_cached = ref_ncbi_acc.map { ref_meta, acc ->
+        def fasta = file("${params.data_dir}/assemblies/${ref_meta.id}.fasta.gz")
+        [ref_meta, acc, fasta.exists()]
+    }.branch { ref_meta, acc, has_fasta ->
+        cached: has_fasta
+        to_download: true
+    }
+
+    // Emit cached assemblies
+    cached_seq_and_gff = ref_ncbi_acc_cached.cached.map { ref_meta, acc, has_fasta ->
+        def fasta = file("${params.data_dir}/assemblies/${ref_meta.id}.fasta.gz")
+        def gff = file("${params.data_dir}/assemblies/${ref_meta.id}.gff.gz")
+        [ref_meta, fasta, gff.exists() ? gff : null]
+    }
+
+    // Download missing assemblies
+    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc_cached.to_download.map { ref_meta, acc, cached -> [ref_meta, acc] } )
     versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
+    downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
+        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
+
+    // Combine cached and downloaded assemblies
+    all_seq_and_gff = cached_seq_and_gff.mix(downloaded_seq_and_gff)
+
     // Separate excluded references to preserve their metadata without downloading/processing
     excluded_refs = sample_data
         .transpose(by: 1)
@@ -303,15 +366,13 @@ workflow PREPARE_INPUT {
         .filter{ sample_meta, ref_meta ->
             ref_meta.ref_path && !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
         }
-    downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
-        .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
     sample_data = sample_data
         .transpose(by: 1)
         .filter{ sample_meta, ref_meta -> !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
         .map{ sample_meta, ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }
-        .combine(downloaded_seq_and_gff, by: 0)
+        .combine(all_seq_and_gff, by: 0)
         .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
             ref_meta.ref_path = ref_path
             ref_meta.gff = gff_path
@@ -354,7 +415,6 @@ workflow PREPARE_INPUT {
             }
             .unique(),
     )
-    versions = versions.mix(SEQKIT_STATS.out.versions)
     read_count = SEQKIT_STATS.out.stats
         .splitCsv ( header:true, sep:'\t', limit: 1 )
         .map { sample_meta, stats ->

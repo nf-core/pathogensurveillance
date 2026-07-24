@@ -292,7 +292,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(core_phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(MULTIQC.out.outdir, remainder: true)
+        .join(MULTIQC.out.report, remainder: true)
         .join(group_messages, remainder: true)
         .filter{it[0] != null}
         .map{ it.size() == 16 ? it + [null] : it }

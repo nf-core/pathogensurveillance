@@ -13,8 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Removed `TRIM_AND_SKETCH` step. Samples that fail assembly are no longer sketched from raw reads and are instead excluded from sketch-based comparisons and downstream analyses that rely on them. Warnings for failed assemblies remain in the report output.
 - Assembly RAM is now calculated more accurately to avoid retrying to increase RAM
 - Increase number of reference assemblies downloaded by default
-- Added `scaledRam` helper function and `--ram_scale`/`--max_ram` parameters to control RAM allocation across processes, analogous to the existing CPU scaling functionality.
-- Changed defaults for `--max_cpus` from `0` to `64` and `--max_ram` from `0` to `1000`. Previously, `0` meant "no limit"; now the parameters enforce a hard ceiling and `0` is invalid.
+- Added `scaledRam` helper function and `--ram_scale` parameter to control RAM allocation across processes, analogous to the existing CPU scaling functionality.
+- Removed `--max_cpus` and `--max_ram` parameters. Resource ceilings should now be handled by `resourceLimits` in a custom config/profile.
+- Replaced `storeDir` process directive with workflow-level caching logic to avoid incompatibility with eval statements in topic channels (https://github.com/nextflow-io/nextflow/issues/5785).
 - When there are fewer unique strains than `n_ref_strains`, the pipeline now makes up the difference with more examples of the same strain. This ensure that multiple representatives of each species-level taxon are downloaded when strain-level info is not present.
 - Reference assemblies are now downloaded in parallel from NCBI.
 

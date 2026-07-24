@@ -95,8 +95,13 @@ workflow CORE_GENOME_PHYLOGENY {
             bakta_db = channel.fromPath(params.bakta_db).first()
         }
     } else if (params.download_bakta_db) {
-        BAKTA_BAKTADBDOWNLOAD()
-        bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+        def bakta_cache = file("${params.data_dir}/bakta_db")
+        if (bakta_cache.exists() && bakta_cache.listFiles()) {
+            bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/**").collect()
+        } else {
+            BAKTA_BAKTADBDOWNLOAD()
+            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+        }
     }
 
     // Run bakta on samples and references without a gff already

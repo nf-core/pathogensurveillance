@@ -106,9 +106,15 @@ workflow PIPELINE_INITIALISATION {
 
     // Check input path parameters to see if they exist
     file(params.input, checkIfExists: true)
-    file(params.reference_data, checkIfExists: true)
-    file(params.multiqc_config, checkIfExists: true)
-    file(params.bakta_db, checkIfExists: true)
+    if (params.reference_data) {
+        file(params.reference_data, checkIfExists: true)
+    }
+    if (params.multiqc_config) {
+        file(params.multiqc_config, checkIfExists: true)
+    }
+    if (params.bakta_db) {
+        file(params.bakta_db, checkIfExists: true)
+    }
 
     // Check mandatory parameters
     if (params.input) {

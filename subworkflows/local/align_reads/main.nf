@@ -52,16 +52,15 @@ workflow ALIGN_READS {
     versions = versions.mix(PICARD_FORMAT.out.versions)
 
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
-    versions = versions.mix(SAMTOOLS_INDEX.out.versions)
 
     // Revet combined metas back to seperate ones for sample and reference
     out_bam = PICARD_FORMAT.out.bam
         .map { combined_meta, bam ->
             [combined_meta.sample, combined_meta.ref, bam]
         }
-    out_csi = SAMTOOLS_INDEX.out.csi
-        .map { combined_meta, csi ->
-            [combined_meta.sample, combined_meta.ref, csi]
+    out_csi = SAMTOOLS_INDEX.out.index
+        .map { combined_meta, index ->
+            [combined_meta.sample, combined_meta.ref, index]
         }
 
     emit:
