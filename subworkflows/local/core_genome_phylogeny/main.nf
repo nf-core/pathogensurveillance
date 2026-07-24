@@ -79,10 +79,8 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { ref_meta, report_meta, ref_path, gff_path ->
             [ref_meta, report_meta, ref_path, gff_path]
         }
-        .branch { ref_meta, report_meta, ref_path, gff_path ->
-            has_gff: gff_path
-            no_gff: ! gff_path
-        }
+    selected_ref_data_has_gff = all_ref_data.filter { ref_meta, report_meta, ref_path, gff_path -> gff_path }
+    selected_ref_data_no_gff = all_ref_data.filter { ref_meta, report_meta, ref_path, gff_path -> !gff_path }
 
     // Download the bakta database if needed
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
@@ -97,7 +95,7 @@ workflow CORE_GENOME_PHYLOGENY {
     } else if (params.download_bakta_db) {
         def bakta_cache = file("${params.data_dir}/bakta_db")
         if (bakta_cache.exists() && bakta_cache.listFiles()) {
-            bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/**").collect()
+            bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/db-${params.bakta_db_type}")
         } else {
             BAKTA_BAKTADBDOWNLOAD()
             bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
@@ -108,7 +106,7 @@ workflow CORE_GENOME_PHYLOGENY {
     sample_assem_data = sample_data
         .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(sample_assemblies, by: 0)
-    ref_assem_data = selected_ref_data.no_gff
+    ref_assem_data = selected_ref_data_no_gff
         .map { ref_meta, report_meta, ref_path, gff_path ->
             [ref_meta, report_meta, ref_path]
         }
@@ -129,7 +127,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // For references that have a gff already, combine the assembly with the gff the same way bakta outputs
     MAKE_GFF_WITH_FASTA (
-        selected_ref_data.has_gff
+        selected_ref_data_has_gff
             .map{ ref_meta, report_meta, ref_path, ref_gff ->
                 [ref_meta, ref_path, ref_gff]
             }
@@ -142,7 +140,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { sample_or_ref_meta, report_meta, assem_path, gff_path ->
             [sample_or_ref_meta, report_meta, gff_path]
         }
-    other_gffs = selected_ref_data.has_gff
+    other_gffs = selected_ref_data_has_gff
         .combine(MAKE_GFF_WITH_FASTA.out.gff, by: 0)
         .map{ ref_meta, report_meta, ref_path, ref_gff, ref_combined ->
             [ref_meta, report_meta, ref_combined]

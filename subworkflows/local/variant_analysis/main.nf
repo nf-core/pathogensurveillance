@@ -66,13 +66,16 @@ workflow VARIANT_ANALYSIS {
         }
         .join(ref_paths, by: 0..2)
         .join(sample_data.map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids], sample_meta.paths, sample_meta.sequence_type, sample_meta.ploidy] }, by: 0..1)
-        .branch { entry -> // Remove any samples that do not have reference information
-            filtered: entry[2] != null
-            no_ref: entry[2] == null
-        } // sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type
+
+    sample_data_with_refs_filtered = sample_data_with_refs.filter { entry -> entry[2] != null }
+    sample_data_with_refs_no_ref = sample_data_with_refs.filter { entry -> entry[2] == null }
+        .map { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [sample_meta, report_meta, ref_meta, "VARIANT_ANALYSIS", "WARNING", "Sample excluded from variant calling because no reference information was found."]
+        }
+    messages = messages.mix(sample_data_with_refs_no_ref)
 
     // Remove samples belonging to groups with only one sample
-    grouped_sample_data_with_refs = sample_data_with_refs.filtered
+    grouped_sample_data_with_refs = sample_data_with_refs_filtered
         .map{sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [report_meta, ref_meta, [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy]]
         }
@@ -111,13 +114,6 @@ workflow VARIANT_ANALYSIS {
         }
         .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, report_meta
 
-
-    // Report samples that do not have reference information
-    no_ref_warnings = sample_data_with_refs.no_ref
-        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
-            [sample_meta, report_meta, null, "VARIANT_ANALYSIS", "WARNING", "Sample is excluded from variant calling analysis because no reference genome is available."]
-        }
-    messages = messages.mix(no_ref_warnings)
 
     // Create indexes for each reference
     REFERENCE_INDEX (
@@ -177,19 +173,22 @@ workflow VARIANT_ANALYSIS {
         .map { row -> [[id: row[1].replace('\n', '')], row[0].group, row[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
 
     // Dont make trees for groups with less than 3 samples
-    align_with_samp_meta = VCF_TO_SNP_ALIGN.out.fasta
+    align_combined = VCF_TO_SNP_ALIGN.out.fasta
         .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
-        .branch { meta, fasta, seq_count_file ->
-            enough: seq_count_file.text.trim().toInteger() >= 4
-                return [meta, fasta]
-            too_few: true
-                return [meta, fasta]
-        }
-    too_few_samp_warnings = align_with_samp_meta.too_few
+
+    align_with_samp_meta_enough = align_combined
+        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() >= 4 }
+        .map { meta, fasta, seq_count_file -> [meta, fasta] }
+
+    align_with_samp_meta_too_few = align_combined
+        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() < 4 }
+        .map { meta, fasta, seq_count_file -> [meta, fasta] }
+
+    too_few_samp_warnings = align_with_samp_meta_too_few
         .map { meta, fasta -> [null, meta.group, meta.ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] }
     messages = messages.mix(too_few_samp_warnings)
 
-    phylogeny_input = align_with_samp_meta.enough
+    phylogeny_input = align_with_samp_meta_enough
         .map { meta, alignment ->
             [meta, alignment, []]
         }

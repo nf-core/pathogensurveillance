@@ -77,21 +77,20 @@ workflow PREPARE_INPUT {
     // Check for cached reads and split into cached / to-download
     ncbi_acc_cached = ncbi_acc.map { ncbi_acc_meta, sra ->
         def cache_dir = file("${params.data_dir}/reads")
-        def cached = cache_dir.exists() ? cache_dir.list().findAll { it.startsWith(ncbi_acc_meta.id) && it.endsWith('.fastq.gz') } : []
+        def cached = cache_dir.exists() ? cache_dir.list().findAll { filename -> filename.startsWith(ncbi_acc_meta.id) && filename.endsWith('.fastq.gz') } : []
         [ncbi_acc_meta, sra, cached]
-    }.branch { ncbi_acc_meta, sra, cached ->
-        cached: cached.size() > 0
-        to_download: true
     }
+    ncbi_acc_with_cache = ncbi_acc_cached.filter { ncbi_acc_meta, sra, cached -> cached.size() > 0 }
+    ncbi_acc_to_download = ncbi_acc_cached.filter { ncbi_acc_meta, sra, cached -> cached.size() == 0 }
 
     // Emit cached reads
-    cached_reads = ncbi_acc_cached.cached.map { ncbi_acc_meta, sra, cached ->
+    cached_reads = ncbi_acc_with_cache.map { ncbi_acc_meta, sra, cached ->
         def paths = cached.collect { file("${params.data_dir}/reads/${it}") }
         [ncbi_acc_meta, paths]
     }
 
     // Download missing reads
-    SRATOOLS_FASTERQDUMP ( ncbi_acc_cached.to_download.map { ncbi_acc_meta, sra, cached ->  [ncbi_acc_meta, sra] }, [], [] )
+    SRATOOLS_FASTERQDUMP ( ncbi_acc_to_download.map { ncbi_acc_meta, sra, cached ->  [ncbi_acc_meta, sra] }, [], [] )
     downloaded_reads = SRATOOLS_FASTERQDUMP.out.reads
 
     // Combine cached and downloaded reads
@@ -189,19 +188,18 @@ workflow PREPARE_INPUT {
     family_ids_cached = family_ids_to_download.map { taxon ->
         def cache_file = file("${params.data_dir}/assembly_metadata/${taxon}.tsv")
         [taxon, cache_file.exists() ? cache_file : null]
-    }.branch { taxon, cached ->
-        cached: cached != null
-        to_process: true
     }
+    family_ids_with_cache = family_ids_cached.filter { taxon, cached -> cached != null }
+    family_ids_to_process = family_ids_cached.filter { taxon, cached -> cached == null }
 
     // Emit cached stats directly
-    cached_stats = family_ids_cached.cached.map { taxon, cached ->
+    cached_stats = family_ids_with_cache.map { taxon, cached ->
         [taxon, cached]
     }
 
     // Download RefSeq metadata for all assemblies for every family found by the initial identification
     FIND_ASSEMBLIES (
-        family_ids_cached.to_process.map { it[0] }
+        family_ids_to_process.map { taxon, cached -> taxon }
     )
     versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
@@ -222,7 +220,7 @@ workflow PREPARE_INPUT {
         }
         .unique()
         .join(all_stats.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] }
+        .filter { item -> item != [null, null] }
 
     // Choose reference sequences to provide context for each sample
     family_stats_per_sample = family_taxon_ids
@@ -239,8 +237,8 @@ workflow PREPARE_INPUT {
     excluded_accessions_per_sample = sample_data
         .map { sample_meta, ref_metas ->
             def excluded = ref_metas
-                .findAll { it.ref_primary_usage == 'excluded' && it.ref_contextual_usage == 'excluded' && it.ref_ncbi_accession }
-                .collect { it.ref_ncbi_accession }
+                .findAll { ref_meta -> ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' && ref_meta.ref_ncbi_accession }
+                .collect { ref_meta -> ref_meta.ref_ncbi_accession }
                 .sort()
                 .join(',')
             [[id: sample_meta.sample_id], excluded ?: 'NONE']
@@ -272,7 +270,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(PICK_ASSEMBLIES.out.metadata.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+        .filter { item -> item != [null, null] } // above join adds [null, null] if channel is empty
     picked_assemblies_refs = PICK_ASSEMBLIES.out.formatted // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
         .map{ sample_id, ref_meta ->
@@ -284,7 +282,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(picked_assemblies_refs.ifEmpty([null, null]), remainder: true)
-        .filter { it != [null, null] } // above join adds [null, null] if channel is empty
+        .filter { item -> item != [null, null] } // above join adds [null, null] if channel is empty
         .map { sample_meta, ref_metas ->
             [sample_meta, ref_metas == null ? [] : ref_metas]
         }
@@ -325,7 +323,7 @@ workflow PREPARE_INPUT {
 
     // Download reference files if an accession is provided
     ref_ncbi_acc = reference_data
-        .filter{ ref_meta -> ref_meta.ref_ncbi_accession && !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
+        .filter{ ref_meta -> ref_meta.ref_ncbi_accession && !(ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded') }
         .tap{ ref_data_with_ncbi_acc }
         .map { ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], ref_meta.ref_ncbi_accession]
@@ -336,20 +334,19 @@ workflow PREPARE_INPUT {
     ref_ncbi_acc_cached = ref_ncbi_acc.map { ref_meta, acc ->
         def fasta = file("${params.data_dir}/assemblies/${ref_meta.id}.fasta.gz")
         [ref_meta, acc, fasta.exists()]
-    }.branch { ref_meta, acc, has_fasta ->
-        cached: has_fasta
-        to_download: true
     }
+    ref_ncbi_acc_with_cache = ref_ncbi_acc_cached.filter { ref_meta, acc, has_fasta -> has_fasta }
+    ref_ncbi_acc_to_download = ref_ncbi_acc_cached.filter { ref_meta, acc, has_fasta -> !has_fasta }
 
     // Emit cached assemblies
-    cached_seq_and_gff = ref_ncbi_acc_cached.cached.map { ref_meta, acc, has_fasta ->
+    cached_seq_and_gff = ref_ncbi_acc_with_cache.map { ref_meta, acc, has_fasta ->
         def fasta = file("${params.data_dir}/assemblies/${ref_meta.id}.fasta.gz")
         def gff = file("${params.data_dir}/assemblies/${ref_meta.id}.gff.gz")
         [ref_meta, fasta, gff.exists() ? gff : null]
     }
 
     // Download missing assemblies
-    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc_cached.to_download.map { ref_meta, acc, cached -> [ref_meta, acc] } )
+    DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc_to_download.map { ref_meta, acc, cached -> [ref_meta, acc] } )
     versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
     downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
         .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
@@ -364,11 +361,11 @@ workflow PREPARE_INPUT {
     local_references = sample_data
         .transpose(by: 1)
         .filter{ sample_meta, ref_meta ->
-            ref_meta.ref_path && !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded'
+            ref_meta.ref_path && !(ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded')
         }
     sample_data = sample_data
         .transpose(by: 1)
-        .filter{ sample_meta, ref_meta -> !ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded' }
+        .filter{ sample_meta, ref_meta -> !(ref_meta.ref_primary_usage == 'excluded' && ref_meta.ref_contextual_usage == 'excluded') }
         .map{ sample_meta, ref_meta ->
             [[id: ref_meta.ref_ncbi_accession], sample_meta, ref_meta ]
         }

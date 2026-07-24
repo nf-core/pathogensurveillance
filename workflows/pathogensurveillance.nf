@@ -102,14 +102,12 @@ workflow PATHOGENSURVEILLANCE {
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
-    def topic_versions = channel.topic("versions")
+    def topic_versions_all = channel.topic("versions")
         .distinct()
-        .branch { entry ->
-            versions_file: entry instanceof Path
-            versions_tuple: true
-        }
+    def topic_versions_file = topic_versions_all.filter { entry -> entry instanceof Path }
+    def topic_versions_tuple = topic_versions_all.filter { entry -> !(entry instanceof Path) }
 
-    def topic_versions_string = topic_versions.versions_tuple
+    def topic_versions_string = topic_versions_tuple
         .map { process, tool, version ->
             [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
         }
@@ -119,7 +117,7 @@ workflow PATHOGENSURVEILLANCE {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(versions.mix(topic_versions_file))
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -294,10 +292,10 @@ workflow PATHOGENSURVEILLANCE {
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
         .join(MULTIQC.out.report, remainder: true)
         .join(group_messages, remainder: true)
-        .filter{it[0] != null}
-        .map{ it.size() == 16 ? it + [null] : it }
-        .filter{ it.size() == 17 }
-        .map{ it.collect{ it ?: [] } }
+        .filter{ item -> item[0] != null }
+        .map{ item -> item.size() == 16 ? item + [null] : item }
+        .filter{ item -> item.size() == 17 }
+        .map{ item -> item.collect{ element -> element ?: [] } }
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
