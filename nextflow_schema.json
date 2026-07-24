@@ -217,9 +217,9 @@
                 },
                 "max_cpus": {
                     "type": "integer",
-                    "default": 0,
-                    "minimum": 0,
-                    "description": "Maximum number of CPUs to use for any single process. Set to 0 for no limit. When set, this overrides the calculated CPU count from cpu_scale.",
+                    "default": 64,
+                    "minimum": 1,
+                    "description": "Maximum number of CPUs to use for any single process. When set, this overrides the calculated CPU count from cpu_scale.",
                     "fa_icon": "fas fa-microchip"
                 },
                 "ram_scale": {
@@ -231,9 +231,9 @@
                 },
                 "max_ram": {
                     "type": "integer",
-                    "default": 0,
-                    "minimum": 0,
-                    "description": "Maximum amount of RAM in GB to use for any single process. Set to 0 for no limit. When set, this overrides the calculated RAM from ram_scale.",
+                    "default": 1000,
+                    "minimum": 1,
+                    "description": "Maximum amount of RAM in GB to use for any single process. When set, this overrides the calculated RAM from ram_scale.",
                     "fa_icon": "fas fa-memory"
                 },
                 "skip_core_phylogeny": {
