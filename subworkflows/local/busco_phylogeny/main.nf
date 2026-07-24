@@ -19,17 +19,17 @@ workflow BUSCO_PHYLOGENY {
 
     // Remove any samples that are not eukaryotes
     sample_data = original_sample_data
-        .filter{it.domain == "Eukaryota"}
+        .filter{ sample_meta -> sample_meta.domain == "Eukaryota"}
 
     // Remove samples without a successful assembly
     sample_data = sample_data
-        .map{ [[id: it.sample_id], it] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], sample_meta] }
         .join(sample_assemblies, by: 0)
         .map{ sample_meta, sample_data_map, assembly_path -> sample_data_map }
 
     // Build stable raw TSV text of sample IDs and user-defined references for each group
     samp_ref_pairs = sample_data
-        .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
+        .map{ sample_meta -> [sample_meta.sample_id, sample_meta.report_group_ids, sample_meta.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_group_id, ref_meta ->
             [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_contextual_usage]
@@ -54,7 +54,7 @@ workflow BUSCO_PHYLOGENY {
 
     // Create channel with required reference metadata and genomes from selected references
     references =  sample_data
-        .map{ [[id: it.report_group_ids], it.ref_metas] }
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids], sample_meta.ref_metas] }
         .transpose(by: 1)
         .map{ report_meta, ref_meta ->
             [report_meta, [id: ref_meta.ref_id], ref_meta.ref_path, ref_meta.ref_name]
@@ -63,7 +63,7 @@ workflow BUSCO_PHYLOGENY {
 
     selected_ref_data = ASSIGN_BUSCO_REFERENCES.out.references
         .splitText( elem: 1 )
-        .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
+        .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
             [report_meta, [id: tsv_contents[0]]]
@@ -75,14 +75,13 @@ workflow BUSCO_PHYLOGENY {
 
     // Combine selected reference data with analogous sample metadata and assembled genomes
     busco_input = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(sample_assemblies, by: 0)
         .mix(selected_ref_data)
         .unique()
 
     // Download BUSCO datasets
     BUSCO_DOWNLOAD ( channel.from( "eukaryota_odb10" ) )
-    versions = versions.mix(BUSCO_DOWNLOAD.out.versions)
 
     // Extract BUSCO genes for all unique reference genomes used in any sample/group
     BUSCO_BUSCO (
@@ -97,7 +96,6 @@ workflow BUSCO_PHYLOGENY {
         [],
         true
     )
-    versions = versions.mix(BUSCO_BUSCO.out.versions)
 
     // Combine BUSCO output by gene for each report group
     sorted_busco_data = busco_input
@@ -116,13 +114,13 @@ workflow BUSCO_PHYLOGENY {
     messages = messages.mix (
         SUBSET_BUSCO_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
-            .map { [
-                it.sample_id == '' ? null : [id: it.sample_id],
-                it.report_group_id == '' ? null : [id: it.report_group_id],
-                it.reference_id == '' ? null : [id: it.reference_id],
+            .map { message_row -> [
+                message_row.sample_id == '' ? null : [id: message_row.sample_id],
+                message_row.report_group_id == '' ? null : [id: message_row.report_group_id],
+                message_row.reference_id == '' ? null : [id: message_row.reference_id],
                 "BUSCO_PHYLOGENY",
-                it.message_type,
-                it.description
+                message_row.message_type,
+                message_row.description
             ] }
     )
 
@@ -143,9 +141,8 @@ workflow BUSCO_PHYLOGENY {
             [meta, alignments, []]
         }
     IQTREE_BUSCO ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
-    versions = versions.mix(IQTREE_BUSCO.out.versions)
     trees = IQTREE_BUSCO.out.phylogeny // subset_meta, tree
-        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .map { meta -> [meta[0].group_id, meta[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
 
     emit:

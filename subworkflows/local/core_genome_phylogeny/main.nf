@@ -25,17 +25,17 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Remove any samples that are not prokaryotes
     sample_data = sample_data
-        .filter{it.domain == "Bacteria" || it.domain == "Archaea"}
+        .filter{ sample_meta -> sample_meta.domain == "Bacteria" || sample_meta.domain == "Archaea"}
 
     // Remove samples without a successful assembly
     sample_data = sample_data
-        .map{ [[id: it.sample_id], it] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], sample_meta] }
         .join(sample_assemblies, by: 0)
         .map{ sample_meta, sample_data_map, assembly_path -> sample_data_map }
 
     // Build stable raw TSV text of sample IDs and user-defined references for each group
     samp_ref_pairs = sample_data
-        .map{ [it.sample_id, it.report_group_ids, it.ref_metas] }
+        .map{ sample_meta -> [sample_meta.sample_id, sample_meta.report_group_ids, sample_meta.ref_metas] }
         .transpose(by: 2)
         .map{ sample_id, report_group_id, ref_meta ->
             [sample_id, report_group_id, ref_meta.ref_id, ref_meta.ref_name, ref_meta.ref_description, ref_meta.ref_path, ref_meta.ref_contextual_usage]
@@ -60,7 +60,7 @@ workflow CORE_GENOME_PHYLOGENY {
 
     // Get relevant information from all references assigned to samples
     all_ref_data =  sample_data
-        .map{ [[id: it.report_group_ids], it.ref_metas] }
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids], sample_meta.ref_metas] }
         .transpose(by: 1)
         .map{ report_meta, ref_meta ->
             [[id: ref_meta.ref_id], report_meta, ref_meta.ref_path, ref_meta.gff]
@@ -70,7 +70,7 @@ workflow CORE_GENOME_PHYLOGENY {
     // Get information for references selected for this analysis and check if they have an existing gff
     selected_ref_data = ASSIGN_CORE_REFERENCES.out.references
         .splitText( elem: 1 )
-        .map { [it[0], it[1].replace('\n', '')] } // remove newline that splitText adds
+        .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
             [[id: tsv_contents[0]], report_meta]
@@ -88,22 +88,20 @@ workflow CORE_GENOME_PHYLOGENY {
     //   Based on code from the bacass nf-core pipeline using the MIT license: https://github.com/nf-core/bacass
     if (params.bakta_db) {
         if (params.bakta_db.endsWith('.tar.gz')) {
-            bakta_db_tar = channel.fromPath(params.bakta_db).map{ [ [id: 'baktadb'], it] }
+            bakta_db_tar = channel.fromPath(params.bakta_db).map{ path -> [ [id: 'baktadb'], path] }
             UNTAR( bakta_db_tar )
             bakta_db = UNTAR.out.untar.map{ meta, db -> db }.first()
-            versions = versions.mix(UNTAR.out.versions)
         } else {
             bakta_db = channel.fromPath(params.bakta_db).first()
         }
     } else if (params.download_bakta_db) {
         BAKTA_BAKTADBDOWNLOAD()
         bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
-        versions = versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
     }
 
     // Run bakta on samples and references without a gff already
     sample_assem_data = sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(sample_assemblies, by: 0)
     ref_assem_data = selected_ref_data.no_gff
         .map { ref_meta, report_meta, ref_path, gff_path ->
@@ -123,7 +121,6 @@ workflow CORE_GENOME_PHYLOGENY {
         [], // regions (optional)
         []  // hmms (optional)
     )
-    versions = versions.mix(BAKTA_BAKTA.out.versions)
 
     // For references that have a gff already, combine the assembly with the gff the same way bakta outputs
     MAKE_GFF_WITH_FASTA (
@@ -156,17 +153,17 @@ workflow CORE_GENOME_PHYLOGENY {
             .groupTuple(by: 0, sort: 'hash')
             .map { meta, gffs -> // Attempt to fix intermittent "input file name collision" error
                 def seen = [] as Set
-                [meta, gffs.findAll { seen.add(it.name) }]
+                [meta, gffs.findAll { gff -> seen.add(gff.name) }]
             }
     )
     versions = versions.mix(PIRATE.out.versions)
 
     // Check that Pirate worked and report
     good_pirate_results = PIRATE.out.results
-        .filter { it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
+        .filter { result -> result[1].any{ path -> path.endsWith("PIRATE.gene_families.ordered.tsv") } }
     pirate_failed = PIRATE.out.results // val(group_meta), [result_files]
-        .filter { ! it[1].any{ it.endsWith("PIRATE.gene_families.ordered.tsv") } }
-        .map { [null, it[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Pirate failed to find a core genome, possibly becuase samples are very different or there are too few reads."] } // meta, group_meta, ref_meta, workflow, level, message
+        .filter { result -> ! result[1].any{ path -> path.endsWith("PIRATE.gene_families.ordered.tsv") } }
+        .map { result -> [null, result[0], null, "CORE_GENOME_PHYLOGENY", "WARNING", "Pirate failed to find a core genome, possibly becuase samples are very different or there are too few reads."] } // meta, group_meta, ref_meta, workflow, level, message
     messages = messages.mix(pirate_failed)
 
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
@@ -222,17 +219,16 @@ workflow CORE_GENOME_PHYLOGENY {
             [meta, alignments, []]
         }
     IQTREE_CORE ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
-    versions = versions.mix(IQTREE_CORE.out.versions)
     trees = IQTREE_CORE.out.phylogeny // subset_meta, tree
-        .map { [it[0].group_id, it[1]] } // group_meta, tree
+        .map { meta -> [meta[0].group_id, meta[1]] } // group_meta, tree
         .groupTuple(sort: 'hash') // group_meta, [trees]
 
     // Mix in null placeholders for failed groups
     pirate_aln = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-        .map { [it[1], null] }
+        .map { msg -> [msg[1], null] }
         .mix(PIRATE.out.aln) // group_meta, align_fasta
     phylogeny = pirate_failed // meta, group_meta, ref_meta, workflow, level, message
-        .map { [it[1], null] }
+        .map { msg -> [msg[1], null] }
         .mix(trees) // group_meta, [trees]
 
 

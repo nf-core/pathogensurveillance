@@ -12,18 +12,17 @@ workflow INITIAL_QC_CHECKS {
 
     // Run FastQC
     shortreads = sample_data
-        .filter { it.sequence_type == "illumina" || it.sequence_type == "bgiseq" }
-        .map { [[id: it.sample_id], it.paths] }
+        .filter { sample_meta -> sample_meta.sequence_type == "illumina" || sample_meta.sequence_type == "bgiseq" }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths] }
         .unique()
     FASTQC ( shortreads )
 
     // Run Nanoplot
     nanopore_reads = sample_data
-        .filter { it.sequence_type == "nanopore" || it.sequence_type == "pacbio" }
-        .map { [[id: it.sample_id], it.paths] }
+        .filter { sample_meta -> sample_meta.sequence_type == "nanopore" || sample_meta.sequence_type == "pacbio" }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths] }
         .unique()
     NANOPLOT ( nanopore_reads )
-    versions = versions.mix(NANOPLOT.out.versions)
 
     emit:
     fastqc_zip    = FASTQC.out.zip

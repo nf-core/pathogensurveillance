@@ -13,7 +13,7 @@ workflow SKETCH_COMPARISON {
 
     // Create signature for each reference genome and successful assembly
     assemblies_to_sketch = sample_data
-        .map{ [it.ref_metas] }
+        .map{ sample_meta -> [sample_meta.ref_metas] }
         .transpose(by: 0)
         .map{ ref_meta -> [[id: ref_meta[0].ref_id], ref_meta[0].ref_path] }
         .filter{ ref_id, ref_path -> ref_path }
@@ -22,24 +22,23 @@ workflow SKETCH_COMPARISON {
     SOURMASH_SKETCH (
         assemblies_to_sketch
     )
-    versions = versions.mix(SOURMASH_SKETCH.out.versions)
 
     // Compare all genomes/samples to eachother to create an ANI matrix
     ref_sigs = sample_data
-        .map{ [it.ref_metas, [id: it.report_group_ids]] }
+        .map{ sample_meta -> [sample_meta.ref_metas, [id: sample_meta.report_group_ids]] }
         .transpose(by: 0)
         .map{ ref_meta, report_group_id -> [[id: ref_meta.ref_id], report_group_id] }
         .combine(SOURMASH_SKETCH.out.signatures, by: 0)
         .map{ ref_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
     assem_sigs = sample_data
-        .map { [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map { sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(SOURMASH_SKETCH.out.signatures, by: 0)
         .map{ sample_id, report_group_id, signature -> [report_group_id, signature]}
         .unique()
     report_groups_with_assemblies = sample_data
-        .map { [[id: it.sample_id], [id: it.report_group_ids]] }
-        .join(assemblies.map { it[0] }, by: 0)
+        .map { sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
+        .join(assemblies.map { assembly -> assembly[0] }, by: 0)
         .map { sample_id, report_group_id -> report_group_id }
         .unique()
     grouped_sigs = ref_sigs
@@ -52,7 +51,6 @@ workflow SKETCH_COMPARISON {
         true, // save numpy matrix
         true  // save CSV
     )
-    versions = versions.mix(SOURMASH_COMPARE.out.versions)
 
     emit:
     ani_matrix    = SOURMASH_COMPARE.out.csv                   // group_meta, csv

@@ -33,9 +33,8 @@ workflow REFERENCE_INDEX {
     ch_versions = channel.empty()
 
     PICARD_CREATESEQUENCEDICTIONARY ( reference )
-    ch_versions = ch_versions.mix (PICARD_CREATESEQUENCEDICTIONARY.out.versions)
 
-    SAMTOOLS_FAIDX ( reference, [[], []], false )
+    SAMTOOLS_FAIDX ( reference.map {meta, fasta -> [meta, fasta, []]}, false )
 
     if (params.aligner == 'bwamem3') {
         BWAMEM3_INDEX ( reference )
