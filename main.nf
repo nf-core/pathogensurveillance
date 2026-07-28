@@ -18,7 +18,6 @@
 include { PATHOGENSURVEILLANCE    } from './workflows/pathogensurveillance'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 include { completionEmail         } from './subworkflows/nf-core/utils_nfcore_pipeline'
 include { completionSummary       } from './subworkflows/nf-core/utils_nfcore_pipeline'
 include { paramsSummaryMap        } from 'plugin/nf-schema'

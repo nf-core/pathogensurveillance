@@ -72,7 +72,6 @@ workflow GENOME_ASSEMBLY {
         [], // val yml
         []  // val hmm
     )
-    versions = versions.mix(SPADES.out.versions)
 
     // Warn about any failed Spades assemblies
     spades_warnings = spades_input

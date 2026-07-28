@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bakta/bakta": {
                         "branch": "master",
-                        "git_sha": "81fe5e6f07fa92ecfd1721373620e2538a1466eb",
+                        "git_sha": "302a84316b0f12eae37bb53e43a88dc4f491a08c",
                         "installed_by": ["modules"]
                     },
                     "bakta/baktadbdownload": {
@@ -22,12 +22,12 @@
                     },
                     "busco/busco": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "3927a974459b80b8e24d73e00da029e8c7335c4d",
                         "installed_by": ["modules"]
                     },
                     "busco/download": {
                         "branch": "master",
-                        "git_sha": "c65517224900fbc03611170224ee63fa16287d83",
+                        "git_sha": "3927a974459b80b8e24d73e00da029e8c7335c4d",
                         "installed_by": ["modules"]
                     },
                     "bwa/index": {
@@ -80,6 +80,11 @@
                         "git_sha": "810f513f8de6d6bd53c24250cbce04c32ea7ad45",
                         "installed_by": ["modules"]
                     },
+                    "htslib/bgziptabix": {
+                        "branch": "master",
+                        "git_sha": "37f69c8ca3eb3d038a5d44f33a329e49f44bd4f2",
+                        "installed_by": ["modules"]
+                    },
                     "iqtree": {
                         "branch": "master",
                         "git_sha": "55ca0738629246b23a84394e94cf50a542f6d72d",
@@ -88,7 +93,8 @@
                     "mafft/align": {
                         "branch": "master",
                         "git_sha": "f0fc064c76250bf362d1900bbf8b62092f9f2a1b",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/mafft/align/mafft-align.diff"
                     },
                     "multiqc": {
                         "branch": "master",
@@ -132,12 +138,12 @@
                     },
                     "samtools/faidx": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "9339809fcb90af8a8b7051e6cd914894d5c52002",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "9339809fcb90af8a8b7051e6cd914894d5c52002",
                         "installed_by": ["modules"]
                     },
                     "seqkit/head": {
@@ -172,7 +178,7 @@
                     },
                     "spades": {
                         "branch": "master",
-                        "git_sha": "4dd9d8439a429c7ee566e0e2347f76ddeef27e66",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "sratools/fasterqdump": {
@@ -182,12 +188,12 @@
                     },
                     "tabix/bgzip": {
                         "branch": "master",
-                        "git_sha": "f2cfcf9d3f6a2d123e6c44aefa788aa232204a7a",
+                        "git_sha": "54e41f4ed3aead45054380a9befeb927612ffc91",
                         "installed_by": ["modules"]
                     },
                     "tabix/tabix": {
                         "branch": "master",
-                        "git_sha": "524a7d5ef99a0cbfb4feec8bf7062eb6a531931a",
+                        "git_sha": "54e41f4ed3aead45054380a9befeb927612ffc91",
                         "installed_by": ["modules"]
                     },
                     "untar": {
