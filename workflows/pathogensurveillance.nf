@@ -279,7 +279,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
         .join(sendsketch_hits, remainder: true)
         .join(ncbi_ref_meta, remainder: true)
         .join(selected_ref_meta, remainder: true)
-        .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
+        .join(VARIANT_ANALYSIS.out.ani_matrix, remainder: true)
         .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
         .join(snp_align, remainder: true)
         .join(snp_phylogeny, remainder: true)

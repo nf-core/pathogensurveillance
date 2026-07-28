@@ -13,6 +13,7 @@ process ASSIGN_MAPPING_REFERENCE {
 
     output:
     tuple val(group_meta), path("${prefix}_mapping_references.tsv"), emit: samp_ref_pairs
+    tuple val(group_meta), path("${prefix}_ani_matrix.csv")       , emit: ani_matrix
     path "versions.yml"                                            , emit: versions
 
     when:
@@ -22,7 +23,7 @@ process ASSIGN_MAPPING_REFERENCE {
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
-    assign_mapping_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_mapping_references.tsv ${min_ref_ani}
+    assign_mapping_reference.R ${ani_matrix} ${samp_ref_pairs} ${prefix}_mapping_references.tsv ${min_ref_ani} ${prefix}_ani_matrix.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -31,9 +31,19 @@ args <- commandArgs(trailingOnly = TRUE)
 #     '0.95'
 # )
 args <- as.list(args)
-names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani")
-ani_matrix <- read.csv(args$ani_matrix, check.names = FALSE)
-rownames(ani_matrix) <- as.character(colnames(ani_matrix))
+names(args) <- c("ani_matrix", "samp_ref_pairs", "out_path", "start_min_ani", "csv_output_path")
+# ani_matrix <- read.csv(args$ani_matrix, check.names = FALSE)
+# rownames(ani_matrix) <- as.character(colnames(ani_matrix))
+
+pw <- read.csv(args$ani_matrix, check.names = FALSE)
+all_names <- sort(unique(c(pw$query_name, pw$match_name)))
+ani_matrix <- matrix(0, nrow = length(all_names), ncol = length(all_names),
+		                          dimnames = list(all_names, all_names))
+ani_matrix[cbind(pw$query_name, pw$match_name)] <- pw$average_containment_ani
+ani_matrix[lower.tri(ani_matrix)] <- t(ani_matrix)[lower.tri(ani_matrix)]
+diag(ani_matrix) <- 1
+write.csv(ani_matrix, args$csv_output_path, row.names = FALSE)
+
 samp_ref_pairs <- read.csv(args$samp_ref_pairs, header = FALSE, col.names = c("sample_id", "ref_id", "ref_name", "ref_desc", "usage"), sep = '\t')
 samp_ref_pairs$sample_id <- as.character(samp_ref_pairs$sample_id)
 start_min_ani <- as.numeric(args$start_min_ani) # The minimum ANI for a reference to be assigned to a samples

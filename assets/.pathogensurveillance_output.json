@@ -887,7 +887,7 @@
         },
         "ani_matrix_csv": {
             "name": "ANI similarity matrix",
-            "description": "Estimated ANI similarity matrix made by sourmash compare in CSV format",
+            "description": "Estimated ANI similarity matrix made by sourmash pairwise in CSV format",
             "category": "Sketch analysis",
             "primary": true,
             "parsers": {
@@ -899,7 +899,7 @@
             "sources": [
                 {
                     "path": "sketch_comparisons/ani_matricies",
-                    "pattern": "^(.+?)_comp\\.csv$",
+                    "pattern": "^(.+?)_ani_matrix\\.csv$",
                     "capture_groups": ["report_id"]
                 }
             ]
