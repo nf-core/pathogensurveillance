@@ -132,8 +132,9 @@ workflow VARIANT_ANALYSIS {
         .combine(REFERENCE_INDEX.out.samtools_fai, by: 0)
         .combine(REFERENCE_INDEX.out.bwa_index, by: 0)
         .combine(REFERENCE_INDEX.out.picard_dict, by: 0)
-        .map{ ref_meta, sample_meta, read_paths, ref_path, report_meta, fai, bwa, picard ->
-            [sample_meta, read_paths, ref_meta, ref_path, report_meta, fai, bwa, picard]
+        .combine(REFERENCE_INDEX.out.samtools_gzi, by: 0)
+        .map{ ref_meta, sample_meta, read_paths, ref_path, report_meta, fai, bwa, picard, gzi ->
+            [sample_meta, read_paths, ref_meta, ref_path, report_meta, fai, bwa, picard, gzi]
         }
 
     ALIGN_READS (
@@ -145,10 +146,10 @@ workflow VARIANT_ANALYSIS {
 
     CALL_VARIANTS (
         input_with_indexes
-            .map { row -> [row[0], row[2], row[1]] + row[3..5] + [row[7]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard]
+            .map { row -> [row[0], row[2], row[1]] + row[3..5] + [row[7]] + [row[8]] } // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, gzi]
             .combine(ALIGN_READS.out.bam, by: 0..1)
-            .combine(ALIGN_READS.out.csi, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, bam, csi]
-            .map { row -> [row[0], row[7], row[8], row[1]] + row[3..6] }
+            .combine(ALIGN_READS.out.csi, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, gzi, bam, csi]
+            .map { row -> [row[0], row[8], row[9], row[1]] + row[3..6] + [row[7]] }
     )
     versions = versions.mix(CALL_VARIANTS.out.versions)
 
