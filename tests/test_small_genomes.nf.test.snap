@@ -1,0 +1,15 @@
+{
+    "-profile test_small_genomes": {
+        "content": [
+            [
+                
+            ],
+            null
+        ],
+        "timestamp": "2026-07-16T14:07:42.017310602",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.04.6"
+        }
+    }
+}

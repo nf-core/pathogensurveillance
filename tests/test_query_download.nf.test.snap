@@ -1,0 +1,136 @@
+{
+    "-profile test_query_download": {
+        "content": [
+            [
+                ".pathogensurveillance_output.json",
+                "assemblies",
+                "assemblies/spades",
+                "assemblies/spades/b_fragilisSRR9713709.assembly.gfa.gz",
+                "assemblies/spades/b_fragilisSRR9713709.contigs.fa.gz",
+                "assemblies/spades/b_fragilisSRR9713709.scaffolds.fa.gz",
+                "assemblies/spades/b_fragilisSRR9713709.spades.log",
+                "downloads",
+                "downloads/annotations",
+                "downloads/annotations/GCA_057606405.1.gff.gz",
+                "downloads/annotations/GCF_000159855.2.gff.gz",
+                "downloads/annotations/GCF_000190575.1.gff.gz",
+                "downloads/annotations/GCF_000210075.1.gff.gz",
+                "downloads/annotations/GCF_001314995.1.gff.gz",
+                "downloads/annotations/GCF_014131755.1.gff.gz",
+                "downloads/annotations/GCF_020097275.1.gff.gz",
+                "downloads/annotations/GCF_024623065.1.gff.gz",
+                "downloads/annotations/GCF_027666515.1.gff.gz",
+                "downloads/annotations/GCF_044361425.1.gff.gz",
+                "downloads/annotations/GCF_900128475.1.gff.gz",
+                "downloads/annotations/GCF_902385425.1.gff.gz",
+                "downloads/assemblies",
+                "downloads/assemblies/GCA_057606405.1.fasta.gz",
+                "downloads/assemblies/GCF_000159855.2.fasta.gz",
+                "downloads/assemblies/GCF_000190575.1.fasta.gz",
+                "downloads/assemblies/GCF_000210075.1.fasta.gz",
+                "downloads/assemblies/GCF_001314995.1.fasta.gz",
+                "downloads/assemblies/GCF_014131755.1.fasta.gz",
+                "downloads/assemblies/GCF_020097275.1.fasta.gz",
+                "downloads/assemblies/GCF_024623065.1.fasta.gz",
+                "downloads/assemblies/GCF_027666515.1.fasta.gz",
+                "downloads/assemblies/GCF_044361425.1.fasta.gz",
+                "downloads/assemblies/GCF_900128475.1.fasta.gz",
+                "downloads/assemblies/GCF_902385425.1.fasta.gz",
+                "downloads/reads",
+                "downloads/reads/SRR9713709_1.fastq.gz",
+                "downloads/reads/SRR9713709_2.fastq.gz",
+                "fastp",
+                "fastp/b_fragilisSRR9713709.fastp.html",
+                "fastp/b_fragilisSRR9713709.fastp.json",
+                "fastp/b_fragilisSRR9713709.fastp.log",
+                "fastp/b_fragilisSRR9713709_R1.fastp.fastq.gz",
+                "fastp/b_fragilisSRR9713709_R2.fastp.fastq.gz",
+                "metadata",
+                "metadata/reference_metadata.tsv",
+                "metadata/sample_metadata.tsv",
+                "pipeline_info",
+                "pipeline_info/messages.tsv",
+                "pipeline_info/pathogensurveillance_run_info.yml",
+                "pipeline_info/version_info.yml",
+                "quality_control",
+                "quality_control/fastqc",
+                "quality_control/fastqc/b_fragilisSRR9713709_1_fastqc.html",
+                "quality_control/fastqc/b_fragilisSRR9713709_1_fastqc.zip",
+                "quality_control/fastqc/b_fragilisSRR9713709_2_fastqc.html",
+                "quality_control/fastqc/b_fragilisSRR9713709_2_fastqc.zip",
+                "quality_control/multiqc",
+                "quality_control/multiqc/all_multiqc",
+                "quality_control/quast",
+                "quality_control/quast/b_fragilisSRR9713709",
+                "quality_control/quast/b_fragilisSRR9713709.tsv",
+                "reference_data",
+                "reference_data/considered",
+                "reference_data/considered/815.json",
+                "reference_data/considered/815.tsv",
+                "reference_data/downloaded",
+                "reference_data/downloaded/b_fragilisSRR9713709.tsv",
+                "report_group_data",
+                "report_group_data/all_inputs",
+                "reports",
+                "reports/all_pathsurveil_report.html",
+                "sendsketch",
+                "sendsketch/b_fragilisSRR9713709.txt",
+                "sendsketch/b_fragilisSRR9713709_taxa_found.tsv",
+                "sendsketch/b_fragilisSRR9713709_taxon_data.tsv",
+                "sketch_comparisons",
+                "sketch_comparisons/ani_matricies",
+                "sketch_comparisons/ani_matricies/all_comp.csv",
+                "sketch_comparisons/ani_matricies/all_comp.npy",
+                "sketch_comparisons/ani_matricies/all_comp.npy.labels.txt",
+                "sketch_comparisons/sketches",
+                "sketch_comparisons/sketches/GCA_057606405_1.sig",
+                "sketch_comparisons/sketches/GCF_000159855_2.sig",
+                "sketch_comparisons/sketches/GCF_000190575_1.sig",
+                "sketch_comparisons/sketches/GCF_000210075_1.sig",
+                "sketch_comparisons/sketches/GCF_001314995_1.sig",
+                "sketch_comparisons/sketches/GCF_014131755_1.sig",
+                "sketch_comparisons/sketches/GCF_020097275_1.sig",
+                "sketch_comparisons/sketches/GCF_024623065_1.sig",
+                "sketch_comparisons/sketches/GCF_027666515_1.sig",
+                "sketch_comparisons/sketches/GCF_044361425_1.sig",
+                "sketch_comparisons/sketches/GCF_900128475_1.sig",
+                "sketch_comparisons/sketches/GCF_902385425_1.sig",
+                "sketch_comparisons/sketches/b_fragilisSRR9713709.sig"
+            ],
+            {
+                "BUSCO_DOWNLOAD": {
+                    "busco": "5.8.3"
+                },
+                "FASTP": {
+                    "fastp": "1.0.1"
+                },
+                "FASTQC": {
+                    "fastqc": "0.12.1"
+                },
+                "QUAST": {
+                    "quast": "5.3.0"
+                },
+                "SAMPLESHEET_CHECK": {
+                    "r-PathoSurveilR": "1.2.0"
+                },
+                "SOURMASH_COMPARE": {
+                    "sourmash": "4.9.4"
+                },
+                "SOURMASH_SKETCH": {
+                    "sourmash": "4.9.4"
+                },
+                "SPADES": {
+                    "spades": "4.1.0"
+                },
+                "Workflow": {
+                    "nf-core/pathogensurveillance": "v1.2.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-07-16T13:21:45.047604179",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.04.6"
+        }
+    }
+}

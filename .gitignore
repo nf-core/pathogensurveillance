@@ -38,3 +38,4 @@ assets/main_report/packages.bib
 .positai
 .lineage/
 .rsync-filter
+tests/nextflow.local.*
