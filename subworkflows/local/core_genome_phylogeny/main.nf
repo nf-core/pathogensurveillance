@@ -95,10 +95,10 @@ workflow CORE_GENOME_PHYLOGENY {
     } else if (params.download_bakta_db) {
         def bakta_cache = file("${params.data_dir}/bakta_db")
         if (bakta_cache.exists() && bakta_cache.listFiles()) {
-            bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/db-${params.bakta_db_type}")
+            bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/db-${params.bakta_db_type}").first()
         } else {
             BAKTA_BAKTADBDOWNLOAD()
-            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db.first()
         }
     }
 
