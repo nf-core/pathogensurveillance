@@ -99,17 +99,12 @@ workflow PREPARE_INPUT {
     sample_data = all_reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
-            if (reads_path instanceof Collection) {
-                if (reads_path.size() <= 2) {
-                    sample_meta.paths = reads_path
-                } else {  // if there are a mixture of single and paired end reads
-                    sample_meta.paths = reads_path.findAll{it ==~ /^.+_[12]\..+$/}
-                }
-            } else {
-                sample_meta.paths = [reads_path]
-            }
-            sample_meta.single_end = sample_meta.paths.size() == 1
-            [sample_meta, ref_metas]
+            def paths = reads_path instanceof Collection
+                ? (reads_path.size() <= 2
+                    ? reads_path
+                    : reads_path.findAll{it ==~ /^.+_[12]\..+$/})
+                : [reads_path]
+            [sample_meta + [paths: paths, single_end: paths.size() == 1], ref_metas]
         }
         .mix(sample_data_without_acc)
 
@@ -153,9 +148,7 @@ workflow PREPARE_INPUT {
         .combine(sendsketch_depth, by: 0)
         .combine(INITIAL_CLASSIFICATION.out.domain, by: 0)
         .map{ sample_id, sample_meta, ref_metas, depth, domain ->
-            sample_meta.sendsketch_depth = depth
-            sample_meta.domain = domain
-            [sample_meta, ref_metas]
+            [sample_meta + [sendsketch_depth: depth, domain: domain], ref_metas]
         }
 
     // Get list of families for all samples without exclusive references defined by the user
@@ -273,8 +266,8 @@ workflow PREPARE_INPUT {
         .filter { item -> item != [null, null] } // above join adds [null, null] if channel is empty
     picked_assemblies_refs = PICK_ASSEMBLIES.out.formatted // pick_assemblies_out has a list of ref metdata for each sample
         .splitCsv(header:true, sep:'\t', quote:'"', elem: 1)
-        .map{ sample_id, ref_meta ->
-            [sample_id, ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
+        .map{ meta, ref_meta ->
+            [[id: meta.id], ref_meta.collectEntries{ key, value -> [(key): value ?: null] }]
         }
         .unique()
         .groupTuple(by: 0, sort: 'hash')
@@ -371,9 +364,7 @@ workflow PREPARE_INPUT {
         }
         .combine(all_seq_and_gff, by: 0)
         .map { ncbi_acc_meta, sample_meta, ref_meta, ref_path, gff_path ->
-            ref_meta.ref_path = ref_path
-            ref_meta.gff = gff_path
-            [sample_meta, ref_meta]
+            [sample_meta, ref_meta + [ref_path: ref_path, gff: gff_path]]
         }
         .mix(local_references)
         .mix(excluded_refs)
@@ -383,15 +374,13 @@ workflow PREPARE_INPUT {
     // Add reference metadata list to the sample metadata
     sample_data = sample_data
         .map{ sample_meta, ref_metas ->
-            sample_meta.ref_metas = ref_metas
-            sample_meta
+            sample_meta + [ref_metas: ref_metas]
         }
 
     // Ensure that items that can be single or multiple are always formatted as lists
     sample_data = sample_data
         .map{ sample_meta ->
-            sample_meta.paths = sample_meta.paths instanceof Collection ? sample_meta.paths : [sample_meta.paths]
-            sample_meta
+            sample_meta + [paths: sample_meta.paths instanceof Collection ? sample_meta.paths : [sample_meta.paths]]
         }
 
     // Count the number of reads and basepairs to decide whether not to subset reads
@@ -433,8 +422,7 @@ workflow PREPARE_INPUT {
         }
         .combine(SEQKIT_HEAD.out.subset, by: 0)
         .map { sample_id, sample_meta, subset_reads ->
-            sample_meta.paths = subset_reads instanceof Collection ? subset_reads : [subset_reads]
-            sample_meta
+            sample_meta + [paths: subset_reads instanceof Collection ? subset_reads : [subset_reads]]
         }
         .mix(samples_to_not_subset)
 

@@ -25,8 +25,7 @@ workflow GENOME_ASSEMBLY {
         .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
     all_samples = parsed_sample_data
         .map{ sample_meta, report_meta, read_paths ->
-            sample_meta.reads_size_gb = readsSizeGB(read_paths)
-            [sample_meta, read_paths]
+            [sample_meta + [reads_size_gb: readsSizeGB(read_paths)], read_paths]
         }
         .unique()
 

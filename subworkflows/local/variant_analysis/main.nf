@@ -178,11 +178,11 @@ workflow VARIANT_ANALYSIS {
         .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
 
     align_with_samp_meta_enough = align_combined
-        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() >= 4 }
+        .filter { meta, fasta, seq_count_file -> seq_count_file.trim().toInteger() >= 4 }
         .map { meta, fasta, seq_count_file -> [meta, fasta] }
 
     align_with_samp_meta_too_few = align_combined
-        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() < 4 }
+        .filter { meta, fasta, seq_count_file -> seq_count_file.trim().toInteger() < 4 }
         .map { meta, fasta, seq_count_file -> [meta, fasta] }
 
     too_few_samp_warnings = align_with_samp_meta_too_few

@@ -35,7 +35,6 @@ workflow ALIGN_READS {
     } else {
         BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
         aligner_out = BWA_MEM.out.bam
-        versions = versions.mix(BWA_MEM.out.versions)
     }
 
     // Run a series of picard commands to sort and filter variants
