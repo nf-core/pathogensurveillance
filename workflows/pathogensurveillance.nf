@@ -186,7 +186,14 @@ workflow PATHOGENSURVEILLANCE {
         .combine(multiqc_logo.collect(sort: true).ifEmpty([]))
         .combine(channel.value([]))
         .combine(channel.value([]))
-        .map { report_meta, files, config, custom_config, logo, replace, samples ->
+        .map { tuple ->
+            def report_meta = tuple[0]
+            def files = tuple[1]
+            def config = tuple.size() > 2 ? tuple[2] : []
+            def custom_config = tuple.size() > 3 ? tuple[3] : []
+            def logo = tuple.size() > 4 ? tuple[4] : []
+            def replace = tuple.size() > 5 ? tuple[5] : []
+            def samples = tuple.size() > 6 ? tuple[6] : []
             def all_configs = (config ? [config] : []) + (custom_config ? [custom_config] : [])
             [report_meta, files, all_configs.flatten(), logo, replace, samples]
         }

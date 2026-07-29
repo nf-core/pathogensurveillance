@@ -178,12 +178,12 @@ workflow VARIANT_ANALYSIS {
         .combine(VCF_TO_SNP_ALIGN.out.seq_count, by: 0)
 
     align_with_samp_meta_enough = align_combined
-        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() >= 4 }
-        .map { meta, fasta, seq_count_file -> [meta, fasta] }
+        .filter { meta, fasta, seq_count -> seq_count.trim().toInteger() >= 4 }
+        .map { meta, fasta, seq_count -> [meta, fasta] }
 
     align_with_samp_meta_too_few = align_combined
-        .filter { meta, fasta, seq_count_file -> seq_count_file.text.trim().toInteger() < 4 }
-        .map { meta, fasta, seq_count_file -> [meta, fasta] }
+        .filter { meta, fasta, seq_count -> seq_count.trim().toInteger() < 4 }
+        .map { meta, fasta, seq_count -> [meta, fasta] }
 
     too_few_samp_warnings = align_with_samp_meta_too_few
         .map { meta, fasta -> [null, meta.group, meta.ref, "VARIANT_ANALYSIS", "WARNING", "Not enough samples to build a SNP tree."] }
