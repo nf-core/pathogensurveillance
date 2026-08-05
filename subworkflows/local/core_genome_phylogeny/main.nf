@@ -73,7 +73,7 @@ workflow CORE_GENOME_PHYLOGENY {
         .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
-            [[id: tsv_contents[0]], report_meta]
+            [[id: tsv_contents[0].toString()], report_meta]
         }
         .join(all_ref_data, by: 0..1)
         .map { ref_meta, report_meta, ref_path, gff_path ->
@@ -196,9 +196,9 @@ workflow CORE_GENOME_PHYLOGENY {
         SUBSET_CORE_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
             .map { file_name, message_data -> [
-                message_data.sample_id ? [id: message_data.sample_id] : null,
-                message_data.report_group_id ? [id: message_data.report_group_id] : null,
-                message_data.reference_id ? [id: message_data.reference_id] : null,
+                message_data.sample_id ? [id: message_data.sample_id.toString()] : null,
+                message_data.report_group_id ? [id: message_data.report_group_id.toString()] : null,
+                message_data.reference_id ? [id: message_data.reference_id.toString()] : null,
                 "CORE_GENOME_PHYLOGENY",
                 message_data.message_type,
                 message_data.description

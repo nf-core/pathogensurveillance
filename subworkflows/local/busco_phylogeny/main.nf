@@ -66,7 +66,7 @@ workflow BUSCO_PHYLOGENY {
         .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
-            [report_meta, [id: tsv_contents[0]]]
+            [report_meta, [id: tsv_contents[0].toString()]]
         }
         .combine(references, by: 0..1)
         .map {report_meta, ref_meta, ref_path, ref_name ->
@@ -121,9 +121,9 @@ workflow BUSCO_PHYLOGENY {
         SUBSET_BUSCO_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
             .map { message_row -> [
-                message_row.sample_id == '' ? null : [id: message_row.sample_id],
-                message_row.report_group_id == '' ? null : [id: message_row.report_group_id],
-                message_row.reference_id == '' ? null : [id: message_row.reference_id],
+                message_row.sample_id == '' ? null : [id: message_row.sample_id.toString()],
+                message_row.report_group_id == '' ? null : [id: message_row.report_group_id.toString()],
+                message_row.reference_id == '' ? null : [id: message_row.reference_id.toString()],
                 "BUSCO_PHYLOGENY",
                 message_row.message_type,
                 message_row.description

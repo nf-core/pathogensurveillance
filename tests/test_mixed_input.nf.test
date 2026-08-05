@@ -2,18 +2,17 @@ nextflow_pipeline {
 
     name "Test pipeline"
     script "../main.nf"
-    options "-resume"
     tag "pipeline"
     tag "downloads"
 
-    test("-profile test_query_download_with_refs") {
+    test("-profile test_mixed_input") {
 
         when {
             params {
                 outdir = "$outputDir"
+                max_samples = 4
                 input = "https://raw.githubusercontent.com/worthyc51/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_mixed_input.csv"
                 reference_data = "https://raw.githubusercontent.com/worthyc51/test-datasets/refs/heads/pathogensurveillance/samplesheets/query_download_refs.csv"
-                max_samples = 1
                 phylo_max_genes = 100
                 n_ref_closest = 1
                 n_ref_closest_named = 1

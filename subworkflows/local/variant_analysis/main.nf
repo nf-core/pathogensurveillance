@@ -5,6 +5,7 @@ include { IQTREE as IQTREE_SNP     } from '../../../modules/nf-core/iqtree'
 include { VCF_TO_SNP_ALIGN         } from '../../../modules/local/vcf_to_snp_align'
 include { SEQKIT_SLIDING           } from '../../../modules/nf-core/seqkit/sliding'
 include { ASSIGN_MAPPING_REFERENCE } from '../../../modules/local/assign_mapping_reference'
+include { HTSLIB_BGZIPTABIX        } from '../../../modules/nf-core/htslib/bgziptabix'
 
 workflow VARIANT_ANALYSIS {
 
@@ -62,7 +63,7 @@ workflow VARIANT_ANALYSIS {
         .map { row -> [row[0], row[1].replace('\n', '')] } // remove newline that splitText adds
         .splitCsv( elem: 1, sep: '\t' )
         .map { report_meta, tsv_contents ->
-            [[id: tsv_contents[0]], report_meta, [id: tsv_contents[1]]]
+            [[id: tsv_contents[0].toString()], report_meta, [id: tsv_contents[1].toString()]]
         }
         .join(ref_paths, by: 0..2)
         .join(sample_data.map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids], sample_meta.paths, sample_meta.sequence_type, sample_meta.ploidy] }, by: 0..1)
@@ -115,17 +116,35 @@ workflow VARIANT_ANALYSIS {
         .mix(chopped_reads) // meta, [fastqs], ref_meta, reference, report_meta
 
 
-    // Create indexes for each reference
-    REFERENCE_INDEX (
-        filtered_input
-            .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
-                [ref_meta, ref_path]
-            }
-            .unique()
+    // Compress references with htslib (BGZF) so they emit a .gzi and can be indexed for variant calling
+    unique_refs = filtered_input
+        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [ref_meta, ref_path]
+        }
+        .unique()
+    HTSLIB_BGZIPTABIX (
+        unique_refs.map { ref_meta, ref_path -> [ref_meta, ref_path, [], []] },
+        "compress",
+        false,
+        "fasta"
     )
+    compressed_refs = HTSLIB_BGZIPTABIX.out.output   // [ref_meta, <id>.fasta.gz]
+
+    // Swap original ref_path for the compressed reference
+    filtered_input_with_compressed_refs = filtered_input
+        .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
+            [ref_meta, sample_meta, report_meta, usage, read_paths, sequence_type, ploidy]
+        }
+        .join(compressed_refs, by: 0)
+        .map{ ref_meta, sample_meta, report_meta, usage, read_paths, sequence_type, ploidy, ref_path ->
+            [sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy]
+        }
+
+    // Create indexes for each compressed reference
+    REFERENCE_INDEX ( compressed_refs )
     versions = versions.mix(REFERENCE_INDEX.out.versions)
 
-    input_with_indexes = filtered_input
+    input_with_indexes = filtered_input_with_compressed_refs
         .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
             [ref_meta, sample_meta, read_paths, ref_path, report_meta]
         }

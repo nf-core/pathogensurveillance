@@ -38,9 +38,9 @@ workflow PREPARE_INPUT {
         SAMPLESHEET_CHECK.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
             .map { [
-                it.sample_id == '' ? null : [id: it.sample_id],
-                it.report_group_id == '' ? null : [id: it.report_group_id],
-                it.reference_id == '' ? null : [id: it.reference_id],
+                it.sample_id == '' ? null : [id: it.sample_id.toString()],
+                it.report_group_id == '' ? null : [id: it.report_group_id.toString()],
+                it.reference_id == '' ? null : [id: it.reference_id.toString()],
                 "PREPARE_INPUT",
                 it.message_type,
                 it.description
@@ -445,7 +445,8 @@ def create_sample_metadata_channel(LinkedHashMap sample_meta) {
         exit 1, "ERROR: Please check the sample metadata TSV/CSV. The file specified by 'path_2' does not exist.\n${sample_meta.path_2}"
     }
     sample_meta = sample_meta.collectEntries { key, value -> [(key): value ?: null] }
-    sample_meta.ref_ids = sample_meta.ref_ids ? sample_meta.ref_ids.split(";") as ArrayList : []
+    sample_meta.sample_id = sample_meta.sample_id?.toString()
+    sample_meta.ref_ids = sample_meta.ref_ids ? sample_meta.ref_ids.toString().split(";") as ArrayList : []
     sample_meta.single_end = ! sample_meta.path_2
     def paths = null
     if (sample_meta.path) {
@@ -463,6 +464,7 @@ def create_reference_metadata_channel(LinkedHashMap ref_meta) {
         exit 1, "ERROR: Please check the reference metadata TSV/CSV. The file specified by 'ref_path` does not exist.\n${ref_meta.ref_path}"
     }
     ref_meta = ref_meta.collectEntries { key, value -> [(key): value ?: null] }
+    ref_meta.ref_id = ref_meta.ref_id?.toString()
     ref_meta.ref_path = ref_meta.ref_path ? file(ref_meta.ref_path) : null
     return ref_meta
 }
