@@ -106,7 +106,9 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Put multiqc's output into a single folder for organization
-    cp -r ${multiqc} ${prefix}_inputs/multiqc
+    if [ ! -z "${multiqc}" ]; then
+    	cp -r ${multiqc} ${prefix}_inputs/multiqc
+    fi
 
     # Add pipeline status messages
     mkdir -p ${prefix}_inputs/pipeline_info

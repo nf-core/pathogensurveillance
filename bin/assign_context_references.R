@@ -41,8 +41,17 @@ args <- commandArgs(trailingOnly = TRUE)
 # )
 names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
-ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
-rownames(ani_matrix) <- colnames(ani_matrix)
+# ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
+# rownames(ani_matrix) <- colnames(ani_matrix)
+
+pw <- read.csv(args$ani_matrix, check.names = FALSE)
+all_names <- sort(unique(c(pw$query_name, pw$match_name)))
+ani_matrix <- matrix(0, nrow = length(all_names), ncol = length(all_names),
+		                          dimnames = list(all_names, all_names))
+ani_matrix[cbind(pw$query_name, pw$match_name)] <- pw$average_containment_ani
+ani_matrix[lower.tri(ani_matrix)] <- t(ani_matrix)[lower.tri(ani_matrix)]
+diag(ani_matrix) <- 1
+
 n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
@@ -71,7 +80,7 @@ sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), 
 }))
 rownames(sample_data) <- NULL
 all_ids <- unique(c(sample_data$ref_id, sample_data$sample_id))
-ani_matrix <- ani_matrix[row.names(ani_matrix) %in% all_ids, names(ani_matrix) %in% all_ids, drop = FALSE]
+ani_matrix <- ani_matrix[rownames(ani_matrix) %in% all_ids, colnames(ani_matrix) %in% all_ids, drop = FALSE]
 
 # Scale ANI values for each sample
 rescale <- function(x) {

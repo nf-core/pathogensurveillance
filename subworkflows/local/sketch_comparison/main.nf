@@ -1,5 +1,5 @@
 include { SOURMASH_SKETCH            } from '../../../modules/nf-core/sourmash/sketch/main'
-include { SOURMASH_COMPARE           } from '../../../modules/nf-core/sourmash/compare'
+include { SOURMASH_PAIRWISE          } from '../../../modules/nf-core/sourmash/pairwise'
 
 workflow SKETCH_COMPARISON {
 
@@ -45,15 +45,14 @@ workflow SKETCH_COMPARISON {
         .mix(assem_sigs)
         .groupTuple(by: 0, sort: 'hash')
         .join(report_groups_with_assemblies, by: 0)
-    SOURMASH_COMPARE (
+    SOURMASH_PAIRWISE (
         grouped_sigs,
         [], // file_list (optional)
-        true, // save numpy matrix
-        true  // save CSV
+	true
     )
 
     emit:
-    ani_matrix    = SOURMASH_COMPARE.out.csv                   // group_meta, csv
-    versions      = versions                                // versions
-    messages      = messages                                   // meta, group_meta, ref_meta, workflow, level, message
+    ani_matrix    = SOURMASH_PAIRWISE.out.csv                   // group_meta, csv
+    versions      = versions                                    // versions
+    messages      = messages                                    // meta, group_meta, ref_meta, workflow, level, message
 }

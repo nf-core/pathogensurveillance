@@ -166,11 +166,16 @@
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
-                    "sourmash/compare": {
+                    /* "sourmash/compare": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
-                    },
+                    }, */
+                    "sourmash/pairwise": {
+                        "branch": "sourmash_scripts_pairwise"
+                        "git_sha": "a4f2c04af5334530642d9460ad728d4306bd6d94"
+                        "installed_by": ["modules"]
+                    }
                     "sourmash/sketch": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",

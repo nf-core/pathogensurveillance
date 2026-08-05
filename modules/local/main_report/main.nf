@@ -27,7 +27,6 @@ process MAIN_REPORT {
     if [[ -v SINGULARITY_ENVIRONMENT ]]; then
         source /opt/conda/etc/conda/activate.d/quarto.sh
     fi
-
     # Tell quarto where to put cache so it does not try to put it where it does not have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
 
