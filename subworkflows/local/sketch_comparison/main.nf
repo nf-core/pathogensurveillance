@@ -48,7 +48,6 @@ workflow SKETCH_COMPARISON {
     SOURMASH_PAIRWISE (
         grouped_sigs,
         [], // file_list (optional)
-	true
     )
 
     emit:
