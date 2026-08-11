@@ -31,7 +31,7 @@ process BAKTA_BAKTA {
 
     when:
     task.ext.when == null || task.ext.when
-
+    
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -39,11 +39,16 @@ process BAKTA_BAKTA {
     def prodigal_tf_opt = prodigal_tf ? "--prodigal-tf ${prodigal_tf[0]}" : ""
     def regions_opt = regions ? "--regions ${regions}" : ""
     def hmms_opt = hmms ? "--hmms ${hmms}" : ""
-
     """
     ## Fake home due to fontconfig 'no writeable cache directory' issue
     mkdir nxf_home
     export HOME=\$PWD/nxf_home
+
+    db_real="\$(realpath "${db}")"
+    if [ ! -e "\$db_real/amrfinderplus-db/latest" ] || [ ! -L "\$db_real/amrfinderplus-db/latest" ]; then
+        rm -rf "\$db_real/amrfinderplus-db/latest"
+        amrfinder_update --force_update --database "\$db_real/amrfinderplus-db"
+    fi
 
     bakta \\
         ${fasta} \\
