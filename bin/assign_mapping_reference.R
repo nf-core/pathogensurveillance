@@ -66,7 +66,9 @@ rownames(samp_ref_pairs) <- NULL
 
 # Function to assign references given a minimum ANI
 reference_ids <- unique(samp_ref_pairs$ref_id)
+reference_ids <- reference_ids[reference_ids %in% rownames(ani_matrix)]
 assign_ref <- function(sample_ids, min_ani) {
+    sample_ids <- sample_ids[sample_ids %in% colnames(ani_matrix)]
     valid_samples_for_ref <- lapply(reference_ids, function(ref_id) {
         good_ani <- ani_matrix[ref_id, sample_ids] >= min_ani
         can_use_ref <- unlist(lapply(sample_ids, function(sample_id) {

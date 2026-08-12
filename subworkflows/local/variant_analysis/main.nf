@@ -45,7 +45,7 @@ workflow VARIANT_ANALYSIS {
         .collectFile() { sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
             [ "${report_group_id}.tsv", "${sample_id}\t${ref_id}\t${ref_name}\t${ref_desc}\t${usage}\n" ]
         }
-        .map {path -> [[id: path.getSimpleName()], path]}
+        .map {path -> [[id: path.getSimpleName().replace('.tsv', '')], path]}
 
     // For each group, assign references for variant calling if not user-defined
     ASSIGN_MAPPING_REFERENCE (
