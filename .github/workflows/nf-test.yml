@@ -51,6 +51,7 @@ jobs:
           NFT_VER: ${{ env.NFT_VER }}
         with:
           max_shards: 7
+          paths: tests/default.nf.test
 
       - name: debug
         run: |
@@ -100,6 +101,7 @@ jobs:
           profile: ${{ matrix.profile }}
           shard: ${{ matrix.shard }}
           total_shards: ${{ env.TOTAL_SHARDS }}
+          paths: tests/default.nf.test
       - name: Report test status
         if: ${{ always() }}
         run: |

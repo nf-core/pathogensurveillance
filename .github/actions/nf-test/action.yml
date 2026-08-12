@@ -62,6 +62,7 @@ runs:
         NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
       run: |
         nf-test test \
+          ${{ inputs.paths }} \
           --profile=+${{ inputs.profile }} \
           $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
           --ci \
