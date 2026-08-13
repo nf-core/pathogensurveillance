@@ -1,19 +1,19 @@
 
 nextflow_pipeline {
 
-    name "Test pipeline"
+    name "Test pipeline with bacteria profile"
     script "../main.nf"
-    tag "pipeline"
+    tag "pipeline_test"
     tag "bacteria"
 
-    test("-profile test_bacteria") {
+    test("bacteria profile") {
 
         when {
             params {
                 outdir = "$outputDir"
                 input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/bacteria.csv"
-
-                max_samples = 1
+                max_samples = 5
+                aligner = 'bwa'
                 phylo_max_genes = 100
                 n_ref_closest = 1
                 n_ref_closest_named = 1
@@ -42,7 +42,7 @@ nextflow_pipeline {
     }
 
     //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("-profile test, stub") {
+    /* test("bacteria profile, stub") {
         options "-stub"
         when {
             params {

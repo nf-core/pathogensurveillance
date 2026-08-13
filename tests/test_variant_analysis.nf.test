@@ -1,27 +1,26 @@
 nextflow_pipeline {
 
-    name "Test pipeline with sample input paths"
+    name "Test pipeline with full variant analysis"
     script "../main.nf"
-    options "-resume"
     tag "pipeline"
-    tag "input_test_full"
+    tag "full_pipeline_feature"
 
-    test("download path input test") {
+    test("variant analysis") {
 
         when {
             params {
                 outdir = "$outputDir"
-                input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_url_download.csv"
-
-                max_samples = 2
-                phylo_max_genes = 20
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_variant_analysis.csv"
+                reference_data = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_refs.csv"
+                aligner = 'bwa'
+                max_samples = 3
+                phylo_max_genes = 100
                 n_ref_closest = 1
                 n_ref_closest_named = 1
-                n_ref_context = 3
+                n_ref_context = 7
                 n_ref_strains = '1'
-                n_ref_species = '3'
-                n_ref_genera = '3'
-                skip_core_phylogeny = true
+                n_ref_species = '5'
+                n_ref_genera = '5'
             }
         }
 
@@ -43,7 +42,7 @@ nextflow_pipeline {
     }
 
     //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("download path input test, stub") {
+    /* test("variant analysis, stub") {
         options "-stub"
         when {
             params {

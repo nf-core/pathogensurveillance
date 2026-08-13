@@ -1,14 +1,15 @@
 nextflow_pipeline {
 
-    name "Test pipeline"
+    name "Test pipeline with test profile"
     script "../main.nf"
     tag "pipeline"
-    tag "test"
+    tag "pipeline_test"
 
-    test("-profile test") {
+    test("test profile") {
         when {
             params {
                 outdir = "$outputDir"
+                aligner = "bwa"
             }
         }
 
@@ -17,20 +18,20 @@ nextflow_pipeline {
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
 
             assertAll(
-		{ assert workflow.success },
+		        { assert workflow.success },
                 { assert snapshot(
                     // All stable path name, with a relative path
                     stable_name,
 
                     // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
                     removeNextflowVersion("$outputDir/pipeline_info/version_info.yml")
-                ).match(): "" }
+                ).match() }
             )
         }
     }
 
     //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("-profile test, stub") {
+    /* test("test profile, stub") {
         options "-stub"
         when {
             params {

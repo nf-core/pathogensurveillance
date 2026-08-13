@@ -1,18 +1,18 @@
 nextflow_pipeline {
 
-    name "Test pipeline"
+    name "Test pipeline with sample and reference input queries"
     script "../main.nf"
     tag "pipeline"
-    tag "downloads"
+    tag "input_test_full"
 
-    test("-profile test_query_download_with_refs") {
+    test("ncbi query test with refs") {
 
         when {
             params {
                 outdir = "$outputDir"
-                input = "https://raw.githubusercontent.com/worthyc51/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_query_download_with_refs.csv"
-                reference_data = "https://raw.githubusercontent.com/worthyc51/test-datasets/refs/heads/pathogensurveillance/samplesheets/query_download_refs.csv"
-                max_samples = 1
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_query_download_with_refs.csv"
+                reference_data = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_refs.csv"
+                max_samples = 2
                 phylo_max_genes = 20
                 n_ref_closest = 1
                 n_ref_closest_named = 1
@@ -25,7 +25,8 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
+            // Test snapshots with NCBI queries are non-deterministic amd require further filtering
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*']).grep { !(it =~ /(?:[A-Z]{3}\d+|GC[AF][_\d.]*|reference_data\/considered\/\d+\.(?:json|tsv))/) }
 
             assertAll(
                 { assert workflow.success},
@@ -41,7 +42,7 @@ nextflow_pipeline {
     }
 
     //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("-profile test, stub") {
+    /* test("ncbi query test with refs, stub") {
         options "-stub"
         when {
             params {

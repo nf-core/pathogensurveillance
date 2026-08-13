@@ -43,17 +43,17 @@
                     },
                     "bwamem3/index": {
                         "branch": "master",
-                        "git_sha": "cab334f632708de2679161f713dd969bfa491a25",
+                        "git_sha": "d38f40ca73e22a520ad4bb56eed2906219696ccc",
                         "installed_by": ["modules"]
                     },
                     "bwamem3/mem": {
                         "branch": "master",
-                        "git_sha": "cab334f632708de2679161f713dd969bfa491a25",
+                        "git_sha": "d38f40ca73e22a520ad4bb56eed2906219696ccc",
                         "installed_by": ["modules"]
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "826a9b28d6da61097d60e1923bb8a2e51de3c5b4",
                         "installed_by": ["modules"]
                     },
                     "fastqc": {
@@ -63,7 +63,7 @@
                     },
                     "flye": {
                         "branch": "master",
-                        "git_sha": "1ab453187e9eada07bdd98609ce770971bfe86e4",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "gatk4/variantfiltration": {
@@ -88,7 +88,7 @@
                     },
                     "iqtree": {
                         "branch": "master",
-                        "git_sha": "55ca0738629246b23a84394e94cf50a542f6d72d",
+                        "git_sha": "fb60d28393f3c278daecbd276e7d8cd502689a8b",
                         "installed_by": ["modules"]
                     },
                     "mafft/align": {
@@ -99,7 +99,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "008f9d3e61209bf995edac3ba531f54e269e1215",
+                        "git_sha": "98403d15b0e50edae1f3fec5eae5e24982f1fade",
                         "installed_by": ["modules"]
                     },
                     "nanoplot": {
@@ -129,7 +129,7 @@
                     },
                     "pirate": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "382d2a24afe87ba02a14b687f6c5cfde0518305c",
                         "installed_by": ["modules"]
                     },
                     "quast": {
@@ -164,12 +164,12 @@
                     },
                     "seqtk/sample": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "d672aca9cdef89ee649b340c08877ae40a19d5c0",
                         "installed_by": ["modules"]
                     },
                     "sourmash/pairwise": {
                         "branch": "master",
-                        "git_sha": "0041db49284f44eaeba5b861acdb7d076771d244",
+                        "git_sha": "1a6d192f85a35f260ca5b70195f87536d78b4717",
                         "installed_by": ["modules"]
                     },
                     "sourmash/sketch": {
@@ -184,8 +184,9 @@
                     },
                     "sratools/fasterqdump": {
                         "branch": "master",
-                        "git_sha": "0cdf7767a79faf424645beeff83ecfa5528b6a7c",
-                        "installed_by": ["modules"]
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/sratools/fasterqdump/sratools-fasterqdump.diff"
                     },
                     "untar": {
                         "branch": "master",
