@@ -3,7 +3,7 @@ process FLYE {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/fa/fa1c1e961de38d24cf36c424a8f4a9920ddd07b63fdb4cfa51c9e3a593c3c979/data' :
         'community.wave.seqera.io/library/flye:2.9.5--d577924c8416ccd8' }"
 
@@ -29,7 +29,6 @@ process FLYE {
     def valid_mode = ["--pacbio-raw", "--pacbio-corr", "--pacbio-hifi", "--nano-raw", "--nano-corr", "--nano-hq"]
     if ( !valid_mode.contains(mode) )  { error "Unrecognised mode to run Flye. Options: ${valid_mode.join(', ')}" }
     """
-    set +e
     flye \\
         $mode \\
         $reads \\
@@ -37,31 +36,13 @@ process FLYE {
         --threads \\
         $task.cpus \\
         $args
-    FLYE_EXIT=\$?
-    set -e
 
-    # Check for specific errors that should not be retried
-    if [ \$FLYE_EXIT -ne 0 ]; then
-        if grep -q "ERROR: No disjointigs were assembled" flye.log; then
-            # Create empty output files to indicate no assembly
-            touch ${prefix}.assembly.fasta.gz
-            touch ${prefix}.assembly_graph.gfa.gz
-            touch ${prefix}.assembly_graph.gv.gz
-            touch ${prefix}.assembly_info.txt
-            mv flye.log ${prefix}.flye.log
-            mv params.json ${prefix}.params.json
-            (exit 0) || true
-        else
-            (exit \$FLYE_EXIT) || true
-        fi
-    else
-        gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
-        gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz
-        gzip -c assembly_graph.gv > ${prefix}.assembly_graph.gv.gz
-        mv assembly_info.txt ${prefix}.assembly_info.txt
-        mv flye.log ${prefix}.flye.log
-        mv params.json ${prefix}.params.json
-    fi
+    gzip -c assembly.fasta > ${prefix}.assembly.fasta.gz
+    gzip -c assembly_graph.gfa > ${prefix}.assembly_graph.gfa.gz
+    gzip -c assembly_graph.gv > ${prefix}.assembly_graph.gv.gz
+    mv assembly_info.txt ${prefix}.assembly_info.txt
+    mv flye.log ${prefix}.flye.log
+    mv params.json ${prefix}.params.json
     """
 
     stub:
