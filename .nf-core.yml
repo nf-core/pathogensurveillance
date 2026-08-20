@@ -1,7 +1,11 @@
 lint:
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
+    - .github/workflows/linting.yml
     - assets/nf-core-pathogensurveillance_logo_light.png
+    - docs/images/nf-core-pathogensurveillance_logo_light.png
+    - docs/images/nf-core-pathogensurveillance_logo_dark.png
     - LICENSE
     - .gitignore
   nf_test_content: false
@@ -18,4 +22,4 @@ template:
   name: pathogensurveillance
   org: nf-core
   outdir: .
-  version: 1.2.0dev
+  version: 1.2.0
