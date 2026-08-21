@@ -68,7 +68,7 @@
                     },
                     "gatk4/variantfiltration": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "d5de7a949aa84689f4098c958f05733a6c3804f5",
                         "installed_by": ["modules"]
                     },
                     "graphtyper/genotype": {
@@ -109,22 +109,22 @@
                     },
                     "picard/addorreplacereadgroups": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "fe08122c3dc2f2d7890daba06f6c90e570ef01de",
                         "installed_by": ["modules"]
                     },
                     "picard/createsequencedictionary": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "fe08122c3dc2f2d7890daba06f6c90e570ef01de",
                         "installed_by": ["modules"]
                     },
                     "picard/markduplicates": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "fe08122c3dc2f2d7890daba06f6c90e570ef01de",
                         "installed_by": ["modules"]
                     },
                     "picard/sortsam": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "fe08122c3dc2f2d7890daba06f6c90e570ef01de",
                         "installed_by": ["modules"]
                     },
                     "pirate": {

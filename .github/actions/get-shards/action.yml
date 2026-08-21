@@ -34,7 +34,7 @@ runs:
           --profile +docker \
           $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
           --dry-run \
-          --ci || {
+          --ci) || {
             echo "nf-test command failed with exit code $?"
             echo "Full output: $nftest_output"
             exit 1

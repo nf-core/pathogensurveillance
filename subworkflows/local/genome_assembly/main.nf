@@ -22,7 +22,7 @@ workflow GENOME_ASSEMBLY {
     versions = channel.empty()
     messages = channel.empty()
     parsed_sample_data = sample_data
-        .map{ [[id: it.sample_id, single_end: it.single_end, domain: it.domain, type: it.sequence_type], [id: it.report_group_ids], it.paths] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id, single_end: sample_meta.single_end, domain: sample_meta.domain, type: sample_meta.sequence_type], [id: sample_meta.report_group_ids], sample_meta.paths] }
     all_samples = parsed_sample_data
         .map{ sample_meta, report_meta, read_paths ->
             [sample_meta + [reads_size_gb: readsSizeGB(read_paths)], read_paths]
@@ -113,7 +113,7 @@ workflow GENOME_ASSEMBLY {
 
     // Warn if a sample was not assembled
     not_assembled_warnings = sample_data
-        .map { [[id: it.sample_id], it] }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta] }
         .combine(other_reads, by: 0)
         .map{ sample_meta, my_sample_data, paths ->
             [sample_meta, [id: my_sample_data.report_group_ids], null, "GENOME_ASSEMBLY", "WARNING", "Sample not assembled because no assemblier was configured to handle this combination of taxon and sequencing technology"]

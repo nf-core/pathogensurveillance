@@ -28,22 +28,22 @@ workflow PREPARE_INPUT {
     versions = versions.mix(SAMPLESHEET_CHECK.out.versions)
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
-        .map { create_sample_metadata_channel(it) }
+        .map { row -> create_sample_metadata_channel(row) }
         .filter { sample_meta -> sample_meta.enabled.toBoolean() }
     reference_data = SAMPLESHEET_CHECK.out.reference_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
-        .map { create_reference_metadata_channel(it) }
+        .map { row -> create_reference_metadata_channel(row) }
         .filter { ref_meta -> ref_meta.ref_enabled.toBoolean() }
     messages = messages.mix (
         SAMPLESHEET_CHECK.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
-            .map { [
-                it.sample_id == '' ? null : [id: it.sample_id.toString()],
-                it.report_group_id == '' ? null : [id: it.report_group_id.toString()],
-                it.reference_id == '' ? null : [id: it.reference_id.toString()],
+            .map { message_data -> [
+                message_data.sample_id == '' ? null : [id: message_data.sample_id.toString()],
+                message_data.report_group_id == '' ? null : [id: message_data.report_group_id.toString()],
+                message_data.reference_id == '' ? null : [id: message_data.reference_id.toString()],
                 "PREPARE_INPUT",
-                it.message_type,
-                it.description
+                message_data.message_type,
+                message_data.description
             ] }
     )
 
@@ -67,7 +67,7 @@ workflow PREPARE_INPUT {
         .filter{ sample_meta, ref_metas -> ! sample_meta.ncbi_accession }
         .map { sample_meta, ref_metas -> [sample_meta, ref_metas]}
     ncbi_acc_sample_key = sample_data_with_acc
-        .map{ sample_meta, ref_metas -> [[id: sample_meta.ncbi_accession], sample_meta, ref_metas] }
+        .map{ sample_meta, ref_metas -> [[id: sample_meta.ncbi_accession, single_end: sample_meta.single_end], sample_meta, ref_metas] }
     ncbi_acc = ncbi_acc_sample_key
         .map { ncbi_acc_meta, sample_meta, ref_metas ->
             [ncbi_acc_meta, ncbi_acc_meta.id]
@@ -85,7 +85,7 @@ workflow PREPARE_INPUT {
 
     // Emit cached reads
     cached_reads = ncbi_acc_with_cache.map { ncbi_acc_meta, sra, cached ->
-        def paths = cached.collect { file("${params.data_dir}/reads/${it}") }
+        def paths = cached.collect { filename -> file("${params.data_dir}/reads/${filename}") }
         [ncbi_acc_meta, paths]
     }
 
@@ -102,7 +102,7 @@ workflow PREPARE_INPUT {
             def paths = reads_path instanceof Collection
                 ? (reads_path.size() <= 2
                     ? reads_path
-                    : reads_path.findAll{it ==~ /^.+_[12]\..+$/})
+                    : reads_path.findAll{ path -> path ==~ /^.+_[12]\..+$/ })
                 : [reads_path]
             [sample_meta + [paths: paths, single_end: paths.size() == 1], ref_metas]
         }
@@ -166,8 +166,8 @@ workflow PREPARE_INPUT {
             ! (params.n_ref_genera == 0 && params.n_ref_species == 0 && params.n_ref_strains == 0)
         }
         .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata for samples that the user has defined exclusive references for
-            ! (ref_metas.collect{it.ref_primary_usage}.contains('exclusive') &&
-                (ref_metas.collect{it.ref_contextual_usage}.contains('exclusive') || no_auto_contextual_refs))
+            ! (ref_metas.collect{ ref_meta -> ref_meta.ref_primary_usage }.contains('exclusive') &&
+                (ref_metas.collect{ ref_meta -> ref_meta.ref_contextual_usage }.contains('exclusive') || no_auto_contextual_refs))
         }
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
@@ -223,7 +223,7 @@ workflow PREPARE_INPUT {
         .unique()
         .groupTuple(by: 0, sort: 'hash')
         .map { sample_id, family_stats ->
-            [sample_id, family_stats.findAll{it != null}]
+            [sample_id, family_stats.findAll{ stats -> stats != null }]
         }
 
     // Build a stable comma-delimited string of excluded accessions per sample
@@ -385,14 +385,14 @@ workflow PREPARE_INPUT {
 
     // Count the number of reads and basepairs to decide whether not to subset reads
     samples_to_subset = sample_data
-        .map { [[id: it.sample_id], it.paths, it.sendsketch_depth] }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths, sample_meta.sendsketch_depth] }
         .unique()
         .filter { sample_id, fastq_paths, depth ->
             depth.toFloat() > params.max_depth.toFloat()
         }
     samples_to_not_subset = sample_data
-        .filter {
-            it.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
+        .filter { sample_meta ->
+            sample_meta.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
         }
     SEQKIT_STATS (
         samples_to_subset

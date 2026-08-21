@@ -145,31 +145,31 @@ workflow PATHOGENSURVEILLANCE {
     // End note section -------------------
 
     fastqc_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
         .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
         .unique()
         .groupTuple(sort: 'hash')
     fastp_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.fastp_json, by: 0)
         .map{ sample_meta, report_meta, fastp_json -> [report_meta, fastp_json] }
         .unique()
         .groupTuple(sort: 'hash')
     nanoplot_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
         .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
         .unique()
         .groupTuple(sort: 'hash')
     quast_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.quast, by: 0)
         .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
         .unique()
         .groupTuple(sort: 'hash')
     multiqc_files = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids]] }
         .unique()
         .combine(collated_versions)
         .join(fastqc_results, remainder: true)
@@ -204,13 +204,13 @@ workflow PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     sample_data_tsvs = PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
+            [[id: sample_meta.report_group_ids], sample_meta.findAll { entry -> entry.key != 'paths' && entry.key != 'ref_metas' && entry.key != 'ref_ids' }]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+        .map { file ->[[id: file.getSimpleName().replace('_sample_data', '')], file]}
 
     // Gather reference data for each report
     reference_data_tsvs = PREPARE_INPUT.out.sample_data
@@ -219,22 +219,22 @@ workflow PATHOGENSURVEILLANCE {
         }
         .transpose(by: 1)
         .map { report_meta, ref_meta ->
-            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+            [report_meta, ref_meta.findAll { entry -> entry.key != 'ref_path' && entry.key != 'gff' }]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+        .map { file ->[[id: file.getSimpleName().replace('_reference_data', '')], file]}
 
     // Gather sendsketch signatures and taxa found
     sendsketch_files = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.sendsketch, by: 0)
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
     sendsketch_taxa = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.taxa_found, by: 0)
         .map{ sample_meta, report_meta, taxa_found -> [report_meta, taxa_found] }
         .unique()
@@ -244,7 +244,7 @@ workflow PATHOGENSURVEILLANCE {
 
     // Gather NCBI reference metadata for all references considered
     ncbi_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.family_stats_per_sample, by: 0)
         .groupTuple(by: 1, sort: 'hash')
         .map { sample_meta, report_meta, family_stats ->
@@ -253,14 +253,14 @@ workflow PATHOGENSURVEILLANCE {
 
     // Gather selected reference metadata
     selected_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
         .map{ sample_meta, report_meta, ref_meta_file ->
             [report_meta, ref_meta_file] }
         .unique()
         .groupTuple(sort: 'hash')
         .map { report_meta, ref_meta_files ->
-            [report_meta, ref_meta_files.findAll{it != null}]
+            [report_meta, ref_meta_files.findAll{ file -> file != null }]
         }
 
     // Gather SNP alignments from the variant analysis
@@ -279,7 +279,7 @@ workflow PATHOGENSURVEILLANCE {
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
             [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
-        .map {[[id: it.getSimpleName()], it]}
+        .map { file ->[[id: file.getSimpleName()], file]}
         .ifEmpty([])
 
     // Combine components into a single channel for the main report_meta
@@ -350,7 +350,7 @@ workflow PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}
+            sample_meta.findAll { entry -> entry.key != 'paths' && entry.key != 'ref_metas' && entry.key != 'ref_ids' }
         }
         .unique()
         .collectFile(
@@ -359,7 +359,7 @@ workflow PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "sample_metadata.tsv"
         ) { sample_meta ->
-            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n"
         }
 
     // Gather reference data for each report
@@ -369,7 +369,7 @@ workflow PATHOGENSURVEILLANCE {
         }
         .transpose(by: 0)
         .map { ref_meta ->
-            ref_meta[0].findAll {it.key != 'ref_path' && it.key != 'gff'}
+            ref_meta[0].findAll { entry -> entry.key != 'ref_path' && entry.key != 'gff' }
         }
         .unique()
         .collectFile(
@@ -378,7 +378,7 @@ workflow PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "reference_metadata.tsv"
         ) { ref_meta ->
-            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n"
         }
 
     emit:

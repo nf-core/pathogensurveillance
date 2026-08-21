@@ -159,7 +159,6 @@ workflow CORE_GENOME_PHYLOGENY {
                 [meta, gffs.findAll { gff -> seen.add(gff.name) }]
             }
     )
-    versions = versions.mix(PIRATE.out.versions)
 
     // Check that Pirate worked and report
     good_pirate_results = PIRATE.out.results
