@@ -337,7 +337,9 @@ The accuracy of this identification depends on the presence of close reference s
 ### Tree
 
 ```{r}
-has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
+multigene_tree_paths <- PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F)
+has_multigene_tree <- ! is.null(multigene_tree_paths)
+n_core_genes <- if (has_multigene_tree) sum(multigene_tree_paths$method == 'core') else 0L
 ```
 
 ```{r plot_multigene_tree, eval=has_multigene_tree, fig.height=8}
@@ -349,7 +351,7 @@ cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This is a multigene phylogeny of samples with reference genomes for context.
+This is a multigene phylogeny of samples with reference genomes for context, inferred from ", n_core_genes, " core genes.
 It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
 :::
 ')
