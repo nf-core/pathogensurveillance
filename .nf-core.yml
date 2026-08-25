@@ -15,7 +15,7 @@ lint:
 nf_core_version: 4.0.3
 repository_type: pipeline
 template:
-  author: "Zachary S.L. Foster, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald"
+  author: "Zachary S.L. Foster, Claire Worthy, Camilo Parada-Rojas, Logan Blair, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Ricardo Alcalá-Briseño, Hung Phan, Jeﬀ H. Chang, Niklaus J. Grünwald"
   description: Surveillance of plant pathogens using high-throughput sequencing
   force: false
   is_nfcore: true
