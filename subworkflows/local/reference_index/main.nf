@@ -30,7 +30,6 @@ workflow REFERENCE_INDEX {
     reference     // [ val(ref_meta), file(reference) ]
 
     main:
-    ch_versions = channel.empty()
 
     PICARD_CREATESEQUENCEDICTIONARY ( reference )
 
@@ -49,6 +48,5 @@ workflow REFERENCE_INDEX {
     samtools_fai  = SAMTOOLS_FAIDX.out.fai
     samtools_gzi  = SAMTOOLS_FAIDX.out.gzi
     bwa_index     = aligner_index
-    versions      = ch_versions                        // channel: [ versions.yml ]
 
 }

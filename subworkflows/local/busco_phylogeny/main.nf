@@ -14,7 +14,6 @@ workflow BUSCO_PHYLOGENY {
 
     main:
 
-    versions = channel.empty()
     messages = channel.empty()
 
     // Remove any samples that are not eukaryotes
@@ -50,7 +49,6 @@ workflow BUSCO_PHYLOGENY {
         params.n_ref_closest_named,
         params.n_ref_context
     )
-    versions = versions.mix(ASSIGN_BUSCO_REFERENCES.out.versions)
 
     // Create channel with required reference metadata and genomes from selected references
     references =  sample_data
@@ -116,7 +114,6 @@ workflow BUSCO_PHYLOGENY {
         params.phylo_min_genes,
         params.phylo_max_genes
     )
-    versions = versions.mix(SUBSET_BUSCO_GENES.out.versions)
     messages = messages.mix (
         SUBSET_BUSCO_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
@@ -152,7 +149,6 @@ workflow BUSCO_PHYLOGENY {
         .groupTuple(sort: 'hash') // group_meta, [trees]
 
     emit:
-    versions      = versions // versions.yml
     messages      = messages // meta, group_meta, ref_meta, workflow, level, message
     selected_refs = ASSIGN_BUSCO_REFERENCES.out.references
     tree          = trees

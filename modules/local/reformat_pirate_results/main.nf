@@ -13,7 +13,7 @@ process REFORMAT_PIRATE_RESULTS {
     output:
     tuple val(ref_meta), path("${prefix}_gene_family.tsv")    , emit: gene_fam
     tuple val(ref_meta), path("${prefix}_genePA.tsv")         , emit: gene_fam_pa
-    path "versions.yml"                                       , emit: versions
+    path "versions.yml"                                       , emit: versions_reformat_pirate_results, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

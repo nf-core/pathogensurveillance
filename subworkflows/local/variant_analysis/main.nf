@@ -14,7 +14,6 @@ workflow VARIANT_ANALYSIS {
     ani_matrix
 
     main:
-    versions = channel.empty()
     messages = channel.empty()
 
     // Remove samples belonging to groups with only one sample
@@ -52,7 +51,6 @@ workflow VARIANT_ANALYSIS {
         ani_matrix.join(samp_ref_pairs),
         params.ref_min_ani
     )
-    versions = versions.mix(ASSIGN_MAPPING_REFERENCE.out.versions)
     ref_paths = references
         .map {sample_id, report_group_id, ref_id, ref_name, ref_desc, ref_path, usage ->
             [[id: sample_id], [id:report_group_id], [id: ref_id], ref_path, usage]
@@ -142,7 +140,6 @@ workflow VARIANT_ANALYSIS {
 
     // Create indexes for each compressed reference
     REFERENCE_INDEX ( compressed_refs )
-    versions = versions.mix(REFERENCE_INDEX.out.versions)
 
     input_with_indexes = filtered_input_with_compressed_refs
         .map{ sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
@@ -161,7 +158,6 @@ workflow VARIANT_ANALYSIS {
             .map { row -> row[0..3] + row[5..6] }
             .unique()
     )
-    versions = versions.mix(ALIGN_READS.out.versions)
 
     CALL_VARIANTS (
         input_with_indexes
@@ -170,7 +166,6 @@ workflow VARIANT_ANALYSIS {
             .combine(ALIGN_READS.out.csi, by: 0..1) // [val(meta), val(ref_meta), [file(fastq)], file(reference), val(report_meta), fai, picard, gzi, bam, csi]
             .map { row -> [row[0], row[8], row[9], row[1]] + row[3..6] + [row[7]] }
     )
-    versions = versions.mix(CALL_VARIANTS.out.versions)
 
     sample_ploidy_data = filtered_sample_data_with_refs
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, ref_path, usage, read_paths, sequence_type, ploidy ->
@@ -187,7 +182,6 @@ workflow VARIANT_ANALYSIS {
             .combine(sample_ploidy_data, by: 0),
         params.max_variants
     )
-    versions = versions.mix(VCF_TO_SNP_ALIGN.out.versions)
     removed_samps = VCF_TO_SNP_ALIGN.out.removed_sample_ids
         .splitText()
         .map { row -> [[id: row[1].replace('\n', '')], row[0].group, row[0].ref, "VARIANT_ANALYSIS", "WARNING", "Sample removed from SNP phylogeny due to too much missing data."] } // meta, group_meta, ref_meta, workflow, level, message
@@ -233,7 +227,6 @@ workflow VARIANT_ANALYSIS {
     results       = results     // report_meta, ref_meta, vcf, align, tree
     mapping_ref   = ASSIGN_MAPPING_REFERENCE.out.samp_ref_pairs // report_meta, tsv
     ani_matrix    = ASSIGN_MAPPING_REFERENCE.out.ani_matrix // report_meta, csv
-    versions      = versions // versions.yml
     messages      = messages    // meta, report_meta, ref_meta, workflow, level, message
 
 }

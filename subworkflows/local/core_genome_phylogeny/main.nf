@@ -20,7 +20,6 @@ workflow CORE_GENOME_PHYLOGENY {
 
     main:
 
-    versions = channel.empty()
     messages = channel.empty()
 
     // Remove any samples that are not prokaryotes
@@ -56,7 +55,6 @@ workflow CORE_GENOME_PHYLOGENY {
         params.n_ref_closest_named,
         params.n_ref_context
     )
-    versions = versions.mix(ASSIGN_CORE_REFERENCES.out.versions)
 
     // Get relevant information from all references assigned to samples
     all_ref_data =  sample_data
@@ -132,7 +130,6 @@ workflow CORE_GENOME_PHYLOGENY {
                 [ref_meta, ref_path, ref_gff]
             }
     )
-    versions = versions.mix(MAKE_GFF_WITH_FASTA.out.versions)
 
     // group samples by report group
     bakta_gffs = all_assem_data
@@ -169,18 +166,15 @@ workflow CORE_GENOME_PHYLOGENY {
     messages = messages.mix(pirate_failed)
 
     REFORMAT_PIRATE_RESULTS ( good_pirate_results )
-    versions = versions.mix(REFORMAT_PIRATE_RESULTS.out.versions)
 
 
     // Calculate POCP from presence/absence matrix of genes
     CALCULATE_POCP (
         REFORMAT_PIRATE_RESULTS.out.gene_fam_pa
     )
-    versions = versions.mix(CALCULATE_POCP.out.versions)
 
     // Extract sequences of all genes
     EXTRACT_FEATURE_SEQUENCES ( good_pirate_results )
-    versions = versions.mix(EXTRACT_FEATURE_SEQUENCES.out.versions)
 
     // Filter for core single copy genes with no paralogs
     SUBSET_CORE_GENES (
@@ -190,7 +184,6 @@ workflow CORE_GENOME_PHYLOGENY {
         params.phylo_min_genes,
         params.phylo_max_genes
     )
-    versions = versions.mix(SUBSET_CORE_GENES.out.versions)
     messages = messages.mix (
         SUBSET_CORE_GENES.out.message_data
             .splitCsv ( header:true, sep:'\t', quote:'"' )
@@ -239,7 +232,6 @@ workflow CORE_GENOME_PHYLOGENY {
     phylogeny     = phylogeny               // group_meta, [trees]
     pocp          = CALCULATE_POCP.out.pocp // group_meta, pocp
     selected_refs = ASSIGN_CORE_REFERENCES.out.references // group_meta, tsv
-    versions      = versions             // versions.yml
     messages      = messages                // meta, group_meta, ref_meta, workflow, level, message
 
 }

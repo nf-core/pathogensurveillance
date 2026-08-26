@@ -18,7 +18,7 @@ process PICK_ASSEMBLIES {
     tuple val(meta), path("${prefix}_formatted.tsv"), emit: formatted
     tuple val(meta), path("${prefix}.tsv")          , emit: metadata
     tuple val(meta), env('COUNT')                   , emit: line_count
-    path "versions.yml"                             , emit: versions
+    path "versions.yml"                             , emit: versions_pick_assemblies, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

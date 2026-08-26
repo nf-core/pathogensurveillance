@@ -19,13 +19,11 @@ workflow PREPARE_INPUT {
 
     main:
 
-    // Initalize channel to accumulate information about software versions used
-    versions = channel.empty()
+    // Initialize channel to accumulate warning messages
     messages = channel.empty()
 
     // Parse input tables
     SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, params.max_samples )
-    versions = versions.mix(SAMPLESHEET_CHECK.out.versions)
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { row -> create_sample_metadata_channel(row) }
@@ -138,7 +136,6 @@ workflow PREPARE_INPUT {
 
     // Parse results of sendsketch to get list of taxa to download references for
     INITIAL_CLASSIFICATION ( sendsketch_out )
-    versions = versions.mix(INITIAL_CLASSIFICATION.out.versions)
 
     // Add estimated depth and domain to sample metadata
     sample_data = sample_data
@@ -194,13 +191,11 @@ workflow PREPARE_INPUT {
     FIND_ASSEMBLIES (
         family_ids_to_process.map { taxon, cached -> taxon }
     )
-    versions = versions.mix(FIND_ASSEMBLIES.out.versions)
 
     // Parse assembly metadata to TSVs to save time when multiple samples use the same data
     PARSE_ASSEMBLIES (
         FIND_ASSEMBLIES.out.stats
     )
-    versions = versions.mix(PARSE_ASSEMBLIES.out.versions)
     processed_stats = PARSE_ASSEMBLIES.out.stats
 
     // Combine cached and processed stats
@@ -256,7 +251,6 @@ workflow PREPARE_INPUT {
         params.n_ref_genera,
         params.only_latin_binomial_refs
     )
-    versions = versions.mix(PICK_ASSEMBLIES.out.versions)
 
     // Add placeholders for PICK_ASSEMBLIES output if not run
     picked_assemblies_stat_files = sample_data
@@ -340,7 +334,6 @@ workflow PREPARE_INPUT {
 
     // Download missing assemblies
     DOWNLOAD_ASSEMBLIES ( ref_ncbi_acc_to_download.map { ref_meta, acc, cached -> [ref_meta, acc] } )
-    versions = versions.mix(DOWNLOAD_ASSEMBLIES.out.versions)
     downloaded_seq_and_gff = DOWNLOAD_ASSEMBLIES.out.sequence
         .join(DOWNLOAD_ASSEMBLIES.out.gff, by: 0, remainder: true)
 
@@ -415,7 +408,6 @@ workflow PREPARE_INPUT {
                 [sample_meta, fastq_paths, Math.ceil((params.max_depth.toFloat() / depth.toFloat()) * my_read_count.toFloat()).toInteger() ]
             }
     )
-    versions = versions.mix(SEQKIT_HEAD.out.versions)
     sample_data = sample_data
         .map { sample_meta ->
             [[id: sample_meta.sample_id], sample_meta]
@@ -433,7 +425,6 @@ workflow PREPARE_INPUT {
     family_stats = ncbi_ref_meta
     selected_ref_meta = picked_assemblies_stat_files
     family_stats_per_sample = family_stats_per_sample
-    versions = SAMPLESHEET_CHECK.out.versions
     messages = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 

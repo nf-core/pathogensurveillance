@@ -10,7 +10,7 @@ process PARSE_ASSEMBLIES {
 
     output:
     tuple val(taxon), path("${prefix}.tsv"), emit: stats
-    path "versions.yml"                    , emit: versions
+    path "versions.yml"                    , emit: versions_parse_assemblies, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

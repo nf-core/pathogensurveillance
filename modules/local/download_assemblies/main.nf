@@ -17,7 +17,7 @@ process DOWNLOAD_ASSEMBLIES {
     //tuple val(ref_meta), path("${prefix}_cds.fna"), emit: cds, optional: true
     //tuple val(ref_meta), path("${prefix}.faa"), emit: protein, optional: true
 
-    path "versions.yml"                 , emit: versions
+    path "versions.yml"                 , emit: versions_download_assemblies, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

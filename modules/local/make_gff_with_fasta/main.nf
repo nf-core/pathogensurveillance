@@ -12,7 +12,7 @@ process MAKE_GFF_WITH_FASTA {
 
     output:
     tuple val(meta), path("${prefix}.gff"), emit: gff
-    path "versions.yml"                   , emit: versions
+    path "versions.yml"                   , emit: versions_make_gff_with_fasta, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

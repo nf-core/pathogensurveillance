@@ -12,7 +12,7 @@ process EXTRACT_FEATURE_SEQUENCES {
 
     output:
     tuple val(ref_meta), path("${prefix}_feature_sequences"), emit: feat_seqs
-    path "versions.yml"                                     , emit: versions
+    path "versions.yml"                                     , emit: versions_extract_feature_sequences, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

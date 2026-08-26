@@ -11,7 +11,6 @@ workflow CALL_VARIANTS {
 
     main:
 
-    versions = channel.empty()
 
     // group samples by reference genome and group
     ch_ref_grouped = ch_input
@@ -59,7 +58,6 @@ workflow CALL_VARIANTS {
             [region_file]
         },
     )
-    versions = versions.mix(GRAPHTYPER_GENOTYPE.out.versions)
 
     // Combine graphtyper VCFs for each group of samples
     GRAPHTYPER_VCFCONCATENATE ( GRAPHTYPER_GENOTYPE.out.vcf )
@@ -107,5 +105,4 @@ workflow CALL_VARIANTS {
         .map { combined_meta, sample_meta, bam, bai, ref, fai, dict, gzi, region_file ->
             [combined_meta, sample_meta]
         }
-    versions = versions
 }

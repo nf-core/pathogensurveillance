@@ -14,7 +14,7 @@ process ASSIGN_MAPPING_REFERENCE {
     output:
     tuple val(group_meta), path("${prefix}_mapping_references.tsv"), emit: samp_ref_pairs
     tuple val(group_meta), path("${prefix}_ani_matrix.csv")       , emit: ani_matrix
-    path "versions.yml"                                            , emit: versions
+    path "versions.yml"                                            , emit: versions_assign_mapping_reference, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

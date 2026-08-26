@@ -14,7 +14,7 @@ process PICARD_FORMAT {
     tuple val(meta), path("${prefix}.bam")        , emit: bam
     tuple val(meta), path("${prefix}.bai")        , emit: bai,     optional: true
     tuple val(meta), path("${prefix}.MarkDuplicates.metrics.txt"), emit: metrics
-    path "versions.yml"                   , emit: versions
+    path "versions.yml"                   , emit: versions_picard_format, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

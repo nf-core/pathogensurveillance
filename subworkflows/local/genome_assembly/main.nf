@@ -19,7 +19,6 @@ workflow GENOME_ASSEMBLY {
 
     main:
 
-    versions = channel.empty()
     messages = channel.empty()
     parsed_sample_data = sample_data
         .map{ sample_meta -> [[id: sample_meta.sample_id, single_end: sample_meta.single_end, domain: sample_meta.domain, type: sample_meta.sequence_type], [id: sample_meta.report_group_ids], sample_meta.paths] }
@@ -125,6 +124,5 @@ workflow GENOME_ASSEMBLY {
     fastp_json = FASTP.out.json.map{sample_meta, json -> [[id: sample_meta.id], json]} // strip off extra sample metadata to make joins easier downstream
     scaffolds  = assemblies
     quast      = QUAST.out.results
-    versions   = versions
     messages   = messages    // meta, group_meta, ref_meta, workflow, level, message
 }

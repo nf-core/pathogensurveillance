@@ -15,7 +15,7 @@ process SUBSET_BUSCO_GENES {
     output:
     tuple val(group_meta), path("${prefix}_feat_seqs/${prefix}--cluster_*"), optional: true, emit: feat_seqs
     tuple val(group_meta), path("message_data.tsv")             , emit: message_data
-    path "versions.yml"                                         , emit: versions
+    path "versions.yml"                                         , emit: versions_subset_busco_genes, topic: versions
 
 
     when:

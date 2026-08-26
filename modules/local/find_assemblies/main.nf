@@ -12,7 +12,7 @@ process FIND_ASSEMBLIES {
 
     output:
     tuple val(taxon), path(output_path), emit: stats
-    path "versions.yml"                , emit: versions
+    path "versions.yml"                , emit: versions_find_assemblies, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

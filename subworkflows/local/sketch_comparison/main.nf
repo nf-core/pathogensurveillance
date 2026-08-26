@@ -8,7 +8,6 @@ workflow SKETCH_COMPARISON {
     assemblies
 
     main:
-    versions = channel.empty()
     messages = channel.empty()
 
     // Create signature for each reference genome and successful assembly
@@ -52,6 +51,5 @@ workflow SKETCH_COMPARISON {
 
     emit:
     ani_matrix    = SOURMASH_PAIRWISE.out.csv                   // group_meta, csv
-    versions      = versions                                    // versions
     messages      = messages                                    // meta, group_meta, ref_meta, workflow, level, message
 }

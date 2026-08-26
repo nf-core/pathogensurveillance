@@ -10,7 +10,6 @@ workflow ALIGN_READS {
 
     main:
 
-    versions = channel.empty()
 
     // Addd composite ID for read/ref combos to input
     samp_ref_combo = ch_input
@@ -48,7 +47,6 @@ workflow ALIGN_READS {
         .join(ch_reference)
         .join(ch_ref_index)
     PICARD_FORMAT ( picard_input )
-    versions = versions.mix(PICARD_FORMAT.out.versions)
 
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
 
@@ -65,5 +63,4 @@ workflow ALIGN_READS {
     emit:
     bam      = out_bam        // channel: [ val(meta), val(ref_meta), [ bam ] ]
     csi      = out_csi        // channel: [ val(meta), val(ref_meta), [ csi ] ]
-    versions = versions    // channel: [ versions.yml ]
 }

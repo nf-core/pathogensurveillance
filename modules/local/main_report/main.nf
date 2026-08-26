@@ -14,7 +14,7 @@ process MAIN_REPORT {
     output:
     tuple val(group_meta), path("${prefix}_pathsurveil_report.html"), emit: html
     tuple val(group_meta), path("${prefix}_pathsurveil_report.pdf") , emit: pdf, optional: true
-    path "versions.yml"                                             , emit: versions
+    path "versions.yml"                                             , emit: versions_main_report, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

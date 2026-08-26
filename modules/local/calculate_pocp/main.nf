@@ -12,7 +12,7 @@ process CALCULATE_POCP {
 
     output:
     tuple val(group_meta), path("${prefix}_pocp.tsv"), emit: pocp
-    path "versions.yml"                              , emit: versions
+    path "versions.yml"                              , emit: versions_calculate_pocp, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

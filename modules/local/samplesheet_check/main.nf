@@ -19,7 +19,7 @@ process SAMPLESHEET_CHECK {
     path 'sample_metadata.tsv'   , emit: sample_data
     path 'reference_metadata.tsv', emit: reference_data
     path 'message_data.tsv'      , emit: message_data
-    path "versions.yml"          , emit: versions
+    path "versions.yml"          , emit: versions_samplesheet_check, topic: versions
 
     script:
     def entrez_key_set = secrets.NCBI_API_KEY ? "export ENTREZ_KEY='${secrets.NCBI_API_KEY}'" : ''

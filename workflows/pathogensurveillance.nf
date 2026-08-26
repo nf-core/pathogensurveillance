@@ -37,20 +37,17 @@ workflow PATHOGENSURVEILLANCE {
     // Write output format file for PathoSurveilR parsing
     file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
 
-    // Initalize channel to accumulate information about software versions used
-    versions = channel.empty()
+    // Initialize channel to accumulate warning messages
     messages = channel.empty()
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
-    versions = versions.mix(PREPARE_INPUT.out.versions)
     messages = messages.mix(PREPARE_INPUT.out.messages)
 
     // Assemble and annotate genomes
     GENOME_ASSEMBLY (
         PREPARE_INPUT.out.sample_data
     )
-    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
     messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
     // Initial quick analysis of sequences and references based on sketchs
@@ -58,12 +55,10 @@ workflow PATHOGENSURVEILLANCE {
         PREPARE_INPUT.out.sample_data,
         GENOME_ASSEMBLY.out.scaffolds
     )
-    versions = versions.mix(SKETCH_COMPARISON.out.versions)
     messages = messages.mix(SKETCH_COMPARISON.out.messages)
 
     // Initial quality control of reads
     INITIAL_QC_CHECKS ( PREPARE_INPUT.out.sample_data )
-    versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
@@ -71,7 +66,6 @@ workflow PATHOGENSURVEILLANCE {
         PREPARE_INPUT.out.sample_data,
         SKETCH_COMPARISON.out.ani_matrix
     )
-    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Create core gene phylogeny for bacterial samples
@@ -81,7 +75,6 @@ workflow PATHOGENSURVEILLANCE {
             SKETCH_COMPARISON.out.ani_matrix,
             GENOME_ASSEMBLY.out.scaffolds
         )
-        versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
         messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
         core_selected_refs = CORE_GENOME_PHYLOGENY.out.selected_refs
         core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
@@ -98,7 +91,6 @@ workflow PATHOGENSURVEILLANCE {
         SKETCH_COMPARISON.out.ani_matrix,
         GENOME_ASSEMBLY.out.scaffolds
     )
-    versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
@@ -117,7 +109,7 @@ workflow PATHOGENSURVEILLANCE {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(versions.mix(topic_versions_file))
+    softwareVersionsToYAML(topic_versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -199,7 +191,6 @@ workflow PATHOGENSURVEILLANCE {
         }
 
     MULTIQC ( multiqc_all )
-    versions = versions.mix(MULTIQC.out.versions)
 
     // Gather sample data for each report
     sample_data_tsvs = PREPARE_INPUT.out.sample_data
@@ -383,5 +374,4 @@ workflow PATHOGENSURVEILLANCE {
 
     emit:
     multiqc_report = MULTIQC.out.report
-    versions       = versions                 // channel: [ path(versions.yml) ]
 }

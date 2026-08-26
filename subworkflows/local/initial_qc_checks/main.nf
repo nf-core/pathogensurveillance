@@ -7,7 +7,6 @@ workflow INITIAL_QC_CHECKS {
     sample_data
 
     main:
-    versions = channel.empty()
     messages = channel.empty()
 
     // Run FastQC
@@ -27,6 +26,5 @@ workflow INITIAL_QC_CHECKS {
     emit:
     fastqc_zip    = FASTQC.out.zip
     nanoplot_txt  = NANOPLOT.out.txt
-    versions      = versions         // versions
     messages      = messages         // meta, group_meta, ref_meta, workflow, level, message
 }
