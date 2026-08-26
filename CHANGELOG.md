@@ -36,7 +36,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - When multiple assembly versions exist for the same organism (e.g. GCA_000230695.1 vs GCA_000230695.3, or GCA vs GCF), only the best version is retained. RefSeq (GCF) is preferred over GenBank (GCA), and higher version numbers are preferred.
 - Handle numeric-only sample IDs by casting to string.
 
-
 ## 1.1.0 - 2026-01-30
 
 ### `Added`

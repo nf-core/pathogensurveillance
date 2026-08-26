@@ -9,7 +9,7 @@ nextflow_pipeline {
         when {
             params {
                 outdir = "$outputDir"
-                aligner = "bwa"
+                max_samples = 1
             }
         }
 
@@ -44,4 +44,3 @@ nextflow_pipeline {
         }
     } */
 }
-
