@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - When there are fewer unique strains than `n_ref_strains`, the pipeline now makes up the difference with more examples of the same strain. This ensure that multiple representatives of each species-level taxon are downloaded when strain-level info is not present.
 - Reference assemblies are now downloaded in parallel from NCBI.
 - Replaced deprecated `tabix/tabix` and `tabix/bgzip` nf-core modules with `htslib/bgziptabix` for VCF indexing. Reference `.gzi` indexes are now sourced directly from the upstream `samtools faidx` step instead of being regenerated. User-supplied reference FASTA files for variant calling must be gzip-compressed (`.fasta.gz`).
+- Software versions from local pipeline modules are now collected via Nextflow topic channels, matching the nf-core module convention. All tools are now included in `pipeline_info/version_info.yml`, including previously unreported ones.
 
 ### `Fixed`
 
