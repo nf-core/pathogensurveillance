@@ -15,6 +15,7 @@ process INITIAL_CLASSIFICATION {
     tuple val(meta), path("${prefix}_taxon_data.tsv"), emit: taxon_data
     tuple val(meta), env('DOMAIN')                   , emit: domain
     path "versions.yml"                              , emit: versions_initial_classification, topic: versions
+    tuple val(meta), path("${prefix}_child_taxa.tsv"), emit: child_taxa
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,6 +33,7 @@ process INITIAL_CLASSIFICATION {
 
     mv taxa_found.tsv ${prefix}_taxa_found.tsv
     mv taxon_data.tsv ${prefix}_taxon_data.tsv
+    mv child_taxa.tsv ${prefix}_child_taxa.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

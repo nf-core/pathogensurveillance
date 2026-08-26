@@ -149,14 +149,12 @@ workflow PREPARE_INPUT {
         }
 
     // Get list of families for all samples without exclusive references defined by the user
-    family_taxon_ids = INITIAL_CLASSIFICATION.out.taxa_found
-        .splitCsv(elem: 1, header: true, sep: '\t')
-        .filter{ sample_meta, taxon_data ->
-            taxon_data.rank == 'family'
+    lookup_taxon_ids = INITIAL_CLASSIFICATION.out.child_taxa
+        .splitCsv(header: true, sep: '\t')
+        .map{ sample_meta, row ->
+            [sample_meta, row.query_taxon_id.toString()]
         }
-        .map{ sample_meta, taxon_data ->
-            [sample_meta, taxon_data.taxon_id]
-        }
+
     def no_auto_contextual_refs = params.n_ref_closest == 0 && params.n_ref_closest_named == 0 && params.n_ref_context == 0
     family_ids_to_download = sample_data
         .filter { sample_meta, ref_metas -> // Dont lookup assembly metadata if no references are to be dowloaded automatically (besides user-defined references)
@@ -169,7 +167,7 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas ->
             [[id: sample_meta.sample_id], sample_meta]
         }
-        .combine(family_taxon_ids, by: 0)
+        .combine(lookup_taxon_ids, by: 0)
         .map{ sample_id, sample_meta, family_ids -> [family_ids] }
         .flatten()
         .unique()
@@ -202,23 +200,27 @@ workflow PREPARE_INPUT {
     all_stats = cached_stats.mix(processed_stats)
 
     // Add placeholders for NCBI reference metadata if none was looked up
-    ncbi_ref_meta = family_taxon_ids
-        .map { sample_meta, family_ids ->
-            [family_ids]
+    ncbi_ref_meta = INITIAL_CLASSIFICATION.out.child_taxa
+        .splitCsv(header: true, sep: '\t')
+        .map { sample_meta, row ->
+            [row.query_taxon_id.toString(), row.family_taxon_id.toString()]
         }
         .unique()
         .join(all_stats.ifEmpty([null, null]), remainder: true)
-        .filter { item -> item != [null, null] }
+        .filter { query_taxon, family_taxon, stats -> stats != null }
+        .map { query_taxon, family_taxon, stats -> [family_taxon, stats]}
 
     // Choose reference sequences to provide context for each sample
-    family_stats_per_sample = family_taxon_ids
-        .map { sample_id, family_id -> [family_id, sample_id] }
+    family_stats_per_sample = INITIAL_CLASSIFICATION.out.child_taxa
+        .splitCsv(header: true, sep: '\t')
+        .map { sample_meta, row -> [row.family_taxon_id.toString(), sample_meta] }
+        .unique()
         .combine(ncbi_ref_meta, by: 0)
-        .map { family_id, sample_id, stats_path -> [sample_id, stats_path] }
+        .map { family_id, sample_meta, stats_path -> [sample_meta, stats_path] }
         .unique()
         .groupTuple(by: 0, sort: 'hash')
-        .map { sample_id, family_stats ->
-            [sample_id, family_stats.findAll{ stats -> stats != null }]
+        .map { sample_meta, family_stats ->
+            [sample_meta, family_stats.findAll{ stats -> stats != null }]
         }
 
     // Build a stable comma-delimited string of excluded accessions per sample

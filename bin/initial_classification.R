@@ -85,6 +85,24 @@ filter_and_extract <- function(rank) {
 
 # Extract taxon info
 output_data <- unique(do.call(rbind, lapply(names(ani_threshold), filter_and_extract)))
+family_taxids = unique(output_data$taxon_id[output_data$rank == 'family'])
+
+child_links <- if (length(family_taxids) > 0) {
+    entrez_link(dbfrom='taxonomy', db='taxonomy', id=family_taxids, cmd='neighbor')
+} else {
+    list(links = NULL)
+}
+
+child_rows <- do.call(rbind, lapply(family_taxids, function(fid) {
+    hits <- child_links$links
+    children <- if (is.null(hits)) character(0) else
+        unique(sub('^taxonomy_taxonomy[0-9]+_taxonomy([0-9]+)$', '\\1',
+                   names(hits)[grep(sprintf('^taxonomy_taxonomy%s_taxonomy', fid), names(hits))]))
+    if (length(children) == 0) children <- fid # family as query if no children present
+    data.frame(family_taxon_id = fid, query_taxon_id = children)
+}))
+if (is.null(child_rows)) child_rows <- data.frame(family_taxon_id = character(), query_taxon_id = character())
+write.table(child_rows, 'child_taxa.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
 
 # Write table of taxon "found"
 write.table(output_data, file = 'taxa_found.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
