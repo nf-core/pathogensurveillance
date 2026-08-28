@@ -8,7 +8,7 @@ process PICK_ASSEMBLIES {
         'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
 
     input:
-    tuple val(meta), path(found_taxa), path(assem_data_tsvs), val(excluded_accessions)
+    tuple val(meta), path(found_taxa), path(child_taxa), path(assem_data_tsvs), val(excluded_accessions)
     val n_ref_strains
     val n_ref_species
     val n_ref_genera
@@ -28,7 +28,7 @@ process PICK_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${meta.id}"
     def excluded_arg = excluded_accessions != 'NONE' ? "\"${excluded_accessions}\"" : 'NONE'
     """
-    pick_assemblies.R ${found_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${excluded_arg} ${assem_data_tsvs}
+    pick_assemblies.R ${found_taxa} ${child_taxa} ${n_ref_strains} ${n_ref_species} ${n_ref_genera} ${only_latin_binomial_refs} ${prefix} ${excluded_arg} ${assem_data_tsvs}
     COUNT=\$(cat ${prefix}.tsv | wc -l)
 
     cat <<-END_VERSIONS > versions.yml

@@ -238,13 +238,14 @@ workflow PREPARE_INPUT {
         .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id]] }
         .unique()
         .join(INITIAL_CLASSIFICATION.out.taxa_found)
+        .join(INITIAL_CLASSIFICATION.out.child_taxa)
         .join(family_stats_per_sample)
-        .filter { sample_meta, taxa_found, family_stats ->
+        .filter { sample_meta, taxa_found, child_taxa, family_stats ->
             family_stats.size() > 0
         }
         .join(excluded_accessions_per_sample)
-        .map { sample_meta, taxa_found, family_stats, excluded_accessions ->
-            [sample_meta, taxa_found, family_stats, excluded_accessions]
+        .map { sample_meta, taxa_found, child_taxa, family_stats, excluded_accessions ->
+            [sample_meta, taxa_found, child_taxa, family_stats, excluded_accessions]
         }
     PICK_ASSEMBLIES (
         taxon_and_ref_data,

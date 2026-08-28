@@ -38,14 +38,15 @@ args <- commandArgs(trailingOnly = TRUE)
 
 args <- as.list(args)
 taxa_found_data <- read.table(args[[1]], header = TRUE, sep = '\t', comment.char = '')
-n_ref_strains <- args[[2]]
-n_ref_species <- args[[3]]
-n_ref_genera <- args[[4]]
-only_binomial <- as.logical(args[[5]])
-out_name <- args[[6]]
+child_taxa_data <- read.table(args[[2]], header = TRUE, sep = '\t', comment.char = '')
+n_ref_strains <- args[[3]]
+n_ref_species <- args[[4]]
+n_ref_genera <- args[[5]]
+only_binomial <- as.logical(args[[6]])
+out_name <- args[[7]]
 
 # Read excluded accessions from comma-delimited string argument
-excluded_accessions_str <- args[[7]]
+excluded_accessions_str <- args[[8]]
 excluded_accessions <- character(0)
 if (! is.null(excluded_accessions_str) && excluded_accessions_str != "" && excluded_accessions_str != "NONE") {
     excluded_accessions <- strsplit(excluded_accessions_str, split = ',')[[1]]
@@ -53,18 +54,22 @@ if (! is.null(excluded_accessions_str) && excluded_accessions_str != "" && exclu
 }
 
 # Parse input TSVs
-if (length(args) < 8) {
+if (length(args) < 9) {
     stop('No family-level reference metadata files supplied. Check input data.')
 }
-tsv_paths <- unlist(args[8:length(args)])
-assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
-    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '')
+tsv_paths <- unlist(args[9:length(args)])
+
+read_one <- function(path) {
+    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '', check.names = FALSE)
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
     if (nrow(out) > 0) {
-        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]
+        family_taxon_id <- child_taxa_data$family_taxon_id[child_taxa_data$query_taxon_id == family_id]
+        if (length(family_taxon_id) == 0) family_taxon_id <- family_id
+        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_taxon_id]
     }
-    return(out)
-}))
+    out
+}
+assem_data <- do.call(rbind, lapply(tsv_paths, read_one))
 
 # Filter out excluded accessions from user-defined references
 if (length(excluded_accessions) > 0) {

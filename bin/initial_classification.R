@@ -85,22 +85,22 @@ filter_and_extract <- function(rank) {
 
 # Extract taxon info
 output_data <- unique(do.call(rbind, lapply(names(ani_threshold), filter_and_extract)))
-family_taxids = unique(output_data$taxon_id[output_data$rank == 'family'])
+family_taxids <- unique(output_data$taxon_id[output_data$rank == 'family'])
+family_taxnames <- unique(output_data$name[output_data$rank == 'family'])
 
-child_links <- if (length(family_taxids) > 0) {
-    entrez_link(dbfrom='taxonomy', db='taxonomy', id=family_taxids, cmd='neighbor')
-} else {
-    list(links = NULL)
-}
-
-child_rows <- do.call(rbind, lapply(family_taxids, function(fid) {
-    hits <- child_links$links
-    children <- if (is.null(hits)) character(0) else
-        unique(sub('^taxonomy_taxonomy[0-9]+_taxonomy([0-9]+)$', '\\1',
-                   names(hits)[grep(sprintf('^taxonomy_taxonomy%s_taxonomy', fid), names(hits))]))
+child_rows <- do.call(rbind, lapply(seq_along(family_taxids), function(i) {
+    fid <- family_taxids[i]
+    fname <- family_taxnames[i]
+    search_term <- paste0('txid', fid, '[Subtree] AND ', fname, '[Next Level]')
+    result <- tryCatch(
+        entrez_search(db = 'taxonomy', term = search_term, retmax = 10000),
+        error = function(e) list(ids = character(0))
+    )
+    children <- result$ids
     if (length(children) == 0) children <- fid # family as query if no children present
     data.frame(family_taxon_id = fid, query_taxon_id = children)
 }))
+
 if (is.null(child_rows)) child_rows <- data.frame(family_taxon_id = character(), query_taxon_id = character())
 write.table(child_rows, 'child_taxa.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
 
