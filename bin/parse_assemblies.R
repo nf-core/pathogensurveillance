@@ -61,68 +61,41 @@ header <- data.frame(
 )
 write.table(header, file = out_path, sep = '\t', quote = FALSE)
 
-if (file.info(in_path)$size == 0) {
-    # Handle empty files with only header
-    write.table(header, file = out_path, sep = '\t', quote = FALSE, row.names = FALSE)
-    quit(status = 0)
+# Parse and write assembly metadata one at a time
+in_handle <- file(in_path)
+open(in_handle)
+out_handle <- file(out_path, open = 'a')
+while (length(line <- readLines(in_handle, n = 1)) != 0) {
+    assem_data <- RcppSimdJson::fparse(line, always_list = TRUE)[[1]]
+    attributes <- assem_data$assembly_info$biosample$attributes
+    hosts <- paste0(attributes$value[attributes$name == 'host'], collapse = ';')
+    data_parts <- list(
+        reference_id = gsub(assem_data$accession, pattern = '[\\/:*?"<>| .]', replacement = '_'),
+        accession = assem_data$accession,
+        assembly_level = assem_data$assembly_info$assembly_level,
+        assembly_status = assem_data$assembly_info$assembly_status,
+        assembly_type = assem_data$assembly_info$assembly_type,
+        hosts = ifelse(hosts == '', NA_character_, hosts),
+        organism_name = gsub(assem_data$organism$organism_name, pattern = '\\[|\\]', replacement = ''),
+        tax_id = as.character(assem_data$organism$tax_id),
+        contig_l50 = as.numeric(assem_data$assembly_stats$contig_l50),
+        contig_n50 = as.numeric(assem_data$assembly_stats$contig_n50),
+        coverage = as.numeric(sub(assem_data$assembly_stats$genome_coverage, pattern = 'x$', replacement = '')),
+        number_of_component_sequences = as.numeric(assem_data$assembly_stats$number_of_component_sequences),
+        number_of_contigs = as.numeric(assem_data$assembly_stats$number_of_contigs),
+        total_ungapped_length = as.numeric(assem_data$assembly_stats$total_ungapped_length),
+        total_sequence_length = as.numeric(assem_data$assembly_stats$total_sequence_length),
+        source_database = assem_data$source_database,
+        is_type = "type_material" %in% names(assem_data),
+        is_annotated = "annotation_info" %in% names(assem_data),
+        is_atypical = "atypical" %in% names(assem_data$assembly_info),
+        checkm_completeness = assem_data$checkm_info$completeness,
+        checkm_contamination = assem_data$checkm_info$contamination
+    )
+    data_parts[sapply(data_parts, length) == 0 | sapply(data_parts, is.null)] <- NA
+    output <- as.data.frame(data_parts)
+    write.table(output, file = out_handle, sep = '\t', col.names = FALSE, row.names = FALSE, quote = FALSE)
 }
-reports <- RcppSimdJson::fload(in_path, query = "/reports", always_list = TRUE, max_simplify_lvl = "list")[[1]]
+close(out_handle)
+close(in_handle)
 
-# Handle null fields
-`%||%` <- function(x, y) if (is.null(x) || length(x) == 0) y else x
-
-# Get value helper
-get_field <- function(x, path, default = NA_character_) {
-  for (p in path) {
-    if (is.null(x)) return(default)
-    x <- x[[p]]
-  }
-  x %||% default
-}
-
-# Get host list
-get_hosts <- function(r) {
-  attrs <- r$assembly_info$biosample$attributes
-  if (is.null(attrs)) return(NA_character_)
-  hosts <- paste0(attrs$value[attrs$name == 'host'], collapse = ';')
-  if (hosts == '') NA_character_ else hosts
-}
-
-num <- function(r, path) as.numeric(get_field(r, path, NA_character_))
-
-out <- data.frame(
-  accession       = vapply(reports, function(r) r$accession, character(1)),
-  assembly_level  = vapply(reports, get_field, character(1), path = c("assembly_info", "assembly_level")),
-  assembly_status = vapply(reports, get_field, character(1), path = c("assembly_info", "assembly_status")),
-  assembly_type   = vapply(reports, get_field, character(1), path = c("assembly_info", "assembly_type")),
-  hosts           = vapply(reports, get_hosts, character(1)),
-  organism_name   = vapply(reports, function(r) get_field(r, c("organism", "organism_name")), character(1)),
-  tax_id          = vapply(reports, function(r) as.character(get_field(r, c("organism", "tax_id"))), character(1)),
-  contig_l50      = vapply(reports, num, double(1), path = c("assembly_stats", "contig_l50")),
-  contig_n50      = vapply(reports, num, double(1), path = c("assembly_stats", "contig_n50")),
-  coverage        = vapply(reports, function(r) {
-                      v <- get_field(r, c("assembly_stats", "genome_coverage"))
-                      if (is.na(v)) {
-                          NA_real_
-                      } else {
-                          as.numeric(sub('x$', '', v))
-                      }
-                    }, double(1)),
-  number_of_component_sequences = vapply(reports, num, double(1), path = c("assembly_stats", "number_of_component_sequences")),
-  number_of_contigs             = vapply(reports, num, double(1), path = c("assembly_stats", "number_of_contigs")),
-  total_ungapped_length         = vapply(reports, num, double(1), path = c("assembly_stats", "total_ungapped_length")),
-  total_sequence_length         = vapply(reports, num, double(1), path = c("assembly_stats", "total_sequence_length")),
-  source_database = vapply(reports, function(r) get_field(r, "source_database"), character(1)),
-  is_type         = vapply(reports, function(r) "type_material" %in% names(r), logical(1)),
-  is_annotated    = vapply(reports, function(r) "annotation_info" %in% names(r), logical(1)),
-  is_atypical     = vapply(reports, function(r) "atypical" %in% names(r$assembly_info), logical(1)),
-  checkm_completeness  = vapply(reports, num, double(1), path = c("checkm_info", "completeness")),
-  checkm_contamination = vapply(reports, num, double(1), path = c("checkm_info", "contamination")),
-  stringsAsFactors = FALSE
-)
-
-out$reference_id <- gsub('[\\/:*?"<>| .]', '_', out$accession)
-out <- out[, c("reference_id", setdiff(names(out), "reference_id"))]
-out$organism_name <- gsub('\\[|\\]', '', out$organism_name)
-
-write.table(out, file = out_path, append = TRUE, sep = '\t', col.names = FALSE, row.names = FALSE, quote = FALSE)

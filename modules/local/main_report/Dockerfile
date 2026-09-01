@@ -47,7 +47,7 @@ EOF
 
 RUN <<EOF
 install.r remotes
-Rscript -e 'remotes::install_github("grunwaldlab/PathoSurveilR@v0.4.5")'
+Rscript -e 'remotes::install_github("grunwaldlab/PathoSurveilR@v0.4.7")'
 EOF
 
 USER root

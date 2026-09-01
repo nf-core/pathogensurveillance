@@ -5,10 +5,10 @@ Validates the input data and returns a reformatted version that is used for the 
 process SAMPLESHEET_CHECK {
     tag "input metadata"
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.7"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/b9/b95abf1e05ee8b355cc960457a32f0ff613e864f595b8d5c977ed49dd9aa2278/data':
-        'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ec/ec0e2ca110b9875eab3997bac2682b5735bcbff78a6025b98816dd016685bdd4/data':
+        'community.wave.seqera.io/library/r-pathosurveilr_quarto:dc06886ee7b6ddcd' }"
 
     input:
     path sample_tsv    , stageAs: 'input_sample_metadata.txt'
