@@ -25,16 +25,6 @@
 
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#     "~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/58/8ca67086d27d1800529d5536960039/SRR4237000_taxa_found.tsv",
-#     "5",
-#     "50",
-#     "20",
-#     "false",
-#     "deleteme",
-#     "~/home/fosterz/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/tmp/a1/92bf3a2c9b4c261f6e19b2149fd280/SRR4237000_reference_data.tsv",
-#     list.files("~/projects/pathogensurveillance_publications/publication/analyses/identification_validation/work/58/8ca67086d27d1800529d5536960039", pattern = '^[0-9]+.tsv$', full.names = TRUE)
-# )
 
 args <- as.list(args)
 taxa_found_data <- read.table(args[[1]], header = TRUE, sep = '\t', comment.char = '')
@@ -55,7 +45,7 @@ if (! is.null(excluded_accessions_str) && excluded_accessions_str != "" && exclu
 
 # Parse input TSVs
 if (length(args) < 9) {
-    stop('No family-level reference metadata files supplied. Check input data.')
+    stop('No reference metadata files supplied. Check input data.')
 }
 tsv_paths <- unlist(args[9:length(args)])
 

@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 
-
 # This script attempts to find a minimal subset of references that have a range of similarity to each sample.
 # This is done by making a list (data.frame) of "bins" representing a range of scaled ANI values for each sample,
 # calculating which references can satisfy each bin, and selecting the references that satisfy the most bins
@@ -31,30 +30,20 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all_comp.csv',
-#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all.tsv',
-#   '1',
-#   '1',
-#   '3',
-#   'all_context_refs.tsv'
-# )
 names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
-# ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
-# rownames(ani_matrix) <- colnames(ani_matrix)
-
-pw <- read.csv(args$ani_matrix, check.names = FALSE)
-all_names <- sort(unique(c(pw$query_name, pw$match_name)))
-ani_matrix <- matrix(0, nrow = length(all_names), ncol = length(all_names),
-		                          dimnames = list(all_names, all_names))
-ani_matrix[cbind(pw$query_name, pw$match_name)] <- pw$average_containment_ani
-ani_matrix[lower.tri(ani_matrix)] <- t(ani_matrix)[lower.tri(ani_matrix)]
-diag(ani_matrix) <- 1
-
 n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
+
+# Convert table of pairwise ANI values to a matrix format
+pw <- read.csv(args$ani_matrix, check.names = FALSE)
+all_names <- sort(unique(c(pw$query_name, pw$match_name)))
+ani_matrix <- matrix(0, nrow = length(all_names), ncol = length(all_names),
+	                 dimnames = list(all_names, all_names))
+ani_matrix[cbind(pw$query_name, pw$match_name)] <- pw$average_containment_ani
+ani_matrix[lower.tri(ani_matrix)] <- t(ani_matrix)[lower.tri(ani_matrix)]
+diag(ani_matrix) <- 1
 
 # Check if user does not want references selected
 if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) {

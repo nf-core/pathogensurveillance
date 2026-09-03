@@ -85,22 +85,19 @@ filter_and_extract <- function(rank) {
 
 # Extract taxon info
 output_data <- unique(do.call(rbind, lapply(names(ani_threshold), filter_and_extract)))
-family_taxids <- unique(output_data$taxon_id[output_data$rank == 'family'])
-family_taxnames <- unique(output_data$name[output_data$rank == 'family'])
-
-child_rows <- do.call(rbind, lapply(seq_along(family_taxids), function(i) {
-    fid <- family_taxids[i]
-    fname <- family_taxnames[i]
-    search_term <- paste0('txid', fid, '[Subtree] AND ', fname, '[Next Level]')
+family_data <- unique(output_data[output_data$rank == 'family', c('taxon_id', 'name'), drop = FALSE])
+child_rows <- do.call(rbind, lapply(seq_len(nrow(family_data)), function(i) {
+    search_term <- paste0('txid', family_data$taxon_id, '[Subtree] AND ', family_data$name, '[Next Level]')
     result <- tryCatch(
         entrez_search(db = 'taxonomy', term = search_term, retmax = 10000),
         error = function(e) list(ids = character(0))
     )
     children <- result$ids
-    if (length(children) == 0) children <- fid # family as query if no children present
-    data.frame(family_taxon_id = fid, query_taxon_id = children)
+    if (length(children) == 0) children <- family_data$taxon_id # family as query if no children present
+    data.frame(family_taxon_id = family_data$taxon_id, query_taxon_id = children)
 }))
 
+# Write taxon info to file
 if (is.null(child_rows)) child_rows <- data.frame(family_taxon_id = character(), query_taxon_id = character())
 write.table(child_rows, 'child_taxa.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
 
