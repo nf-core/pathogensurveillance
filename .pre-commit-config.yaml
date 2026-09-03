@@ -5,6 +5,10 @@ repos:
       - id: prettier
         additional_dependencies:
           - prettier@3.9.6
+        exclude: |
+          (?x)^(
+              .*\.html$
+          )$
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
