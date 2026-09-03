@@ -15,7 +15,8 @@ repos:
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
-              .*\.snap$
+              .*\.snap$|
+              .*\.html$
           )$
       - id: end-of-file-fixer
         exclude: |
@@ -23,7 +24,8 @@ repos:
               .*ro-crate-metadata.json$|
               modules/(?!local/).*|
               subworkflows/(?!local/).*|
-              .*\.snap$
+              .*\.snap$|
+              .*\.html$
           )$
       - id: check-added-large-files
         args: [--maxkb=5000]
