@@ -1,170 +1,4 @@
 {
-    "-profile test_small_genomes": {
-        "content": [
-            [
-                
-            ],
-            null
-        ],
-        "timestamp": "2026-07-10T11:59:27.200500818",
-        "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "25.04.6"
-        }
-    },
-    "-profile test": {
-        "content": [
-            [
-                ".pathogensurveillance_output.json",
-                "assemblies",
-                "assemblies/spades",
-                "assemblies/spades/LF1.assembly.gfa.gz",
-                "assemblies/spades/LF1.contigs.fa.gz",
-                "assemblies/spades/LF1.scaffolds.fa.gz",
-                "assemblies/spades/LF1.spades.log",
-                "assemblies/spades/LF1.warnings.log",
-                "downloads",
-                "downloads/annotations",
-                "downloads/annotations/GCF_000159355.1.gff.gz",
-                "downloads/annotations/GCF_000159435.1.gff.gz",
-                "downloads/annotations/GCF_000236455.2.gff.gz",
-                "downloads/annotations/GCF_000993785.3.gff.gz",
-                "downloads/annotations/GCF_001807655.1.gff.gz",
-                "downloads/annotations/GCF_002278095.1.gff.gz",
-                "downloads/annotations/GCF_003641165.1.gff.gz",
-                "downloads/annotations/GCF_005341425.1.gff.gz",
-                "downloads/annotations/GCF_018987235.1.gff.gz",
-                "downloads/annotations/GCF_028736235.1.gff.gz",
-                "downloads/annotations/GCF_030389495.1.gff.gz",
-                "downloads/annotations/GCF_040571325.1.gff.gz",
-                "downloads/annotations/GCF_900112845.1.gff.gz",
-                "downloads/annotations/GCF_965136895.1.gff.gz",
-                "downloads/assemblies",
-                "downloads/assemblies/GCF_000159355.1.fasta.gz",
-                "downloads/assemblies/GCF_000159435.1.fasta.gz",
-                "downloads/assemblies/GCF_000236455.2.fasta.gz",
-                "downloads/assemblies/GCF_000993785.3.fasta.gz",
-                "downloads/assemblies/GCF_001807655.1.fasta.gz",
-                "downloads/assemblies/GCF_002278095.1.fasta.gz",
-                "downloads/assemblies/GCF_003641165.1.fasta.gz",
-                "downloads/assemblies/GCF_005341425.1.fasta.gz",
-                "downloads/assemblies/GCF_018987235.1.fasta.gz",
-                "downloads/assemblies/GCF_028736235.1.fasta.gz",
-                "downloads/assemblies/GCF_030389495.1.fasta.gz",
-                "downloads/assemblies/GCF_040571325.1.fasta.gz",
-                "downloads/assemblies/GCF_900112845.1.fasta.gz",
-                "downloads/assemblies/GCF_965136895.1.fasta.gz",
-                "downloads/databases",
-                "downloads/databases/busco",
-                "downloads/databases/busco/busco_downloads",
-                "downloads/reads",
-                "downloads/reads/SRR18850314_1.fastq.gz",
-                "downloads/reads/SRR18850314_2.fastq.gz",
-                "fastp",
-                "fastp/LF1.fastp.html",
-                "fastp/LF1.fastp.json",
-                "fastp/LF1.fastp.log",
-                "fastp/LF1_R1.fastp.fastq.gz",
-                "fastp/LF1_R2.fastp.fastq.gz",
-                "metadata",
-                "metadata/reference_metadata.tsv",
-                "metadata/sample_metadata.tsv",
-                "pipeline_info",
-                "pipeline_info/messages.tsv",
-                "pipeline_info/pathogensurveillance_run_info.yml",
-                "pipeline_info/version_info.yml",
-                "quality_control",
-                "quality_control/fastqc",
-                "quality_control/fastqc/LF1_1_fastqc.html",
-                "quality_control/fastqc/LF1_1_fastqc.zip",
-                "quality_control/fastqc/LF1_2_fastqc.html",
-                "quality_control/fastqc/LF1_2_fastqc.zip",
-                "quality_control/multiqc",
-                "quality_control/multiqc/multiqc_data",
-                "quality_control/multiqc/multiqc_plots",
-                "quality_control/multiqc/multiqc_report.html",
-                "quality_control/quast",
-                "quality_control/quast/LF1",
-                "quality_control/quast/LF1.tsv",
-                "reference_data",
-                "reference_data/considered",
-                "reference_data/considered/2062.json",
-                "reference_data/considered/2062.tsv",
-                "reference_data/considered/33958.json",
-                "reference_data/considered/33958.tsv",
-                "reference_data/downloaded",
-                "reference_data/downloaded/LF1.tsv",
-                "report_group_data",
-                "report_group_data/all_inputs",
-                "reports",
-                "reports/all_pathsurveil_report.html",
-                "sendsketch",
-                "sendsketch/LF1.txt",
-                "sendsketch/LF1_taxa_found.tsv",
-                "sendsketch/LF1_taxon_data.tsv",
-                "sketch_comparisons",
-                "sketch_comparisons/ani_matricies",
-                "sketch_comparisons/ani_matricies/all_pairwise.csv",
-                "sketch_comparisons/sketches",
-                "sketch_comparisons/sketches/GCF_000159355_1.sig",
-                "sketch_comparisons/sketches/GCF_000159435_1.sig",
-                "sketch_comparisons/sketches/GCF_000236455_2.sig",
-                "sketch_comparisons/sketches/GCF_000993785_3.sig",
-                "sketch_comparisons/sketches/GCF_001807655_1.sig",
-                "sketch_comparisons/sketches/GCF_002278095_1.sig",
-                "sketch_comparisons/sketches/GCF_003641165_1.sig",
-                "sketch_comparisons/sketches/GCF_005341425_1.sig",
-                "sketch_comparisons/sketches/GCF_018987235_1.sig",
-                "sketch_comparisons/sketches/GCF_028736235_1.sig",
-                "sketch_comparisons/sketches/GCF_030389495_1.sig",
-                "sketch_comparisons/sketches/GCF_040571325_1.sig",
-                "sketch_comparisons/sketches/GCF_900112845_1.sig",
-                "sketch_comparisons/sketches/GCF_965136895_1.sig",
-                "sketch_comparisons/sketches/LF1.sig"
-            ],
-            {
-                "BBMAP_SENDSKETCH": {
-                    "bbmap": 39.18
-                },
-                "BUSCO_DOWNLOAD": {
-                    "busco": "6.1.0"
-                },
-                "FASTP": {
-                    "fastp": "1.1.0"
-                },
-                "FASTQC": {
-                    "fastqc": "0.12.1"
-                },
-                "QUAST": {
-                    "quast": "5.3.0"
-                },
-                "SAMPLESHEET_CHECK": {
-                    "r-PathoSurveilR": "1.2.0"
-                },
-                "SOURMASH_PAIRWISE": {
-                    "sourmash": "4.9.4"
-                },
-                "SOURMASH_SKETCH": {
-                    "sourmash": "4.9.4"
-                },
-                "SPADES": {
-                    "spades": "4.1.0"
-                },
-                "SRATOOLS_FASTERQDUMP": {
-                    "pigz": 2.8,
-                    "sratools": "3.2.1"
-                },
-                "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.2.0dev"
-                }
-            }
-        ],
-        "timestamp": "2026-08-07T17:06:33.101119744",
-        "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "26.04.4"
-        }
-    },
     "test profile": {
         "content": [
             [
@@ -178,33 +12,35 @@
                 "assemblies/spades/LF1.warnings.log",
                 "downloads",
                 "downloads/annotations",
-                "downloads/annotations/GCF_000160855.1.gff.gz",
-                "downloads/annotations/GCF_000196855.1.gff.gz",
-                "downloads/annotations/GCF_000498955.2.gff.gz",
+                "downloads/annotations/GCF_000159435.1.gff.gz",
+                "downloads/annotations/GCF_000236455.2.gff.gz",
                 "downloads/annotations/GCF_000993785.3.gff.gz",
-                "downloads/annotations/GCF_001188955.3.gff.gz",
-                "downloads/annotations/GCF_001435915.1.gff.gz",
-                "downloads/annotations/GCF_006740305.1.gff.gz",
-                "downloads/annotations/GCF_013394085.1.gff.gz",
-                "downloads/annotations/GCF_016756395.1.gff.gz",
-                "downloads/annotations/GCF_018987235.1.gff.gz",
+                "downloads/annotations/GCF_001433975.1.gff.gz",
+                "downloads/annotations/GCF_001434005.1.gff.gz",
+                "downloads/annotations/GCF_001436315.1.gff.gz",
+                "downloads/annotations/GCF_001807655.1.gff.gz",
+                "downloads/annotations/GCF_002278095.1.gff.gz",
+                "downloads/annotations/GCF_003641165.1.gff.gz",
+                "downloads/annotations/GCF_005341425.1.gff.gz",
                 "downloads/annotations/GCF_028736235.1.gff.gz",
                 "downloads/annotations/GCF_043386705.1.gff.gz",
-                "downloads/annotations/GCF_054729175.1.gff.gz",
+                "downloads/annotations/GCF_043950205.1.gff.gz",
+                "downloads/annotations/GCF_900112845.1.gff.gz",
                 "downloads/assemblies",
-                "downloads/assemblies/GCF_000160855.1.fasta.gz",
-                "downloads/assemblies/GCF_000196855.1.fasta.gz",
-                "downloads/assemblies/GCF_000498955.2.fasta.gz",
+                "downloads/assemblies/GCF_000159435.1.fasta.gz",
+                "downloads/assemblies/GCF_000236455.2.fasta.gz",
                 "downloads/assemblies/GCF_000993785.3.fasta.gz",
-                "downloads/assemblies/GCF_001188955.3.fasta.gz",
-                "downloads/assemblies/GCF_001435915.1.fasta.gz",
-                "downloads/assemblies/GCF_006740305.1.fasta.gz",
-                "downloads/assemblies/GCF_013394085.1.fasta.gz",
-                "downloads/assemblies/GCF_016756395.1.fasta.gz",
-                "downloads/assemblies/GCF_018987235.1.fasta.gz",
+                "downloads/assemblies/GCF_001433975.1.fasta.gz",
+                "downloads/assemblies/GCF_001434005.1.fasta.gz",
+                "downloads/assemblies/GCF_001436315.1.fasta.gz",
+                "downloads/assemblies/GCF_001807655.1.fasta.gz",
+                "downloads/assemblies/GCF_002278095.1.fasta.gz",
+                "downloads/assemblies/GCF_003641165.1.fasta.gz",
+                "downloads/assemblies/GCF_005341425.1.fasta.gz",
                 "downloads/assemblies/GCF_028736235.1.fasta.gz",
                 "downloads/assemblies/GCF_043386705.1.fasta.gz",
-                "downloads/assemblies/GCF_054729175.1.fasta.gz",
+                "downloads/assemblies/GCF_043950205.1.fasta.gz",
+                "downloads/assemblies/GCF_900112845.1.fasta.gz",
                 "downloads/databases",
                 "downloads/databases/busco",
                 "downloads/databases/busco/busco_downloads",
@@ -251,25 +87,27 @@
                 "reports/all_pathsurveil_report.html",
                 "sendsketch",
                 "sendsketch/LF1.txt",
+                "sendsketch/LF1_child_taxa.tsv",
                 "sendsketch/LF1_taxa_found.tsv",
                 "sendsketch/LF1_taxon_data.tsv",
                 "sketch_comparisons",
                 "sketch_comparisons/ani_matricies",
                 "sketch_comparisons/ani_matricies/all_pairwise.csv",
                 "sketch_comparisons/sketches",
-                "sketch_comparisons/sketches/GCF_000160855_1.sig",
-                "sketch_comparisons/sketches/GCF_000196855_1.sig",
-                "sketch_comparisons/sketches/GCF_000498955_2.sig",
+                "sketch_comparisons/sketches/GCF_000159435_1.sig",
+                "sketch_comparisons/sketches/GCF_000236455_2.sig",
                 "sketch_comparisons/sketches/GCF_000993785_3.sig",
-                "sketch_comparisons/sketches/GCF_001188955_3.sig",
-                "sketch_comparisons/sketches/GCF_001435915_1.sig",
-                "sketch_comparisons/sketches/GCF_006740305_1.sig",
-                "sketch_comparisons/sketches/GCF_013394085_1.sig",
-                "sketch_comparisons/sketches/GCF_016756395_1.sig",
-                "sketch_comparisons/sketches/GCF_018987235_1.sig",
+                "sketch_comparisons/sketches/GCF_001433975_1.sig",
+                "sketch_comparisons/sketches/GCF_001434005_1.sig",
+                "sketch_comparisons/sketches/GCF_001436315_1.sig",
+                "sketch_comparisons/sketches/GCF_001807655_1.sig",
+                "sketch_comparisons/sketches/GCF_002278095_1.sig",
+                "sketch_comparisons/sketches/GCF_003641165_1.sig",
+                "sketch_comparisons/sketches/GCF_005341425_1.sig",
                 "sketch_comparisons/sketches/GCF_028736235_1.sig",
                 "sketch_comparisons/sketches/GCF_043386705_1.sig",
-                "sketch_comparisons/sketches/GCF_054729175_1.sig",
+                "sketch_comparisons/sketches/GCF_043950205_1.sig",
+                "sketch_comparisons/sketches/GCF_900112845_1.sig",
                 "sketch_comparisons/sketches/LF1.sig"
             ],
             {
@@ -279,17 +117,38 @@
                 "BUSCO_DOWNLOAD": {
                     "busco": "6.1.0"
                 },
+                "DOWNLOAD_ASSEMBLIES": {
+                    "datasets": "18.31.0",
+                    "samtools": 1.18,
+                    "unzip": 6.0
+                },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
+                },
+                "FIND_ASSEMBLIES": {
+                    "datasets": "18.31.0"
+                },
+                "INITIAL_CLASSIFICATION": {
+                    "r-base": "4.5.3",
+                    "r-rentrez": "1.2.4",
+                    "r-PathoSurveilR": "1.2.1"
+                },
+                "PARSE_ASSEMBLIES": {
+                    "r-base": "4.4.2",
+                    "rcppsimdjson": "0.1.12"
+                },
+                "PICK_ASSEMBLIES": {
+                    "r-base": "4.5.3",
+                    "r-PathoSurveilR": "1.2.1"
                 },
                 "QUAST": {
                     "quast": "5.3.0"
                 },
                 "SAMPLESHEET_CHECK": {
-                    "r-PathoSurveilR": "1.2.0"
+                    "r-PathoSurveilR": "1.2.1"
                 },
                 "SOURMASH_PAIRWISE": {
                     "sourmash": "4.9.4"
@@ -305,14 +164,14 @@
                     "sratools": "3.2.1"
                 },
                 "Workflow": {
-                    "nf-core/pathogensurveillance": "v1.2.0dev"
+                    "nf-core/pathogensurveillance": "v1.2.0"
                 }
             }
         ],
-        "timestamp": "2026-08-11T16:53:27.716554311",
         "meta": {
-            "nf-test": "0.9.5",
-            "nextflow": "26.04.4"
-        }
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.6"
+        },
+        "timestamp": "2026-09-04T12:20:19.60851091"
     }
 }
