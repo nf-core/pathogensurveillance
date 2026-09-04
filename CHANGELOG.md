@@ -2,6 +2,40 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.0 - Current
+
+## Added
+
+- Added option to use BWA3 for read alignment, increasing speed. This is controlled by the `--aligner` parameter used to switch between BWA and BWA3. 'bwa' must be used with non-AVX2-capable CPUs.
+- Added number of core genes used to infer multigene phylogeny to the report output.
+
+## Changed
+
+- Removed `TRIM_AND_SKETCH` step. Samples that fail assembly are no longer sketched from raw reads and are instead excluded from sketch-based comparisons and downstream analyses that rely on them. Warnings for failed assemblies remain in the report output.
+- Assembly RAM is now calculated more accurately to avoid retrying to increase RAM
+- Increase number of reference assemblies downloaded by default
+- Added `scaledRam` helper function and `--ram_scale` parameter to control RAM allocation across processes, analogous to the existing CPU scaling functionality.
+- Removed `--max_cpus` and `--max_ram` parameters. Resource ceilings should now be handled by `resourceLimits` in a custom config/profile.
+- Replaced `storeDir` process directive with workflow-level caching logic to avoid incompatibility with eval statements in topic channels (https://github.com/nextflow-io/nextflow/issues/5785).
+- When there are fewer unique strains than `n_ref_strains`, the pipeline now makes up the difference with more examples of the same strain. This ensure that multiple representatives of each species-level taxon are downloaded when strain-level info is not present.
+- Reference assemblies are now downloaded in parallel from NCBI.
+- Replaced deprecated `tabix/tabix` and `tabix/bgzip` nf-core modules with `htslib/bgziptabix` for VCF indexing. Reference `.gzi` indexes are now sourced directly from the upstream `samtools faidx` step instead of being regenerated. User-supplied reference FASTA files for variant calling must be gzip-compressed (`.fasta.gz`).
+- Software versions from local pipeline modules are now collected via Nextflow topic channels, matching the nf-core module convention. All tools are now included in `pipeline_info/version_info.yml`, including previously unreported ones.
+- Replaced the `sourmash/compare` nf-core module with `sourmash/pairwise` for faster sketch comparisons.
+
+### `Fixed`
+
+- Modified Flye module to detect "No disjointigs were assembled" error and exit gracefully instead of retrying.
+- Fixed errors when using "excluded" NCBI accessions.
+- Fixed NCBI timeout errors that occurred when querying large reference families.
+- Handle samples that return no sendsketch results.
+- Prevent PIRATE and BUSCO phylogeny analyses from running on references associated with samples whose assemblies failed.
+- Prevent `SOURMASH_PAIRWISE` from running on report groups that have no successful assemblies.
+- Fixed intermittent PIRATE 'input file name collision' error
+- Reference NCBI assemblies excluded by the user are no longer downloaded.
+- When multiple assembly versions exist for the same organism (e.g. GCA_000230695.1 vs GCA_000230695.3, or GCA vs GCF), only the best version is retained. RefSeq (GCF) is preferred over GenBank (GCA), and higher version numbers are preferred.
+- Handle numeric-only sample IDs by casting to string.
+
 ## 1.1.0 - 2026-01-30
 
 ### `Added`

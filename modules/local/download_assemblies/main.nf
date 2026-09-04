@@ -2,10 +2,10 @@ process DOWNLOAD_ASSEMBLIES {
     tag "${ref_meta.id}"
     label 'process_single'
 
-    conda "conda-forge::ncbi-datasets-cli=15.11.0 bioconda::samtools=1.18 conda-forge::unzip=6.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/90/904d82f3ac3a73335849adf49707027bf8f58b535bcfd9e6736f5e2dde98eedd/data':
-        'community.wave.seqera.io/library/samtools_ncbi-datasets-cli_unzip:155f739985f03f20' }"
+    conda "conda-forge::ncbi-datasets-cli=18.31.0 bioconda::samtools=1.18 conda-forge::unzip=6.0"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'oras://community.wave.seqera.io/library/samtools_ncbi-datasets-cli_unzip:68ff35a3d4d94e30':
+        'community.wave.seqera.io/library/samtools_ncbi-datasets-cli_unzip:0963ac48a0de640a' }"
 
     input:
     tuple val(ref_meta), val(id)
@@ -17,7 +17,7 @@ process DOWNLOAD_ASSEMBLIES {
     //tuple val(ref_meta), path("${prefix}_cds.fna"), emit: cds, optional: true
     //tuple val(ref_meta), path("${prefix}.faa"), emit: protein, optional: true
 
-    path "versions.yml"                 , emit: versions
+    path "versions.yml"                 , emit: versions_download_assemblies, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,6 +26,11 @@ process DOWNLOAD_ASSEMBLIES {
     prefix = task.ext.prefix ?: "${ref_meta.id}"
     def args = task.ext.args ?: ''
     """
+    # Ensure that CA certificates are in path when docker/singularity are used
+    if [ -f /opt/conda/ssl/cacert.pem ]; then
+        export SSL_CERT_FILE=/opt/conda/ssl/cacert.pem
+    fi
+
     # Download assemblies as zip archives
     datasets download genome accession $id $args --include gff3,genome --filename ${prefix}.zip
 

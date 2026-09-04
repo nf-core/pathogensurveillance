@@ -88,6 +88,13 @@
                     "description": "Which type of the Bakta database to download. Must be 'light' (~2Gb) or 'full' (~40Gb).",
                     "default": "light",
                     "fa_icon": "fas fa-download"
+                },
+                "aligner": {
+                    "type": "string",
+                    "enum": ["bwamem3", "bwa"],
+                    "default": "bwamem3",
+                    "description": "Read aligner to use. 'bwa' must be used with non-AVX2-capable CPUs.",
+                    "fa_icon": "fas fa-dna"
                 }
             }
         },
@@ -136,36 +143,36 @@
                 "n_ref_strains": {
                     "type": ["integer", "string"],
                     "default": "5",
-                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "description": "The maximum number/percentage of references representing unique subspecies to download from RefSeq for each species predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a group of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_species": {
                     "type": ["integer", "string"],
-                    "default": "20",
-                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "default": "50",
+                    "description": "The maximum number/percentage of references representing unique species to download from RefSeq for each genus predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a group of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_genera": {
                     "type": ["integer", "string"],
                     "default": "20",
-                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a goup of samples will depend on the taxonomic diversity of the samples.",
+                    "description": "The maximum number/percentage of references representing unique genera to download from RefSeq for each family predicited to be in each sample. When there are fewer unique strains than the number given, multiple representatives of the same strain will be included to reach the specified number. Samples with similar initial indentifications will usually use the same references, so the total number of references downloaded for a group of samples will depend on the taxonomic diversity of the samples.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_closest": {
                     "type": "number",
-                    "default": 2,
+                    "default": 7,
                     "description": "The number of references most similar to each sample based on estimated ANI to include in phyogenetic anlyses.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_closest_named": {
                     "type": "number",
-                    "default": 1,
-                    "description": "Same as the 'n_ref_closest' option except that it only applies to referneces with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
+                    "default": 4,
+                    "description": "Same as the 'n_ref_closest' option except that it only applies to references with what apppear to be standard latin binomaial names (i.e. two words with no numbers or symbols). This is intended to ensure that a refernece with an informative name is present even if it is not the most similar.",
                     "fa_icon": "fas fa-hashtag"
                 },
                 "n_ref_context": {
                     "type": "number",
-                    "default": 5,
+                    "default": 12,
                     "description": "The number of references representing the entire range of ANI relative to each sample. These are meant to provide context for more similar references. For a group of samples, the fewest total references will be selected that satisify this count for each sample.",
                     "fa_icon": "fas fa-hashtag"
                 },
@@ -207,6 +214,13 @@
                     "minimum": 0.01,
                     "description": "A scaling factor to adjust the number of CPUs used by multithreaded processes. The number of CPUs for each process will be multiplied by this value and rounded to the nearest integer (minimum 1).",
                     "fa_icon": "fas fa-microchip"
+                },
+                "ram_scale": {
+                    "type": "number",
+                    "default": 1.0,
+                    "minimum": 0.01,
+                    "description": "A scaling factor to adjust the amount of RAM used by processes. The amount of RAM for each process will be multiplied by this value and rounded to the nearest integer in GB (minimum 1).",
+                    "fa_icon": "fas fa-memory"
                 },
                 "skip_core_phylogeny": {
                     "type": "boolean",

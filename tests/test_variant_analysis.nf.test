@@ -1,0 +1,57 @@
+nextflow_pipeline {
+
+    name "Test pipeline with full variant analysis"
+    script "../main.nf"
+    tag "pipeline"
+    tag "full_pipeline_feature"
+
+    test("variant analysis") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_variant_analysis.csv"
+                reference_data = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_refs.csv"
+                aligner = 'bwa'
+                max_samples = 3
+                phylo_max_genes = 100
+                n_ref_closest = 1
+                n_ref_closest_named = 1
+                n_ref_context = 7
+                n_ref_strains = '1'
+                n_ref_species = '5'
+                n_ref_genera = '5'
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
+
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(
+                    // All stable path name, with a relative path
+                    stable_name,
+
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/version_info.yml")
+                ).match() }
+            )
+        }
+    }
+
+    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
+    /* test("variant analysis, stub") {
+        options "-stub"
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+    } */
+}

@@ -25,37 +25,47 @@
 
 # Parse taxonomy inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#     "~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff/LF1_taxa_found.tsv",
-#     "1",
-#     "3",
-#     "3",
-#     "false",
-#     "deleteme",
-#     list.files("~/projects/pathogensurveillance/work/41/42d81425081a000cc5d1c63d0f56ff", pattern = '^[0-9]+.tsv$', full.names = TRUE)
-# )
 
 args <- as.list(args)
 taxa_found_data <- read.table(args[[1]], header = TRUE, sep = '\t', comment.char = '')
-n_ref_strains <- args[[2]]
-n_ref_species <- args[[3]]
-n_ref_genera <- args[[4]]
-only_binomial <- as.logical(args[[5]])
-out_name <- args[[6]]
+child_taxa_data <- read.table(args[[2]], header = TRUE, sep = '\t', comment.char = '')
+n_ref_strains <- args[[3]]
+n_ref_species <- args[[4]]
+n_ref_genera <- args[[5]]
+only_binomial <- as.logical(args[[6]])
+out_name <- args[[7]]
+
+# Read excluded accessions from comma-delimited string argument
+excluded_accessions_str <- args[[8]]
+excluded_accessions <- character(0)
+if (! is.null(excluded_accessions_str) && excluded_accessions_str != "" && excluded_accessions_str != "NONE") {
+    excluded_accessions <- strsplit(excluded_accessions_str, split = ',')[[1]]
+    excluded_accessions <- sub(excluded_accessions, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+}
 
 # Parse input TSVs
-if (length(args) < 7) {
-    stop('No family-level reference metadata files supplied. Check input data.')
+if (length(args) < 9) {
+    stop('No reference metadata files supplied. Check input data.')
 }
-tsv_paths <- unlist(args[7:length(args)])
-assem_data <- do.call(rbind, lapply(tsv_paths, function(path) {
-    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '')
+tsv_paths <- unlist(args[9:length(args)])
+
+read_one <- function(path) {
+    out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '', check.names = FALSE)
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
     if (nrow(out) > 0) {
-        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_id]
+        family_taxon_id <- child_taxa_data$family_taxon_id[child_taxa_data$query_taxon_id == family_id]
+        if (length(family_taxon_id) == 0) family_taxon_id <- family_id
+        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_taxon_id]
     }
-    return(out)
-}))
+    out
+}
+assem_data <- do.call(rbind, lapply(tsv_paths, read_one))
+
+# Filter out excluded accessions from user-defined references
+if (length(excluded_accessions) > 0) {
+    accession_core_ids <- sub(assem_data$accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    assem_data <- assem_data[! accession_core_ids %in% excluded_accessions, ]
+}
 
 # Add taxon info columns
 assem_data$organism_name <- gsub(assem_data$organism_name, pattern = '[', replacement = '', fixed = TRUE)
@@ -88,23 +98,34 @@ if (only_binomial) {
     assem_data <- assem_data[is_latin_binomial(assem_data$species), ]
 }
 
+# Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
+core_id <- sub(assem_data$accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+version <- as.numeric(sub(assem_data$accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+is_refseq <- startsWith(assem_data$accession, 'GCF_')
+# Sort so best version of each core is first
+priority <- order(is_refseq, version, decreasing = TRUE)
+assem_data <- assem_data[priority, , drop = FALSE]
+assem_data <- assem_data[! duplicated(core_id), , drop = FALSE]
+
 # Parse "count" arguments which can be a number or a percentage
 get_count <- function(choices, count) {
     if (grepl(count, pattern = "%$")) {
         prop <- as.numeric(sub(count, pattern = "%", replacement = "")) / 100
         count <- ceiling(choices * prop)
-        return(min(c(choices, count)))
     } else {
         count <- as.numeric(count)
-        return(min(c(choices, count)))
     }
+    return(count)
 }
 
+# Extract version number for sorting preference
+version_num <- as.numeric(sub(assem_data$accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
 # Sort references by desirability
 priority <- order(decreasing = TRUE,
     assem_data$is_atypical == FALSE,
     assem_data$is_type, # Is type strain
     assem_data$source_database == 'SOURCE_DATABASE_REFSEQ', # Is a RefSeq reference
+    version_num, # Prefer higher version numbers
     is_latin_binomial(assem_data$species), # Has a species epithet
     assem_data$is_annotated,
     factor(assem_data$assembly_level, levels = c("Contig", "Scaffold", "Chromosome", "Complete Genome"), ordered = TRUE),
@@ -113,7 +134,7 @@ priority <- order(decreasing = TRUE,
     assem_data$contig_l50,
     assem_data$coverage
 )
-assem_data <- assem_data[priority, ]
+assem_data <- assem_data[priority, , drop = FALSE]
 
 # Initialize column to hold which level an assembly is selected for
 assem_data$selection_rank <- NA
@@ -121,7 +142,7 @@ assem_data$selection_taxon <- NA
 assem_data$selection_subtaxon <- NA
 
 # Select representatives for each rank
-select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_rank, count_per_subrank = 1)  {
+select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_rank, count_per_subrank = 1, fallback_to_subrank = FALSE)  {
     for (tax in query_taxa) {
         # Get assembly indexes for every subtaxon
         tax_to_consider <- (assem_data[[rank]] == tax | assem_data[[subrank]] == tax) & is.na(assem_data$selection_rank)
@@ -148,15 +169,24 @@ select_for_rank <- function(assem_data, query_taxa, rank, subrank, count_per_ran
         selected <- selected[seq_len(min(c(count_per_rank, length(selected))))]
 
         # Pick representatives of subtaxa with best attributes (based on order in input)
-        selected <- lapply(selected, function(x) {
+        subset_selection <- unlist(lapply(selected, function(x) {
             x[seq_len(min(c(count_per_subrank, length(x))))]
-        })
+        }))
+
+        # If not enough unique taxa of the target rank are found, fill in with subrank taxa
+        if (fallback_to_subrank && length(subset_selection) < count_per_rank) {
+            selection_rank_names <- rep(names(selected), vapply(selected, length, FUN.VALUE = numeric(1)))
+            rank_instance_count <- ave(seq_along(selection_rank_names), selection_rank_names, FUN = seq_along)
+            selection_unlisted <- unlist(selected)[order(rank_instance_count)]
+            selection_unlisted <- selection_unlisted[! selection_unlisted %in% subset_selection]
+            count_to_add <- min(c(length(selection_unlisted), count_per_rank - length(subset_selection)))
+            subset_selection <- c(subset_selection, selection_unlisted[seq_len(count_to_add)])
+        }
 
         # Record data on selected assemblies
-        selected <- unlist(selected)
-        assem_data$selection_rank[selected] <- rank
-        assem_data$selection_taxon[selected] <- tax
-        assem_data$selection_subtaxon[selected] <- assem_data[[subrank]][selected]
+        assem_data$selection_rank[subset_selection] <- rank
+        assem_data$selection_taxon[subset_selection] <- tax
+        assem_data$selection_subtaxon[subset_selection] <- assem_data[[subrank]][subset_selection]
     }
     return(assem_data)
 }
@@ -165,7 +195,8 @@ assem_data <- select_for_rank(
     query_taxa = taxa_found_data$name[taxa_found_data$rank == 'species'],
     rank = 'species',
     subrank = 'organism_name',
-    count_per_rank = n_ref_strains
+    count_per_rank = n_ref_strains,
+    fallback_to_subrank = TRUE
 )
 assem_data <- select_for_rank(
     assem_data,

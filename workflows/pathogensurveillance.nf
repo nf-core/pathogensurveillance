@@ -37,20 +37,17 @@ workflow PATHOGENSURVEILLANCE {
     // Write output format file for PathoSurveilR parsing
     file("$projectDir/assets/.pathogensurveillance_output.json").copyTo("${params.outdir}/.pathogensurveillance_output.json")
 
-    // Initalize channel to accumulate information about software versions used
-    versions = channel.empty()
+    // Initialize channel to accumulate warning messages
     messages = channel.empty()
 
     // Read in samplesheet, validate and stage input files
     PREPARE_INPUT ( sample_data_tsv, reference_data_tsv )
-    versions = versions.mix(PREPARE_INPUT.out.versions)
     messages = messages.mix(PREPARE_INPUT.out.messages)
 
     // Assemble and annotate genomes
     GENOME_ASSEMBLY (
         PREPARE_INPUT.out.sample_data
     )
-    versions = versions.mix(GENOME_ASSEMBLY.out.versions)
     messages = messages.mix(GENOME_ASSEMBLY.out.messages)
 
     // Initial quick analysis of sequences and references based on sketchs
@@ -58,12 +55,10 @@ workflow PATHOGENSURVEILLANCE {
         PREPARE_INPUT.out.sample_data,
         GENOME_ASSEMBLY.out.scaffolds
     )
-    versions = versions.mix(SKETCH_COMPARISON.out.versions)
     messages = messages.mix(SKETCH_COMPARISON.out.messages)
 
     // Initial quality control of reads
     INITIAL_QC_CHECKS ( PREPARE_INPUT.out.sample_data )
-    versions = versions.mix(INITIAL_QC_CHECKS.out.versions)
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
     // Call variants and create SNP-tree and minimum spanning nextwork
@@ -71,7 +66,6 @@ workflow PATHOGENSURVEILLANCE {
         PREPARE_INPUT.out.sample_data,
         SKETCH_COMPARISON.out.ani_matrix
     )
-    versions = versions.mix(VARIANT_ANALYSIS.out.versions)
     messages = messages.mix(VARIANT_ANALYSIS.out.messages)
 
     // Create core gene phylogeny for bacterial samples
@@ -81,7 +75,6 @@ workflow PATHOGENSURVEILLANCE {
             SKETCH_COMPARISON.out.ani_matrix,
             GENOME_ASSEMBLY.out.scaffolds
         )
-        versions = versions.mix(CORE_GENOME_PHYLOGENY.out.versions)
         messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
         core_selected_refs = CORE_GENOME_PHYLOGENY.out.selected_refs
         core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
@@ -98,18 +91,15 @@ workflow PATHOGENSURVEILLANCE {
         SKETCH_COMPARISON.out.ani_matrix,
         GENOME_ASSEMBLY.out.scaffolds
     )
-    versions = versions.mix(BUSCO_PHYLOGENY.out.versions)
     messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
 
     // Collate and save software versions
-    def topic_versions = channel.topic("versions")
+    def topic_versions_all = channel.topic("versions")
         .distinct()
-        .branch { entry ->
-            versions_file: entry instanceof Path
-            versions_tuple: true
-        }
+    def topic_versions_file = topic_versions_all.filter { entry -> entry instanceof Path }
+    def topic_versions_tuple = topic_versions_all.filter { entry -> !(entry instanceof Path) }
 
-    def topic_versions_string = topic_versions.versions_tuple
+    def topic_versions_string = topic_versions_tuple
         .map { process, tool, version ->
             [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
         }
@@ -119,7 +109,7 @@ workflow PATHOGENSURVEILLANCE {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    softwareVersionsToYAML(versions.mix(topic_versions.versions_file))
+    softwareVersionsToYAML(topic_versions_file)
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
@@ -147,31 +137,31 @@ workflow PATHOGENSURVEILLANCE {
     // End note section -------------------
 
     fastqc_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.fastqc_zip, by: 0)
         .map{ sample_meta, report_meta, fastqc -> [report_meta, fastqc] }
         .unique()
         .groupTuple(sort: 'hash')
     fastp_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.fastp_json, by: 0)
         .map{ sample_meta, report_meta, fastp_json -> [report_meta, fastp_json] }
         .unique()
         .groupTuple(sort: 'hash')
     nanoplot_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(INITIAL_QC_CHECKS.out.nanoplot_txt, by: 0)
         .map{ sample_meta, report_meta, nanoplot_txt -> [report_meta, nanoplot_txt] }
         .unique()
         .groupTuple(sort: 'hash')
     quast_results = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(GENOME_ASSEMBLY.out.quast, by: 0)
         .map{ sample_meta, report_meta, quast -> [report_meta, quast] }
         .unique()
         .groupTuple(sort: 'hash')
     multiqc_files = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.report_group_ids]] }
         .unique()
         .combine(collated_versions)
         .join(fastqc_results, remainder: true)
@@ -188,24 +178,30 @@ workflow PATHOGENSURVEILLANCE {
         .combine(multiqc_logo.collect(sort: true).ifEmpty([]))
         .combine(channel.value([]))
         .combine(channel.value([]))
-        .map { report_meta, files, config, custom_config, logo, replace, samples ->
+        .map { tuple ->
+            def report_meta = tuple[0]
+            def files = tuple[1]
+            def config = tuple.size() > 2 ? tuple[2] : []
+            def custom_config = tuple.size() > 3 ? tuple[3] : []
+            def logo = tuple.size() > 4 ? tuple[4] : []
+            def replace = tuple.size() > 5 ? tuple[5] : []
+            def samples = tuple.size() > 6 ? tuple[6] : []
             def all_configs = (config ? [config] : []) + (custom_config ? [custom_config] : [])
             [report_meta, files, all_configs.flatten(), logo, replace, samples]
         }
 
     MULTIQC ( multiqc_all )
-    versions = versions.mix(MULTIQC.out.versions)
 
     // Gather sample data for each report
     sample_data_tsvs = PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            [[id: sample_meta.report_group_ids], sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}]
+            [[id: sample_meta.report_group_ids], sample_meta.findAll { entry -> entry.key != 'paths' && entry.key != 'ref_metas' && entry.key != 'ref_ids' }]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, sample_meta ->
-            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_sample_data.tsv", sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_sample_data', '')], it]}
+        .map { file ->[[id: file.getSimpleName().replace('_sample_data', '')], file]}
 
     // Gather reference data for each report
     reference_data_tsvs = PREPARE_INPUT.out.sample_data
@@ -214,25 +210,32 @@ workflow PATHOGENSURVEILLANCE {
         }
         .transpose(by: 1)
         .map { report_meta, ref_meta ->
-            [report_meta, ref_meta.findAll {it.key != 'ref_path' && it.key != 'gff'}]
+            [report_meta, ref_meta.findAll { entry -> entry.key != 'ref_path' && entry.key != 'gff' }]
         }
         .unique()
         .collectFile(keepHeader: true, skip: 1) { report_meta, ref_meta ->
-            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n" ]
+            [ "${report_meta.id}_reference_data.tsv", ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n" ]
         }
-        .map {[[id: it.getSimpleName().replace('_reference_data', '')], it]}
+        .map { file ->[[id: file.getSimpleName().replace('_reference_data', '')], file]}
 
-    // Gather sendsketch signatures
-    sendsketch_hits = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+    // Gather sendsketch signatures and taxa found
+    sendsketch_files = PREPARE_INPUT.out.sample_data
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.sendsketch, by: 0)
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
-        .groupTuple(sort: 'hash')
+    sendsketch_taxa = PREPARE_INPUT.out.sample_data
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
+        .combine(PREPARE_INPUT.out.taxa_found, by: 0)
+        .map{ sample_meta, report_meta, taxa_found -> [report_meta, taxa_found] }
+        .unique()
+    sendsketch_hits = sendsketch_files
+        .mix(sendsketch_taxa)
+        .groupTuple(by: 0, sort: 'hash')
 
     // Gather NCBI reference metadata for all references considered
     ncbi_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.family_stats_per_sample, by: 0)
         .groupTuple(by: 1, sort: 'hash')
         .map { sample_meta, report_meta, family_stats ->
@@ -241,14 +244,14 @@ workflow PATHOGENSURVEILLANCE {
 
     // Gather selected reference metadata
     selected_ref_meta = PREPARE_INPUT.out.sample_data
-        .map{ [[id: it.sample_id], [id: it.report_group_ids]] }
+        .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
         .combine(PREPARE_INPUT.out.selected_ref_meta, by:0)
         .map{ sample_meta, report_meta, ref_meta_file ->
             [report_meta, ref_meta_file] }
         .unique()
         .groupTuple(sort: 'hash')
         .map { report_meta, ref_meta_files ->
-            [report_meta, ref_meta_files.findAll{it != null}]
+            [report_meta, ref_meta_files.findAll{ file -> file != null }]
         }
 
     // Gather SNP alignments from the variant analysis
@@ -267,7 +270,7 @@ workflow PATHOGENSURVEILLANCE {
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
             [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
-        .map {[[id: it.getSimpleName()], it]}
+        .map { file ->[[id: file.getSimpleName()], file]}
         .ifEmpty([])
 
     // Combine components into a single channel for the main report_meta
@@ -276,7 +279,7 @@ workflow PATHOGENSURVEILLANCE {
         .join(sendsketch_hits, remainder: true)
         .join(ncbi_ref_meta, remainder: true)
         .join(selected_ref_meta, remainder: true)
-        .join(SKETCH_COMPARISON.out.ani_matrix, remainder: true)
+        .join(VARIANT_ANALYSIS.out.ani_matrix, remainder: true)
         .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
         .join(snp_align, remainder: true)
         .join(snp_phylogeny, remainder: true)
@@ -285,12 +288,12 @@ workflow PATHOGENSURVEILLANCE {
         .join(core_phylogeny, remainder: true)
         .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
         .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
-        .join(MULTIQC.out.outdir, remainder: true)
+        .join(MULTIQC.out.report, remainder: true)
         .join(group_messages, remainder: true)
-        .filter{it[0] != null}
-        .map{ it.size() == 16 ? it + [null] : it }
-        .filter{ it.size() == 17 }
-        .map{ it.collect{ it ?: [] } }
+        .filter{ item -> item[0] != null }
+        .map{ item -> item.size() == 16 ? item + [null] : item }
+        .filter{ item -> item.size() == 17 }
+        .map{ item -> item.collect{ element -> element ?: [] } }
         .combine(collated_versions)
 
     PREPARE_REPORT_INPUT (
@@ -338,7 +341,7 @@ workflow PATHOGENSURVEILLANCE {
     // Gather sample data for each report
     PREPARE_INPUT.out.sample_data
         .map{ sample_meta ->
-            sample_meta.findAll {it.key != 'paths' && it.key != 'ref_metas' && it.key != 'ref_ids'}
+            sample_meta.findAll { entry -> entry.key != 'paths' && entry.key != 'ref_metas' && entry.key != 'ref_ids' }
         }
         .unique()
         .collectFile(
@@ -347,7 +350,7 @@ workflow PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "sample_metadata.tsv"
         ) { sample_meta ->
-            sample_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + sample_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            sample_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + sample_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n"
         }
 
     // Gather reference data for each report
@@ -357,7 +360,7 @@ workflow PATHOGENSURVEILLANCE {
         }
         .transpose(by: 0)
         .map { ref_meta ->
-            ref_meta[0].findAll {it.key != 'ref_path' && it.key != 'gff'}
+            ref_meta[0].findAll { entry -> entry.key != 'ref_path' && entry.key != 'gff' }
         }
         .unique()
         .collectFile(
@@ -366,10 +369,9 @@ workflow PATHOGENSURVEILLANCE {
             storeDir: "${params.outdir}/metadata",
             name: "reference_metadata.tsv"
         ) { ref_meta ->
-            ref_meta.keySet().collect{'"' + it + '"'}.join('\t') + "\n" + ref_meta.values().collect{'"' + (it ?: '') + '"'}.join('\t') + "\n"
+            ref_meta.keySet().collect{ key -> '"' + key + '"'}.join('\t') + "\n" + ref_meta.values().collect{ value -> '"' + (value ?: '') + '"'}.join('\t') + "\n"
         }
 
     emit:
     multiqc_report = MULTIQC.out.report
-    versions       = versions                 // channel: [ path(versions.yml) ]
 }

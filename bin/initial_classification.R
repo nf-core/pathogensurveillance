@@ -26,7 +26,7 @@
 library(rentrez)
 
 # Options
-ani_threshold <- c(species = 95, genus = 90, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
+ani_threshold <- c(species = 96, genus = 93, family = 70)  # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 complt_threshold <- c(species = 40, genus = 15, family = 5) # These numbers are total guesses. TODO: find reasonable defaults (issue #11)
 ani_fallback_offset <- 1 # If nothing is found for a given rank threshold, pick all that have an ANI greater than (the best ANI - this value)
 
@@ -85,6 +85,21 @@ filter_and_extract <- function(rank) {
 
 # Extract taxon info
 output_data <- unique(do.call(rbind, lapply(names(ani_threshold), filter_and_extract)))
+family_data <- unique(output_data[output_data$rank == 'family', c('taxon_id', 'name'), drop = FALSE])
+child_rows <- do.call(rbind, lapply(seq_len(nrow(family_data)), function(i) {
+    search_term <- paste0('txid', family_data$taxon_id, '[Subtree] AND ', family_data$name, '[Next Level]')
+    result <- tryCatch(
+        entrez_search(db = 'taxonomy', term = search_term, retmax = 10000),
+        error = function(e) list(ids = character(0))
+    )
+    children <- result$ids
+    if (length(children) == 0) children <- family_data$taxon_id # family as query if no children present
+    data.frame(family_taxon_id = family_data$taxon_id, query_taxon_id = children)
+}))
+
+# Write taxon info to file
+if (is.null(child_rows)) child_rows <- data.frame(family_taxon_id = character(), query_taxon_id = character())
+write.table(child_rows, 'child_taxa.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)
 
 # Write table of taxon "found"
 write.table(output_data, file = 'taxa_found.tsv', sep = '\t', col.names = TRUE, row.names = FALSE, quote = FALSE)

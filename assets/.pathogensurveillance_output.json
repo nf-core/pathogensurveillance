@@ -834,7 +834,7 @@
             "category": "Variant analysis",
             "primary": false,
             "parsers": {
-                "r": "PathoSurveilR:::parse_tsv"
+                "r": "PathoSurveilR:::parse_sample_ref_list"
             },
             "combiners": {
                 "r": "PathoSurveilR:::combine_tables"
@@ -866,9 +866,28 @@
                 }
             ]
         },
+        "sendsketch_taxa": {
+            "name": "Taxa in sendsketch results",
+            "description": "Taxa in the sendsketch results that pass a rank-specific ANI threshold",
+            "category": "Initial identification",
+            "primary": false,
+            "parsers": {
+                "r": "PathoSurveilR:::parse_tsv"
+            },
+            "combiners": {
+                "r": "PathoSurveilR:::combine_tables"
+            },
+            "sources": [
+                {
+                    "path": "sendsketch",
+                    "pattern": "^(.+?)_taxa_found\\.tsv$",
+                    "capture_groups": ["sample_id"]
+                }
+            ]
+        },
         "ani_matrix_csv": {
             "name": "ANI similarity matrix",
-            "description": "Estimated ANI similarity matrix made by sourmash compare in CSV format",
+            "description": "Estimated ANI similarity matrix made by sourmash pairwise in CSV format",
             "category": "Sketch analysis",
             "primary": true,
             "parsers": {
@@ -880,7 +899,7 @@
             "sources": [
                 {
                     "path": "sketch_comparisons/ani_matricies",
-                    "pattern": "^(.+?)_comp\\.csv$",
+                    "pattern": "^(.+?)_ani_matrix\\.csv$",
                     "capture_groups": ["report_id"]
                 }
             ]

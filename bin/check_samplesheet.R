@@ -95,7 +95,7 @@ known_columns_ref <- c(
 
 # Default values for columns
 defaults_ref <- c(
-    ref_ncbi_query_max = '30',
+    ref_ncbi_query_max = '100',
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_enabled = TRUE
@@ -103,7 +103,7 @@ defaults_ref <- c(
 defaults_samp <- c(
     report_group_ids = '_no_group_defined_',
     enabled = TRUE,
-    ncbi_query_max = '10',
+    ncbi_query_max = '30',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
     ref_primary_usage = defaults_ref[['ref_primary_usage']],
     ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
@@ -190,18 +190,27 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 
 read_input_table <- function(path) {
-    if (endsWith(path, '.csv')) {
-        output <- read.csv(path, check.names = FALSE)
-    } else if (endsWith(path, '.tsv')) {
+    lines <- readLines(path, n = 10, warn = FALSE)
+    lines <- lines[lines != '']
+    if (length(lines) == 0) {
+        stop('Input file is empty: ', path)
+    }
+    count_delim <- function(lines, delim) {
+        sum(vapply(strsplit(lines, delim, fixed = TRUE), length, integer(1)) - 1L)
+    }
+    tab_count <- count_delim(lines, '\t')
+    comma_count <- count_delim(lines, ',')
+    if (tab_count > comma_count) {
         output <- read.csv(path, check.names = FALSE, sep = '\t')
     } else {
-        stop('Input file extension not supported. Must be .csv or .tsv.')
+        output <- read.csv(path, check.names = FALSE)
     }
+    return(output)
 }
 
 metadata_original_samp <- read_input_table(args[[1]])
 max_samples <- as.numeric(args[[2]])
-if (length(args) > 2) {
+if (length(args) > 2 && file.exists(args[[3]])) {
     metadata_original_ref <- read_input_table(args[[3]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
@@ -684,6 +693,16 @@ rownames(metadata_samp) <- NULL
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
     search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
+    if (length(search_result$ids) == 0) {
+        return(
+            data.frame(
+                ref_id = character(0),
+                ref_name = character(0),
+                ref_description = character(0),
+                ref_ncbi_accession = character(0)
+            )
+        )
+    }
     starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
     summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
         rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
@@ -702,15 +721,63 @@ get_ncbi_genomes <- function(query) {
         ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
     )
     rownames(output) <- NULL
+
+    # Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
+    core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+    is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
+    output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
+    output <- output[! duplicated(core_id), , drop = FALSE]
     return(output)
 }
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
+
+# Identify excluded accessions and their source row indices
+is_fully_excluded <- metadata_ref$ref_primary_usage == 'excluded' &
+                     metadata_ref$ref_contextual_usage == 'excluded' &
+                     as.logical(metadata_ref$ref_enabled)
+
+excluded_accessions <- character(0)
+excluded_source_rows <- integer(0)
+
+for (i in seq_len(nrow(metadata_ref))) {
+    if (!is_fully_excluded[i]) next
+
+    if (is_present(metadata_ref$ref_ncbi_accession[i])) {
+        core_id <- sub(metadata_ref$ref_ncbi_accession[i], pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        excluded_accessions <- c(excluded_accessions, core_id)
+        excluded_source_rows <- c(excluded_source_rows, i)
+    }
+
+    if (is_present(metadata_ref$ref_ncbi_query[i])) {
+        query_results <- ncbi_result[[metadata_ref$ref_ncbi_query[i]]]
+        if (!is.null(query_results) && nrow(query_results) > 0) {
+            core_ids <- sub(query_results$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+            excluded_accessions <- c(excluded_accessions, core_ids)
+            excluded_source_rows <- c(excluded_source_rows, rep(i, length(core_ids)))
+        }
+    }
+}
+
 is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata_ref$ref_enabled)
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+
+    # Remove accessions excluded by later rows (compare by core ID)
+    later_excluded <- excluded_accessions[excluded_source_rows > index]
+    if (length(later_excluded) > 0 && nrow(query_data) > 0) {
+        query_core_ids <- sub(query_data$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        query_data <- query_data[! query_core_ids %in% later_excluded, ]
+    }
+
+    # Skip if no results remain after filtering
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
+
     query_max <- metadata_ref$ref_ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
         query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
@@ -1000,7 +1067,7 @@ metadata_samp$enabled[invalid_seq_type] <- FALSE
 # Report missing sequence type information
 is_invalid_seq_type_to_report <- invalid_seq_type & metadata_samp$enabled
 if (sum(invalid_seq_type) > 0) {
-    stop('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
+    warning('The following ', sum(invalid_seq_type), ' samples had invalid, missing, multiple, or undeterminable sequence types:\n',
             paste0('   ', metadata_samp$sample_id[invalid_seq_type], collapse = '\n'), '\n')
     addition <- data.frame(
         sample_id = metadata_samp$sample_id[invalid_seq_type],
@@ -1011,6 +1078,7 @@ if (sum(invalid_seq_type) > 0) {
         description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
     )
     message_data <- rbind(message_data, duplicate_rows_by_id_list(addition, 'report_group_id'))
+    metadata_samp <- metadata_samp[!invalid_seq_type, , drop = FALSE]
 }
 
 

@@ -33,19 +33,25 @@ process MAFFT_ALIGN {
     addprofile   = addprofile      ? "--addprofile <(unpigz -cdf ${addprofile})"     : ''
     addlong      = addlong         ? "--addlong <(unpigz -cdf ${addlong})"           : ''
     write_output = compress ? " | pigz -cp ${task.cpus} > ${prefix}.fas.gz" : "> ${prefix}.fas"
+    def add_args = [add, addfragments, addfull, addprofile, addlong].findAll{ it }.join(' ')
     // this will not preserve MAFFTs return value, but mafft crashes when it receives a process substitution
     if ("$fasta" == "${prefix}.fas" ) error "Input and output names are the same, set prefix in module configuration to disambiguate!"
     """
-    mafft \\
-        --thread ${task.cpus} \\
-        ${add} \\
-        ${addfragments} \\
-        ${addfull} \\
-        ${addprofile} \\
-        ${addlong} \\
-        ${args} \\
-        ${fasta} \\
-        ${write_output}
+    if [ -d "$fasta" ]; then
+        find "$fasta/" -maxdepth 1 -type f -name '*.fasta' -print0 | \\
+            xargs -0 -P ${task.cpus} -I {} bash -c 'mafft --thread 1 ${add_args} ${args} "\$1" > "\$(basename "\$1" .fasta).fas"' _ {}
+    else
+        mafft \\
+            --thread ${task.cpus} \\
+            ${add} \\
+            ${addfragments} \\
+            ${addfull} \\
+            ${addprofile} \\
+            ${addlong} \\
+            ${args} \\
+            ${fasta} \\
+            ${write_output}
+    fi
     """
 
     stub:
@@ -53,12 +59,16 @@ process MAFFT_ALIGN {
     def prefix = task.ext.prefix ?: "${meta.id}"
     if ("$fasta" == "${prefix}.fas" ) error "Input and output names are the same, set prefix in module configuration to disambiguate!"
     """
-    echo ${args}
-
-    if [[ "$compress" == "true" ]]; then
-        echo "" | pigz -cp ${task.cpus} > ${prefix}.fas.gz
+    if [ -d "$fasta" ]; then
+        touch gene1.fas
+        touch gene2.fas
     else
-        touch ${prefix}.fas
+        echo ${args}
+        if [[ "$compress" == "true" ]]; then
+            echo "" | pigz -cp ${task.cpus} > ${prefix}.fas.gz
+        else
+            touch ${prefix}.fas
+        fi
     fi
     """
 

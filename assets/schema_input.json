@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "sample_id": {
-                "type": "string"
+                "type": ["string", "integer"]
             },
             "name": {
                 "type": "string"
@@ -48,7 +48,7 @@
                 "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', or 'bgiseq'."
             },
             "report_group_ids": {
-                "type": "string",
+                "type": ["string", "integer"],
                 "default": "_no_group_defined_",
                 "pattern": "^[a-zA-Z0-9_ -]+(?:;[a-zA-Z0-9_ -]+)*$"
             },
@@ -66,7 +66,7 @@
                 "default": true
             },
             "ref_group_ids": {
-                "type": "string"
+                "type": ["string", "integer"]
             }
         }
     }

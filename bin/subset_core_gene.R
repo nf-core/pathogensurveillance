@@ -59,11 +59,22 @@ max_genes <- as.integer(args$max_genes)
 # Replace runs of underscores with a single underscore in sample IDs since this is what PIRATE does
 metadata$modified_sample_ids <- gsub(metadata$sample_id, pattern = '_+', replacement = '_')
 
+# Remove NA's
+raw_gene_data[] <- lapply(raw_gene_data, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+
 # Infer number of samples and references
 total_count <- ncol(raw_gene_data) - 22
 all_ids <- colnames(raw_gene_data)[23:ncol(raw_gene_data)]
 sample_ids <- unique(metadata$modified_sample_ids[metadata$modified_sample_ids %in% all_ids])
 ref_ids <- all_ids[! all_ids %in% sample_ids]
+
+# Warn if no samples are present
+if (length(sample_ids) == 0) {
+    stop('No samples are present in PIRATE output.')
+}
 
 # Create matrix with TRUE/FALSE for whether a gene is present and single copy
 present_and_single_original <- as.data.frame(lapply(raw_gene_data[, all_ids], function(column) {

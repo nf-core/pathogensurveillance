@@ -47,13 +47,12 @@ outdir
 ├── reference_data
 │   ├── considered
 │   ├── downloaded
-│   ├── indexes
-│   │   ├── bgzip
-│   │   ├── bwa
-│   │   ├── faidx
-│   │   ├── picard
-│   │   └── tabix
-│   └── selected
+│   ├── indexes
+│   │   ├── bwa
+│   │   ├── faidx
+│   │   ├── picard
+│   │   └── tabix
+│   └── selected
 ├── reports
 ├── report_group_data
 ├── sendsketch
@@ -295,12 +294,10 @@ The outputs of these tools are compiled using [MultiQC](https://github.com/Multi
     - `bwa/`
       - `<Refernce ID>_bwa`: Index files used to align reads to references with `bwa mem`
     - `tabix/`
-      - `<Report ID>_<Reference ID>.vcf.gz.tbi`: Index files created by `tabix`, which is part of samtools
-    - `bgzip/`
-      - `<Reference ID>.fasta.gz.gzi`: Index files created by `bgzip`, which is part of samtools
+      - `<Report ID>_<Reference ID>.vcf.gz.tbi`: Index files created by `htslib bgziptabix`
     - `faidx`:
-      - `<Reference ID>.fasta.gz.fai`: Index files created by `faidx`, which is part of samtools
-      - `<Reference ID>.fasta.gz.gzi`: Index files created by `faidx`, which is part of samtools
+      - `<Reference ID>.fasta.gz.fai`: Index files created by `samtools faidx`
+      - `<Reference ID>.fasta.gz.gzi`: Index files created by `samtools faidx` for gzip-compressed references
     - `picard`:
       - `<Reference ID>.fasta.dict`: Index files created by `picard CreateSequenceDictionary`.
 
@@ -341,6 +338,7 @@ It contains selected and renamed outputs from the pipeline present in other outp
 
 - `sendsketch/`
   - `<Sample ID>.txt`: Table returned by BBmap `sendsketch` with initial identifications of samples.
+  - `<Sample ID>_taxa_found.tsv`: Table of taxa found in the sendsketch results that pass a rank-specific ANI threshold.
 
 </details>
 

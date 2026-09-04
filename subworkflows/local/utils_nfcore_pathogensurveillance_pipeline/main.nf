@@ -10,8 +10,6 @@
 
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
-include { samplesheetToList         } from 'plugin/nf-schema'
-include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { UTILS_NFCORE_PIPELINE     } from '../../nf-core/utils_nfcore_pipeline'
@@ -38,8 +36,6 @@ workflow PIPELINE_INITIALISATION {
     reference_data    //  string: Path to reference data samplesheet
 
     main:
-
-    versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -106,9 +102,15 @@ workflow PIPELINE_INITIALISATION {
 
     // Check input path parameters to see if they exist
     file(params.input, checkIfExists: true)
-    file(params.reference_data, checkIfExists: true)
-    file(params.multiqc_config, checkIfExists: true)
-    file(params.bakta_db, checkIfExists: true)
+    if (params.reference_data) {
+        file(params.reference_data, checkIfExists: true)
+    }
+    if (params.multiqc_config) {
+        file(params.multiqc_config, checkIfExists: true)
+    }
+    if (params.bakta_db) {
+        file(params.bakta_db, checkIfExists: true)
+    }
 
     // Check mandatory parameters
     if (params.input) {
@@ -125,7 +127,6 @@ workflow PIPELINE_INITIALISATION {
     emit:
     sample_data_tsv    = sample_data_tsv
     reference_data_tsv = reference_data_tsv
-    versions           = versions
 }
 
 /*

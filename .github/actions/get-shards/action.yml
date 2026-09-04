@@ -30,11 +30,11 @@ runs:
       run: |
         # Run nf-test with dynamic parameter
         nftest_output=$(nf-test test \
+          ${{ inputs.paths }} \
           --profile +docker \
           $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
           --dry-run \
-          --ci \
-          --changed-since HEAD^) || {
+          --ci) || {
             echo "nf-test command failed with exit code $?"
             echo "Full output: $nftest_output"
             exit 1

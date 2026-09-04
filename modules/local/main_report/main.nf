@@ -2,10 +2,10 @@ process MAIN_REPORT {
     tag "$group_meta.id"
     label 'process_low'
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/b9/b95abf1e05ee8b355cc960457a32f0ff613e864f595b8d5c977ed49dd9aa2278/data':
-        'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.7"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ec/ec0e2ca110b9875eab3997bac2682b5735bcbff78a6025b98816dd016685bdd4/data':
+        'community.wave.seqera.io/library/r-pathosurveilr_quarto:dc06886ee7b6ddcd' }"
 
     input:
     tuple val(group_meta), file(inputs)
@@ -14,7 +14,7 @@ process MAIN_REPORT {
     output:
     tuple val(group_meta), path("${prefix}_pathsurveil_report.html"), emit: html
     tuple val(group_meta), path("${prefix}_pathsurveil_report.pdf") , emit: pdf, optional: true
-    path "versions.yml"                                             , emit: versions
+    path "versions.yml"                                             , emit: versions_main_report
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,11 +24,10 @@ process MAIN_REPORT {
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
     # Needed to avoid this issue: https://github.com/conda-forge/quarto-feedstock/issues/30
-    if [[ -v SINGULARITY_ENVIRONMENT ]]; then
+    if [[ -f /opt/conda/etc/conda/activate.d/quarto.sh ]]; then
         source /opt/conda/etc/conda/activate.d/quarto.sh
     fi
-
-    # Tell quarto where to put cache so it does not try to put it where it does not have permissions
+    # Tell quarto where to put cache so it does not try to put it where it does nmt have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
 
     # Copy source of report here cause quarto seems to want to make its output in the source

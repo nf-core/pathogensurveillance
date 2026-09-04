@@ -40,12 +40,18 @@ h1.title {
 
 .zoomist-wrapper img {
   height: auto;
-  max-height: min(80vh, 1200px);
+  max-height: min(80vh, 1000px);
   width: auto;
   max-width: 100%;
   margin: 0 auto;
 }
 
-.html-widget {
-  max-height: min(80vh, 1200px) !important;
+.plotly.html-widget {
+  height: auto !important;
+  min-height: min(80vh, 400px) !important;
+  max-height: min(80vh, 1000px) !important;
+}
+
+.heat_tree {
+  max-height: min(80vh, 1000px) !important;
 }

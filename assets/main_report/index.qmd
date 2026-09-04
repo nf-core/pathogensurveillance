@@ -1,7 +1,7 @@
 ---
 title: Pathogen Surveillance Report
 params:
-    inputs: ""
+    inputs: "/home/fosterz/projects/pathogensurveillance_publications/publication/analyses/identification_validation/output/manual_runs_output/serratia_bockelmannii_inputs"
 execute:
     echo: false
 bibliography: references.bib
@@ -17,6 +17,56 @@ knitr::opts_chunk$set(echo = FALSE, fig.width = 8, warning = FALSE, message = FA
 ```{r load_libraries, include=FALSE}
 library(PathoSurveilR)
 ```
+
+```{r}
+# TODO: replace with PathoSurveilR once updated
+selected_ref_meta_table <- function(input, target, interactive = FALSE, ...) {
+
+  selected_ref_data <- find_ps_data(input, target = target, simplify = TRUE)
+  selected_ref_ids <- unique(selected_ref_data$reference_id)
+
+  downloaded_ref_metadata <- find_ps_data(input, target = 'downloaded_ref_metadata', simplify = TRUE)
+  downloaded_ref_metadata <- downloaded_ref_metadata[match(selected_ref_ids, downloaded_ref_metadata$reference_id), , drop = FALSE]
+
+  reference_data <- find_ps_data(input, target = 'reference_metadata', simplify = TRUE)
+  reference_data <- reference_data[match(selected_ref_ids, reference_data$ref_id), , drop = FALSE]
+  colnames(reference_data)[colnames(reference_data) == 'ref_id'] <- 'reference_id'
+
+  merged_data <- merge(by = "reference_id", reference_data, downloaded_ref_metadata)
+
+  # Subset to desired columns
+  cols <- c(
+    reference_id = 'ID',
+    ref_name = 'Name',
+    ref_description = 'Description',
+    ref_ncbi_accession = 'NCBI ID',
+    assembly_level = 'Assembly quality',
+    hosts = 'Hosts',
+    tax_id = 'NCBI taxon ID',
+    contig_l50 = 'Assembly L50',
+    contig_n50 = 'Assembly N50',
+    coverage = 'Assembly coverage',
+    number_of_contigs = 'Contig count',
+    total_sequence_length = 'Assembly length',
+    is_type = 'Type strain',
+    checkm_completeness = 'Assembly completeness (%)',
+    checkm_contamination = 'Assembly contamination (%)'
+  )
+  merged_data <- merged_data[, colnames(merged_data) %in% names(cols)]
+  colnames(merged_data) <- cols
+
+  # Print table
+  if (interactive) {
+    output <- DT::datatable(merged_data, class = "display nowrap", ...)
+    output <- DT::formatStyle(output, colnames(merged_data), "white-space" = "nowrap")
+  } else {
+    output <- print_static_table(merged_data)
+  }
+
+  return(output)
+}
+```
+
 
 # Summary
 
@@ -94,7 +144,7 @@ sample_meta_table(params$inputs, interactive = TRUE)
 ## {{< fa question-circle >}}  Initial identification
 
 The following data provides tentative classifications of the samples based on exact matches of a subset of short DNA sequences.
-These are intended to be preliminary identifications.
+These are intended to be preliminary identifications used to select references for more robust analyses
 For more robust identifications based on whole genome sequences, see "Phylogenetic context" section below.
 
 ::: panel-tabset
@@ -160,13 +210,19 @@ Included metrics can provide insights into how each sample compares with referen
 
 ## {{< iconify fluent-emoji-high-contrast id-button >}} Most similar organisms
 
+```{r}
+ani_matrix_path <- find_ps_paths(params$inputs, target = 'ani_matrix_csv', simplify = TRUE, must_exist = FALSE)
+```
+
 ::: panel-tabset
 ### ANI top matches
 
-```{r}
+```{r eval = !is.null(ani_matrix_path)}
 estimated_ani_match_table(params$inputs, interactive = TRUE)
 ```
 
+```{r, results='asis', eval = !is.null(ani_matrix_path)}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this table
 
@@ -174,14 +230,24 @@ This table shows the Average Nucleotide Identity (ANI) between each sample and t
 ANI is used to measure how similar the shared portion of two genomes are.
 Note that this measure only takes into account the shared portion of genomes, so differences like extra plasmids or chromosomal duplications are not taken into account.
 :::
+')
+```
 
+```{r, results='asis', eval = is.null(ani_matrix_path)}
+cat('
+ANI similarity data not available.
+This can happen when no assemblies were successfully generated for any sample in this report group.
+')
+```
 
 ### ANI heatmap
 
-```{r ani_heatmap}
-estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
+```{r ani_heatmap, eval = !is.null(ani_matrix_path)}
+estimated_ani_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 950)
 ```
 
+```{r, results='asis', eval = !is.null(ani_matrix_path)}
+cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
@@ -189,7 +255,15 @@ This plot shows the results of comparing the similarity of all samples and refer
 These similarity metrics are based on the presence and abundance of short exact sequence matches between samples (i.e. comparisons of k-mer sketches).
 These measurements are not as reliable as the methods used to create phylogenetic trees, but may be useful if phylogenetic trees could not be inferred for these samples.
 :::
+')
+```
 
+```{r, results='asis', eval = is.null(ani_matrix_path)}
+cat('
+ANI similarity data not available.
+This can happen when no assemblies were successfully generated for any sample in this report group.
+')
+```
 
 ### POCP top matches
 
@@ -226,7 +300,7 @@ POPC not calculated.
 ### POCP heatmap
 
 ```{r pocp_heatmap, eval = ! is.null(pocp_path_data)}
-pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 1000)
+pocp_heatmap(params$inputs, interactive = TRUE, height = 1000, width = 950)
 ```
 
 ```{r, results='asis', eval = ! is.null(pocp_path_data)}
@@ -258,8 +332,14 @@ The accuracy of this identification depends on the presence of close reference s
 
 ### Multigene phylogeny
 
+::: panel-tabset
+
+### Tree
+
 ```{r}
-has_multigene_tree <- ! is.null(PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F))
+multigene_tree_paths <- PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F)
+has_multigene_tree <- ! is.null(multigene_tree_paths)
+n_core_genes <- if (has_multigene_tree) sum(multigene_tree_paths$method == 'core') else 0L
 ```
 
 ```{r plot_multigene_tree, eval=has_multigene_tree, fig.height=8}
@@ -271,7 +351,7 @@ cat('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This a multigene phylogeny of samples with reference genomes for context.
+This is a multigene phylogeny of samples with reference genomes for context, inferred from ", n_core_genes, " core genes.
 It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
 :::
 ')
@@ -283,9 +363,27 @@ Could not generate core genome phylogeny.
 ')
 ```
 
+### Reference data
+
+```{r, eval = has_multigene_tree}
+selected_ref_meta_table(params$inputs, target = 'contextual_refs', interactive = TRUE)
+```
+
+```{r, results='asis', eval = !has_multigene_tree}
+cat('
+Could not generate core genome phylogeny.
+')
+```
+
+:::
+
 # Genetic diversity
 
 ## {{< iconify healthicons dna-outline >}} SNP trees
+
+::: panel-tabset
+
+### Tree
 
 ```{r}
 snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must_exist = FALSE)
@@ -296,7 +394,6 @@ snp_tree_path_data <- find_ps_paths(params$inputs, target = 'variant_tree', must
 plot_tree(params$inputs, target = 'variant_tree')
 ```
 
-
 ```{r, results='asis', eval = ! is.null(snp_tree_path_data)}
 cat('
 ::: {.callout-tip collapse="true"}
@@ -305,8 +402,6 @@ cat('
 This is a representation of a Single Nucleotide Polymorphism (SNP) tree, depicting the genetic relationships among samples in comparison to a reference assembly.
 
 The tree is less robust than a core gene phylogeny and cannot offer insights on evolutionary relationships among strains, but it does offer one way to visualize the genetic diversity among samples, with genetically similar strains clustering together.
-
-Question-does it make sense to be showing the reference within the tree?
 :::
 ')
 ```
@@ -318,6 +413,20 @@ This can happen when there are too few samples or too few SNPs.
 See staus messages at the start of the report for details.
 ')
 ```
+
+### Reference data
+
+```{r, eval = ! is.null(snp_tree_path_data)}
+selected_ref_meta_table(params$inputs, target = 'mapping_refs', interactive = TRUE)
+```
+
+```{r, results='asis', eval = is.null(snp_tree_path_data)}
+cat('
+Could not generate SNP tree.
+')
+```
+
+:::
 
 
 ## {{< iconify ph share-network-duotone >}} Minimum spanning network
@@ -433,7 +542,7 @@ sessionInfo()
 # About
 
 ## {{< bi file-earmark-person >}} Contributors
-The **`nf-core/pathogen surveillance` pipeline** was developed by: Zach Foster, Martha Sudermann, Camilo Parada-Rojas, Logan Blair, Fernanda Iruegas-Bocardo, Ricardo Alcalá-Briseño, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
+The **`nf-core/pathogen surveillance` pipeline** was developed by: Zachary S.L. Foster, Claire Worthy, Martha Sudermann, Nicholas C. Cauldron, Fernanda I. Bocardo, Hung Phan, [Alexandra Weisberg](https://alexandra-weisberg.com/), [Jeff Chang](http://changlab.cgrb.oregonstate.edu/) and [Nik Grünwald](http://grunwaldlab.cgrb.oregonstate.edu/).
 
 ## {{< bi wallet2 >}} Funding
 This pipeline is supported by  [![](images/usda-logo-color.png){height=15px}](https://www.usda.gov/style-guide/logo) NIFA grants 2021-67021-34433, 2023-67013-39918 to JHC and NJG and ARS Project 2072-22000-045-000-D to NJG.

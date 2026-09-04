@@ -3,30 +3,30 @@ Validates the input data and returns a reformatted version that is used for the 
 */
 
 process SAMPLESHEET_CHECK {
-    tag "$sample_tsv"
+    tag "input metadata"
 
-    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.5"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/b9/b95abf1e05ee8b355cc960457a32f0ff613e864f595b8d5c977ed49dd9aa2278/data':
-        'community.wave.seqera.io/library/r-pathosurveilr_quarto:e9fd20a978974509' }"
+    conda "conda-forge::quarto=1.6.41 bioconda::r-pathosurveilr=0.4.7"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/ec/ec0e2ca110b9875eab3997bac2682b5735bcbff78a6025b98816dd016685bdd4/data':
+        'community.wave.seqera.io/library/r-pathosurveilr_quarto:dc06886ee7b6ddcd' }"
 
     input:
-    path sample_tsv
-    path reference_tsv
+    path sample_tsv    , stageAs: 'input_sample_metadata.txt'
+    path reference_tsv , stageAs: 'input_reference_metadata.txt'
     val max_samples
 
     output:
     path 'sample_metadata.tsv'   , emit: sample_data
     path 'reference_metadata.tsv', emit: reference_data
     path 'message_data.tsv'      , emit: message_data
-    path "versions.yml"          , emit: versions
+    path "versions.yml"          , emit: versions_samplesheet_check, topic: versions
 
     script:
     def entrez_key_set = secrets.NCBI_API_KEY ? "export ENTREZ_KEY='${secrets.NCBI_API_KEY}'" : ''
     """
     ${entrez_key_set}
 
-    check_samplesheet.R ${sample_tsv} ${max_samples} ${reference_tsv}
+    check_samplesheet.R input_sample_metadata.txt ${max_samples} input_reference_metadata.txt
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 
-
 # This script attempts to find a minimal subset of references that have a range of similarity to each sample.
 # This is done by making a list (data.frame) of "bins" representing a range of scaled ANI values for each sample,
 # calculating which references can satisfy each bin, and selecting the references that satisfy the most bins
@@ -31,24 +30,22 @@
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
-# args <- c(
-#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all_comp.csv',
-#   '~/projects/pathogensurveillance/work/66/a9e7c9bf4dde97204da1e4663b5ae9/all.tsv',
-#   '1',
-#   '1',
-#   '3',
-#   'all_context_refs.tsv'
-# )
 names(args) <- c('ani_matrix', 'sample_data', 'n_refs_closest', 'n_refs_closest_named', 'n_refs_contextual', 'output_path')
 args <- as.list(args)
-ani_matrix <- read.csv(args$ani_matrix, header = TRUE, check.names = FALSE)
-rownames(ani_matrix) <- colnames(ani_matrix)
 n_refs_closest <- as.integer(args$n_refs_closest)
 n_refs_closest_named <- as.integer(args$n_refs_closest_named)
 n_refs_contextual <- as.integer(args$n_refs_contextual)
 
+# Convert table of pairwise ANI values to a matrix format
+pw <- read.csv(args$ani_matrix, check.names = FALSE)
+all_names <- sort(unique(c(pw$query_name, pw$match_name)))
+ani_matrix <- matrix(0, nrow = length(all_names), ncol = length(all_names),
+	                 dimnames = list(all_names, all_names))
+ani_matrix[cbind(pw$query_name, pw$match_name)] <- pw$average_containment_ani
+ani_matrix[lower.tri(ani_matrix)] <- t(ani_matrix)[lower.tri(ani_matrix)]
+diag(ani_matrix) <- 1
 
-#Check if user does not want references selected
+# Check if user does not want references selected
 if (n_refs_closest == 0 && n_refs_closest_named == 0 && n_refs_contextual == 0) {
     writeLines(character(0), args$output_path)
     quit(save = 'no')
@@ -66,13 +63,13 @@ sample_data <- do.call(rbind, lapply(split(sample_data, sample_data$sample_id), 
     if (any(table$usage == 'exclusive')) {
         table <- table[table$usage == 'exclusive', , drop = FALSE]
     }
-    excluded_ids <- table$sample_id[table$usage == 'excluded']
-    table <- table[! table$usage %in% excluded_ids, , drop = FALSE]
+    excluded_ids <- table$ref_id[table$usage == 'excluded']
+    table <- table[! table$ref_id %in% excluded_ids, , drop = FALSE]
     return(table)
 }))
 rownames(sample_data) <- NULL
 all_ids <- unique(c(sample_data$ref_id, sample_data$sample_id))
-ani_matrix <- ani_matrix[row.names(ani_matrix) %in% all_ids, names(ani_matrix) %in% all_ids, drop = FALSE]
+ani_matrix <- ani_matrix[rownames(ani_matrix) %in% all_ids, colnames(ani_matrix) %in% all_ids, drop = FALSE]
 
 # Scale ANI values for each sample
 rescale <- function(x) {
@@ -88,6 +85,18 @@ ani_ref_v_samples[ani_ref_v_samples == 0] <- NA # stops zeros from skewing the s
 ani_scaled <- as.data.frame(apply(ani_ref_v_samples, MARGIN = 2, rescale, simplify = FALSE), check.names = FALSE)
 ani_scaled[is.na(ani_scaled)] <- 0
 
+# Make function to check for ambiguous species names
+is_ambiguous_taxon_name <- function(taxon_names) {
+    patterns <- c(".*\\bunknown.*", ".*\\bunidentified.*", ".*incertae[_ -]+sedis.*",
+                  ".*\\bambiguous\\b.*", ".*ambiguous[_ -]+taxa.*", ".*unassigned.*",
+                  ".*possible.*", ".*putative.*", ".*uncultured.*", ".*\\bcandidatus.*",
+                  ".*metagenome.*", ".*\\bsp\\..*", ".*\\bcf\\..*", ".*\\bendosymbiont.*" ,
+                  ".*\\bsymbiont.*", ".*\\bbacterium\\b.*", ".*\\bgenomosp\\..*")
+    Reduce(`|`, lapply(patterns, function(x) {
+        grepl(taxon_names, pattern = x, ignore.case = TRUE)
+    }))
+}
+
 # Initialize list of selected references with closest references and required references
 closest_refs <- unlist(lapply(sample_ids, function(id) {
     rownames(ani_scaled)[tail(order(ani_scaled[, id]), n = n_refs_closest)]
@@ -95,7 +104,8 @@ closest_refs <- unlist(lapply(sample_ids, function(id) {
 closest_named_refs <- unlist(lapply(sample_ids, function(id) {
     ordered_ref_ids <- rownames(ani_scaled)[order(ani_scaled[, id])]
     is_latin_binomial <- grepl(ref_name_key[ordered_ref_ids], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
-    return(tail(ordered_ref_ids[is_latin_binomial], n = n_refs_closest_named))
+    is_ambiguous <- is_ambiguous_taxon_name(ref_name_key[ordered_ref_ids])
+    return(tail(ordered_ref_ids[is_latin_binomial & ! is_ambiguous], n = n_refs_closest_named))
 }))
 required_refs <- unlist(lapply(sample_ids, function(id) {
     sample_data$ref_id[sample_data$sample_id == id & sample_data$usage %in% c('required', 'exclusive')]
@@ -134,7 +144,12 @@ while (nrow(bin_data) > 0) {
     bin_counts <- table(unlist(bin_data$refs))
     best_refs <- names(bin_counts)[bin_counts == max(bin_counts)]
     is_latin_binomial <- grepl(ref_name_key[best_refs], pattern = '^[a-zA-Z]+ [a-zA-Z]+($| ).*$')
-    if (any(is_latin_binomial)) {
+    is_not_ambiguous <- ! is_ambiguous_taxon_name(ref_name_key[best_refs])
+    if (any(is_not_ambiguous & is_latin_binomial)) {
+        best_ref <- best_refs[is_not_ambiguous & is_latin_binomial][1]
+    } else if (any(is_not_ambiguous)) {
+        best_ref <- best_refs[is_not_ambiguous][1]
+    } else if (any(is_latin_binomial)) {
         best_ref <- best_refs[is_latin_binomial][1]
     } else {
         best_ref <- best_refs[1]

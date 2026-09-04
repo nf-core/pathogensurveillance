@@ -3,7 +3,7 @@ process PREPARE_REPORT_INPUT {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/52/52ccce28d2ab928ab862e25aae26314d69c8e38bd41ca9431c67ef05221348aa/data' :
         'community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned:838ba80435a629f8'}"
 
@@ -52,8 +52,10 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Add estimated ANI matrix from sourmash
-    mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
-    cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    if [ ! -z "${ani_matrix}" ]; then
+        mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
+        cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    fi
 
     # Add metadata for references assined for variant calling
     if [ ! -z "${mapping_ref}" ]; then
@@ -104,7 +106,9 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Put multiqc's output into a single folder for organization
-    cp -r ${multiqc} ${prefix}_inputs/multiqc
+    if [ ! -z "${multiqc}" ]; then
+    	cp -r ${multiqc} ${prefix}_inputs/multiqc
+    fi
 
     # Add pipeline status messages
     mkdir -p ${prefix}_inputs/pipeline_info
