@@ -24,7 +24,7 @@ process MAIN_REPORT {
     prefix = task.ext.prefix ?: "${group_meta.id}"
     """
     # Needed to avoid this issue: https://github.com/conda-forge/quarto-feedstock/issues/30
-    if [[ -v SINGULARITY_ENVIRONMENT ]]; then
+    if [[ -f /opt/conda/etc/conda/activate.d/quarto.sh ]]; then
         source /opt/conda/etc/conda/activate.d/quarto.sh
     fi
     # Tell quarto where to put cache so it does not try to put it where it does not have permissions
