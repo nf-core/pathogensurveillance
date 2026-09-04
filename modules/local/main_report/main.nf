@@ -27,7 +27,7 @@ process MAIN_REPORT {
     if [[ -f /opt/conda/etc/conda/activate.d/quarto.sh ]]; then
         source /opt/conda/etc/conda/activate.d/quarto.sh
     fi
-    # Tell quarto where to put cache so it does not try to put it where it does not have permissions
+    # Tell quarto where to put cache so it does not try to put it where it does nmt have permissions
     export XDG_CACHE_HOME="\$(pwd)/cache"
 
     # Copy source of report here cause quarto seems to want to make its output in the source
