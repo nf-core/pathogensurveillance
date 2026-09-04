@@ -98,4 +98,3 @@ while (length(line <- readLines(in_handle, n = 1)) != 0) {
 }
 close(out_handle)
 close(in_handle)
-
