@@ -2,8 +2,8 @@ nextflow_pipeline {
 
     name "Test pipeline with small genomes profile"
     script "../main.nf"
-    tag "pipeline"
-    tag "pipeline_test"
+    tag "full_pipeline"
+    tag "genomic"
 
     test("small genomes profile") {
 
@@ -11,7 +11,7 @@ nextflow_pipeline {
             params {
                 outdir = "$outputDir"
                 input = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/small_genomes.csv"
-                aligner = 'bwa'
+
                 max_samples = 3
                 phylo_max_genes = 100
                 n_ref_closest = 1
@@ -39,18 +39,4 @@ nextflow_pipeline {
             )
         }
     }
-
-    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("small genomes profile, stub") {
-        options "-stub"
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-    } */
 }

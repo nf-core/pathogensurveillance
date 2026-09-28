@@ -2,8 +2,7 @@ nextflow_pipeline {
 
     name "Test pipeline with sample input queries"
     script "../main.nf"
-    tag "pipeline"
-    tag "input_test_full"
+    tag "input"
 
     test("ncbi query test") {
 
@@ -25,8 +24,7 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            // Test snapshots with NCBI queries are non-deterministic amd require further filtering
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*']).grep { !(it =~ /(?:[A-Z]{3}\d+|GC[AF][_\d.]*|reference_data\/considered\/\d+\.(?:json|tsv))/) }
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
 
             assertAll(
                 { assert workflow.success},
@@ -40,18 +38,4 @@ nextflow_pipeline {
             )
         }
     }
-
-    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("ncbi query test, stub") {
-        options "-stub"
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-    } */
 }

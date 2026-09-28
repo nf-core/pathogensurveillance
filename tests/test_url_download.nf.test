@@ -3,8 +3,7 @@ nextflow_pipeline {
     name "Test pipeline with sample input paths"
     script "../main.nf"
     options "-resume"
-    tag "pipeline"
-    tag "input_test_full"
+    tag "input"
 
     test("download path input test") {
 
@@ -23,7 +22,6 @@ nextflow_pipeline {
                 n_ref_genera = '3'
                 skip_core_phylogeny = true
             }
-        }
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
@@ -41,18 +39,4 @@ nextflow_pipeline {
             )
         }
     }
-
-    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("download path input test, stub") {
-        options "-stub"
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-    } */
 }
