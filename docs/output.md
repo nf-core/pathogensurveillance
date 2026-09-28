@@ -312,7 +312,7 @@ The `reference_data` folder contains information regarding references, including
 <summary>output files</summary>
 
 - `reports/`
-  - `<Report ID>_report.html`: The primary output report of the pipeline
+  - `<Report ID>_<Template directory name>.html`: The primary output report of the pipeline. The template directory name defaults to `pathsurveil_report`, so the default report for the group `all` is written as `all_pathsurveil_report.html`. When a report group is assigned more than one template in `--report_data`, one file is written per template.
 
 </details>
 

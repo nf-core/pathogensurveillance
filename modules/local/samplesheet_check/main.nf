@@ -13,11 +13,13 @@ process SAMPLESHEET_CHECK {
     input:
     path sample_tsv    , stageAs: 'input_sample_metadata.txt'
     path reference_tsv , stageAs: 'input_reference_metadata.txt'
+    path report_tsv    , stageAs: 'input_report_metadata.txt'
     val max_samples
 
     output:
     path 'sample_metadata.tsv'   , emit: sample_data
     path 'reference_metadata.tsv', emit: reference_data
+    path 'report_metadata.tsv'   , emit: report_data
     path 'message_data.tsv'      , emit: message_data
     path "versions.yml"          , emit: versions_samplesheet_check, topic: versions
 
@@ -26,7 +28,7 @@ process SAMPLESHEET_CHECK {
     """
     ${entrez_key_set}
 
-    check_samplesheet.R input_sample_metadata.txt ${max_samples} input_reference_metadata.txt
+    check_samplesheet.R input_sample_metadata.txt ${max_samples} input_reference_metadata.txt input_report_metadata.txt ${projectDir}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

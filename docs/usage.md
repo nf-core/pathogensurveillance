@@ -61,6 +61,7 @@ Below is a description of each column used by `pathogensurveillance`:
 | `ploidy`           | The ploidy of the sample. Should be a number. Defaults to "1".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `enabled`          | Either "TRUE" or "FALSE", indicating whether the sample should be included in the analysis or not. Defaults to "TRUE".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `ref_group_ids`    | One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata TSV.                                                                                                                                                                                                                                                                                                                                                                          |
+## Adding Custom References
 
 Additionally, users can supply a reference metadata TSV/CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
 If not provided, the pipeline will download and choose references to use automatically.
@@ -103,6 +104,39 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 | `ref_enabled`          | Either `TRUE` or `FALSE`, indicating whether the reference should be included in the analysis or not. Defaults to `TRUE`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 > **Note on reference FASTA files for variant calling:** User-supplied reference genomes provided via the `ref_path` column **must be gzip-compressed** (`.fasta.gz`) if they are used for variant calling.
+
+
+## Customizing Report Templates
+
+Additionally, users can supply a report metadata TSV/CSV that can be used to assign custom report templates to particular report groups using the `--report_data` option.
+If not provided, the pipeline will use the default report template.
+Each row in this table defines a custom report output for a given report group. Multiple templates can be assigned to a single report group by adding multiple rows or delimiting values by semicolons.
+For example, the following file content given to `--report_data` would assign report groups to report templates:
+
+```csv title="report_data.csv"
+report_group_ids,template
+all_samples,report
+all_samples,dashboard
+my_subset,/path/to/template/dir
+```
+
+To make this have an effect, the `--input` spreadsheet must have the `report_group_ids` column defined with the same ID:
+
+```csv title="samplesheet_with_ref.csv"
+sample_id,path,report_group_ids
+CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,all_samples
+CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,all_samples
+CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,all_samples
+TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,all_samples
+TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,all_samples;my_subset
+TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,all_samples;my_subset
+```
+
+The report metadata TSV can have the following columns:
+- `report_group_ids`: Report group IDs defined in the sample metadata. Can accept multiple values if delimited by semicolons.
+- `template`: The name of an included template or path to a custom user-defined quarto template directory. Can accept multiple values if delimited by semicolons.
+
+
 
 ## Running the pipeline
 

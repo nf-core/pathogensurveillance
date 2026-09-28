@@ -36,6 +36,7 @@ library(rentrez)
 # Where to save output metadata files
 sample_data_path <- 'sample_metadata.tsv'
 reference_data_path <- 'reference_metadata.tsv'
+report_data_path <- 'report_metadata.tsv'
 
 # Where to save list of messages to be shown to the user, such as samples that were filtered out
 message_data_path <- 'message_data.tsv'
@@ -92,6 +93,10 @@ known_columns_ref <- c(
     'ref_color_by',
     'ref_enabled'
 )
+known_columns_rep <- c(
+    'report_group_ids',
+    'template'
+)
 
 # Default values for columns
 defaults_ref <- c(
@@ -109,6 +114,9 @@ defaults_samp <- c(
     ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
     ref_enabled = defaults_ref[['ref_enabled']]
 )
+defaults_rep <- c(
+    template = 'report'
+)
 
 # Columns that must have a valid value in the input of this script
 # For each vector in the list, at least one of the columns must have a value
@@ -117,6 +125,9 @@ required_input_columns_samp <- list(
 )
 required_input_columns_ref <- list(
     c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
+)
+required_input_columns_rep <- list(
+    c('report_group_ids', 'template')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
@@ -215,8 +226,15 @@ if (length(args) > 2 && file.exists(args[[3]])) {
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
 }
+if (length(args) > 3 && file.exists(args[[4]])) {
+    metadata_original_rep <- read_input_table(args[[4]])
+} else {
+    metadata_original_rep <- data.frame(template = character(0))
+}
+
 metadata_samp <- metadata_original_samp
 metadata_ref <- metadata_original_ref
+metadata_rep <- metadata_original_rep
 
 # Remove empty rows
 remove_empty_rows <- function(metadata) {
@@ -229,6 +247,9 @@ remove_empty_rows <- function(metadata) {
 metadata_samp <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_rows(metadata_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_rows(metadata_rep)
 }
 
 # Check that there is data
@@ -260,6 +281,9 @@ colnames(metadata_samp) <- validate_col_names(colnames(metadata_samp), known_col
 if (nrow(metadata_ref) > 0) {
     colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    colnames(metadata_rep) <- validate_col_names(colnames(metadata_rep), known_columns_rep)
+}
 
 # Remove empty columns and columns with no header
 remove_empty_cols <- function(metadata, csv_name) {
@@ -278,7 +302,10 @@ remove_empty_cols <- function(metadata, csv_name) {
 }
 metadata_samp <- remove_empty_cols(metadata_samp, args[[1]])
 if (nrow(metadata_ref) > 0) {
-    metadata_ref <- remove_empty_cols(metadata_ref, args[[2]])
+    metadata_ref <- remove_empty_cols(metadata_ref, args[[3]])
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_cols(metadata_rep, args[[4]])
 }
 
 # Remove all whitespace
@@ -290,6 +317,9 @@ metadata_samp <- remove_whitespace(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_whitespace(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_whitespace(metadata_rep)
+}
 
 # Replace NAs with empty stings
 metadata_samp[] <- lapply(metadata_samp, function(x) {
@@ -297,6 +327,10 @@ metadata_samp[] <- lapply(metadata_samp, function(x) {
     return(x)
 })
 metadata_ref[] <- lapply(metadata_ref, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+metadata_rep[] <- lapply(metadata_rep, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
@@ -311,6 +345,7 @@ check_required_cols <- function(metadata, required_cols, csv_name) {
 }
 check_required_cols(metadata_samp, required_input_columns_samp, 'sample data')
 check_required_cols(metadata_ref, required_input_columns_ref, 'reference data')
+check_required_cols(metadata_rep, required_input_columns_rep, 'report data')
 
 # Check for duplicated columns
 check_duplicated_cols <- function(metadata, known_cols, csv_name) {
@@ -325,6 +360,7 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
 }
 check_duplicated_cols(metadata_samp,  known_columns_samp, 'sample data')
 check_duplicated_cols(metadata_ref,  known_columns_ref, 'reference data')
+check_duplicated_cols(metadata_rep,  known_columns_rep, 'report data')
 
 # Reorder columns and add any missing columns
 reorder_and_add_cols <- function(metadata, known_columns) {
@@ -338,6 +374,7 @@ reorder_and_add_cols <- function(metadata, known_columns) {
 }
 metadata_samp <- reorder_and_add_cols(metadata_samp, known_columns_samp)
 metadata_ref <- reorder_and_add_cols(metadata_ref, known_columns_ref)
+metadata_rep <- reorder_and_add_cols(metadata_rep, known_columns_rep)
 
 # Add default values for some columns
 apply_defaults <- function(metadata, defaults) {
@@ -349,6 +386,9 @@ apply_defaults <- function(metadata, defaults) {
 metadata_samp <- apply_defaults(metadata_samp, defaults_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- apply_defaults(metadata_rep, defaults_rep)
 }
 
 # Validate mutually exclusive columns
@@ -820,6 +860,121 @@ validate_required_input(metadata_samp, required_input_columns_samp, 'sample data
 if (nrow(metadata_ref) > 0) {
     validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
 }
+if (nrow(metadata_rep) > 0) {
+    validate_required_input(metadata_rep, required_input_columns_rep, 'report data')
+}
+
+# Validate report template: either a bare name resolved under assets/report_templates/ or an
+# absolute path to a directory containing *.qmd. Relative paths are deliberately rejected. They
+# would otherwise resolve against this task's work dir here, and against the launch dir in
+# resolveTemplateDir() in workflows/pathogensurveillance.nf, so the two could disagree.
+if (nrow(metadata_rep) > 0) {
+    # projectDir is passed as 5th arg (project root) to allow absolute resolution in work dir
+    projectDir <- if (length(args) >= 5 && dir.exists(args[[5]])) args[[5]] else "."
+    # Built-in template directory aliases. The default directory was renamed to pathsurveil_report,
+    # but "report" is what users have always written in report_data, so it keeps working.
+    # Kept in step with templateAliases() in workflows/pathogensurveillance.nf.
+    report_template_aliases <- c(report = 'pathsurveil_report')
+    # Returns a per-value status rather than a bare logical so that each way of getting it wrong
+    # can be reported with its own actionable message.
+    template_status <- function(vals) {
+        vapply(trimws(vals), function(v) {
+            if (grepl('^~', v)) {
+                return('tilde')
+            }
+            if (grepl('^/', v)) {
+                cand <- v
+            } else if (grepl('/', v) || grepl('^\\.', v)) {
+                return('relative')
+            } else {
+                # A named vector errors on [[ with an absent name, so membership is tested first.
+                name <- if (v %in% names(report_template_aliases)) unname(report_template_aliases[[v]]) else v
+                cand <- file.path(projectDir, "assets/report_templates", name)
+            }
+            if (!dir.exists(cand)) {
+                return('missing')
+            }
+            if (length(list.files(cand, pattern = "\\.qmd$")) == 0) {
+                return('no_qmd')
+            }
+            'ok'
+        }, character(1))
+    }
+    all_tmpl <- unique(unlist(strsplit(metadata_rep$template, ";")))
+    all_tmpl <- trimws(all_tmpl[all_tmpl != ""])
+    tmpl_status <- template_status(all_tmpl)
+    for (i in seq_along(all_tmpl)) {
+        status <- tmpl_status[[i]]
+        if (status == 'ok') {
+            next
+        }
+        v <- all_tmpl[[i]]
+        if (status == 'relative') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" is a relative path. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
+        }
+        if (status == 'tilde') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" starts with "~", which is not expanded. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
+        }
+        if (status == 'missing') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" does not resolve to an existing directory. Use a name resolved under assets/report_templates/, or an absolute path to a directory containing .qmd.'))
+        }
+        stop(call. = FALSE, paste0('report_data template "', v, '" contains no .qmd files. Templates must be a directory containing at least one .qmd.'))
+    }
+
+    # Published reports are named "<report group>_<template dir name>.html", so the directory
+    # name alone decides the output filename. Two templates that reduce to the same name would
+    # write the same file, so reject the whole file rather than let one silently overwrite the
+    # other. Aliases are resolved first, so listing both "report" and "pathsurveil_report" for a
+    # group is caught even though the two strings differ.
+    report_template_label <- function(v) {
+        v <- sub('/+$', '', v)
+        if (grepl('^/', v)) {
+            return(basename(v))
+        }
+        # A named vector errors on [[ with an absent name, so membership is tested first.
+        if (v %in% names(report_template_aliases)) {
+            return(unname(report_template_aliases[[v]]))
+        }
+        v
+    }
+    # Built-in directories are read from disk rather than hardcoded, so a template that is added
+    # or renamed is covered without touching this script.
+    templates_root <- file.path(projectDir, "assets/report_templates")
+    known_templates <- if (dir.exists(templates_root)) {
+        basename(list.dirs(templates_root, full.names = FALSE, recursive = FALSE))
+    } else {
+        character(0)
+    }
+    # Case-insensitive: a case-insensitive filesystem (macOS by default) would treat these as the
+    # same output file even though the strings differ.
+    tmpl_label <- vapply(all_tmpl, report_template_label, character(1))
+    label_up <- toupper(tmpl_label)
+    # A value is a duplicate if it repeats anywhere, so look at both ends of each run.
+    dup_idx <- duplicated(label_up) | duplicated(label_up, fromLast = TRUE)
+    for (idxs in split(which(dup_idx), label_up[dup_idx])) {
+        stop(call. = FALSE, paste0(
+            'report_data templates ', paste0('"', unique(all_tmpl[idxs]), '"', collapse = ' and '),
+            ' all produce the report name "', tmpl_label[[idxs[[1]]]], '.html". ',
+            'Rename one of the template directories so their names differ.'
+        ))
+    }
+    # A custom directory may not shadow a built-in template: the two would produce the same
+    # report name, and the intent of the run would be ambiguous. Only real directory names are
+    # reserved; the aliases are not.
+    for (i in seq_along(all_tmpl)) {
+        v <- all_tmpl[[i]]
+        if (!grepl('^/', v)) {
+            next
+        }
+        if (toupper(tmpl_label[[i]]) %in% toupper(known_templates)) {
+            stop(call. = FALSE, paste0(
+                'report_data template "', v, '" is named "', tmpl_label[[i]], '", which is the name of a ',
+                'built-in template directory. Rename the custom template directory so it does not ',
+                'produce the same report name as a built-in template.'
+            ))
+        }
+    }
+}
 
 # Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
@@ -1029,6 +1184,9 @@ metadata_samp$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$re
 if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep$report_group_ids <- make_group_ids_ok_for_file_names(metadata_rep$report_group_ids)
+}
 
 # Check that reference groups in sample metadata are present in the reference metadata
 if (nrow(metadata_ref)) {
@@ -1041,6 +1199,23 @@ if (nrow(metadata_ref)) {
                 'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
                 ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
                 ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
+                ' metadata CSV.'
+            ))
+        }
+    }
+}
+
+# Check that report groups in the report metadata are present in the sample metadata
+if (nrow(metadata_rep)) {
+    all_rep_group_ids <- unique(unlist(strsplit(metadata_samp$report_group_ids, split = ';')))
+    for (index in 1:nrow(metadata_rep)) {
+        split_ids <- strsplit(metadata_rep$report_group_ids[index], split = ';')[[1]]
+        invalid_ids <- split_ids[! split_ids %in% all_rep_group_ids]
+        if (length(invalid_ids) > 0) {
+            stop(call. = FALSE, paste0(
+                'The report group ID "', invalid_ids[1], '" used in row ', index, ' in the report metadata CSV',
+                ' is not defined in the sample metadata CSV. All values in the "report_group_ids" column in the',
+                ' report metadata CSV must be present in the "report_group_ids" column of the sample',
                 ' metadata CSV.'
             ))
         }
@@ -1111,6 +1286,9 @@ metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- duplicate_rows_by_id_list(metadata_rep, 'report_group_ids')
+}
 
 # Convert reference groups to reference ids in the sample data
 metadata_samp$ref_ids <- unlist(lapply(metadata_samp$ref_group_ids, function(group_ids) {
@@ -1165,10 +1343,14 @@ metadata_samp <- unique(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- unique(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- unique(metadata_rep)
+}
 
 # Replace double quotes with single quotes to not conflict with the CSV format quoting values
 metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
 metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
+metadata_rep[] <- lapply(metadata_rep, gsub, pattern = '"', replacement = "'")
 message_data[] <- lapply(message_data, gsub, pattern = '"', replacement = "'")
 
 # Write data for messages to be shown to the user, such as warnings about removed samples
@@ -1177,3 +1359,4 @@ write.table(message_data, file = message_data_path, row.names = FALSE, na = '', 
 # Write output metadata
 write.table(metadata_samp, file = sample_data_path, row.names = FALSE, na = '', sep = '\t')
 write.table(metadata_ref, file = reference_data_path, row.names = FALSE, na = '', sep = '\t')
+write.table(metadata_rep, file = report_data_path, row.names = FALSE, na = '', sep = '\t')

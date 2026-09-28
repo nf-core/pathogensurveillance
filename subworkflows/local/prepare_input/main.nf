@@ -17,6 +17,7 @@ workflow PREPARE_INPUT {
     take:
     sample_data_tsv
     reference_data_tsv
+    report_data_tsv
 
     main:
 
@@ -24,7 +25,7 @@ workflow PREPARE_INPUT {
     messages = channel.empty()
 
     // Parse input tables
-    SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, params.max_samples )
+    SAMPLESHEET_CHECK ( sample_data_tsv, reference_data_tsv, report_data_tsv, params.max_samples )
     sample_data = SAMPLESHEET_CHECK.out.sample_data
         .splitCsv ( header:true, sep:'\t', quote:'"' )
         .map { row -> create_sample_metadata_channel(row) }
@@ -481,6 +482,7 @@ workflow PREPARE_INPUT {
     family_stats = ncbi_ref_meta
     selected_ref_meta = picked_assemblies_stat_files
     family_stats_per_sample = family_stats_per_sample
+    report_data = SAMPLESHEET_CHECK.out.report_data
     messages = messages    // meta, group_meta, ref_meta, workflow, level, message
 }
 
