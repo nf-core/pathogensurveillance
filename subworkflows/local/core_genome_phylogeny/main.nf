@@ -102,7 +102,7 @@ workflow CORE_GENOME_PHYLOGENY {
             bakta_db = Channel.fromPath("${params.data_dir}/bakta_db/db-${params.bakta_db_type}").first()
         } else {
             BAKTA_BAKTADBDOWNLOAD()
-            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db.first()
+            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
         }
     }
 

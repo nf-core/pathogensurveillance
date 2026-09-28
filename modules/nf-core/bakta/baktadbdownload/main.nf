@@ -23,6 +23,8 @@ process BAKTA_BAKTADBDOWNLOAD {
     bakta_db \\
         download \\
         ${args}
+
+    amrfinder_update --force_update --database db*
     """
 
     stub:
