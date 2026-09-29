@@ -38,6 +38,16 @@
                     "help_text": "This TSV/CSV has one row per reference and contains information such as the location of input files, reference ID, labels, etc. Use this parameter to specify its location. See [the usage page](https://nf-co.re/pathogensurveillance/usage/) for details on formatting this file.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "report_data": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/tsv",
+                    "pattern": "^\\S+\\.[ct]sv$",
+                    "schema": "assets/schema_input.json",
+                    "description": "Path to comma-separated file containing report metadata",
+                    "help_text": "Each row corresponds to report group configuration. Currently, it is only used to configure which quarto templates are used to render reports. See [the usage page](https://nf-co.re/pathogensurveillance/usage/) for details on formatting this file.",
+                    "fa_icon": "fas fa-file-csv"
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -223,7 +233,7 @@
                     "fa_icon": "fas fa-memory"
                 },
                 "skip_core_phylogeny": {
-                    "type": "boolean",
+                    "type": ["boolean","string"],
                     "default": false,
                     "description": "Skip the core genome phylogeny analysis. This will not affect downstream processes like MultiQC and the main report.",
                     "fa_icon": "fas fa-forward"
