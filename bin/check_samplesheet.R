@@ -418,8 +418,8 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Validate color_by column and add back any original user-defined columns used
-validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
+# Validate color_by column and add back any original user_defined columns used
+validate_color_by <- function(metadata, color_by_col, csv_name, sep = ';') {
     split_color_by <- strsplit(metadata[[color_by_col]], split = sep)
     split_color_by <- lapply(split_color_by, trimws)
     all_color_by_cols <- unique(unlist(split_color_by))
@@ -432,10 +432,18 @@ validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep 
     }
     return(unlist(lapply(split_color_by, paste0, collapse = sep)))
 }
-metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', known_columns_samp, 'sample data')
-if (nrow(metadata_ref) > 0) {
-    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+
+# Fill in an empty color_by column with all user-defined column names
+set_color_by_defaults <- function(metadata, color_by_col, known_cols) {
+    default_columns <- setdiff(colnames(metadata), known_cols)
+    if (all(metadata[[color_by_col]] == '')) {
+        metadata[[color_by_col]] <- paste(default_columns, collapse = ';')
+    }
+    return(metadata)
 }
+
+metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', 'sample data')
+metadata_samp <- set_color_by_defaults(metadata_samp, 'color_by', known_columns_samp)
 
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
@@ -453,6 +461,10 @@ ref_data_addition[user_specific_ref_cols] <- rep('', nrow(ref_data_addition))
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- unique(rbind(metadata_ref, ref_data_addition))
 
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', 'reference data')
+    metadata_ref <- set_color_by_defaults(metadata_ref, 'ref_color_by', known_columns_ref)
+}
 # Validate usage columns
 validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
