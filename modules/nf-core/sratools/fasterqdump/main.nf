@@ -13,7 +13,7 @@ process SRATOOLS_FASTERQDUMP {
     path certificate
 
     output:
-    tuple val(meta), path("${prefix}*.fastq.gz"), emit: reads
+    tuple val(meta), path('*.fastq.gz'), emit: reads
     tuple val("${task.process}"), val('sratools'), eval("prefetch --version 2>&1 | grep -Eo '[0-9.]+'"), topic: versions, emit: versions_sratools
     tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"), topic: versions, emit: versions_pigz
 
@@ -23,7 +23,11 @@ process SRATOOLS_FASTERQDUMP {
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def outfile = "${prefix}.fastq"
+    def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
+    // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and
+    // avoids the '.' in the path bug: https://github.com/ncbi/sra-tools/issues/865
     def key_file = ''
     if (certificate.toString().endsWith('.jwt')) {
         key_file += " --perm ${certificate}"
@@ -36,8 +40,11 @@ process SRATOOLS_FASTERQDUMP {
     fasterq-dump \\
         $args \\
         --threads $task.cpus \\
+        --outfile $outfile \\
         ${key_file} \\
         ${sra}
+
+    $exclude_third
 
     pigz \\
         $args2 \\
@@ -49,7 +56,7 @@ process SRATOOLS_FASTERQDUMP {
     stub:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def outfile = "${prefix}.fastq"
     def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
     // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and

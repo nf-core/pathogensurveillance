@@ -36,6 +36,7 @@ library(rentrez)
 # Where to save output metadata files
 sample_data_path <- 'sample_metadata.tsv'
 reference_data_path <- 'reference_metadata.tsv'
+report_data_path <- 'report_metadata.tsv'
 
 # Where to save list of messages to be shown to the user, such as samples that were filtered out
 message_data_path <- 'message_data.tsv'
@@ -92,10 +93,14 @@ known_columns_ref <- c(
     'ref_color_by',
     'ref_enabled'
 )
+known_columns_rep <- c(
+    'report_group_ids',
+    'template'
+)
 
 # Default values for columns
 defaults_ref <- c(
-    ref_ncbi_query_max = '30',
+    ref_ncbi_query_max = '100',
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_enabled = TRUE
@@ -103,11 +108,14 @@ defaults_ref <- c(
 defaults_samp <- c(
     report_group_ids = '_no_group_defined_',
     enabled = TRUE,
-    ncbi_query_max = '10',
+    ncbi_query_max = '30',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
     ref_primary_usage = defaults_ref[['ref_primary_usage']],
     ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
     ref_enabled = defaults_ref[['ref_enabled']]
+)
+defaults_rep <- c(
+    template = 'report'
 )
 
 # Columns that must have a valid value in the input of this script
@@ -117,6 +125,9 @@ required_input_columns_samp <- list(
 )
 required_input_columns_ref <- list(
     c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
+)
+required_input_columns_rep <- list(
+    c('report_group_ids', 'template')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
@@ -190,24 +201,40 @@ args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 
 read_input_table <- function(path) {
-    if (endsWith(path, '.csv')) {
-        output <- read.csv(path, check.names = FALSE)
-    } else if (endsWith(path, '.tsv')) {
+    lines <- readLines(path, n = 10, warn = FALSE)
+    lines <- lines[lines != '']
+    if (length(lines) == 0) {
+        stop('Input file is empty: ', path)
+    }
+    count_delim <- function(lines, delim) {
+        sum(vapply(strsplit(lines, delim, fixed = TRUE), length, integer(1)) - 1L)
+    }
+    tab_count <- count_delim(lines, '\t')
+    comma_count <- count_delim(lines, ',')
+    if (tab_count > comma_count) {
         output <- read.csv(path, check.names = FALSE, sep = '\t')
     } else {
-        stop('Input file extension not supported. Must be .csv or .tsv.')
+        output <- read.csv(path, check.names = FALSE)
     }
+    return(output)
 }
 
 metadata_original_samp <- read_input_table(args[[1]])
 max_samples <- as.numeric(args[[2]])
-if (length(args) > 2) {
+if (length(args) > 2 && file.exists(args[[3]])) {
     metadata_original_ref <- read_input_table(args[[3]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
 }
+if (length(args) > 3 && file.exists(args[[4]])) {
+    metadata_original_rep <- read_input_table(args[[4]])
+} else {
+    metadata_original_rep <- data.frame(template = character(0))
+}
+
 metadata_samp <- metadata_original_samp
 metadata_ref <- metadata_original_ref
+metadata_rep <- metadata_original_rep
 
 # Remove empty rows
 remove_empty_rows <- function(metadata) {
@@ -220,6 +247,9 @@ remove_empty_rows <- function(metadata) {
 metadata_samp <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_rows(metadata_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_rows(metadata_rep)
 }
 
 # Check that there is data
@@ -251,6 +281,9 @@ colnames(metadata_samp) <- validate_col_names(colnames(metadata_samp), known_col
 if (nrow(metadata_ref) > 0) {
     colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    colnames(metadata_rep) <- validate_col_names(colnames(metadata_rep), known_columns_rep)
+}
 
 # Remove empty columns and columns with no header
 remove_empty_cols <- function(metadata, csv_name) {
@@ -269,7 +302,10 @@ remove_empty_cols <- function(metadata, csv_name) {
 }
 metadata_samp <- remove_empty_cols(metadata_samp, args[[1]])
 if (nrow(metadata_ref) > 0) {
-    metadata_ref <- remove_empty_cols(metadata_ref, args[[2]])
+    metadata_ref <- remove_empty_cols(metadata_ref, args[[3]])
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_cols(metadata_rep, args[[4]])
 }
 
 # Remove all whitespace
@@ -281,6 +317,9 @@ metadata_samp <- remove_whitespace(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_whitespace(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_whitespace(metadata_rep)
+}
 
 # Replace NAs with empty stings
 metadata_samp[] <- lapply(metadata_samp, function(x) {
@@ -288,6 +327,10 @@ metadata_samp[] <- lapply(metadata_samp, function(x) {
     return(x)
 })
 metadata_ref[] <- lapply(metadata_ref, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+metadata_rep[] <- lapply(metadata_rep, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
@@ -302,6 +345,7 @@ check_required_cols <- function(metadata, required_cols, csv_name) {
 }
 check_required_cols(metadata_samp, required_input_columns_samp, 'sample data')
 check_required_cols(metadata_ref, required_input_columns_ref, 'reference data')
+check_required_cols(metadata_rep, required_input_columns_rep, 'report data')
 
 # Check for duplicated columns
 check_duplicated_cols <- function(metadata, known_cols, csv_name) {
@@ -316,6 +360,7 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
 }
 check_duplicated_cols(metadata_samp,  known_columns_samp, 'sample data')
 check_duplicated_cols(metadata_ref,  known_columns_ref, 'reference data')
+check_duplicated_cols(metadata_rep,  known_columns_rep, 'report data')
 
 # Reorder columns and add any missing columns
 reorder_and_add_cols <- function(metadata, known_columns) {
@@ -329,6 +374,7 @@ reorder_and_add_cols <- function(metadata, known_columns) {
 }
 metadata_samp <- reorder_and_add_cols(metadata_samp, known_columns_samp)
 metadata_ref <- reorder_and_add_cols(metadata_ref, known_columns_ref)
+metadata_rep <- reorder_and_add_cols(metadata_rep, known_columns_rep)
 
 # Add default values for some columns
 apply_defaults <- function(metadata, defaults) {
@@ -340,6 +386,9 @@ apply_defaults <- function(metadata, defaults) {
 metadata_samp <- apply_defaults(metadata_samp, defaults_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- apply_defaults(metadata_rep, defaults_rep)
 }
 
 # Validate mutually exclusive columns
@@ -369,8 +418,8 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Validate color_by column and add back any original user-defined columns used
-validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
+# Validate color_by column and add back any original user_defined columns used
+validate_color_by <- function(metadata, color_by_col, csv_name, sep = ';') {
     split_color_by <- strsplit(metadata[[color_by_col]], split = sep)
     split_color_by <- lapply(split_color_by, trimws)
     all_color_by_cols <- unique(unlist(split_color_by))
@@ -383,10 +432,18 @@ validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep 
     }
     return(unlist(lapply(split_color_by, paste0, collapse = sep)))
 }
-metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', known_columns_samp, 'sample data')
-if (nrow(metadata_ref) > 0) {
-    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+
+# Fill in an empty color_by column with all user-defined column names
+set_color_by_defaults <- function(metadata, color_by_col, known_cols) {
+    default_columns <- setdiff(colnames(metadata), known_cols)
+    if (all(metadata[[color_by_col]] == '')) {
+        metadata[[color_by_col]] <- paste(default_columns, collapse = ';')
+    }
+    return(metadata)
 }
+
+metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', 'sample data')
+metadata_samp <- set_color_by_defaults(metadata_samp, 'color_by', known_columns_samp)
 
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
@@ -404,6 +461,10 @@ ref_data_addition[user_specific_ref_cols] <- rep('', nrow(ref_data_addition))
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- unique(rbind(metadata_ref, ref_data_addition))
 
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', 'reference data')
+    metadata_ref <- set_color_by_defaults(metadata_ref, 'ref_color_by', known_columns_ref)
+}
 # Validate usage columns
 validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
@@ -684,6 +745,16 @@ rownames(metadata_samp) <- NULL
 # Convert NCBI reference queries to a list of assembly accessions
 get_ncbi_genomes <- function(query) {
     search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
+    if (length(search_result$ids) == 0) {
+        return(
+            data.frame(
+                ref_id = character(0),
+                ref_name = character(0),
+                ref_description = character(0),
+                ref_ncbi_accession = character(0)
+            )
+        )
+    }
     starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
     summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
         rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
@@ -702,15 +773,63 @@ get_ncbi_genomes <- function(query) {
         ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
     )
     rownames(output) <- NULL
+
+    # Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
+    core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+    version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+    is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
+    output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
+    output <- output[! duplicated(core_id), , drop = FALSE]
     return(output)
 }
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
 ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
 names(ncbi_result) <- unique_queries
+
+# Identify excluded accessions and their source row indices
+is_fully_excluded <- metadata_ref$ref_primary_usage == 'excluded' &
+                     metadata_ref$ref_contextual_usage == 'excluded' &
+                     as.logical(metadata_ref$ref_enabled)
+
+excluded_accessions <- character(0)
+excluded_source_rows <- integer(0)
+
+for (i in seq_len(nrow(metadata_ref))) {
+    if (!is_fully_excluded[i]) next
+
+    if (is_present(metadata_ref$ref_ncbi_accession[i])) {
+        core_id <- sub(metadata_ref$ref_ncbi_accession[i], pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        excluded_accessions <- c(excluded_accessions, core_id)
+        excluded_source_rows <- c(excluded_source_rows, i)
+    }
+
+    if (is_present(metadata_ref$ref_ncbi_query[i])) {
+        query_results <- ncbi_result[[metadata_ref$ref_ncbi_query[i]]]
+        if (!is.null(query_results) && nrow(query_results) > 0) {
+            core_ids <- sub(query_results$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+            excluded_accessions <- c(excluded_accessions, core_ids)
+            excluded_source_rows <- c(excluded_source_rows, rep(i, length(core_ids)))
+        }
+    }
+}
+
 is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata_ref$ref_enabled)
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+
+    # Remove accessions excluded by later rows (compare by core ID)
+    later_excluded <- excluded_accessions[excluded_source_rows > index]
+    if (length(later_excluded) > 0 && nrow(query_data) > 0) {
+        query_core_ids <- sub(query_data$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        query_data <- query_data[! query_core_ids %in% later_excluded, ]
+    }
+
+    # Skip if no results remain after filtering
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
+
     query_max <- metadata_ref$ref_ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
         query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
@@ -752,6 +871,121 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
 validate_required_input(metadata_samp, required_input_columns_samp, 'sample data')
 if (nrow(metadata_ref) > 0) {
     validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
+}
+if (nrow(metadata_rep) > 0) {
+    validate_required_input(metadata_rep, required_input_columns_rep, 'report data')
+}
+
+# Validate report template: either a bare name resolved under assets/report_templates/ or an
+# absolute path to a directory containing *.qmd. Relative paths are deliberately rejected. They
+# would otherwise resolve against this task's work dir here, and against the launch dir in
+# resolveTemplateDir() in workflows/pathogensurveillance.nf, so the two could disagree.
+if (nrow(metadata_rep) > 0) {
+    # projectDir is passed as 5th arg (project root) to allow absolute resolution in work dir
+    projectDir <- if (length(args) >= 5 && dir.exists(args[[5]])) args[[5]] else "."
+    # Built-in template directory aliases. The default directory was renamed to pathsurveil_report,
+    # but "report" is what users have always written in report_data, so it keeps working.
+    # Kept in step with templateAliases() in workflows/pathogensurveillance.nf.
+    report_template_aliases <- c(report = 'pathsurveil_report')
+    # Returns a per-value status rather than a bare logical so that each way of getting it wrong
+    # can be reported with its own actionable message.
+    template_status <- function(vals) {
+        vapply(trimws(vals), function(v) {
+            if (grepl('^~', v)) {
+                return('tilde')
+            }
+            if (grepl('^/', v)) {
+                cand <- v
+            } else if (grepl('/', v) || grepl('^\\.', v)) {
+                return('relative')
+            } else {
+                # A named vector errors on [[ with an absent name, so membership is tested first.
+                name <- if (v %in% names(report_template_aliases)) unname(report_template_aliases[[v]]) else v
+                cand <- file.path(projectDir, "assets/report_templates", name)
+            }
+            if (!dir.exists(cand)) {
+                return('missing')
+            }
+            if (length(list.files(cand, pattern = "\\.qmd$")) == 0) {
+                return('no_qmd')
+            }
+            'ok'
+        }, character(1))
+    }
+    all_tmpl <- unique(unlist(strsplit(metadata_rep$template, ";")))
+    all_tmpl <- trimws(all_tmpl[all_tmpl != ""])
+    tmpl_status <- template_status(all_tmpl)
+    for (i in seq_along(all_tmpl)) {
+        status <- tmpl_status[[i]]
+        if (status == 'ok') {
+            next
+        }
+        v <- all_tmpl[[i]]
+        if (status == 'relative') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" is a relative path. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
+        }
+        if (status == 'tilde') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" starts with "~", which is not expanded. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
+        }
+        if (status == 'missing') {
+            stop(call. = FALSE, paste0('report_data template "', v, '" does not resolve to an existing directory. Use a name resolved under assets/report_templates/, or an absolute path to a directory containing .qmd.'))
+        }
+        stop(call. = FALSE, paste0('report_data template "', v, '" contains no .qmd files. Templates must be a directory containing at least one .qmd.'))
+    }
+
+    # Published reports are named "<report group>_<template dir name>.html", so the directory
+    # name alone decides the output filename. Two templates that reduce to the same name would
+    # write the same file, so reject the whole file rather than let one silently overwrite the
+    # other. Aliases are resolved first, so listing both "report" and "pathsurveil_report" for a
+    # group is caught even though the two strings differ.
+    report_template_label <- function(v) {
+        v <- sub('/+$', '', v)
+        if (grepl('^/', v)) {
+            return(basename(v))
+        }
+        # A named vector errors on [[ with an absent name, so membership is tested first.
+        if (v %in% names(report_template_aliases)) {
+            return(unname(report_template_aliases[[v]]))
+        }
+        v
+    }
+    # Built-in directories are read from disk rather than hardcoded, so a template that is added
+    # or renamed is covered without touching this script.
+    templates_root <- file.path(projectDir, "assets/report_templates")
+    known_templates <- if (dir.exists(templates_root)) {
+        basename(list.dirs(templates_root, full.names = FALSE, recursive = FALSE))
+    } else {
+        character(0)
+    }
+    # Case-insensitive: a case-insensitive filesystem (macOS by default) would treat these as the
+    # same output file even though the strings differ.
+    tmpl_label <- vapply(all_tmpl, report_template_label, character(1))
+    label_up <- toupper(tmpl_label)
+    # A value is a duplicate if it repeats anywhere, so look at both ends of each run.
+    dup_idx <- duplicated(label_up) | duplicated(label_up, fromLast = TRUE)
+    for (idxs in split(which(dup_idx), label_up[dup_idx])) {
+        stop(call. = FALSE, paste0(
+            'report_data templates ', paste0('"', unique(all_tmpl[idxs]), '"', collapse = ' and '),
+            ' all produce the report name "', tmpl_label[[idxs[[1]]]], '.html". ',
+            'Rename one of the template directories so their names differ.'
+        ))
+    }
+    # A custom directory may not shadow a built-in template: the two would produce the same
+    # report name, and the intent of the run would be ambiguous. Only real directory names are
+    # reserved; the aliases are not.
+    for (i in seq_along(all_tmpl)) {
+        v <- all_tmpl[[i]]
+        if (!grepl('^/', v)) {
+            next
+        }
+        if (toupper(tmpl_label[[i]]) %in% toupper(known_templates)) {
+            stop(call. = FALSE, paste0(
+                'report_data template "', v, '" is named "', tmpl_label[[i]], '", which is the name of a ',
+                'built-in template directory. Rename the custom template directory so it does not ',
+                'produce the same report name as a built-in template.'
+            ))
+        }
+    }
 }
 
 # Ensure sample/reference IDs are present
@@ -804,9 +1038,33 @@ remove_file_extensions <- function(x) {
     return(gsub(x, pattern = all_ext_pattern, replacement = ''))
 }
 
+# Helper to split semicolon-delimited paths
+split_paths <- function(x) {
+    if (is_present(x)) {
+        unlist(strsplit(x, split = ';'))
+    } else {
+        character(0)
+    }
+}
+
+# Reject HTTP(S) URLs that contain glob characters
+glob_pattern <- '[][*?{}]'
+all_path_values <- c(metadata_samp$path, metadata_samp$path_2)
+all_path_values <- all_path_values[is_present(all_path_values)]
+all_paths <- unlist(lapply(all_path_values, split_paths))
+is_http_glob <- grepl('^https?://', all_paths) & grepl(glob_pattern, all_paths)
+if (any(is_http_glob)) {
+    stop(call. = FALSE, paste0(
+        'Glob patterns are not supported for HTTP/HTTPS URLs: "',
+        all_paths[is_http_glob][1], '"'
+    ))
+}
+
 reads_ids <- unlist(lapply(1:nrow(metadata_samp), function(row_index) {
-    reads_1 <- basename(metadata_samp$path[row_index])
-    reads_2 <- basename(metadata_samp$path_2[row_index])
+    reads_1_paths <- split_paths(metadata_samp$path[row_index])
+    reads_2_paths <- split_paths(metadata_samp$path_2[row_index])
+    reads_1 <- if (length(reads_1_paths) > 0) basename(reads_1_paths[1]) else ''
+    reads_2 <- if (length(reads_2_paths) > 0) basename(reads_2_paths[1]) else ''
     if (is_present(reads_1) && is_present(reads_2)) {
         remove_different_parts <- function(a, b) {
             a_split <- strsplit(reads_1, split = '')[[1]]
@@ -938,6 +1196,9 @@ metadata_samp$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$re
 if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep$report_group_ids <- make_group_ids_ok_for_file_names(metadata_rep$report_group_ids)
+}
 
 # Check that reference groups in sample metadata are present in the reference metadata
 if (nrow(metadata_ref)) {
@@ -950,6 +1211,23 @@ if (nrow(metadata_ref)) {
                 'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
                 ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
                 ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
+                ' metadata CSV.'
+            ))
+        }
+    }
+}
+
+# Check that report groups in the report metadata are present in the sample metadata
+if (nrow(metadata_rep)) {
+    all_rep_group_ids <- unique(unlist(strsplit(metadata_samp$report_group_ids, split = ';')))
+    for (index in 1:nrow(metadata_rep)) {
+        split_ids <- strsplit(metadata_rep$report_group_ids[index], split = ';')[[1]]
+        invalid_ids <- split_ids[! split_ids %in% all_rep_group_ids]
+        if (length(invalid_ids) > 0) {
+            stop(call. = FALSE, paste0(
+                'The report group ID "', invalid_ids[1], '" used in row ', index, ' in the report metadata CSV',
+                ' is not defined in the sample metadata CSV. All values in the "report_group_ids" column in the',
+                ' report metadata CSV must be present in the "report_group_ids" column of the sample',
                 ' metadata CSV.'
             ))
         }
@@ -1011,6 +1289,7 @@ if (sum(invalid_seq_type) > 0) {
         description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
     )
     message_data <- rbind(message_data, duplicate_rows_by_id_list(addition, 'report_group_id'))
+    metadata_samp <- metadata_samp[!invalid_seq_type, , drop = FALSE]
 }
 
 
@@ -1018,6 +1297,9 @@ if (sum(invalid_seq_type) > 0) {
 metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- duplicate_rows_by_id_list(metadata_rep, 'report_group_ids')
 }
 
 # Convert reference groups to reference ids in the sample data
@@ -1073,10 +1355,14 @@ metadata_samp <- unique(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- unique(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- unique(metadata_rep)
+}
 
 # Replace double quotes with single quotes to not conflict with the CSV format quoting values
 metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
 metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
+metadata_rep[] <- lapply(metadata_rep, gsub, pattern = '"', replacement = "'")
 message_data[] <- lapply(message_data, gsub, pattern = '"', replacement = "'")
 
 # Write data for messages to be shown to the user, such as warnings about removed samples
@@ -1085,3 +1371,4 @@ write.table(message_data, file = message_data_path, row.names = FALSE, na = '', 
 # Write output metadata
 write.table(metadata_samp, file = sample_data_path, row.names = FALSE, na = '', sep = '\t')
 write.table(metadata_ref, file = reference_data_path, row.names = FALSE, na = '', sep = '\t')
+write.table(metadata_rep, file = report_data_path, row.names = FALSE, na = '', sep = '\t')

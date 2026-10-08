@@ -3,7 +3,7 @@ process ASSIGN_MAPPING_REFERENCE {
     label 'process_single'
 
     conda "conda-forge::r-base=4.2.1"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
         'biocontainers/r-base:4.2.1' }"
 
@@ -13,7 +13,7 @@ process ASSIGN_MAPPING_REFERENCE {
 
     output:
     tuple val(group_meta), path("${prefix}_mapping_references.tsv"), emit: samp_ref_pairs
-    path "versions.yml"                                            , emit: versions
+    path "versions.yml"                                            , emit: versions_assign_mapping_reference, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

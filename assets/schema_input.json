@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "sample_id": {
-                "type": "string"
+                "type": ["string", "integer"]
             },
             "name": {
                 "type": "string"
@@ -18,15 +18,13 @@
             },
             "path": {
                 "type": "string",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^[^\\s]+\\.f(ast)?q\\.gz(;[^\\s]+\\.f(ast)?q\\.gz)*$",
+                "errorMessage": "FastQ file(s) for reads 1 must be provided, cannot contain spaces, must have extension '.fq.gz' or '.fastq.gz', and multiple files must be separated by semicolons."
             },
             "path_2": {
                 "type": "string",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^[^\\s]+\\.f(ast)?q\\.gz(;[^\\s]+\\.f(ast)?q\\.gz)*$",
+                "errorMessage": "FastQ file(s) for reads 2 cannot contain spaces, must have extension '.fq.gz' or '.fastq.gz', and multiple files must be separated by semicolons."
             },
             "ncbi_accession": {
                 "type": "string",
@@ -48,7 +46,7 @@
                 "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', or 'bgiseq'."
             },
             "report_group_ids": {
-                "type": "string",
+                "type": ["string", "integer"],
                 "default": "_no_group_defined_",
                 "pattern": "^[a-zA-Z0-9_ -]+(?:;[a-zA-Z0-9_ -]+)*$"
             },
@@ -66,7 +64,7 @@
                 "default": true
             },
             "ref_group_ids": {
-                "type": "string"
+                "type": ["string", "integer"]
             }
         }
     }

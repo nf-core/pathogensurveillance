@@ -3,7 +3,7 @@ process PICARD_FORMAT {
     label 'process_low'
 
     conda "bioconda::picard=3.3.0"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/picard:3.3.0--hdfd78af_0' :
         'biocontainers/picard:3.3.0--hdfd78af_0' }"
 
@@ -14,7 +14,7 @@ process PICARD_FORMAT {
     tuple val(meta), path("${prefix}.bam")        , emit: bam
     tuple val(meta), path("${prefix}.bai")        , emit: bai,     optional: true
     tuple val(meta), path("${prefix}.MarkDuplicates.metrics.txt"), emit: metrics
-    path "versions.yml"                   , emit: versions
+    path "versions.yml"                   , emit: versions_picard_format, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

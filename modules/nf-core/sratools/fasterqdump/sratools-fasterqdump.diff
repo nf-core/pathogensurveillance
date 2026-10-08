@@ -2,7 +2,7 @@ Changes in component 'nf-core/sratools/fasterqdump'
 Changes in 'sratools/fasterqdump/main.nf':
 --- modules/nf-core/sratools/fasterqdump/main.nf
 +++ modules/nf-core/sratools/fasterqdump/main.nf
-@@ -8,12 +8,12 @@
+@@ -8,7 +8,7 @@
          'community.wave.seqera.io/library/sra-tools_pigz:4a694d823f6f7fcf' }"
  
      input:
@@ -11,49 +11,9 @@ Changes in 'sratools/fasterqdump/main.nf':
      path ncbi_settings
      path certificate
  
-     output:
--    tuple val(meta), path('*.fastq.gz'), emit: reads
-+    tuple val(meta), path("${prefix}*.fastq.gz"), emit: reads
-     tuple val("${task.process}"), val('sratools'), eval("prefetch --version 2>&1 | grep -Eo '[0-9.]+'"), topic: versions, emit: versions_sratools
-     tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //g'"), topic: versions, emit: versions_pigz
- 
-@@ -23,11 +23,7 @@
-     script:
-     def args = task.ext.args ?: ''
-     def args2 = task.ext.args2 ?: ''
--    def prefix = task.ext.prefix ?: "${meta.id}"
--    def outfile = "${prefix}.fastq"
--    def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
--    // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and
--    // avoids the '.' in the path bug: https://github.com/ncbi/sra-tools/issues/865
-+    prefix = task.ext.prefix ?: "${meta.id}"
-     def key_file = ''
-     if (certificate.toString().endsWith('.jwt')) {
-         key_file += " --perm ${certificate}"
-@@ -40,11 +36,8 @@
-     fasterq-dump \\
-         $args \\
-         --threads $task.cpus \\
--        --outfile $outfile \\
-         ${key_file} \\
-         ${sra}
--
--    $exclude_third
- 
-     pigz \\
-         $args2 \\
-@@ -56,7 +49,7 @@
-     stub:
-     def args = task.ext.args ?: ''
-     def args2 = task.ext.args2 ?: ''
--    def prefix = task.ext.prefix ?: "${meta.id}"
-+    prefix = task.ext.prefix ?: "${meta.id}"
-     def outfile = "${prefix}.fastq"
-     def exclude_third = meta.single_end ? '' : "mv $outfile $prefix || echo 'No third file'"
-     // Excludes the "${prefix}.fastq" file from output `reads` channel for paired end cases and
 
-'modules/nf-core/sratools/fasterqdump/environment.yml' is unchanged
 'modules/nf-core/sratools/fasterqdump/meta.yml' is unchanged
-'modules/nf-core/sratools/fasterqdump/tests/main.nf.test' is unchanged
+'modules/nf-core/sratools/fasterqdump/environment.yml' is unchanged
 'modules/nf-core/sratools/fasterqdump/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/sratools/fasterqdump/tests/main.nf.test' is unchanged
 ************************************************************
