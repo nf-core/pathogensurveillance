@@ -61,6 +61,7 @@ Below is a description of each column used by `pathogensurveillance`:
 | `ploidy`           | The ploidy of the sample. Should be a number. Defaults to "1".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `enabled`          | Either "TRUE" or "FALSE", indicating whether the sample should be included in the analysis or not. Defaults to "TRUE".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `ref_group_ids`    | One or more reference group IDs separated by ";". These are used to supply specific references to specific samples. These IDs correspond to IDs listed in the `ref_group_ids` or `ref_id` columns of the reference metadata TSV.                                                                                                                                                                                                                                                                                                                                                                          |
+
 ## Adding Custom References
 
 Additionally, users can supply a reference metadata TSV/CSV that can be used to assign custom references to particular samples using the `--reference_data` option.
@@ -105,19 +106,26 @@ The reference metadata TSV or the sample metadata TSV can have the following col
 
 > **Note on reference FASTA files for variant calling:** User-supplied reference genomes provided via the `ref_path` column **must be gzip-compressed** (`.fasta.gz`) if they are used for variant calling.
 
-
 ## Customizing Report Templates
 
 Additionally, users can supply a report metadata TSV/CSV that can be used to assign custom report templates to particular report groups using the `--report_data` option.
-If not provided, the pipeline will use the default report template.
-Each row in this table defines a custom report output for a given report group. Multiple templates can be assigned to a single report group by adding multiple rows or delimiting values by semicolons.
-For example, the following file content given to `--report_data` would assign report groups to report templates:
+If not provided, the pipeline will use the `pathsurveil_report` template for each report group in the samplesheet (or for the `all` group if none are specified).
+Each row in this table defines a report output for a report group. Multiple templates can be assigned to a single report group by adding multiple rows or delimiting template values by semicolons.
+Reports will be published in a directory corresponding to the template name, including their source files, unless `render_target` is set. In that case, the pipeline renders the whole template and publishes only the exact matching file from the rendered output.
+
+Specifically, a report for group `my_subset` built from a template directory `dashboard` is published as:
+
+- `reports/my_subset_dashboard/` containing the whole rendered site and the template sources, or
+- `reports/my_subset_dashboard.pdf` containing only the selected file, when `render_target` is `exports/summary.pdf`.
+
+> **Note on `render_target`:** This is a relative path, including a file extension, within the rendered output directory. Nested paths are allowed, and the extension can be any type of rendered file. The file is selected after rendering; if the exact path does not exist, no report artifact is published. When set, only that artifact is published, so it is the user's responsibility to ensure it is self-contained and has any required companion assets.
+> For example, the following file content given to `--report_data` would assign report groups to report templates:
 
 ```csv title="report_data.csv"
-report_group_ids,template
-all_samples,report
-all_samples,dashboard
-my_subset,/path/to/template/dir
+report_group_ids,template,render_target
+all_samples,pathsurveil_report,
+all_samples,dashboard,
+my_subset,/path/to/template/dir,exports/summary.pdf
 ```
 
 To make this have an effect, the `--input` spreadsheet must have the `report_group_ids` column defined with the same ID:
@@ -133,10 +141,12 @@ TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,all_samples;my_subset
 ```
 
 The report metadata TSV can have the following columns:
-- `report_group_ids`: Report group IDs defined in the sample metadata. Can accept multiple values if delimited by semicolons.
-- `template`: The name of an included template or path to a custom user-defined quarto template directory. Can accept multiple values if delimited by semicolons.
 
-
+| Column             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `report_group_ids` | Report group IDs defined in the sample metadata. Can accept multiple values if delimited by semicolons.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `template`         | A pre-built template directory name under `assets/report_templates/` (for example, `pathsurveil_report`) or a path to a custom template directory. Built-in template names are checked first. Multiple templates may be delimited by semicolons.                                                                                                                                                                                                                                                                                         |
+| `render_target`    | Optional. A relative path, including a file extension, to the exact file to select from the rendered output directory (for example, `exports/summary.pdf`). It may contain nested directories, but only one target can be specified per row. If a row lists several templates, its target applies to each template. The target is checked after rendering; if it is absent, no report artifact is published. When present, it is renamed to `<Report ID>_<Template directory name>.<extension>` directly under `reports/`. If not specified, the full rendered directory and template sources are published. |
 
 ## Running the pipeline
 

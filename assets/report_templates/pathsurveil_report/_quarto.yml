@@ -1,7 +1,5 @@
 project:
   type: website
-  render:
-    - "index.qmd"
 
 website:
   title: "Pathogen Surveillance"

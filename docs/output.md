@@ -312,11 +312,14 @@ The `reference_data` folder contains information regarding references, including
 <summary>output files</summary>
 
 - `reports/`
-  - `<Report ID>_<Template directory name>.html`: The primary output report of the pipeline. The template directory name defaults to `pathsurveil_report`, so the default report for the group `all` is written as `all_pathsurveil_report.html`. When a report group is assigned more than one template in `--report_data`, one file is written per template.
+  - `<Report ID>_<Template directory name>/`: Directory containing the rendered report. When a report group is assigned more than one template in `--report_data`, one directory is written per template.
+  - `<Report ID>_<Template directory name>.<extension>`: When `render_target` is set, the exact matching file from the rendered output is published directly under `reports/`.
 
 </details>
 
 This is the primary output of the pipeline, containing the report meant to be understandable by non-bioinformaticians.
+
+Each full report directory contains the rendered report output(s), plus associated stylesheets and assets. If a `render_target` is set, only the exact matching rendered file is published to the report directory.
 
 ### Grouped report data
 

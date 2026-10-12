@@ -5,19 +5,20 @@
  *  Licenses - Font: SIL OFL 1.1, CSS: MIT License
  */
 @font-face {
-  font-family: 'Academicons';
+  font-family: "Academicons";
   font-style: normal;
   font-weight: 400;
   font-display: block;
-  src: url('../webfonts/academicons.eot');
-  src: url('../webfonts/academicons.eot') format('embedded-opentype'),
-    url('../webfonts/academicons.ttf') format('truetype'),
-    url('../webfonts/academicons.woff') format('woff'),
-    url('../webfonts/academicons.svg') format('svg');
+  src: url("../webfonts/academicons.eot");
+  src:
+    url("../webfonts/academicons.eot") format("embedded-opentype"),
+    url("../webfonts/academicons.ttf") format("truetype"),
+    url("../webfonts/academicons.woff") format("woff"),
+    url("../webfonts/academicons.svg") format("svg");
 }
 
 .ai {
-  font-family: 'Academicons';
+  font-family: "Academicons";
   font-weight: 400;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
@@ -612,15 +613,15 @@
 .ai-lg {
   font-size: 1.33333em;
   line-height: 0.75em;
-  vertical-align: -.0667em;
+  vertical-align: -0.0667em;
 }
 
 .ai-xs {
-  font-size: .75em;
+  font-size: 0.75em;
 }
 
 .ai-sm {
-  font-size: .875em;
+  font-size: 0.875em;
 }
 
 .ai-1x {
@@ -674,7 +675,7 @@
   padding-left: 0;
 }
 
-.ai-ul>li {
+.ai-ul > li {
   position: relative;
 }
 
@@ -688,8 +689,8 @@
 
 .ai-border {
   border: solid 0.08em #eee;
-  border-radius: .1em;
-  padding: .2em .25em .15em;
+  border-radius: 0.1em;
+  padding: 0.2em 0.25em 0.15em;
 }
 
 .ai-pull-left {
@@ -701,11 +702,11 @@
 }
 
 .ai.ai-pull-left {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 
 .ai.ai-pull-right {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 
 .ai-stack {

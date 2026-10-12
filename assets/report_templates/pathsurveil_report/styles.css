@@ -30,16 +30,16 @@
   min-height: 600px !important;
 }
 
-#tabset-3-2, 
+#tabset-3-2,
 #tabset-3-4 {
-    min-height: 1050px !important;
-    height: auto !important;
+  min-height: 1050px !important;
+  height: auto !important;
 }
 
 #tabset-3-2 .plotly.html-widget,
 #tabset-3-4 .plotly.html-widget {
-    height: 1000px !important;
-    min-height: 1000px !important;
+  height: 1000px !important;
+  min-height: 1000px !important;
 }
 
 #htmlwidget-5d6e7d8ec790402b7edb {

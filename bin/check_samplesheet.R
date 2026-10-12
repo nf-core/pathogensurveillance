@@ -95,9 +95,9 @@ known_columns_ref <- c(
 )
 known_columns_rep <- c(
     'report_group_ids',
-    'template'
+    'template',
+    'render_target'
 )
-
 # Default values for columns
 defaults_ref <- c(
     ref_ncbi_query_max = '100',
@@ -106,7 +106,7 @@ defaults_ref <- c(
     ref_enabled = TRUE
 )
 defaults_samp <- c(
-    report_group_ids = '_no_group_defined_',
+    report_group_ids = '',
     enabled = TRUE,
     ncbi_query_max = '30',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
@@ -115,7 +115,8 @@ defaults_samp <- c(
     ref_enabled = defaults_ref[['ref_enabled']]
 )
 defaults_rep <- c(
-    template = 'report'
+    template = 'pathsurveil_report',
+    render_target = 'index.html'
 )
 
 # Columns that must have a valid value in the input of this script
@@ -194,6 +195,18 @@ duplicate_rows_by_id_list <- function(metadata, id_col) {
     metadata[[id_col]] <- unlist(group_ids)
     rownames(metadata) <- NULL
     return(metadata)
+}
+duplicate_rows_by_template_list <- function(metadata) {
+    templates <- strsplit(metadata$template, split = ';', fixed = TRUE)
+    templates <- lapply(templates, function(values) trimws(values[values != '']))
+    if (any(lengths(templates) == 0)) {
+        stop(call. = FALSE, 'Each report_data row must specify at least one template.')
+    }
+    n_templates <- lengths(templates)
+    metadata <- metadata[rep(seq_len(nrow(metadata)), n_templates), , drop = FALSE]
+    metadata$template <- unlist(templates, use.names = FALSE)
+    rownames(metadata) <- NULL
+    metadata
 }
 
 # Parse inputs
@@ -876,118 +889,6 @@ if (nrow(metadata_rep) > 0) {
     validate_required_input(metadata_rep, required_input_columns_rep, 'report data')
 }
 
-# Validate report template: either a bare name resolved under assets/report_templates/ or an
-# absolute path to a directory containing *.qmd. Relative paths are deliberately rejected. They
-# would otherwise resolve against this task's work dir here, and against the launch dir in
-# resolveTemplateDir() in workflows/pathogensurveillance.nf, so the two could disagree.
-if (nrow(metadata_rep) > 0) {
-    # projectDir is passed as 5th arg (project root) to allow absolute resolution in work dir
-    projectDir <- if (length(args) >= 5 && dir.exists(args[[5]])) args[[5]] else "."
-    # Built-in template directory aliases. The default directory was renamed to pathsurveil_report,
-    # but "report" is what users have always written in report_data, so it keeps working.
-    # Kept in step with templateAliases() in workflows/pathogensurveillance.nf.
-    report_template_aliases <- c(report = 'pathsurveil_report')
-    # Returns a per-value status rather than a bare logical so that each way of getting it wrong
-    # can be reported with its own actionable message.
-    template_status <- function(vals) {
-        vapply(trimws(vals), function(v) {
-            if (grepl('^~', v)) {
-                return('tilde')
-            }
-            if (grepl('^/', v)) {
-                cand <- v
-            } else if (grepl('/', v) || grepl('^\\.', v)) {
-                return('relative')
-            } else {
-                # A named vector errors on [[ with an absent name, so membership is tested first.
-                name <- if (v %in% names(report_template_aliases)) unname(report_template_aliases[[v]]) else v
-                cand <- file.path(projectDir, "assets/report_templates", name)
-            }
-            if (!dir.exists(cand)) {
-                return('missing')
-            }
-            if (length(list.files(cand, pattern = "\\.qmd$")) == 0) {
-                return('no_qmd')
-            }
-            'ok'
-        }, character(1))
-    }
-    all_tmpl <- unique(unlist(strsplit(metadata_rep$template, ";")))
-    all_tmpl <- trimws(all_tmpl[all_tmpl != ""])
-    tmpl_status <- template_status(all_tmpl)
-    for (i in seq_along(all_tmpl)) {
-        status <- tmpl_status[[i]]
-        if (status == 'ok') {
-            next
-        }
-        v <- all_tmpl[[i]]
-        if (status == 'relative') {
-            stop(call. = FALSE, paste0('report_data template "', v, '" is a relative path. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
-        }
-        if (status == 'tilde') {
-            stop(call. = FALSE, paste0('report_data template "', v, '" starts with "~", which is not expanded. Use an absolute path (e.g. /data/templates/tpl) or a name resolved under assets/report_templates/.'))
-        }
-        if (status == 'missing') {
-            stop(call. = FALSE, paste0('report_data template "', v, '" does not resolve to an existing directory. Use a name resolved under assets/report_templates/, or an absolute path to a directory containing .qmd.'))
-        }
-        stop(call. = FALSE, paste0('report_data template "', v, '" contains no .qmd files. Templates must be a directory containing at least one .qmd.'))
-    }
-
-    # Published reports are named "<report group>_<template dir name>.html", so the directory
-    # name alone decides the output filename. Two templates that reduce to the same name would
-    # write the same file, so reject the whole file rather than let one silently overwrite the
-    # other. Aliases are resolved first, so listing both "report" and "pathsurveil_report" for a
-    # group is caught even though the two strings differ.
-    report_template_label <- function(v) {
-        v <- sub('/+$', '', v)
-        if (grepl('^/', v)) {
-            return(basename(v))
-        }
-        # A named vector errors on [[ with an absent name, so membership is tested first.
-        if (v %in% names(report_template_aliases)) {
-            return(unname(report_template_aliases[[v]]))
-        }
-        v
-    }
-    # Built-in directories are read from disk rather than hardcoded, so a template that is added
-    # or renamed is covered without touching this script.
-    templates_root <- file.path(projectDir, "assets/report_templates")
-    known_templates <- if (dir.exists(templates_root)) {
-        basename(list.dirs(templates_root, full.names = FALSE, recursive = FALSE))
-    } else {
-        character(0)
-    }
-    # Case-insensitive: a case-insensitive filesystem (macOS by default) would treat these as the
-    # same output file even though the strings differ.
-    tmpl_label <- vapply(all_tmpl, report_template_label, character(1))
-    label_up <- toupper(tmpl_label)
-    # A value is a duplicate if it repeats anywhere, so look at both ends of each run.
-    dup_idx <- duplicated(label_up) | duplicated(label_up, fromLast = TRUE)
-    for (idxs in split(which(dup_idx), label_up[dup_idx])) {
-        stop(call. = FALSE, paste0(
-            'report_data templates ', paste0('"', unique(all_tmpl[idxs]), '"', collapse = ' and '),
-            ' all produce the report name "', tmpl_label[[idxs[[1]]]], '.html". ',
-            'Rename one of the template directories so their names differ.'
-        ))
-    }
-    # A custom directory may not shadow a built-in template: the two would produce the same
-    # report name, and the intent of the run would be ambiguous. Only real directory names are
-    # reserved; the aliases are not.
-    for (i in seq_along(all_tmpl)) {
-        v <- all_tmpl[[i]]
-        if (!grepl('^/', v)) {
-            next
-        }
-        if (toupper(tmpl_label[[i]]) %in% toupper(known_templates)) {
-            stop(call. = FALSE, paste0(
-                'report_data template "', v, '" is named "', tmpl_label[[i]], '", which is the name of a ',
-                'built-in template directory. Rename the custom template directory so it does not ',
-                'produce the same report name as a built-in template.'
-            ))
-        }
-    }
-}
-
 # Ensure sample/reference IDs are present
 shared_char <- function(col, end = FALSE) {
     col[col == ''] <- NA_character_
@@ -1298,8 +1199,81 @@ metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
 }
+
+# Expand report groups, then template lists; add defaults for groups without an explicit template.
+projectDir <- if (length(args) >= 5 && dir.exists(args[[5]])) args[[5]] else "."
+report_groups <- unique(trimws(unlist(strsplit(metadata_samp$report_group_ids, split = ';', fixed = TRUE))))
+report_groups <- report_groups[nzchar(report_groups)]
+metadata_rep <- metadata_rep[, known_columns_rep, drop = FALSE]
 if (nrow(metadata_rep) > 0) {
     metadata_rep <- duplicate_rows_by_id_list(metadata_rep, 'report_group_ids')
+    metadata_rep <- duplicate_rows_by_template_list(metadata_rep)
+} else {
+    metadata_rep <- data.frame(
+        report_group_ids = character(0),
+        template = character(0),
+        render_target = character(0)
+    )
+}
+
+resolve_template <- function(value) {
+    value <- trimws(value)
+    known_template <- file.path(projectDir, 'assets', 'report_templates', value)
+    if (dir.exists(known_template)) {
+        resolved <- known_template
+    } else {
+        resolved <- value
+        if (!dir.exists(resolved)) {
+            stop(call. = FALSE, paste0('report_data template "', value, '" does not resolve to an existing directory.'))
+        }
+    }
+    resolved
+}
+
+if (nrow(metadata_rep) > 0) {
+    targets <- trimws(metadata_rep$render_target)
+    targets[is.na(targets)] <- ''
+    has_target <- targets != ''
+    if (any(grepl(';', targets[has_target], fixed = TRUE))) {
+        stop(call. = FALSE, 'Each report_data row may specify only one render_target; semicolon-delimited targets are not supported.')
+    }
+    if (any(!nzchar(tools::file_ext(targets[has_target])))) {
+        stop(call. = FALSE, 'Each report_data render_target must include a file extension.')
+    }
+    if (any(grepl('^(/|~)', targets[has_target])) || any(grepl('(^|/)\\.\\.(/|$)', targets[has_target]))) {
+        stop(call. = FALSE, 'report_data render_target must be a relative path inside the rendered output directory.')
+    }
+    metadata_rep$render_target <- targets
+}
+
+explicit_groups <- unique(metadata_rep$report_group_ids)
+default_groups <- setdiff(report_groups, explicit_groups)
+default_rows <- data.frame(
+    report_group_ids = default_groups,
+    template = rep('pathsurveil_report', length(default_groups)),
+    render_target = rep('', length(default_groups)),
+    stringsAsFactors = FALSE
+)
+metadata_rep <- rbind(metadata_rep, default_rows)
+if (nrow(metadata_rep) > 0) {
+    metadata_rep$template <- vapply(metadata_rep$template, resolve_template, character(1))
+    metadata_rep <- unique(metadata_rep)
+
+    template_labels <- basename(metadata_rep$template)
+    target_extensions <- tools::file_ext(metadata_rep$render_target)
+    publish_names <- ifelse(
+        metadata_rep$render_target == '',
+        paste(metadata_rep$report_group_ids, template_labels, sep = '_'),
+        paste0(metadata_rep$report_group_ids, '_', template_labels, '.', target_extensions)
+    )
+    duplicate_outputs <- duplicated(tolower(publish_names)) | duplicated(tolower(publish_names), fromLast = TRUE)
+    if (any(duplicate_outputs)) {
+        stop(call. = FALSE, paste0(
+            'report_data rows produce duplicate report outputs: ',
+            paste(unique(publish_names[duplicate_outputs]), collapse = ', '),
+            '. Use different template directory names or target file extensions.'
+        ))
+    }
 }
 
 # Convert reference groups to reference ids in the sample data
