@@ -60,6 +60,7 @@ known_columns_samp <- c(
     'path_2',
     'ncbi_accession',
     'ncbi_query',
+    'query_db',
     'ncbi_query_max',
     'sequence_type',
     'report_group_ids',
@@ -162,8 +163,10 @@ known_read_types <- c(
     'illumina',
     'nanopore',
     'pacbio',
-    'bgiseq'
+    'bgiseq',
+    'assembly'
 )
+valid_query_databases <- c('sra', 'assembly')
 
 # Regular expression for characters that cannot appear in IDs
 invalid_id_char_pattern <- '[\\/:;*?"<>| .()-]+'
@@ -512,6 +515,54 @@ metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CS
 metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
 
 # Convert NCBI sample queries to a list of SRA run accessions
+is_assembly_accession <- grepl('^GC[AF]_[0-9]+(\\.[0-9]+)?$', metadata_samp$ncbi_accession, ignore.case = TRUE)
+conflicting_assembly_type <- is_assembly_accession & is_present(metadata_samp$sequence_type) &
+    !grepl('^assembly$', metadata_samp$sequence_type, ignore.case = TRUE)
+if (any(conflicting_assembly_type)) {
+    stop(call. = FALSE, paste0(
+        'NCBI Assembly accessions beginning with GCA_ or GCF_ must use sequence_type "assembly" (rows: ',
+        paste(which(conflicting_assembly_type), collapse = ', '), ').'
+    ))
+}
+metadata_samp$sequence_type[is_assembly_accession & !is_present(metadata_samp$sequence_type)] <- 'assembly'
+
+# Validate query_db column
+has_query <- is_present(metadata_samp$ncbi_query)
+has_query_db <- is_present(metadata_samp$query_db)
+metadata_samp$query_db <- tolower(trimws(metadata_samp$query_db))
+missing_query_db <- has_query & !has_query_db
+invalid_query_db <- has_query & !metadata_samp$query_db %in% valid_query_databases
+unused_query_db <- !has_query & has_query_db
+if (any(missing_query_db)) {
+    stop(call. = FALSE, paste0(
+        'The "query_db" column must be specified as "SRA" or "assembly" when "ncbi_query" is present (rows: ',
+        paste(which(missing_query_db), collapse = ', '), ').'
+    ))
+}
+if (any(invalid_query_db)) {
+    stop(call. = FALSE, paste0(
+        'The "query_db" column must contain only "SRA" or "assembly" (rows: ',
+        paste(which(invalid_query_db), collapse = ', '), ').'
+    ))
+}
+if (any(unused_query_db)) {
+    stop(call. = FALSE, paste0(
+        'The "query_db" column can only be used when "ncbi_query" is present (rows: ',
+        paste(which(unused_query_db), collapse = ', '), ').'
+    ))
+}
+conflicting_query_type <- has_query & (
+    (metadata_samp$query_db == 'assembly' & is_present(metadata_samp$sequence_type) &
+        !grepl('^assembly$', metadata_samp$sequence_type, ignore.case = TRUE)) |
+    (metadata_samp$query_db == 'sra' & grepl('^assembly$', metadata_samp$sequence_type, ignore.case = TRUE))
+)
+if (any(conflicting_query_type)) {
+    stop(call. = FALSE, paste0(
+        'The "sequence_type" value conflicts with the selected "query_db" (rows: ',
+        paste(which(conflicting_query_type), collapse = ', '), ').'
+    ))
+}
+
 get_ncbi_sra_runs <- function(query) {
     if (query == '') {
         return(NULL)
@@ -556,15 +607,80 @@ get_ncbi_sra_runs <- function(query) {
     rownames(output) <- NULL
     return(output)
 }
-unique_queries <- unique(metadata_samp$ncbi_query)
-unique_queries <- unique_queries[unique_queries != '']
-ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
-names(ncbi_result) <- unique_queries
-is_query_to_use <- is_present(metadata_samp$ncbi_query) & metadata_samp$enabled
+
+get_ncbi_assembly_data <- function(query, for_reference = FALSE) {
+    if (query == '') {
+        return(NULL)
+    }
+    search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
+    if (length(search_result$ids) == 0) {
+        if (for_reference) {
+            return(data.frame(ref_id = character(0), ref_name = character(0), ref_description = character(0), ref_ncbi_accession = character(0)))
+        }
+        return(data.frame(ncbi_accession = character(0), sequence_type = character(0), name = character(0), description = character(0)))
+    }
+    starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
+    summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
+        rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
+    }))
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    accessions <- unlist(lapply(summary_result, function(x) x$assemblyaccession))
+    names <- unlist(lapply(summary_result, function(x) paste0(x$speciesname, ' ', x$assemblyname)))
+    descriptions <- unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')')))
+    if (for_reference) {
+        output <- data.frame(
+            ref_id = accessions,
+            ref_name = names,
+            ref_description = descriptions,
+            ref_ncbi_accession = accessions
+        )
+    } else {
+        output <- data.frame(
+            ncbi_accession = accessions,
+            sequence_type = 'assembly',
+            name = names,
+            description = descriptions
+        )
+    }
+    rownames(output) <- NULL
+    if (for_reference) {
+        # Keep one representative per unversioned assembly accession, preferring RefSeq.
+        core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+        is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
+        output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
+        output <- output[! duplicated(core_id), , drop = FALSE]
+    }
+    output
+}
+
+# Resolve SRA and assembly queries against their declared NCBI databases.
+unique_sra_queries <- unique(metadata_samp$ncbi_query[metadata_samp$query_db == 'sra'])
+unique_sra_queries <- unique_sra_queries[unique_sra_queries != '']
+ncbi_sra_result <- lapply(unique_sra_queries, get_ncbi_sra_runs)
+names(ncbi_sra_result) <- unique_sra_queries
+unique_assembly_queries <- unique(metadata_samp$ncbi_query[metadata_samp$query_db == 'assembly'])
+unique_assembly_queries <- unique_assembly_queries[unique_assembly_queries != '']
+ncbi_assembly_result <- lapply(unique_assembly_queries, get_ncbi_assembly_data)
+names(ncbi_assembly_result) <- unique_assembly_queries
+
+is_query_to_use <- has_query & metadata_samp$enabled
 new_sample_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
-    query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
-    # Remove any samples with abnormally low reads
-    query_data <- query_data[query_data$total_bases > 100000, ]
+    query_db <- metadata_samp$query_db[index]
+    query_data <- if (query_db == 'assembly') {
+        ncbi_assembly_result[[metadata_samp$ncbi_query[index]]]
+    } else {
+        ncbi_sra_result[[metadata_samp$ncbi_query[index]]]
+    }
+    if (query_db == 'sra') {
+        # Remove any samples with abnormally low reads
+        query_data <- query_data[query_data$total_bases > 100000, ]
+    }
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
     # subsample using ncbi_query_max
     query_max <- metadata_samp$ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
@@ -581,6 +697,7 @@ new_sample_data <- do.call(rbind, lapply(which(is_query_to_use), function(index)
     output$description <- paste0(metadata_samp$description[index], query_data$description)
     output$ncbi_accession <- query_data$ncbi_accession
     output$sequence_type <- query_data$sequence_type
+    output$query_db <- query_db
     rownames(output) <- NULL
     output
 }))
@@ -755,49 +872,9 @@ split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
 metadata_samp <- do.call(rbind, split_metadata)
 rownames(metadata_samp) <- NULL
 
-# Convert NCBI reference queries to a list of assembly accessions
-get_ncbi_genomes <- function(query) {
-    search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
-    if (length(search_result$ids) == 0) {
-        return(
-            data.frame(
-                ref_id = character(0),
-                ref_name = character(0),
-                ref_description = character(0),
-                ref_ncbi_accession = character(0)
-            )
-        )
-    }
-    starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
-    summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
-        rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
-    }))
-    if (length(search_result$ids) == 1) {
-        summary_result <- list(summary_result)
-    }
-    acc_ids <- unlist(lapply(summary_result, function(x) {
-        run_xml <- x$assemblyaccession[1]
-        gsub(run_xml, pattern = '.+ acc="(.+?)" .+', replacement = '\\1')
-    }))
-    output <- data.frame(
-        ref_id = unlist(lapply(summary_result, function(x) x$assemblyaccession)),
-        ref_name = unlist(lapply(summary_result, function(x) paste0(x$speciesname, ' ', x$assemblyname))),
-        ref_description = unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')'))),
-        ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
-    )
-    rownames(output) <- NULL
-
-    # Deduplicate by core assembly ID, preferring RefSeq (GCF_) and higher version numbers
-    core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
-    version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
-    is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
-    output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
-    output <- output[! duplicated(core_id), , drop = FALSE]
-    return(output)
-}
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
-ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
+ncbi_result <- lapply(unique_queries, function(query) get_ncbi_assembly_data(query, for_reference = TRUE))
 names(ncbi_result) <- unique_queries
 
 # Identify excluded accessions and their source row indices
@@ -1163,6 +1240,16 @@ type_replace_key <- lapply(undefined_accessions, lookup_sequence_type)
 names(type_replace_key) <- undefined_accessions
 is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
 metadata_samp$sequence_type[is_undefined] <- unlist(type_replace_key[metadata_samp$ncbi_accession[is_undefined]])
+
+assembly_with_read_pairing <- grepl('^assembly$', metadata_samp$sequence_type, ignore.case = TRUE) &
+    (is_present(metadata_samp$path_2) | grepl(';', metadata_samp$path, fixed = TRUE))
+if (any(assembly_with_read_pairing)) {
+    stop(call. = FALSE, paste0(
+        'Assembly samples require exactly one local path in the "path" column and cannot use ',
+        '"path_2" or semicolon-delimited paths (rows: ',
+        paste(which(assembly_with_read_pairing), collapse = ', '), ').'
+    ))
+}
 
 # Validate sequence_type column
 detected_seq_types <- lapply(seq_along(metadata_samp$sequence_type), function(index) {

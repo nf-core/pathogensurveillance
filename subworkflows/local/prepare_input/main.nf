@@ -7,6 +7,7 @@ include { SAMPLESHEET_CHECK      } from '../../../modules/local/samplesheet_chec
 include { SRATOOLS_FASTERQDUMP   } from '../../../modules/nf-core/sratools/fasterqdump'
 include { INITIAL_CLASSIFICATION } from '../../../modules/local/initial_classification'
 include { DOWNLOAD_ASSEMBLIES    } from '../../../modules/local/download_assemblies'
+include { DOWNLOAD_ASSEMBLIES as DOWNLOAD_SAMPLE_ASSEMBLIES } from '../../../modules/local/download_assemblies'
 include { FIND_ASSEMBLIES        } from '../../../modules/local/find_assemblies'
 include { PARSE_ASSEMBLIES       } from '../../../modules/local/parse_assemblies'
 include { PICK_ASSEMBLIES        } from '../../../modules/local/pick_assemblies'
@@ -74,13 +75,15 @@ workflow PREPARE_INPUT {
         .groupTuple(by: 0, sort: 'hash')
         .mix(sample_data_without_refs)
 
-    // Download FASTQ files if an NCBI accession is provided
-    sample_data_with_acc = sample_data
-        .filter{ sample_meta, ref_metas -> sample_meta.ncbi_accession}
+    // Download FASTQ files if an NCBI read accession is provided
+    sample_data_with_read_acc = sample_data
+        .filter{ sample_meta, ref_metas -> sample_meta.ncbi_accession && sample_meta.sequence_type != 'assembly'}
+    sample_data_with_assembly_acc = sample_data
+        .filter{ sample_meta, ref_metas -> sample_meta.ncbi_accession && sample_meta.sequence_type == 'assembly'}
     sample_data_without_acc = sample_data
         .filter{ sample_meta, ref_metas -> ! sample_meta.ncbi_accession }
         .map { sample_meta, ref_metas -> [sample_meta, ref_metas]}
-    ncbi_acc_sample_key = sample_data_with_acc
+    ncbi_acc_sample_key = sample_data_with_read_acc
         .map{ sample_meta, ref_metas -> [[id: sample_meta.ncbi_accession, single_end: sample_meta.single_end], sample_meta, ref_metas] }
     ncbi_acc = ncbi_acc_sample_key
         .map { ncbi_acc_meta, sample_meta, ref_metas ->
@@ -110,7 +113,7 @@ workflow PREPARE_INPUT {
     // Combine cached and downloaded reads
     all_reads = cached_reads.mix(downloaded_reads)
 
-    sample_data = all_reads
+    sample_data_from_reads = all_reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
             def paths = reads_path instanceof Collection ? reads_path : [reads_path]
@@ -123,12 +126,30 @@ workflow PREPARE_INPUT {
             }
             [sample_meta + [paths: paths, paths_1: paths_1, paths_2: paths_2, single_end: is_single], ref_metas]
         }
+
+    // Download assembly accessions using the same NCBI datasets implementation as references.
+    assembly_acc_sample_key = sample_data_with_assembly_acc
+        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }
+    sample_assembly_downloads = assembly_acc_sample_key
+        .map { sample_id, sample_meta, ref_metas -> [sample_meta + [id: sample_meta.sample_id], sample_meta.ncbi_accession] }
+        .unique()
+    DOWNLOAD_SAMPLE_ASSEMBLIES ( sample_assembly_downloads )
+    downloaded_sample_assemblies = DOWNLOAD_SAMPLE_ASSEMBLIES.out.sequence
+        .map { sample_meta, assembly_path -> [[id: sample_meta.id], assembly_path] }
+    sample_data_from_assemblies = assembly_acc_sample_key
+        .combine(downloaded_sample_assemblies, by: 0)
+        .map { sample_id, sample_meta, ref_metas, assembly_path ->
+            [sample_meta + [paths: [assembly_path], paths_1: [assembly_path], paths_2: [], single_end: true], ref_metas]
+        }
+    sample_data = sample_data_from_reads
         .mix(sample_data_without_acc)
+        .mix(sample_data_from_assemblies)
 
     // Concatenate multiple files per sample into a single file (SE) or pair (PE)
     sample_data_to_concat = sample_data
         .filter { sample_meta, ref_metas ->
-            sample_meta.paths.size() > (sample_meta.single_end ? 1 : 2)
+            sample_meta.sequence_type != 'assembly' &&
+                sample_meta.paths.size() > (sample_meta.single_end ? 1 : 2)
         }
     sample_data_single = sample_data
         .filter { sample_meta, ref_metas ->
@@ -166,26 +187,42 @@ workflow PREPARE_INPUT {
     BBMAP_SENDSKETCH (
         sample_data
             .map { sample_meta, ref_metas ->
-                [[id: sample_meta.sample_id], sample_meta.paths]
+                [[
+                    id: sample_meta.sample_id,
+                    sequence_type: sample_meta.sequence_type,
+                    report_group_ids: sample_meta.report_group_ids
+                ], sample_meta.paths]
             }
             .unique()
     )
 
-    // Extract the depth estimate from the sendsketch result and remove samples that dont have it
-    // or that have no hits (BBMap reports "No hits." on the second line)
-    sendsketch_depth = BBMAP_SENDSKETCH.out.hits
+    // Assemblies can produce valid SendSketch results without a Depth field. Raw read inputs
+    // still require Depth because it is used for read subsampling below.
+    sendsketch_blocks = BBMAP_SENDSKETCH.out.hits
         .splitText(limit: 4, by: 4)
-        .filter{sample_meta, header -> header =~ /Depth:/ && !(header =~ /No hits/)}
+    valid_sendsketch_blocks = sendsketch_blocks
+        .filter { sample_meta, header ->
+            !(header =~ /No hits/) &&
+                ((header =~ /Depth:/) || sample_meta.sequence_type == 'assembly')
+        }
+    sendsketch_depth = valid_sendsketch_blocks
         .map { sample_meta, header ->
             def match = header =~ /Depth: ([0-9.]+)/
-            [sample_meta, match[0][1]]
+            [[id: sample_meta.id], match ? match[0][1] : '1']
         }
+    valid_sendsketch_keys = valid_sendsketch_blocks
+        .map { sample_meta, header -> [[id: sample_meta.id], true] }
+        .unique()
     sendsketch_out = BBMAP_SENDSKETCH.out.hits
-        .combine(sendsketch_depth, by: 0) // acts as a filter
-        .map{ sample_meta, hit_data, depth -> [sample_meta, hit_data]}
+        .map { sample_meta, hit_data -> [[id: sample_meta.id], hit_data] }
+        .combine(valid_sendsketch_keys, by: 0)
+        .map { sample_meta, hit_data, valid -> [sample_meta, hit_data] }
     no_sketch_warnings =  BBMAP_SENDSKETCH.out.hits
         .splitText(limit: 4, by: 4)
-        .filter{sample_meta, header -> !(header =~ /Depth:/) || header =~ /No hits/}
+        .filter { sample_meta, header ->
+            (header =~ /No hits/) ||
+                (!(header =~ /Depth:/) && sample_meta.sequence_type != 'assembly')
+        }
         .map{ sample_meta, empty ->
             [sample_meta, [id: sample_meta.report_group_ids], null, "PREPARE_INPUT", "WARNING", "Not enough data to make an initial classification. Check size of input data."]
         }
@@ -438,6 +475,7 @@ workflow PREPARE_INPUT {
 
     // Count the number of reads and basepairs to decide whether not to subset reads
     samples_to_subset = sample_data
+        .filter { sample_meta -> sample_meta.sequence_type != 'assembly' }
         .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths, sample_meta.sendsketch_depth] }
         .unique()
         .filter { sample_id, fastq_paths, depth ->
@@ -445,7 +483,8 @@ workflow PREPARE_INPUT {
         }
     samples_to_not_subset = sample_data
         .filter { sample_meta ->
-            sample_meta.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
+            sample_meta.sequence_type == 'assembly' ||
+                sample_meta.sendsketch_depth.toFloat() <= params.max_depth.toFloat()
         }
     SEQKIT_STATS (
         samples_to_subset
