@@ -87,7 +87,7 @@ workflow PREPARE_INPUT {
     // Check for cached reads and split into cached / to-download
     ncbi_acc_cached = ncbi_acc.map { ncbi_acc_meta, sra ->
         def cache_dir = file("${params.data_dir}/reads")
-        def cached = cache_dir.exists() ? cache_dir.list().findAll { filename -> filename.startsWith(ncbi_acc_meta.id) && filename.endsWith('.fastq.gz') } : []
+        def cached = cache_dir.exists() ? cache_dir.list().findAll { filename -> filename.startsWith(ncbi_acc_meta.id) && filename.endsWith('.fastq.gz') }.sort() : []
         [ncbi_acc_meta, sra, cached]
     }
     ncbi_acc_with_cache = ncbi_acc_cached.filter { ncbi_acc_meta, sra, cached -> cached.size() > 0 }
@@ -491,7 +491,7 @@ def resolve_path_segment(String segment) {
     if (segment ==~ /^https?:\/\/.*/ && segment ==~ /.*[*?{}\[\]].*/) {
         exit 1, "ERROR: Glob patterns are not supported for HTTP/HTTPS URLs.\n${segment}"
     }
-    return files(segment).findAll { it.exists() }
+    return files(segment).findAll { it.exists() }.sort { it.toString() }
 }
 
 def create_sample_metadata_channel(LinkedHashMap sample_meta) {

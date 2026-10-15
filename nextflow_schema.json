@@ -222,10 +222,16 @@
                     "description": "A scaling factor to adjust the amount of RAM used by processes. The amount of RAM for each process will be multiplied by this value and rounded to the nearest integer in GB (minimum 1).",
                     "fa_icon": "fas fa-memory"
                 },
-                "skip_core_phylogeny": {
-                    "type": "boolean",
+                "skip_multigene_phylogeny": {
+                    "type": ["boolean", "string"],
                     "default": false,
-                    "description": "Skip the core genome phylogeny analysis. This will not affect downstream processes like MultiQC and the main report.",
+                    "description": "Skip the multigene phylogeny analysis for both prokaryotes and eukaryotes. This will not affect downstream processes like MultiQC and the main report.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_variant_analysis": {
+                    "type": ["boolean", "string"],
+                    "default": false,
+                    "description": "Skip read mapping, variant calling, SNP alignments, and SNP phylogenies. This will not affect other analyses or the main report.",
                     "fa_icon": "fas fa-forward"
                 }
             }

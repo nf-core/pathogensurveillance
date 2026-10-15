@@ -41,9 +41,6 @@
                 "downloads/assemblies/GCF_028736235.1.fasta.gz",
                 "downloads/assemblies/GCF_030389495.1.fasta.gz",
                 "downloads/assemblies/GCF_043386705.1.fasta.gz",
-                "downloads/databases",
-                "downloads/databases/busco",
-                "downloads/databases/busco/busco_downloads",
                 "downloads/reads",
                 "downloads/reads/SRR18850314_1.fastq.gz",
                 "downloads/reads/SRR18850314_2.fastq.gz",
@@ -114,9 +111,6 @@
                 "BBMAP_SENDSKETCH": {
                     "bbmap": 39.18
                 },
-                "BUSCO_DOWNLOAD": {
-                    "busco": "6.1.0"
-                },
                 "DOWNLOAD_ASSEMBLIES": {
                     "datasets": "18.31.0",
                     "samtools": 1.18,
@@ -172,6 +166,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.6"
         },
-        "timestamp": "2026-09-18T14:54:25.594246811"
+        "timestamp": "2026-09-29T08:34:00.558918806"
     }
 }

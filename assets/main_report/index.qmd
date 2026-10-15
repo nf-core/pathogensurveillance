@@ -346,13 +346,13 @@ The accuracy of this identification depends on the presence of close reference s
 multigene_tree_paths <- PathoSurveilR::find_ps_paths(params$inputs, target = 'multigene_tree', must_exist = F)
 has_multigene_tree <- ! is.null(multigene_tree_paths)
 
-gene_count_paths <- find_ps_paths(params$inputs, target = 'gene_counts', simplify = TRUE, must_exist = FALSE)
+gene_list_paths <- find_ps_paths(params$inputs, target = 'gene_lists', simplify = TRUE, must_exist = FALSE)
 
-if (!is.null(gene_count_paths) && nrow(gene_count_paths) > 0) {
-  gene_count_data <- find_ps_data(params$inputs, target='gene_counts', simplify=TRUE)
-  n_core_genes <- sum(gene_count_data$n_genes[gene_count_data$method=='core'], na.rm=TRUE)
+if (!is.null(gene_list_paths) && nrow(gene_list_paths) > 0) {
+  gene_list_data <- find_ps_data(params$inputs, target='gene_lists', simplify=TRUE)
+  n_core_genes <- nrow(gene_list_data[gene_list_data$source == 'core', , drop = FALSE])
 } else {
-  gene_count_data <- NULL; n_core_genes <- 0L
+  gene_list_data <- NULL; n_core_genes <- 0L
 }
 ```
 
@@ -365,14 +365,14 @@ cat(sprintf('
 ::: {.callout-tip collapse="true"}
 ## About this plot
 
-This is a multigene phylogeny of samples with reference genomes for context, inferred from %s core gene(s). It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
+This is a multigene phylogeny of samples with reference genomes for context, inferred from %s shared gene(s). It is the most robust identification provided by this pipeline, but taxonomic coverage is still limited by the availability of similar reference sequences.
 :::
 ', n_core_genes))
 ```
 
 ```{r, results='asis', eval = !has_multigene_tree}
 cat('
-Could not generate core genome phylogeny.
+Could not generate multigene phylogeny.
 ')
 ```
 
@@ -384,7 +384,7 @@ selected_ref_meta_table(params$inputs, target = 'contextual_refs', interactive =
 
 ```{r, results='asis', eval = !has_multigene_tree}
 cat('
-Could not generate core genome phylogeny.
+Could not generate multigene phylogeny.
 ')
 ```
 

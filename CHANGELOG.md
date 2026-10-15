@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Added support for multiple read files per sample. Files can be supplied as semicolon-delimited lists or as local/S3 glob patterns. Multiple files are concatenated into a single file (or a single forward/reverse pair for paired-end data) before downstream analysis.
 - Added option to use BWA3 for read alignment, increasing speed. This is controlled by the `--aligner` parameter used to switch between BWA and BWA3. 'bwa' must be used with non-AVX2-capable CPUs.
 - Added number of core genes used to infer multigene phylogeny to the report output.
+- Added `--skip_variant_analysis` to skip read mapping, variant calling, and SNP phylogeny while retaining other analyses and the main report. Both it and `--skip_multigene_phylogeny` can be used as bare command-line flags without specifying `true`.
 
 ## Changed
 
@@ -23,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Replaced deprecated `tabix/tabix` and `tabix/bgzip` nf-core modules with `htslib/bgziptabix` for VCF indexing. Reference `.gzi` indexes are now sourced directly from the upstream `samtools faidx` step instead of being regenerated. User-supplied reference FASTA files for variant calling must be gzip-compressed (`.fasta.gz`).
 - Software versions from local pipeline modules are now collected via Nextflow topic channels, matching the nf-core module convention. All tools are now included in `pipeline_info/version_info.yml`, including previously unreported ones.
 - Replaced the `sourmash/compare` nf-core module with `sourmash/pairwise` for faster sketch comparisons.
+- Unified core-genome and BUSCO phylogeny workflows into a single multigene phylogeny analysis. Reference selection and tree inference are now shared across both prokaryotic and eukaryotic samples.
 
 ### `Fixed`
 
@@ -39,6 +41,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - Handle numeric-only sample IDs by casting to string.
 - Fixed POCP and core/BUSCO phylogeny not being run for report subgroups (e.g. for samples only assigned to a species-level report group).
 - Fixed report error that occurred when both user-defined primary and contextual references are exclusive.
+- Generate reports even when no pipeline status messages are emitted.
+- Stabilized read ordering from cached downloads and glob patterns to improve resume behavior.
 
 ## 1.1.0 - 2026-01-30
 
@@ -47,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - `--max_parallel_downloads` parameter to control how many downloads can occur in parallel. This can be used in HPC/cloud contexts to raise the default maximum that is process-specific and generally below 10 to avoid exceeding API limits when running locally. The `cloud` profile was added to provide environment-specific defaults for this parameter and any other relevant ones in the future.
 - `--cpu_scale` parameter to scale the number of CPUs used by multithreaded processes. This allows users to adjust CPU usage across all multithreaded processes
   proportionally (e.g., setting to 0.5 will halve CPU usage, setting to 2 will double it).
-- `skip_core_phylogeny` parameter to skip the core phylogeny step if not required.
+- `skip_multigene_phylogeny` parameter to skip the multigene phylogeny step if not required.
 
 ### `Changed`
 

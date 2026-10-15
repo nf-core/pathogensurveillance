@@ -53,9 +53,10 @@ read_one <- function(path) {
     out <- read.table(path, header = TRUE, sep = '\t', comment.char = '', quote = '', check.names = FALSE)
     family_id <- gsub(basename(path), pattern = '.tsv', replacement = '', fixed = TRUE)
     if (nrow(out) > 0) {
-        family_taxon_id <- child_taxa_data$family_taxon_id[child_taxa_data$query_taxon_id == family_id]
-        if (length(family_taxon_id) == 0) family_taxon_id <- family_id
-        out$family <- taxa_found_data$name[taxa_found_data$taxon_id == family_taxon_id]
+        family_taxon_id <- child_taxa_data$family_taxon_id[match(family_id, child_taxa_data$query_taxon_id)]
+        if (is.na(family_taxon_id)) family_taxon_id <- family_id
+        family_name <- taxa_found_data$name[match(family_taxon_id, taxa_found_data$taxon_id)]
+        out$family <- rep(family_name, nrow(out))
     }
     out
 }
