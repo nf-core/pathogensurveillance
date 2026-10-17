@@ -2,8 +2,7 @@ nextflow_pipeline {
 
     name "Test pipeline with sample input queries"
     script "../main.nf"
-    tag "pipeline"
-    tag "input_test_full"
+    tag "input"
 
     test("ncbi query test") {
 
@@ -40,18 +39,4 @@ nextflow_pipeline {
             )
         }
     }
-
-    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("ncbi query test, stub") {
-        options "-stub"
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-    } */
 }

@@ -2,9 +2,7 @@ nextflow_pipeline {
 
     name "Test pipeline with multiple files per sample"
     script "../main.nf"
-    options "-resume"
-    tag "pipeline"
-    tag "input_test_full"
+    tag "input"
 
     test("multiple files per sample") {
 
@@ -13,6 +11,7 @@ nextflow_pipeline {
                 outdir = "$outputDir"
                 input = "${baseDir}/tests/test_multi_file_input.csv"
                 reference_data = "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/pathogensurveillance/samplesheets/test_refs.csv"
+
                 max_samples = 1
                 phylo_max_genes = 20
                 n_ref_closest = 1

@@ -36,6 +36,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     take:
     sample_data_tsv
     reference_data_tsv
+    report_data_tsv
 
     main:
 
@@ -44,7 +45,8 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     //
     PATHOGENSURVEILLANCE (
         sample_data_tsv,
-        reference_data_tsv
+        reference_data_tsv,
+        report_data_tsv
     )
 
     emit:
@@ -73,7 +75,8 @@ workflow {
         params.help,
         params.help_full,
         params.show_hidden,
-        params.reference_data
+        params.reference_data,
+        params.report_data
     )
 
     //
@@ -81,7 +84,8 @@ workflow {
     //
     NFCORE_PATHOGENSURVEILLANCE (
         PIPELINE_INITIALISATION.out.sample_data_tsv,
-        PIPELINE_INITIALISATION.out.reference_data_tsv
+        PIPELINE_INITIALISATION.out.reference_data_tsv,
+        PIPELINE_INITIALISATION.out.report_data_tsv
     )
 
     //

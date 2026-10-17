@@ -2,8 +2,7 @@ nextflow_pipeline {
 
     name "Test pipeline with test profile"
     script "../main.nf"
-    tag "pipeline"
-    tag "pipeline_test"
+    tag "dev"
 
     test("test profile") {
         when {
@@ -29,18 +28,4 @@ nextflow_pipeline {
             )
         }
     }
-
-    //todo: modify nf-core modules stubs to allow pipeline-level stub tests
-    /* test("test profile, stub") {
-        options "-stub"
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-        }
-
-        then {
-            assert workflow.success
-        }
-    } */
 }

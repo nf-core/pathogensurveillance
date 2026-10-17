@@ -34,6 +34,7 @@ workflow PIPELINE_INITIALISATION {
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
     reference_data    //  string: Path to reference data samplesheet
+    report_data       //  string: Path to report metadata sheet
 
     main:
 
@@ -105,6 +106,9 @@ workflow PIPELINE_INITIALISATION {
     if (params.reference_data) {
         file(params.reference_data, checkIfExists: true)
     }
+    if (params.report_data) {
+        file(params.report_data, checkIfExists: true)
+    }
     if (params.multiqc_config) {
         file(params.multiqc_config, checkIfExists: true)
     }
@@ -123,10 +127,16 @@ workflow PIPELINE_INITIALISATION {
     } else {
         reference_data_tsv = []
     }
+    if (params.report_data) {
+        report_data_tsv = file(params.report_data)
+    } else {
+        report_data_tsv = []
+    }
 
     emit:
     sample_data_tsv    = sample_data_tsv
     reference_data_tsv = reference_data_tsv
+    report_data_tsv    = report_data_tsv
 }
 
 /*
