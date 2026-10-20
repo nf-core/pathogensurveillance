@@ -3,7 +3,7 @@
     "outputs": {
         "shared_genes": {
             "name": "Shared gene alignments",
-            "description": "Aligned sequences for each gene shared amoung a group of organisms in FASTA format",
+            "description": "Aligned sequences for each gene shared among a group of organisms in FASTA format",
             "category": "Multigene phylogeny",
             "primary": true,
             "parsers": {
@@ -11,9 +11,9 @@
             },
             "sources": [
                 {
-                    "path": "shared_genes",
-                    "pattern": "^(.+?)/(.+?)\\.aligned\\.fas$",
-                    "capture_groups": ["method", "gene_id"]
+                    "path": "shared_genes/sequences",
+                    "pattern": "^(.+?)--(.+?)--cluster_(.+?)--(.+?)\\.fas$",
+                    "capture_groups": ["report_id", "source", "cluster_id", "gene_id"]
                 }
             ]
         },
@@ -391,9 +391,9 @@
                 }
             ]
         },
-        "gene_counts": {
-            "name": "Gene counts",
-            "description": "Number of core genes used for multigene phylogenies",
+        "gene_lists": {
+            "name": "Gene lists",
+            "description": "Lists of genes used for each multigene phylogeny cluster",
             "category": "Multigene phylogeny",
             "primary": false,
             "parsers": {
@@ -404,9 +404,9 @@
             },
             "sources": [
                 {
-                    "path": "gene_counts",
-                    "pattern": "^(core|busco)_gene_count\\.tsv$",
-                    "capture_groups": ["method"]
+                    "path": "shared_genes/gene_metadata",
+                    "pattern": "^(.+?)--(.+?)--cluster_(.+?)_gene_list\\.tsv$",
+                    "capture_groups": ["report_id", "source", "cluster_id"]
                 }
             ]
         },
@@ -831,25 +831,14 @@
             "sources": [
                 {
                     "path": "reference_data/selected",
-                    "pattern": "^(.+?)_core_references\\.tsv$",
-                    "capture_groups": ["report_id"],
-                    "constants": {
-                        "method": "core"
-                    }
-                },
-                {
-                    "path": "reference_data/selected",
-                    "pattern": "^(.+?)_busco_references\\.tsv$",
-                    "capture_groups": ["report_id"],
-                    "constants": {
-                        "method": "busco"
-                    }
+                    "pattern": "^(.+?)_contextual_references\\.tsv$",
+                    "capture_groups": ["report_id"]
                 }
             ]
         },
         "mapping_refs": {
             "name": "Mapping reference IDs",
-            "description": "IDs of references selected for multigene phylogenies in TSV format",
+            "description": "IDs of references selected for variant analysis in TSV format",
             "category": "Variant analysis",
             "primary": false,
             "parsers": {
@@ -938,7 +927,7 @@
         },
         "multigene_tree": {
             "name": "Multigene phylogenetic trees",
-            "description": "Trees infered from multigene phylogeny in Newick format",
+            "description": "Trees inferred from shared genes in Newick format",
             "category": "Multigene phylogeny",
             "primary": true,
             "parsers": {
@@ -946,20 +935,9 @@
             },
             "sources": [
                 {
-                    "path": "trees/core",
-                    "pattern": "^(.+?)--(.+?)\\.treefile$",
-                    "capture_groups": ["report_id", "cluster_id"],
-                    "constants": {
-                        "method": "core"
-                    }
-                },
-                {
-                    "path": "trees/busco",
-                    "pattern": "^(.+?)--(.+?)\\.treefile$",
-                    "capture_groups": ["report_id", "cluster_id"],
-                    "constants": {
-                        "method": "busco"
-                    }
+                    "path": "trees/multigene",
+                    "pattern": "^(.+?)--(.+?)--cluster_(.+?)\\.treefile$",
+                    "capture_groups": ["report_id", "method", "cluster_id"]
                 }
             ]
         },

@@ -1,0 +1,20 @@
+Changes in component 'nf-core/bakta/baktadbdownload'
+Changes in 'bakta/baktadbdownload/main.nf':
+--- modules/nf-core/bakta/baktadbdownload/main.nf
++++ modules/nf-core/bakta/baktadbdownload/main.nf
+@@ -23,6 +23,8 @@
+     bakta_db \\
+         download \\
+         ${args}
++
++    amrfinder_update --force_update --database db*
+     """
+ 
+     stub:
+
+'modules/nf-core/bakta/baktadbdownload/environment.yml' is unchanged
+'modules/nf-core/bakta/baktadbdownload/meta.yml' is unchanged
+'modules/nf-core/bakta/baktadbdownload/tests/nextflow.config' is unchanged
+'modules/nf-core/bakta/baktadbdownload/tests/main.nf.test' is unchanged
+'modules/nf-core/bakta/baktadbdownload/tests/main.nf.test.snap' is unchanged
+************************************************************

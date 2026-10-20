@@ -204,17 +204,23 @@ workflow VARIANT_ANALYSIS {
 
     phylogeny_input = align_with_samp_meta_enough
         .map { meta, alignment ->
-            [meta, alignment, []]
+            def tree_meta = meta + [id: "${meta.group.id}--${meta.ref.id}"]
+            [tree_meta, alignment, []]
         }
     IQTREE_SNP ( phylogeny_input, [], [], [], [], [], [], [], [], [], [], [], [] )
     phylogeny = IQTREE_SNP.out.phylogeny.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] } // report_meta, ref_meta, tree
     snp_align = VCF_TO_SNP_ALIGN.out.fasta.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] }
     vcf = CALL_VARIANTS.out.vcf.map{ meta -> [meta[0].group, meta[0].ref, meta[1]] }
 
-    results = CALL_VARIANTS.out.vcf // ref+report_meta, vcf
-        .combine(VCF_TO_SNP_ALIGN.out.fasta, by:0) // ref+report_meta, vcf, align
-        .join(IQTREE_SNP.out.phylogeny, remainder:true, by:0) // ref+report_meta, vcf, align, tree
-        .map{ meta -> [meta[0].group, meta[0].ref] + meta[1..3] } // report_meta, ref_meta, vcf, align, tree
+    results = vcf
+        .join(snp_align, remainder: true, by: [0,1])
+        .join(phylogeny, remainder: true, by: [0,1])
+        .map { row ->
+            def out = [row[0], row[1], row[2]]
+            out << (row.size() > 3 ? row[3] : null)
+            out << (row.size() > 4 ? row[4] : null)
+            out
+        } // report_meta, ref_meta, vcf, align, tree
 
     emit:
     picard_dict   = REFERENCE_INDEX.out.picard_dict

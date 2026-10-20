@@ -25,7 +25,8 @@ nextflow_pipeline {
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
+            // Test snapshots with NCBI queries are non-deterministic amd require further filtering
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/**/*', 'gene_lists/*', 'trees/**/*']).grep { !(it =~ /(?:[A-Z]{3}\d+|GC[AF][_\d.]*|reference_data\/considered\/\d+\.(?:json|tsv))/) }
 
             assertAll(
                 { assert workflow.success},

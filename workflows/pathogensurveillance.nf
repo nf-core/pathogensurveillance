@@ -6,11 +6,10 @@
 
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { PREPARE_INPUT               } from '../subworkflows/local/prepare_input'
-include { CORE_GENOME_PHYLOGENY       } from '../subworkflows/local/core_genome_phylogeny'
+include { MULTIGENE_PHYLOGENY         } from '../subworkflows/local/multigene_phylogeny'
 include { VARIANT_ANALYSIS            } from '../subworkflows/local/variant_analysis'
 include { SKETCH_COMPARISON           } from '../subworkflows/local/sketch_comparison'
 include { GENOME_ASSEMBLY             } from '../subworkflows/local/genome_assembly'
-include { BUSCO_PHYLOGENY             } from '../subworkflows/local/busco_phylogeny'
 include { INITIAL_QC_CHECKS           } from '../subworkflows/local/initial_qc_checks'
 include { RENDER_REPORT                 } from '../modules/local/render_report'
 include { DOWNLOAD_ASSEMBLIES         } from '../modules/local/download_assemblies'
@@ -62,40 +61,40 @@ workflow PATHOGENSURVEILLANCE {
     INITIAL_QC_CHECKS ( PREPARE_INPUT.out.sample_data )
     messages = messages.mix(INITIAL_QC_CHECKS.out.messages)
 
-    // Call variants and create SNP-tree and minimum spanning nextwork
-    VARIANT_ANALYSIS (
-        PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.pairwise_csv
-    )
-    messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+    // Call variants and create SNP-tree and minimum spanning network
+    if (!params.skip_variant_analysis.toString().toBoolean()) {
+        VARIANT_ANALYSIS (
+            PREPARE_INPUT.out.sample_data,
+            SKETCH_COMPARISON.out.pairwise_csv
+        )
+        messages = messages.mix(VARIANT_ANALYSIS.out.messages)
+        variant_mapping_ref = VARIANT_ANALYSIS.out.mapping_ref
+        variant_snp_align = VARIANT_ANALYSIS.out.snp_align
+        variant_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+    } else {
+        variant_mapping_ref = channel.empty()
+        variant_snp_align = channel.empty()
+        variant_phylogeny = channel.empty()
+    }
 
-    // Create core gene phylogeny for bacterial samples
-    if (!params.skip_core_phylogeny) {
-        CORE_GENOME_PHYLOGENY (
+    // Multigene phylogeny for prokaryotes (core genes) and eukaryotes (BUSCO genes)
+    if (!params.skip_multigene_phylogeny.toString().toBoolean()) {
+        MULTIGENE_PHYLOGENY (
             PREPARE_INPUT.out.sample_data,
             SKETCH_COMPARISON.out.pairwise_csv,
             GENOME_ASSEMBLY.out.scaffolds
         )
-        messages  = messages.mix(CORE_GENOME_PHYLOGENY.out.messages)
-        core_selected_refs = CORE_GENOME_PHYLOGENY.out.selected_refs
-        core_pocp = CORE_GENOME_PHYLOGENY.out.pocp
-        core_phylogeny = CORE_GENOME_PHYLOGENY.out.phylogeny
-        core_gene_counts = CORE_GENOME_PHYLOGENY.out.gene_count
+        messages = messages.mix(MULTIGENE_PHYLOGENY.out.messages)
+        selected_refs  = MULTIGENE_PHYLOGENY.out.selected_refs
+        core_pocp      = MULTIGENE_PHYLOGENY.out.pocp
+        phylogeny      = MULTIGENE_PHYLOGENY.out.phylogeny
+        gene_lists     = MULTIGENE_PHYLOGENY.out.gene_lists
     } else {
-        core_selected_refs = channel.empty()
-        core_pocp = channel.empty()
-        core_phylogeny = channel.empty()
-        core_gene_counts = channel.empty()
+        selected_refs  = channel.empty()
+        core_pocp      = channel.empty()
+        phylogeny      = channel.empty()
+        gene_lists     = channel.empty()
     }
-
-    // Read2tree BUSCO phylogeny for eukaryotes
-    BUSCO_PHYLOGENY (
-        PREPARE_INPUT.out.sample_data,
-        SKETCH_COMPARISON.out.pairwise_csv,
-        GENOME_ASSEMBLY.out.scaffolds
-    )
-    messages = messages.mix(BUSCO_PHYLOGENY.out.messages)
-    busco_gene_counts = BUSCO_PHYLOGENY.out.gene_count
 
     // Collate and save software versions
     def topic_versions_all = channel.topic("versions")
@@ -259,12 +258,12 @@ workflow PATHOGENSURVEILLANCE {
         }
 
     // Gather SNP alignments from the variant analysis
-    snp_align = VARIANT_ANALYSIS.out.snp_align
+    snp_align = variant_snp_align
         .map { report_meta, ref_meta, fasta -> [report_meta, fasta] }
         .groupTuple(sort: 'hash')
 
     // Gather phylogenies from the variant analysis
-    snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+    snp_phylogeny = variant_phylogeny
         .map { report_meta, ref_meta, tree -> [report_meta, tree] }
         .groupTuple(sort: 'hash')
 
@@ -275,17 +274,10 @@ workflow PATHOGENSURVEILLANCE {
             [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
         .map { file ->[[id: file.getSimpleName()], file]}
-        .ifEmpty([])
 
-    // Gather gene counts for report
-    core_gene_counts_grouped = core_gene_counts
-        .map { report_meta, tsv -> [report_meta, tsv] }
-        .groupTuple(sort: 'hash')
-    busco_gene_counts_grouped = busco_gene_counts
-        .map { report_meta, tsv -> [report_meta, tsv] }
-        .groupTuple(sort: 'hash')
-    gene_counts = core_gene_counts_grouped
-        .mix(busco_gene_counts_grouped)
+    // Gather gene lists for report
+    gene_lists_grouped = gene_lists
+        .map { report_meta, tsvs -> [report_meta, tsvs] }
         .groupTuple(sort: 'hash')
         .map { report_meta, tsvs -> [report_meta, tsvs.flatten().unique()] }
 
@@ -299,20 +291,17 @@ workflow PATHOGENSURVEILLANCE {
         .join(ncbi_ref_meta, remainder: true)
         .join(selected_ref_meta, remainder: true)
         .join(SKETCH_COMPARISON.out.pairwise_csv, remainder: true)
-        .join(VARIANT_ANALYSIS.out.mapping_ref, remainder: true)
+        .join(variant_mapping_ref, remainder: true)
         .join(snp_align, remainder: true)
         .join(snp_phylogeny, remainder: true)
-        .join(core_selected_refs, remainder: true)
+        .join(selected_refs, remainder: true)
         .join(core_pocp, remainder: true)
-        .join(core_phylogeny, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.selected_refs, remainder: true)
-        .join(BUSCO_PHYLOGENY.out.tree, remainder: true)
+        .join(phylogeny, remainder: true)
+        .join(gene_lists_grouped, remainder: true)
         .join(MULTIQC.out.report, remainder: true)
         .join(group_messages, remainder: true)
-        .join(gene_counts, remainder: true)
         .filter{ item -> item[0] != null }
-        .map{ item -> item.size() == 17 ? item + [null] : item }
-        .filter{ item -> item.size() == 18 }
+        .filter{ item -> item.size() == 16 }
         .map{ item -> item.collect{ element -> element ?: [] } }
         .combine(collated_versions)
 

@@ -18,13 +18,13 @@ nextflow_pipeline {
                 n_ref_strains = '1'
                 n_ref_species = '3'
                 n_ref_genera = '3'
-                skip_core_phylogeny = false
+                skip_multigene_phylogeny = false
             }
         }
 
         then {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
-            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/core/*'])
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, sort: true, ignore: ['pipeline_info/*.{html,json,txt}', 'shared_genes/**/*', 'gene_lists/*', 'trees/**/*'])
 
             assertAll(
 		        { assert workflow.success },

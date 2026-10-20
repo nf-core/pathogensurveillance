@@ -175,6 +175,8 @@ nextflow run nf-core/pathogensurveillance -profile docker -resume --input ./samp
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
+Use `--skip_variant_analysis` to skip read mapping, variant calling, SNP alignments, and SNP phylogenies while continuing other analyses and generating the main report. Variant analysis runs by default. Both `--skip_variant_analysis` and `--skip_multigene_phylogeny` can be used as bare flags without specifying `true`; passing `false` keeps the corresponding analysis enabled.
+
 Note that the pipeline will create the following files in your working directory:
 
 ```bash
@@ -297,9 +299,9 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 ### `-resume`
 
-Specify this when restarting a pipeline. Nextflow will use cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously. For input to be considered the same, not only the names must be identical but the files' contents as well. For more info about this parameter, see [this blog post](https://www.nextflow.io/blog/2019/demystifying-nextflow-resume.html).
+Specify this when restarting a pipeline. Nextflow reuses completed tasks from the resumed session when their task hashes and work-directory outputs still match. Task hashes include the session ID, process script, and inputs; by default, input files are identified by path, size, and modification time. For more information, see [Nextflow's caching and resuming guide](https://www.nextflow.io/docs/latest/cache-and-resume.html).
 
-You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
+By default, `-resume` uses the most recent session, even if that run used a different test profile or script. To resume an earlier run, use its session ID from `nextflow log`, for example `nextflow run main.nf -resume <session-id> -profile docker,test_bacteria --outdir results`. Keep the same work directory and avoid modifying input files.
 
 ### `-c`
 
