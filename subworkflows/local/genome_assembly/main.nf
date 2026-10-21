@@ -22,6 +22,9 @@ workflow GENOME_ASSEMBLY {
     messages = channel.empty()
     parsed_sample_data = sample_data
         .map{ sample_meta -> [[id: sample_meta.sample_id, single_end: sample_meta.single_end, domain: sample_meta.domain, type: sample_meta.sequence_type], [id: sample_meta.report_group_ids], sample_meta.paths] }
+    input_assemblies = sample_data
+        .filter { sample_meta -> sample_meta.sequence_type == 'assembly' }
+        .map { sample_meta -> [[id: sample_meta.sample_id], sample_meta.paths[0]] }
     all_samples = parsed_sample_data
         .map{ sample_meta, report_meta, read_paths ->
             [sample_meta + [reads_size_gb: readsSizeGB(read_paths)], read_paths]
@@ -32,7 +35,7 @@ workflow GENOME_ASSEMBLY {
     nanopore_reads = all_samples.filter { meta, paths -> meta.type == "nanopore" }
     pacbio_reads = all_samples.filter { meta, paths -> meta.type == "pacbio" }
     other_reads = all_samples.filter { meta, paths ->
-        meta.type != "illumina" && meta.type != "bgiseq" && meta.type != "nanopore" && meta.type != "pacbio"
+        meta.type != "illumina" && meta.type != "bgiseq" && meta.type != "nanopore" && meta.type != "pacbio" && meta.type != 'assembly'
     }
 
     fastp_input = short_reads
@@ -100,6 +103,7 @@ workflow GENOME_ASSEMBLY {
     assemblies = SPADES.out.scaffolds
         .mix(FLYE_NANOPORE.out.fasta)
         .mix(FLYE_PACBIO.out.fasta)
+        .mix(input_assemblies)
         .filter { sample_meta, path -> path && path.size() > 0 }  // Filter out empty assemblies
         .map { sample_meta, path ->  // remove the "single_end" in the sample meta data so that it is just the ID like most of the pipeline
             [[id: sample_meta.id], path]

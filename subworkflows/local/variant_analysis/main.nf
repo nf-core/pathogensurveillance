@@ -16,8 +16,16 @@ workflow VARIANT_ANALYSIS {
     main:
     messages = channel.empty()
 
+    assembly_samples = original_sample_data
+        .filter { sample_meta -> sample_meta.sequence_type == 'assembly' }
+        .map { sample_meta ->
+            [sample_meta, [id: sample_meta.report_group_ids], null, "VARIANT_ANALYSIS", "WARNING", "Sample excluded from variant calling because its input is an assembly."]
+        }
+    messages = messages.mix(assembly_samples)
+
     // Remove samples belonging to groups with only one sample
     grouped_sample_data = original_sample_data
+        .filter { sample_meta -> sample_meta.sequence_type != 'assembly' }
         .map{ sample_meta -> [[id: sample_meta.report_group_ids], sample_meta] }
         .groupTuple(by: 0)
     sample_data = grouped_sample_data

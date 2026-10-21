@@ -68,13 +68,13 @@ workflow PATHOGENSURVEILLANCE {
             SKETCH_COMPARISON.out.pairwise_csv
         )
         messages = messages.mix(VARIANT_ANALYSIS.out.messages)
-        variant_mapping_ref = VARIANT_ANALYSIS.out.mapping_ref
         variant_snp_align = VARIANT_ANALYSIS.out.snp_align
-        variant_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+        variant_snp_phylogeny = VARIANT_ANALYSIS.out.phylogeny
+        variant_mapping_ref = VARIANT_ANALYSIS.out.mapping_ref
     } else {
-        variant_mapping_ref = channel.empty()
         variant_snp_align = channel.empty()
-        variant_phylogeny = channel.empty()
+        variant_snp_phylogeny = channel.empty()
+        variant_mapping_ref = channel.empty()
     }
 
     // Multigene phylogeny for prokaryotes (core genes) and eukaryotes (BUSCO genes)
@@ -224,7 +224,11 @@ workflow PATHOGENSURVEILLANCE {
     // Gather sendsketch signatures and taxa found
     sendsketch_files = PREPARE_INPUT.out.sample_data
         .map{ sample_meta -> [[id: sample_meta.sample_id], [id: sample_meta.report_group_ids]] }
-        .combine(PREPARE_INPUT.out.sendsketch, by: 0)
+        .combine(
+            PREPARE_INPUT.out.sendsketch
+                .map { sample_meta, sendsketch -> [[id: sample_meta.id], sendsketch] },
+            by: 0
+        )
         .map{ sample_meta, report_meta, sendsketch -> [report_meta, sendsketch] }
         .unique()
     sendsketch_taxa = PREPARE_INPUT.out.sample_data
@@ -263,17 +267,28 @@ workflow PATHOGENSURVEILLANCE {
         .groupTuple(sort: 'hash')
 
     // Gather phylogenies from the variant analysis
-    snp_phylogeny = variant_phylogeny
+    snp_phylogeny = variant_snp_phylogeny
         .map { report_meta, ref_meta, tree -> [report_meta, tree] }
         .groupTuple(sort: 'hash')
 
-    // Gather status messages for each group
-    group_messages = messages
+    // Gather status messages for each group. Keep an explicit report-group key when there
+    // are no messages so the positional report input tuple does not shift fields.
+    message_files = messages
         .unique()
         .collectFile(keepHeader: true, skip: 1) { sample_meta, report_meta, ref_meta, workflow, level, message ->
-            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"reference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
+            [ "${report_meta.id}.tsv", "\"report_id\"\t\"sample_id\"\t\"rassets/report_templates/pathsurveil_report/_quarto.ymleference_id\"\t\"workflow\"\t\"level\"\t\"message\"\n\"${report_meta.id}\"\t\"${sample_meta ? sample_meta.id : ''}\"\t\"${ref_meta ? ref_meta.id : ''}\"\t\"${workflow}\"\t\"${level}\"\t\"${message}\"\n" ]
         }
         .map { file ->[[id: file.getSimpleName()], file]}
+    report_groups = PREPARE_INPUT.out.sample_data
+        .map { sample_meta -> [[id: sample_meta.report_group_ids]] }
+        .unique()
+    group_messages = report_groups
+        .join(message_files, by: 0, remainder: true)
+        .map { entry ->
+            def report_meta = entry instanceof List ? entry[0] : entry
+            def message_file = entry instanceof List && entry.size() > 1 ? entry[1] : null
+            [report_meta, message_file]
+        }
 
     // Gather gene lists for report
     gene_lists_grouped = gene_lists
