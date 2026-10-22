@@ -1,4 +1,5 @@
 include { BWA_MEM         } from '../../../modules/nf-core/bwa/mem'
+include { BWAMEM3_MEM     } from '../../../modules/nf-core/bwamem3/mem/main'
 include { PICARD_FORMAT   } from '../../../modules/local/picard_format'
 include { SAMTOOLS_INDEX  } from '../../../modules/nf-core/samtools/index'
 
@@ -9,7 +10,6 @@ workflow ALIGN_READS {
 
     main:
 
-    versions = channel.empty()
 
     // Addd composite ID for read/ref combos to input
     samp_ref_combo = ch_input
@@ -27,8 +27,14 @@ workflow ALIGN_READS {
     ch_bwa_index = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
         [combined_meta, bam_index]
     }
-    BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
-    versions = versions.mix(BWA_MEM.out.versions)
+
+    if (params.aligner == 'bwamem3') {
+        BWAMEM3_MEM ( ch_reads, ch_bwa_index, [[], []], false)
+        aligner_out = BWAMEM3_MEM.out.aligned
+    } else {
+        BWA_MEM ( ch_reads, ch_bwa_index, [[], []], false )
+        aligner_out = BWA_MEM.out.bam
+    }
 
     // Run a series of picard commands to sort and filter variants
     ch_reference = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
@@ -37,27 +43,24 @@ workflow ALIGN_READS {
     ch_ref_index = samp_ref_combo.map { combined_meta, meta, fastqs, ref_meta, reference, ref_index, bam_index ->
         [combined_meta, ref_index]
     }
-    picard_input = BWA_MEM.out.bam
+    picard_input = aligner_out
         .join(ch_reference)
         .join(ch_ref_index)
     PICARD_FORMAT ( picard_input )
-    versions = versions.mix(PICARD_FORMAT.out.versions)
 
     SAMTOOLS_INDEX ( PICARD_FORMAT.out.bam )
-    versions = versions.mix(SAMTOOLS_INDEX.out.versions)
 
     // Revet combined metas back to seperate ones for sample and reference
     out_bam = PICARD_FORMAT.out.bam
         .map { combined_meta, bam ->
             [combined_meta.sample, combined_meta.ref, bam]
         }
-    out_csi = SAMTOOLS_INDEX.out.csi
-        .map { combined_meta, csi ->
-            [combined_meta.sample, combined_meta.ref, csi]
+    out_csi = SAMTOOLS_INDEX.out.index
+        .map { combined_meta, index ->
+            [combined_meta.sample, combined_meta.ref, index]
         }
 
     emit:
     bam      = out_bam        // channel: [ val(meta), val(ref_meta), [ bam ] ]
     csi      = out_csi        // channel: [ val(meta), val(ref_meta), [ csi ] ]
-    versions = versions    // channel: [ versions.yml ]
 }

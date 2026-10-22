@@ -2,6 +2,49 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.2.0 - Current
+
+## Added
+
+- Added support for multiple read files per sample. Files can be supplied as semicolon-delimited lists or as local/S3 glob patterns. Multiple files are concatenated into a single file (or a single forward/reverse pair for paired-end data) before downstream analysis.
+- Added option to use BWA3 for read alignment, increasing speed. This is controlled by the `--aligner` parameter used to switch between BWA and BWA3. 'bwa' must be used with non-AVX2-capable CPUs.
+- Added number of core genes used to infer multigene phylogeny to the report output.
+- Added `--skip_variant_analysis` to skip read mapping, variant calling, and SNP phylogeny while retaining other analyses and the main report. Both it and `--skip_multigene_phylogeny` can be used as bare command-line flags without specifying `true`.
+
+## Changed
+
+- Sample assembly downloads are now reused from `--data_dir/assemblies` across runs.
+- Removed `TRIM_AND_SKETCH` step. Samples that fail assembly are no longer sketched from raw reads and are instead excluded from sketch-based comparisons and downstream analyses that rely on them. Warnings for failed assemblies remain in the report output.
+- Assembly RAM is now calculated more accurately to avoid retrying to increase RAM
+- Increase number of reference assemblies downloaded by default
+- Added `scaledRam` helper function and `--ram_scale` parameter to control RAM allocation across processes, analogous to the existing CPU scaling functionality.
+- Removed `--max_cpus` and `--max_ram` parameters. Resource ceilings should now be handled by `resourceLimits` in a custom config/profile.
+- Replaced `storeDir` process directive with workflow-level caching logic to avoid incompatibility with eval statements in topic channels (https://github.com/nextflow-io/nextflow/issues/5785).
+- When there are fewer unique strains than `n_ref_strains`, the pipeline now makes up the difference with more examples of the same strain. This ensure that multiple representatives of each species-level taxon are downloaded when strain-level info is not present.
+- Reference assemblies are now downloaded in parallel from NCBI.
+- Replaced deprecated `tabix/tabix` and `tabix/bgzip` nf-core modules with `htslib/bgziptabix` for VCF indexing. Reference `.gzi` indexes are now sourced directly from the upstream `samtools faidx` step instead of being regenerated. User-supplied reference FASTA files for variant calling must be gzip-compressed (`.fasta.gz`).
+- Software versions from local pipeline modules are now collected via Nextflow topic channels, matching the nf-core module convention. All tools are now included in `pipeline_info/version_info.yml`, including previously unreported ones.
+- Replaced the `sourmash/compare` nf-core module with `sourmash/pairwise` for faster sketch comparisons.
+- Unified core-genome and BUSCO phylogeny workflows into a single multigene phylogeny analysis. Reference selection and tree inference are now shared across both prokaryotic and eukaryotic samples.
+
+### `Fixed`
+
+- Modified Flye module to detect "No disjointigs were assembled" error and exit gracefully instead of retrying.
+- Fixed errors when using "excluded" NCBI accessions.
+- Fixed NCBI timeout errors that occurred when querying large reference families.
+- Handle samples that return no sendsketch results.
+- Prevent PIRATE and BUSCO phylogeny analyses from running on references associated with samples whose assemblies failed.
+- Prevent `SOURMASH_PAIRWISE` from running on report groups that have no successful assemblies.
+- Fixed intermittent PIRATE 'input file name collision' error
+- Fixed non-deterministic selection of downloaded reference assemblies.
+- Reference NCBI assemblies excluded by the user are no longer downloaded.
+- When multiple assembly versions exist for the same organism (e.g. GCA_000230695.1 vs GCA_000230695.3, or GCA vs GCF), only the best version is retained. RefSeq (GCF) is preferred over GenBank (GCA), and higher version numbers are preferred.
+- Handle numeric-only sample IDs by casting to string.
+- Fixed POCP and core/BUSCO phylogeny not being run for report subgroups (e.g. for samples only assigned to a species-level report group).
+- Fixed report error that occurred when both user-defined primary and contextual references are exclusive.
+- Generate reports even when no pipeline status messages are emitted.
+- Stabilized read ordering from cached downloads and glob patterns to improve resume behavior.
+
 ## 1.1.0 - 2026-01-30
 
 ### `Added`
@@ -9,7 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - `--max_parallel_downloads` parameter to control how many downloads can occur in parallel. This can be used in HPC/cloud contexts to raise the default maximum that is process-specific and generally below 10 to avoid exceeding API limits when running locally. The `cloud` profile was added to provide environment-specific defaults for this parameter and any other relevant ones in the future.
 - `--cpu_scale` parameter to scale the number of CPUs used by multithreaded processes. This allows users to adjust CPU usage across all multithreaded processes
   proportionally (e.g., setting to 0.5 will halve CPU usage, setting to 2 will double it).
-- `skip_core_phylogeny` parameter to skip the core phylogeny step if not required.
+- `skip_multigene_phylogeny` parameter to skip the multigene phylogeny step if not required.
 
 ### `Changed`
 

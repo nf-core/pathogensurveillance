@@ -1,0 +1,19 @@
+Changes in component 'nf-core/bbmap/sendsketch'
+'modules/nf-core/bbmap/sendsketch/environment.yml' is unchanged
+Changes in 'bbmap/sendsketch/main.nf':
+--- modules/nf-core/bbmap/sendsketch/main.nf
++++ modules/nf-core/bbmap/sendsketch/main.nf
+@@ -12,7 +12,7 @@
+ 
+     output:
+     tuple val(meta), path("*.txt")  , emit: hits
+-    tuple val("${task.process}"), val('bbmap'), eval('bbversion.sh | grep -v "Duplicate cpuset"'), emit: versions_bbmap, topic: versions
++    tuple val("${task.process}"), val('bbmap'), eval('bbversion.sh | grep -E "^[0-9]"'), emit: versions_bbmap, topic: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+
+'modules/nf-core/bbmap/sendsketch/meta.yml' is unchanged
+'modules/nf-core/bbmap/sendsketch/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/bbmap/sendsketch/tests/main.nf.test' is unchanged
+************************************************************

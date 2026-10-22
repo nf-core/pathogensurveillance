@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/main/assets/schema_report_data.json",
+    "title": "nf-core/pathogensurveillance pipeline - params.report_data schema",
+    "description": "Schema for the file provided with params.report_data",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "report_group_ids": {
+                "type": ["string", "integer"]
+            },
+            "template": {
+                "type": "string",
+                "default": "pathsurveil_report",
+                "errorMessage": "The `template` column must be the name of a template directory included with the pipeline (resolved under assets/report_templates/) or a path to a custom template directory."
+            },
+            "render_target": {
+                "type": "string",
+                "default": null
+            }
+        }
+    }
+}

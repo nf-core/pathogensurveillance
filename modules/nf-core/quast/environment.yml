@@ -5,3 +5,4 @@ channels:
   - bioconda
 dependencies:
   - bioconda::quast=5.3.0
+  - conda-forge::setuptools=75.1.0

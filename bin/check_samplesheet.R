@@ -36,6 +36,7 @@ library(rentrez)
 # Where to save output metadata files
 sample_data_path <- 'sample_metadata.tsv'
 reference_data_path <- 'reference_metadata.tsv'
+report_data_path <- 'report_metadata.tsv'
 
 # Where to save list of messages to be shown to the user, such as samples that were filtered out
 message_data_path <- 'message_data.tsv'
@@ -59,6 +60,7 @@ known_columns_samp <- c(
     'path_2',
     'ncbi_accession',
     'ncbi_query',
+    'ncbi_query_db',
     'ncbi_query_max',
     'sequence_type',
     'report_group_ids',
@@ -92,22 +94,30 @@ known_columns_ref <- c(
     'ref_color_by',
     'ref_enabled'
 )
-
+known_columns_rep <- c(
+    'report_group_ids',
+    'template',
+    'render_target'
+)
 # Default values for columns
 defaults_ref <- c(
-    ref_ncbi_query_max = '30',
+    ref_ncbi_query_max = '100',
     ref_primary_usage = 'optional',
     ref_contextual_usage = 'optional',
     ref_enabled = TRUE
 )
 defaults_samp <- c(
-    report_group_ids = '_no_group_defined_',
+    report_group_ids = '',
     enabled = TRUE,
-    ncbi_query_max = '10',
+    ncbi_query_max = '30',
     ref_ncbi_query_max = defaults_ref[['ref_ncbi_query_max']],
     ref_primary_usage = defaults_ref[['ref_primary_usage']],
     ref_contextual_usage = defaults_ref[['ref_contextual_usage']],
     ref_enabled = defaults_ref[['ref_enabled']]
+)
+defaults_rep <- c(
+    template = 'pathsurveil_report',
+    render_target = 'index.html'
 )
 
 # Columns that must have a valid value in the input of this script
@@ -117,6 +127,9 @@ required_input_columns_samp <- list(
 )
 required_input_columns_ref <- list(
     c('ref_path', 'ref_ncbi_accession', 'ref_ncbi_query')
+)
+required_input_columns_rep <- list(
+    c('report_group_ids', 'template')
 )
 
 # Groups of columns in which only a single one should have a value. Regular expressions are allowed.
@@ -146,12 +159,14 @@ known_extensions <- c(
 
 # Types of sequencing supported by the pipeline.
 # This is case insensitive
-known_read_types <- c(
+known_input_types <- c(
     'illumina',
     'nanopore',
     'pacbio',
-    'bgiseq'
+    'bgiseq',
+    'assembly'
 )
+valid_query_databases <- c('sra', 'assembly')
 
 # Regular expression for characters that cannot appear in IDs
 invalid_id_char_pattern <- '[\\/:;*?"<>| .()-]+'
@@ -184,30 +199,58 @@ duplicate_rows_by_id_list <- function(metadata, id_col) {
     rownames(metadata) <- NULL
     return(metadata)
 }
+duplicate_rows_by_template_list <- function(metadata) {
+    templates <- strsplit(metadata$template, split = ';', fixed = TRUE)
+    templates <- lapply(templates, function(values) trimws(values[values != '']))
+    if (any(lengths(templates) == 0)) {
+        stop(call. = FALSE, 'Each report_data row must specify at least one template.')
+    }
+    n_templates <- lengths(templates)
+    metadata <- metadata[rep(seq_len(nrow(metadata)), n_templates), , drop = FALSE]
+    metadata$template <- unlist(templates, use.names = FALSE)
+    rownames(metadata) <- NULL
+    metadata
+}
 
 # Parse inputs
 args <- commandArgs(trailingOnly = TRUE)
 args <- as.list(args)
 
 read_input_table <- function(path) {
-    if (endsWith(path, '.csv')) {
-        output <- read.csv(path, check.names = FALSE)
-    } else if (endsWith(path, '.tsv')) {
+    lines <- readLines(path, n = 10, warn = FALSE)
+    lines <- lines[lines != '']
+    if (length(lines) == 0) {
+        stop('Input file is empty: ', path)
+    }
+    count_delim <- function(lines, delim) {
+        sum(vapply(strsplit(lines, delim, fixed = TRUE), length, integer(1)) - 1L)
+    }
+    tab_count <- count_delim(lines, '\t')
+    comma_count <- count_delim(lines, ',')
+    if (tab_count > comma_count) {
         output <- read.csv(path, check.names = FALSE, sep = '\t')
     } else {
-        stop('Input file extension not supported. Must be .csv or .tsv.')
+        output <- read.csv(path, check.names = FALSE)
     }
+    return(output)
 }
 
 metadata_original_samp <- read_input_table(args[[1]])
 max_samples <- as.numeric(args[[2]])
-if (length(args) > 2) {
+if (length(args) > 2 && file.exists(args[[3]])) {
     metadata_original_ref <- read_input_table(args[[3]])
 } else {
     metadata_original_ref <- data.frame(ref_path = character(0))
 }
+if (length(args) > 3 && file.exists(args[[4]])) {
+    metadata_original_rep <- read_input_table(args[[4]])
+} else {
+    metadata_original_rep <- data.frame(template = character(0))
+}
+
 metadata_samp <- metadata_original_samp
 metadata_ref <- metadata_original_ref
+metadata_rep <- metadata_original_rep
 
 # Remove empty rows
 remove_empty_rows <- function(metadata) {
@@ -220,6 +263,9 @@ remove_empty_rows <- function(metadata) {
 metadata_samp <- remove_empty_rows(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_empty_rows(metadata_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_rows(metadata_rep)
 }
 
 # Check that there is data
@@ -251,6 +297,9 @@ colnames(metadata_samp) <- validate_col_names(colnames(metadata_samp), known_col
 if (nrow(metadata_ref) > 0) {
     colnames(metadata_ref) <- validate_col_names(colnames(metadata_ref), known_columns_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    colnames(metadata_rep) <- validate_col_names(colnames(metadata_rep), known_columns_rep)
+}
 
 # Remove empty columns and columns with no header
 remove_empty_cols <- function(metadata, csv_name) {
@@ -269,7 +318,10 @@ remove_empty_cols <- function(metadata, csv_name) {
 }
 metadata_samp <- remove_empty_cols(metadata_samp, args[[1]])
 if (nrow(metadata_ref) > 0) {
-    metadata_ref <- remove_empty_cols(metadata_ref, args[[2]])
+    metadata_ref <- remove_empty_cols(metadata_ref, args[[3]])
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_empty_cols(metadata_rep, args[[4]])
 }
 
 # Remove all whitespace
@@ -281,6 +333,9 @@ metadata_samp <- remove_whitespace(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- remove_whitespace(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- remove_whitespace(metadata_rep)
+}
 
 # Replace NAs with empty stings
 metadata_samp[] <- lapply(metadata_samp, function(x) {
@@ -288,6 +343,10 @@ metadata_samp[] <- lapply(metadata_samp, function(x) {
     return(x)
 })
 metadata_ref[] <- lapply(metadata_ref, function(x) {
+    x[is.na(x)] <- ''
+    return(x)
+})
+metadata_rep[] <- lapply(metadata_rep, function(x) {
     x[is.na(x)] <- ''
     return(x)
 })
@@ -302,6 +361,7 @@ check_required_cols <- function(metadata, required_cols, csv_name) {
 }
 check_required_cols(metadata_samp, required_input_columns_samp, 'sample data')
 check_required_cols(metadata_ref, required_input_columns_ref, 'reference data')
+check_required_cols(metadata_rep, required_input_columns_rep, 'report data')
 
 # Check for duplicated columns
 check_duplicated_cols <- function(metadata, known_cols, csv_name) {
@@ -316,6 +376,7 @@ check_duplicated_cols <- function(metadata, known_cols, csv_name) {
 }
 check_duplicated_cols(metadata_samp,  known_columns_samp, 'sample data')
 check_duplicated_cols(metadata_ref,  known_columns_ref, 'reference data')
+check_duplicated_cols(metadata_rep,  known_columns_rep, 'report data')
 
 # Reorder columns and add any missing columns
 reorder_and_add_cols <- function(metadata, known_columns) {
@@ -329,6 +390,7 @@ reorder_and_add_cols <- function(metadata, known_columns) {
 }
 metadata_samp <- reorder_and_add_cols(metadata_samp, known_columns_samp)
 metadata_ref <- reorder_and_add_cols(metadata_ref, known_columns_ref)
+metadata_rep <- reorder_and_add_cols(metadata_rep, known_columns_rep)
 
 # Add default values for some columns
 apply_defaults <- function(metadata, defaults) {
@@ -340,6 +402,9 @@ apply_defaults <- function(metadata, defaults) {
 metadata_samp <- apply_defaults(metadata_samp, defaults_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- apply_defaults(metadata_ref, defaults_ref)
+}
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- apply_defaults(metadata_rep, defaults_rep)
 }
 
 # Validate mutually exclusive columns
@@ -369,8 +434,8 @@ validate_mutually_exclusive <- function(metadata, mutually_exclusive_columns, cs
 validate_mutually_exclusive(metadata_samp, mutually_exclusive_columns_samp, 'sample data')
 validate_mutually_exclusive(metadata_ref, mutually_exclusive_columns_ref, 'reference data')
 
-# Validate color_by column and add back any original user-defined columns used
-validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep = ';') {
+# Validate color_by column and add back any original user_defined columns used
+validate_color_by <- function(metadata, color_by_col, csv_name, sep = ';') {
     split_color_by <- strsplit(metadata[[color_by_col]], split = sep)
     split_color_by <- lapply(split_color_by, trimws)
     all_color_by_cols <- unique(unlist(split_color_by))
@@ -383,10 +448,18 @@ validate_color_by <- function(metadata, color_by_col, known_cols, csv_name, sep 
     }
     return(unlist(lapply(split_color_by, paste0, collapse = sep)))
 }
-metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', known_columns_samp, 'sample data')
-if (nrow(metadata_ref) > 0) {
-    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', known_columns_ref, 'reference data')
+
+# Fill in an empty color_by column with all user-defined column names
+set_color_by_defaults <- function(metadata, color_by_col, known_cols) {
+    default_columns <- setdiff(colnames(metadata), known_cols)
+    if (all(metadata[[color_by_col]] == '')) {
+        metadata[[color_by_col]] <- paste(default_columns, collapse = ';')
+    }
+    return(metadata)
 }
+
+metadata_samp$color_by <- validate_color_by(metadata_samp, 'color_by', 'sample data')
+metadata_samp <- set_color_by_defaults(metadata_samp, 'color_by', known_columns_samp)
 
 # Move reference data from the sample metadata to the reference metadata
 ref_in_samp_data <- metadata_samp[, known_columns_ref]
@@ -404,6 +477,10 @@ ref_data_addition[user_specific_ref_cols] <- rep('', nrow(ref_data_addition))
 ref_data_addition <- ref_data_addition[, colnames(metadata_ref)]
 metadata_ref <- unique(rbind(metadata_ref, ref_data_addition))
 
+if (nrow(metadata_ref) > 0) {
+    metadata_ref$ref_color_by <- validate_color_by(metadata_ref, 'ref_color_by', 'reference data')
+    metadata_ref <- set_color_by_defaults(metadata_ref, 'ref_color_by', known_columns_ref)
+}
 # Validate usage columns
 validate_usage_col <- function(metadata, col) {
     unlist(lapply(1:nrow(metadata), function(index) {
@@ -438,6 +515,35 @@ metadata_samp$enabled <- validate_enabled(metadata_samp$enabled, 'sample data CS
 metadata_ref$ref_enabled <- validate_enabled(metadata_ref$ref_enabled, 'reference data CSV')
 
 # Convert NCBI sample queries to a list of SRA run accessions
+is_assembly_accession <- grepl('^GC[AF]_[0-9]+(\\.[0-9]+)?$', metadata_samp$ncbi_accession, ignore.case = TRUE)
+conflicting_assembly_type <- is_assembly_accession & is_present(metadata_samp$sequence_type) & tolower(metadata_samp$sequence_type) != 'assembly'
+if (any(conflicting_assembly_type)) {
+    stop(call. = FALSE, paste0(
+        'NCBI Assembly accessions beginning with GCA_ or GCF_ must use sequence_type "assembly" or not have a sequence_type specified (rows: ',
+        paste(which(conflicting_assembly_type), collapse = ', '), ').'
+    ))
+}
+metadata_samp$sequence_type[is_assembly_accession & !is_present(metadata_samp$sequence_type)] <- 'assembly'
+
+# Validate ncbi_query_db column
+has_query <- is_present(metadata_samp$ncbi_query)
+has_ncbi_query_db <- is_present(metadata_samp$ncbi_query_db)
+metadata_samp$ncbi_query_db <- tolower(trimws(metadata_samp$ncbi_query_db))
+missing_ncbi_query_db <- has_query & !has_ncbi_query_db
+invalid_ncbi_query_db <- has_query & !metadata_samp$ncbi_query_db %in% valid_query_databases
+if (any(missing_ncbi_query_db)) {
+    stop(call. = FALSE, paste0(
+        'The "ncbi_query_db" column must be specified as "SRA" or "assembly" when "ncbi_query" is present (rows: ',
+        paste(which(missing_ncbi_query_db), collapse = ', '), ').'
+    ))
+}
+if (any(invalid_ncbi_query_db)) {
+    stop(call. = FALSE, paste0(
+        'The "ncbi_query_db" column must contain only "SRA" or "assembly" (rows: ',
+        paste(which(invalid_ncbi_query_db), collapse = ', '), ').'
+    ))
+}
+
 get_ncbi_sra_runs <- function(query) {
     if (query == '') {
         return(NULL)
@@ -482,15 +588,80 @@ get_ncbi_sra_runs <- function(query) {
     rownames(output) <- NULL
     return(output)
 }
-unique_queries <- unique(metadata_samp$ncbi_query)
-unique_queries <- unique_queries[unique_queries != '']
-ncbi_result <- lapply(unique_queries, get_ncbi_sra_runs)
-names(ncbi_result) <- unique_queries
-is_query_to_use <- is_present(metadata_samp$ncbi_query) & metadata_samp$enabled
+
+get_ncbi_assembly_data <- function(query, for_reference = FALSE) {
+    if (query == '') {
+        return(NULL)
+    }
+    search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
+    if (length(search_result$ids) == 0) {
+        if (for_reference) {
+            return(data.frame(ref_id = character(0), ref_name = character(0), ref_description = character(0), ref_ncbi_accession = character(0)))
+        }
+        return(data.frame(ncbi_accession = character(0), sequence_type = character(0), name = character(0), description = character(0)))
+    }
+    starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
+    summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
+        rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
+    }))
+    if (length(search_result$ids) == 1) {
+        summary_result <- list(summary_result)
+    }
+    accessions <- unlist(lapply(summary_result, function(x) x$assemblyaccession))
+    names <- unlist(lapply(summary_result, function(x) paste0(x$speciesname, ' ', x$assemblyname)))
+    descriptions <- unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')')))
+    if (for_reference) {
+        output <- data.frame(
+            ref_id = accessions,
+            ref_name = names,
+            ref_description = descriptions,
+            ref_ncbi_accession = accessions
+        )
+    } else {
+        output <- data.frame(
+            ncbi_accession = accessions,
+            sequence_type = 'assembly',
+            name = names,
+            description = descriptions
+        )
+    }
+    rownames(output) <- NULL
+    if (for_reference) {
+        # Keep one representative per unversioned assembly accession, preferring RefSeq.
+        core_id <- sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        version <- as.numeric(sub(output$ref_ncbi_accession, pattern = '^[A-Z]+_[0-9]+\\.([0-9]+)$', replacement = '\\1'))
+        is_refseq <- startsWith(output$ref_ncbi_accession, 'GCF_')
+        output <- output[order(is_refseq, version, decreasing = TRUE), , drop = FALSE]
+        output <- output[! duplicated(core_id), , drop = FALSE]
+    }
+    output
+}
+
+# Resolve SRA and assembly queries against their declared NCBI databases.
+unique_sra_queries <- unique(metadata_samp$ncbi_query[metadata_samp$ncbi_query_db == 'sra'])
+unique_sra_queries <- unique_sra_queries[unique_sra_queries != '']
+ncbi_sra_result <- lapply(unique_sra_queries, get_ncbi_sra_runs)
+names(ncbi_sra_result) <- unique_sra_queries
+unique_assembly_queries <- unique(metadata_samp$ncbi_query[metadata_samp$ncbi_query_db == 'assembly'])
+unique_assembly_queries <- unique_assembly_queries[unique_assembly_queries != '']
+ncbi_assembly_result <- lapply(unique_assembly_queries, get_ncbi_assembly_data)
+names(ncbi_assembly_result) <- unique_assembly_queries
+
+is_query_to_use <- has_query & metadata_samp$enabled
 new_sample_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
-    query_data <- ncbi_result[[metadata_samp$ncbi_query[index]]]
-    # Remove any samples with abnormally low reads
-    query_data <- query_data[query_data$total_bases > 100000, ]
+    ncbi_query_db <- metadata_samp$ncbi_query_db[index]
+    query_data <- if (ncbi_query_db == 'assembly') {
+        ncbi_assembly_result[[metadata_samp$ncbi_query[index]]]
+    } else {
+        ncbi_sra_result[[metadata_samp$ncbi_query[index]]]
+    }
+    if (ncbi_query_db == 'sra') {
+        # Remove any samples with abnormally low reads
+        query_data <- query_data[query_data$total_bases > 100000, ]
+    }
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
     # subsample using ncbi_query_max
     query_max <- metadata_samp$ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
@@ -507,6 +678,7 @@ new_sample_data <- do.call(rbind, lapply(which(is_query_to_use), function(index)
     output$description <- paste0(metadata_samp$description[index], query_data$description)
     output$ncbi_accession <- query_data$ncbi_accession
     output$sequence_type <- query_data$sequence_type
+    output$ncbi_query_db <- ncbi_query_db
     rownames(output) <- NULL
     output
 }))
@@ -681,36 +853,54 @@ split_metadata <- lapply(seq_len(nrow(metadata_samp)), function(i) {
 metadata_samp <- do.call(rbind, split_metadata)
 rownames(metadata_samp) <- NULL
 
-# Convert NCBI reference queries to a list of assembly accessions
-get_ncbi_genomes <- function(query) {
-    search_result <- rentrez::entrez_search(db = 'assembly', query, retmax = 10000, use_history = TRUE)
-    starts <- seq(from = 0, to = length(search_result$ids) - 1, by = 500)
-    summary_result <- unlist(recursive = FALSE, lapply(starts, function(start) {
-        rentrez::entrez_summary(db = 'assembly', retmax = 500, retstart = start, web_history = search_result$web_history)
-    }))
-    if (length(search_result$ids) == 1) {
-        summary_result <- list(summary_result)
-    }
-    acc_ids <- unlist(lapply(summary_result, function(x) {
-        run_xml <- x$assemblyaccession[1]
-        gsub(run_xml, pattern = '.+ acc="(.+?)" .+', replacement = '\\1')
-    }))
-    output <- data.frame(
-        ref_id = unlist(lapply(summary_result, function(x) x$assemblyaccession)),
-        ref_name = unlist(lapply(summary_result, function(x) paste0(x$speciesname, ' ', x$assemblyname))),
-        ref_description = unlist(lapply(summary_result, function(x) paste0(x$organism, ' ', x$assemblyname, ' (', x$assemblyaccession, ')'))),
-        ref_ncbi_accession = unlist(lapply(summary_result, function(x) x$assemblyaccession))
-    )
-    rownames(output) <- NULL
-    return(output)
-}
 unique_queries <- unique(metadata_ref$ref_ncbi_query)
 unique_queries <- unique_queries[unique_queries != '']
-ncbi_result <- lapply(unique_queries, get_ncbi_genomes)
+ncbi_result <- lapply(unique_queries, function(query) get_ncbi_assembly_data(query, for_reference = TRUE))
 names(ncbi_result) <- unique_queries
+
+# Identify excluded accessions and their source row indices
+is_fully_excluded <- metadata_ref$ref_primary_usage == 'excluded' &
+                     metadata_ref$ref_contextual_usage == 'excluded' &
+                     as.logical(metadata_ref$ref_enabled)
+
+excluded_accessions <- character(0)
+excluded_source_rows <- integer(0)
+
+for (i in seq_len(nrow(metadata_ref))) {
+    if (!is_fully_excluded[i]) next
+
+    if (is_present(metadata_ref$ref_ncbi_accession[i])) {
+        core_id <- sub(metadata_ref$ref_ncbi_accession[i], pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        excluded_accessions <- c(excluded_accessions, core_id)
+        excluded_source_rows <- c(excluded_source_rows, i)
+    }
+
+    if (is_present(metadata_ref$ref_ncbi_query[i])) {
+        query_results <- ncbi_result[[metadata_ref$ref_ncbi_query[i]]]
+        if (!is.null(query_results) && nrow(query_results) > 0) {
+            core_ids <- sub(query_results$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+            excluded_accessions <- c(excluded_accessions, core_ids)
+            excluded_source_rows <- c(excluded_source_rows, rep(i, length(core_ids)))
+        }
+    }
+}
+
 is_query_to_use <- is_present(metadata_ref$ref_ncbi_query) & as.logical(metadata_ref$ref_enabled)
 new_ref_data <- do.call(rbind, lapply(which(is_query_to_use), function(index) {
     query_data <- ncbi_result[[metadata_ref$ref_ncbi_query[index]]]
+
+    # Remove accessions excluded by later rows (compare by core ID)
+    later_excluded <- excluded_accessions[excluded_source_rows > index]
+    if (length(later_excluded) > 0 && nrow(query_data) > 0) {
+        query_core_ids <- sub(query_data$ref_ncbi_accession, pattern = '^[A-Z]+_([0-9]+)\\.[0-9]+$', replacement = '\\1')
+        query_data <- query_data[! query_core_ids %in% later_excluded, ]
+    }
+
+    # Skip if no results remain after filtering
+    if (nrow(query_data) == 0) {
+        return(NULL)
+    }
+
     query_max <- metadata_ref$ref_ncbi_query_max[index]
     if (endsWith(query_max, '%')) {
         query_max_prop <- as.numeric(gsub(query_max, pattern = '%$', replacement = '')) / 100
@@ -752,6 +942,9 @@ validate_required_input <- function(metadata, required_input_columns, csv_name) 
 validate_required_input(metadata_samp, required_input_columns_samp, 'sample data')
 if (nrow(metadata_ref) > 0) {
     validate_required_input(metadata_ref, required_input_columns_ref, 'reference data')
+}
+if (nrow(metadata_rep) > 0) {
+    validate_required_input(metadata_rep, required_input_columns_rep, 'report data')
 }
 
 # Ensure sample/reference IDs are present
@@ -804,9 +997,33 @@ remove_file_extensions <- function(x) {
     return(gsub(x, pattern = all_ext_pattern, replacement = ''))
 }
 
+# Helper to split semicolon-delimited paths
+split_paths <- function(x) {
+    if (is_present(x)) {
+        unlist(strsplit(x, split = ';'))
+    } else {
+        character(0)
+    }
+}
+
+# Reject HTTP(S) URLs that contain glob characters
+glob_pattern <- '[][*?{}]'
+all_path_values <- c(metadata_samp$path, metadata_samp$path_2)
+all_path_values <- all_path_values[is_present(all_path_values)]
+all_paths <- unlist(lapply(all_path_values, split_paths))
+is_http_glob <- grepl('^https?://', all_paths) & grepl(glob_pattern, all_paths)
+if (any(is_http_glob)) {
+    stop(call. = FALSE, paste0(
+        'Glob patterns are not supported for HTTP/HTTPS URLs: "',
+        all_paths[is_http_glob][1], '"'
+    ))
+}
+
 reads_ids <- unlist(lapply(1:nrow(metadata_samp), function(row_index) {
-    reads_1 <- basename(metadata_samp$path[row_index])
-    reads_2 <- basename(metadata_samp$path_2[row_index])
+    reads_1_paths <- split_paths(metadata_samp$path[row_index])
+    reads_2_paths <- split_paths(metadata_samp$path_2[row_index])
+    reads_1 <- if (length(reads_1_paths) > 0) basename(reads_1_paths[1]) else ''
+    reads_2 <- if (length(reads_2_paths) > 0) basename(reads_2_paths[1]) else ''
     if (is_present(reads_1) && is_present(reads_2)) {
         remove_different_parts <- function(a, b) {
             a_split <- strsplit(reads_1, split = '')[[1]]
@@ -938,6 +1155,9 @@ metadata_samp$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_samp$re
 if (nrow(metadata_ref) > 0) {
     metadata_ref$ref_group_ids <- make_group_ids_ok_for_file_names(metadata_ref$ref_group_ids)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep$report_group_ids <- make_group_ids_ok_for_file_names(metadata_rep$report_group_ids)
+}
 
 # Check that reference groups in sample metadata are present in the reference metadata
 if (nrow(metadata_ref)) {
@@ -950,6 +1170,23 @@ if (nrow(metadata_ref)) {
                 'The reference group ID "', invalid_ids[1], '" used in row ', index, ' in the sample metadata CSV',
                 ' is not defined in the reference metadata CSV. All values in the "ref_group_ids" column in the',
                 ' sample metadata CSV must be present in the "ref_group_ids" or "ref_id" columns of the reference',
+                ' metadata CSV.'
+            ))
+        }
+    }
+}
+
+# Check that report groups in the report metadata are present in the sample metadata
+if (nrow(metadata_rep)) {
+    all_rep_group_ids <- unique(unlist(strsplit(metadata_samp$report_group_ids, split = ';')))
+    for (index in 1:nrow(metadata_rep)) {
+        split_ids <- strsplit(metadata_rep$report_group_ids[index], split = ';')[[1]]
+        invalid_ids <- split_ids[! split_ids %in% all_rep_group_ids]
+        if (length(invalid_ids) > 0) {
+            stop(call. = FALSE, paste0(
+                'The report group ID "', invalid_ids[1], '" used in row ', index, ' in the report metadata CSV',
+                ' is not defined in the sample metadata CSV. All values in the "report_group_ids" column in the',
+                ' report metadata CSV must be present in the "report_group_ids" column of the sample',
                 ' metadata CSV.'
             ))
         }
@@ -985,13 +1222,23 @@ names(type_replace_key) <- undefined_accessions
 is_undefined <- metadata_samp$ncbi_accession %in% undefined_accessions
 metadata_samp$sequence_type[is_undefined] <- unlist(type_replace_key[metadata_samp$ncbi_accession[is_undefined]])
 
+assembly_with_read_pairing <- grepl('^assembly$', metadata_samp$sequence_type, ignore.case = TRUE) &
+    (is_present(metadata_samp$path_2) | grepl(';', metadata_samp$path, fixed = TRUE))
+if (any(assembly_with_read_pairing)) {
+    stop(call. = FALSE, paste0(
+        'Assembly samples require exactly one local path in the "path" column and cannot use ',
+        '"path_2" or semicolon-delimited paths (rows: ',
+        paste(which(assembly_with_read_pairing), collapse = ', '), ').'
+    ))
+}
+
 # Validate sequence_type column
 detected_seq_types <- lapply(seq_along(metadata_samp$sequence_type), function(index) {
     user_value <- metadata_samp$sequence_type[index]
-    is_seq_type <- unlist(lapply(known_read_types, function(type) {
+    is_seq_type <- unlist(lapply(known_input_types, function(type) {
         grepl(user_value, pattern = type, ignore.case = TRUE)
     }))
-    return(known_read_types[is_seq_type])
+    return(known_input_types[is_seq_type])
 })
 invalid_seq_type <- vapply(detected_seq_types, length, FUN.VALUE = numeric(1)) != 1
 metadata_samp$sequence_type[! invalid_seq_type] <- unlist(detected_seq_types[! invalid_seq_type])
@@ -1008,9 +1255,10 @@ if (sum(invalid_seq_type) > 0) {
         reference_id = NA_character_,
         workflow = 'PREPARE_INPUT',
         message_type = 'WARNING',
-        description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_read_types, '"', collapse = ', '))
+        description = paste0('Invalid, missing, multiple, or undeterminable sequence type(s). Must be one of: ', paste0('"', known_input_types, '"', collapse = ', '))
     )
     message_data <- rbind(message_data, duplicate_rows_by_id_list(addition, 'report_group_id'))
+    metadata_samp <- metadata_samp[!invalid_seq_type, , drop = FALSE]
 }
 
 
@@ -1018,6 +1266,82 @@ if (sum(invalid_seq_type) > 0) {
 metadata_samp <- duplicate_rows_by_id_list(metadata_samp, 'report_group_ids')
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- duplicate_rows_by_id_list(metadata_ref, 'ref_group_ids')
+}
+
+# Expand report groups, then template lists; add defaults for groups without an explicit template.
+projectDir <- if (length(args) >= 5 && dir.exists(args[[5]])) args[[5]] else "."
+report_groups <- unique(trimws(unlist(strsplit(metadata_samp$report_group_ids, split = ';', fixed = TRUE))))
+report_groups <- report_groups[nzchar(report_groups)]
+metadata_rep <- metadata_rep[, known_columns_rep, drop = FALSE]
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- duplicate_rows_by_id_list(metadata_rep, 'report_group_ids')
+    metadata_rep <- duplicate_rows_by_template_list(metadata_rep)
+} else {
+    metadata_rep <- data.frame(
+        report_group_ids = character(0),
+        template = character(0),
+        render_target = character(0)
+    )
+}
+
+resolve_template <- function(value) {
+    value <- trimws(value)
+    known_template <- file.path(projectDir, 'assets', 'report_templates', value)
+    if (dir.exists(known_template)) {
+        resolved <- known_template
+    } else {
+        resolved <- value
+        if (!dir.exists(resolved)) {
+            stop(call. = FALSE, paste0('report_data template "', value, '" does not resolve to an existing directory.'))
+        }
+    }
+    resolved
+}
+
+if (nrow(metadata_rep) > 0) {
+    targets <- trimws(metadata_rep$render_target)
+    targets[is.na(targets)] <- ''
+    has_target <- targets != ''
+    if (any(grepl(';', targets[has_target], fixed = TRUE))) {
+        stop(call. = FALSE, 'Each report_data row may specify only one render_target; semicolon-delimited targets are not supported.')
+    }
+    if (any(!nzchar(tools::file_ext(targets[has_target])))) {
+        stop(call. = FALSE, 'Each report_data render_target must include a file extension.')
+    }
+    if (any(grepl('^(/|~)', targets[has_target])) || any(grepl('(^|/)\\.\\.(/|$)', targets[has_target]))) {
+        stop(call. = FALSE, 'report_data render_target must be a relative path inside the rendered output directory.')
+    }
+    metadata_rep$render_target <- targets
+}
+
+explicit_groups <- unique(metadata_rep$report_group_ids)
+default_groups <- setdiff(report_groups, explicit_groups)
+default_rows <- data.frame(
+    report_group_ids = default_groups,
+    template = rep(defaults_rep[['template']], length(default_groups)),
+    render_target = rep(defaults_rep[['render_target']], length(default_groups)),
+    stringsAsFactors = FALSE
+)
+metadata_rep <- rbind(metadata_rep, default_rows)
+if (nrow(metadata_rep) > 0) {
+    metadata_rep$template <- vapply(metadata_rep$template, resolve_template, character(1))
+    metadata_rep <- unique(metadata_rep)
+
+    template_labels <- basename(metadata_rep$template)
+    target_extensions <- tools::file_ext(metadata_rep$render_target)
+    publish_names <- ifelse(
+        metadata_rep$render_target == '',
+        paste(metadata_rep$report_group_ids, template_labels, sep = '_'),
+        paste0(metadata_rep$report_group_ids, '_', template_labels, '.', target_extensions)
+    )
+    duplicate_outputs <- duplicated(tolower(publish_names)) | duplicated(tolower(publish_names), fromLast = TRUE)
+    if (any(duplicate_outputs)) {
+        stop(call. = FALSE, paste0(
+            'report_data rows produce duplicate report outputs: ',
+            paste(unique(publish_names[duplicate_outputs]), collapse = ', '),
+            '. Use different template directory names or target file extensions.'
+        ))
+    }
 }
 
 # Convert reference groups to reference ids in the sample data
@@ -1073,10 +1397,14 @@ metadata_samp <- unique(metadata_samp)
 if (nrow(metadata_ref) > 0) {
     metadata_ref <- unique(metadata_ref)
 }
+if (nrow(metadata_rep) > 0) {
+    metadata_rep <- unique(metadata_rep)
+}
 
 # Replace double quotes with single quotes to not conflict with the CSV format quoting values
 metadata_samp[] <- lapply(metadata_samp, gsub, pattern = '"', replacement = "'")
 metadata_ref[] <- lapply(metadata_ref, gsub, pattern = '"', replacement = "'")
+metadata_rep[] <- lapply(metadata_rep, gsub, pattern = '"', replacement = "'")
 message_data[] <- lapply(message_data, gsub, pattern = '"', replacement = "'")
 
 # Write data for messages to be shown to the user, such as warnings about removed samples
@@ -1085,3 +1413,4 @@ write.table(message_data, file = message_data_path, row.names = FALSE, na = '', 
 # Write output metadata
 write.table(metadata_samp, file = sample_data_path, row.names = FALSE, na = '', sep = '\t')
 write.table(metadata_ref, file = reference_data_path, row.names = FALSE, na = '', sep = '\t')
+write.table(metadata_rep, file = report_data_path, row.names = FALSE, na = '', sep = '\t')

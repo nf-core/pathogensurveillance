@@ -15,10 +15,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PATHOGENSURVEILLANCE     } from './workflows/pathogensurveillance'
-include { PIPELINE_INITIALISATION  } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { PIPELINE_COMPLETION      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PATHOGENSURVEILLANCE    } from './workflows/pathogensurveillance'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { completionEmail         } from './subworkflows/nf-core/utils_nfcore_pipeline'
+include { completionSummary       } from './subworkflows/nf-core/utils_nfcore_pipeline'
+include { paramsSummaryMap        } from 'plugin/nf-schema'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,6 +36,7 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     take:
     sample_data_tsv
     reference_data_tsv
+    report_data_tsv
 
     main:
 
@@ -42,7 +45,8 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     //
     PATHOGENSURVEILLANCE (
         sample_data_tsv,
-        reference_data_tsv
+        reference_data_tsv,
+        report_data_tsv
     )
 
     emit:
@@ -71,7 +75,8 @@ workflow {
         params.help,
         params.help_full,
         params.show_hidden,
-        params.reference_data
+        params.reference_data,
+        params.report_data
     )
 
     //
@@ -79,7 +84,8 @@ workflow {
     //
     NFCORE_PATHOGENSURVEILLANCE (
         PIPELINE_INITIALISATION.out.sample_data_tsv,
-        PIPELINE_INITIALISATION.out.reference_data_tsv
+        PIPELINE_INITIALISATION.out.reference_data_tsv,
+        PIPELINE_INITIALISATION.out.report_data_tsv
     )
 
     //
@@ -93,6 +99,7 @@ workflow {
         params.monochrome_logs,
         NFCORE_PATHOGENSURVEILLANCE.out.multiqc_report
     )
+
 }
 
 /*

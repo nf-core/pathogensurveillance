@@ -3,12 +3,12 @@ process PREPARE_REPORT_INPUT {
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/52/52ccce28d2ab928ab862e25aae26314d69c8e38bd41ca9431c67ef05221348aa/data' :
         'community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned:838ba80435a629f8'}"
 
     input:
-    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(selected_refs), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(core_phylo_refs, stageAs: 'core_phylo_refs.tsv'), path(pocp), path(core_phylos, stageAs: 'core_phylos/*'), path(busco_refs, stageAs: 'busco_refs.tsv'), path(busco_phylos, stageAs: 'busco_phylos/*'), path(multiqc), path(messages), path(versions)
+    tuple val(group_meta), path(sample_data), path(ref_data), path(sendsketch), path(ncbi_ref_meta), path(downloaded_ref_meta), path(ani_matrix), path(mapping_ref), path(snp_aligns), path(snp_phylos), path(contextual_refs), path(pocp), path(phylogeny, stageAs: 'phylogeny/*'), path(gene_lists, stageAs: 'gene_lists/*'), path(multiqc), path(messages), path(versions)
     path output_format_json
 
     output:
@@ -46,19 +46,27 @@ process PREPARE_REPORT_INPUT {
     fi
 
     # Put the metadata for references selected for each sample into a single folder
-    if [ ! -z "${selected_refs}" ]; then
+    if [ ! -z "${downloaded_ref_meta}" ]; then
         mkdir -p ${prefix}_inputs/reference_data/downloaded
-        cp -r ${selected_refs} ${prefix}_inputs/reference_data/downloaded/
+        cp -r ${downloaded_ref_meta} ${prefix}_inputs/reference_data/downloaded/
     fi
 
     # Add estimated ANI matrix from sourmash
-    mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
-    cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    if [ ! -z "${ani_matrix}" ]; then
+        mkdir -p ${prefix}_inputs/sketch_comparisons/ani_matricies
+        cp ${ani_matrix} ${prefix}_inputs/sketch_comparisons/ani_matricies/
+    fi
 
-    # Add metadata for references assined for variant calling
+    # Add metadata for references assigned for variant calling
     if [ ! -z "${mapping_ref}" ]; then
         mkdir -p ${prefix}_inputs/reference_data/selected
         cp ${mapping_ref} ${prefix}_inputs/reference_data/selected/${prefix}_mapping_references.tsv
+    fi
+
+    # Add metadata for references selected as context for multigene phylogenies
+    if [ ! -z "${contextual_refs}" ]; then
+        mkdir -p ${prefix}_inputs/reference_data/selected
+        cp -r ${contextual_refs} ${prefix}_inputs/reference_data/selected/
     fi
 
     # Add SNP alignment from variant calling
@@ -73,38 +81,28 @@ process PREPARE_REPORT_INPUT {
         cp -r ${snp_phylos} ${prefix}_inputs/trees/snp/
     fi
 
-    # Add seleted references for the core gene phylogeny
-    if [ ! -z "${core_phylo_refs}" ]; then
-        mkdir -p ${prefix}_inputs/reference_data/selected/
-        cp -r ${core_phylo_refs} ${prefix}_inputs/reference_data/selected/${prefix}_core_references.tsv
-    fi
-
     # Add POCP estimate from the core genome phylogeny
     if [ ! -z "${pocp}" ]; then
         mkdir -p ${prefix}_inputs/pocp
         cp -r ${pocp} ${prefix}_inputs/pocp/${prefix}_pocp.tsv
     fi
 
-    # Add core genome phylogenies
-    if [ ! -z "${core_phylos}" ]; then
-        mkdir -p ${prefix}_inputs/trees/core
-        cp -r ${core_phylos} ${prefix}_inputs/trees/core/
+    # Add multigene phylogenies
+    if [ ! -z "${phylogeny}" ]; then
+        mkdir -p ${prefix}_inputs/trees/multigene
+        cp -r ${phylogeny} ${prefix}_inputs/trees/multigene/
     fi
 
-    # Add seleted references for the busco phylogeny
-    if [ ! -z "${busco_refs}" ]; then
-        mkdir -p ${prefix}_inputs/reference_data/selected/
-        cp -r ${busco_refs} ${prefix}_inputs/reference_data/selected/${prefix}_busco_references.tsv
-    fi
-
-    # Add busco phylogeny
-    if [ ! -z "${busco_phylos}" ]; then
-        mkdir -p ${prefix}_inputs/trees/busco
-        cp -r ${busco_phylos} ${prefix}_inputs/trees/busco/
+    # Add per-cluster gene lists for report
+    if [ ! -z "${gene_lists}" ]; then
+        mkdir -p ${prefix}_inputs/shared_genes/gene_metadata
+        cp -r ${gene_lists} ${prefix}_inputs/shared_genes/gene_metadata/
     fi
 
     # Put multiqc's output into a single folder for organization
-    cp -r ${multiqc} ${prefix}_inputs/multiqc
+    if [ ! -z "${multiqc}" ]; then
+    	cp -r ${multiqc} ${prefix}_inputs/multiqc
+    fi
 
     # Add pipeline status messages
     mkdir -p ${prefix}_inputs/pipeline_info
