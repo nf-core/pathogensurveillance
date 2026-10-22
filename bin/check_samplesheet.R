@@ -1318,8 +1318,8 @@ explicit_groups <- unique(metadata_rep$report_group_ids)
 default_groups <- setdiff(report_groups, explicit_groups)
 default_rows <- data.frame(
     report_group_ids = default_groups,
-    template = rep('pathsurveil_report', length(default_groups)),
-    render_target = rep('', length(default_groups)),
+    template = rep(defaults_rep[['template']], length(default_groups)),
+    render_target = rep(defaults_rep[['render_target']], length(default_groups)),
     stringsAsFactors = FALSE
 )
 metadata_rep <- rbind(metadata_rep, default_rows)

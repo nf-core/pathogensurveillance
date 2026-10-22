@@ -129,16 +129,32 @@ workflow PREPARE_INPUT {
 
     // Download assembly accessions using the same NCBI datasets implementation as references.
     assembly_acc_sample_key = sample_data_with_assembly_acc
-        .map { sample_meta, ref_metas -> [[id: sample_meta.sample_id], sample_meta, ref_metas] }
+        .map { sample_meta, ref_metas -> [[id: sample_meta.ncbi_accession], sample_meta, ref_metas] }
     sample_assembly_downloads = assembly_acc_sample_key
-        .map { sample_id, sample_meta, ref_metas -> [sample_meta + [id: sample_meta.sample_id], sample_meta.ncbi_accession] }
+        .map { ncbi_acc_meta, sample_meta, ref_metas -> [ncbi_acc_meta, ncbi_acc_meta.id] }
         .unique()
-    DOWNLOAD_SAMPLE_ASSEMBLIES ( sample_assembly_downloads )
+
+    // Check for cached assemblies and split into cached / to-download
+    sample_assembly_cached = sample_assembly_downloads.map { ncbi_acc_meta, accession ->
+        def fasta = file("${params.data_dir}/assemblies/${ncbi_acc_meta.id}.fasta.gz")
+        [ncbi_acc_meta, accession, fasta.exists()]
+    }
+    sample_assembly_with_cache = sample_assembly_cached.filter { ncbi_acc_meta, accession, has_fasta -> has_fasta }
+    sample_assembly_to_download = sample_assembly_cached.filter { ncbi_acc_meta, accession, has_fasta -> !has_fasta }
+
+    // Emit cached assemblies
+    cached_sample_assemblies = sample_assembly_with_cache.map { ncbi_acc_meta, accession, has_fasta ->
+        [ncbi_acc_meta, file("${params.data_dir}/assemblies/${ncbi_acc_meta.id}.fasta.gz")]
+    }
+
+    // Download missing assemblies
+    DOWNLOAD_SAMPLE_ASSEMBLIES ( sample_assembly_to_download.map { ncbi_acc_meta, accession, has_fasta -> [ncbi_acc_meta, accession] } )
     downloaded_sample_assemblies = DOWNLOAD_SAMPLE_ASSEMBLIES.out.sequence
-        .map { sample_meta, assembly_path -> [[id: sample_meta.id], assembly_path] }
-    sample_data_from_assemblies = assembly_acc_sample_key
-        .combine(downloaded_sample_assemblies, by: 0)
-        .map { sample_id, sample_meta, ref_metas, assembly_path ->
+    all_sample_assemblies = cached_sample_assemblies.mix(downloaded_sample_assemblies)
+
+    sample_data_from_assemblies = all_sample_assemblies
+        .combine(assembly_acc_sample_key, by: 0)
+        .map { ncbi_acc_meta, assembly_path, sample_meta, ref_metas ->
             [sample_meta + [paths: [assembly_path], paths_1: [assembly_path], paths_2: [], single_end: true], ref_metas]
         }
     sample_data = sample_data_from_reads

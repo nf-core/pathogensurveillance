@@ -184,7 +184,7 @@ Note that the pipeline will create the following files in your working directory
 work                # Directory containing the nextflow working files
 <OUTDIR>            # Finished results in specified location (defined with --outdir)
 .nextflow_log       # Log file from Nextflow
-path_surveil_data   # Where download reads and references are stored for reuse. Can be changed with the `--data_dir` parameter
+path_surveil_data   # Where downloaded reads and assemblies are stored for reuse. Can be changed with the `--data_dir` parameter
 ```
 
 If you wish to repeatedly use the same parameters for multiple runs, rather than specifying each flag in the command, you can specify these in a params file.
