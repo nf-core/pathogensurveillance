@@ -15,21 +15,10 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PATHOGENSURVEILLANCE  } from './workflows/pathogensurveillance'
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    GENOME PARAMETER VALUES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+include { PATHOGENSURVEILLANCE     } from './workflows/pathogensurveillance'
+include { PIPELINE_INITIALISATION  } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { PIPELINE_COMPLETION      } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
+include { getGenomeAttribute       } from './subworkflows/local/utils_nfcore_pathogensurveillance_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +32,8 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_PATHOGENSURVEILLANCE {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    sample_data_tsv
+    reference_data_tsv
 
     main:
 
@@ -51,15 +41,14 @@ workflow NFCORE_PATHOGENSURVEILLANCE {
     // WORKFLOW: Run pipeline
     //
     PATHOGENSURVEILLANCE (
-        samplesheet,
-        params.multiqc_config,
-        params.multiqc_logo,
-        params.multiqc_methods_description,
-        params.outdir,
+        sample_data_tsv,
+        reference_data_tsv
     )
+
     emit:
     multiqc_report = PATHOGENSURVEILLANCE.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -81,15 +70,18 @@ workflow {
         params.input,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
+        params.reference_data
     )
 
     //
     // WORKFLOW: Run main workflow
     //
     NFCORE_PATHOGENSURVEILLANCE (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.sample_data_tsv,
+        PIPELINE_INITIALISATION.out.reference_data_tsv
     )
+
     //
     // SUBWORKFLOW: Run completion tasks
     //

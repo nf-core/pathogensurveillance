@@ -1,5 +1,7 @@
 reports:
-  multiqc_report.html:
-    display: "MultiQC HTML report"
-  samplesheet.csv:
-    display: "Auto-created samplesheet with collated metadata and FASTQ paths"
+  "**/reports/*_pathsurveil_report.html":
+    display: Main reports in HTML format
+    mimeType: text/html
+  "**/reports/*_pathsurveil_report.pdf":
+    display: Main reports in PDF format
+    mimeType: application/pdf
