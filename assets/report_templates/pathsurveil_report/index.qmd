@@ -438,9 +438,23 @@ cat('
 Could not generate SNP tree.
 ')
 ```
-
 :::
 
+## {{< iconify bi map >}} Spatial distribution
+
+```{r plot_map_widget, eval = !is.null(params$inputs) }
+plot_map_widget(params$inputs)
+```
+
+```{r, results='asis'}
+cat('
+::: {.callout-tip collapse="true"}
+## About this plot
+
+This is a representation of the spatial distribution of samples in this analysis.
+:::
+')
+```
 
 ## {{< iconify ph share-network-duotone >}} Minimum spanning network
 
