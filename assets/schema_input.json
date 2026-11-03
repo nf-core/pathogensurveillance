@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "sample_id": {
-                "type": "string"
+                "type": ["string", "integer"]
             },
             "name": {
                 "type": "string"
@@ -17,24 +17,25 @@
                 "type": "string"
             },
             "path": {
-                "type": "string",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "type": "string"
             },
             "path_2": {
                 "type": "string",
-                "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^[^\\s]+\\.f(ast)?q\\.gz(;[^\\s]+\\.f(ast)?q\\.gz)*$",
+                "errorMessage": "FastQ file(s) for reads 2 cannot contain spaces, must have extension '.fq.gz' or '.fastq.gz', and multiple files must be separated by semicolons."
             },
             "ncbi_accession": {
                 "type": "string",
-                "pattern": "^[A-Z]{3,6}[0-9]+$",
-                "errorMessage": "The `ncbi_accession` column contains at least on value that does not look like an NCBI accession (captial letters followed by numbers)."
+                "pattern": "^(?:[A-Z]{3,6}[0-9]+|GC[AF]_[0-9]+(?:\\.[0-9]+)?)$",
+                "errorMessage": "The `ncbi_accession` column contains a value that does not look like an SRA or NCBI Assembly accession."
             },
             "ncbi_query": {
                 "type": "string"
+            },
+            "ncbi_query_db": {
+                "type": "string",
+                "pattern": "(?i)sra|assembly",
+                "errorMessage": "The `ncbi_query_db` column must be either 'sra' or 'assembly'."
             },
             "ncbi_query_max": {
                 "type": "integer",
@@ -44,11 +45,11 @@
             },
             "sequence_type": {
                 "type": "string",
-                "pattern": "(?i)illumina|nanopore|pacbio|bgiseq",
-                "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', or 'bgiseq'."
+                "pattern": "(?i)illumina|nanopore|pacbio|bgiseq|assembly",
+                "errorMessage": "The `sequence_type` column must be one of 'illumina', 'nanopore', 'pacbio', 'bgiseq', or 'assembly'."
             },
             "report_group_ids": {
-                "type": "string",
+                "type": ["string", "integer"],
                 "default": "_no_group_defined_",
                 "pattern": "^[a-zA-Z0-9_ -]+(?:;[a-zA-Z0-9_ -]+)*$"
             },
@@ -66,8 +67,44 @@
                 "default": true
             },
             "ref_group_ids": {
-                "type": "string"
+                "type": ["string", "integer"]
             }
-        }
+        },
+        "allOf": [
+            {
+                "if": {
+                    "required": ["sequence_type"],
+                    "properties": {
+                        "sequence_type": {
+                            "pattern": "(?i)^assembly$"
+                        }
+                    }
+                },
+                "then": {
+                    "properties": {
+                        "path": {
+                            "pattern": "^[^\\s]+\\.(fasta|fa|fna)(\\.gz)?$",
+                            "errorMessage": "Assembly input must be a single FASTA file with extension '.fa', '.fasta', or '.fna', optionally followed by '.gz'."
+                        }
+                    }
+                },
+                "else": {
+                    "properties": {
+                        "path": {
+                            "pattern": "^[^\\s]+\\.f(ast)?q\\.gz(;[^\\s]+\\.f(ast)?q\\.gz)*$",
+                            "errorMessage": "FastQ file(s) for reads 1 must be provided, cannot contain spaces, must have extension '.fq.gz' or '.fastq.gz', and multiple files must be separated by semicolons."
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "required": ["ncbi_query"]
+                },
+                "then": {
+                    "required": ["ncbi_query_db"]
+                }
+            }
+        ]
     }
 }

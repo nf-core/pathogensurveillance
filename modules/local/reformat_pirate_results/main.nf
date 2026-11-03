@@ -3,7 +3,7 @@ process REFORMAT_PIRATE_RESULTS {
     label 'process_single'
 
     conda "bioconda::pirate=1.0.5"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/pirate:1.0.5--hdfd78af_0' :
         'biocontainers/pirate:1.0.5--hdfd78af_0' }"
 
@@ -13,7 +13,7 @@ process REFORMAT_PIRATE_RESULTS {
     output:
     tuple val(ref_meta), path("${prefix}_gene_family.tsv")    , emit: gene_fam
     tuple val(ref_meta), path("${prefix}_genePA.tsv")         , emit: gene_fam_pa
-    path "versions.yml"                                       , emit: versions
+    path "versions.yml"                                       , emit: versions_reformat_pirate_results, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

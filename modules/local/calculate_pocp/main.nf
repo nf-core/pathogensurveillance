@@ -3,7 +3,7 @@ process CALCULATE_POCP {
     label 'process_single'
 
     conda "conda-forge::r-base=4.2.1"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/r-base:4.2.1' :
         'quay.io/biocontainers/r-base:4.2.1' }"
 
@@ -12,7 +12,7 @@ process CALCULATE_POCP {
 
     output:
     tuple val(group_meta), path("${prefix}_pocp.tsv"), emit: pocp
-    path "versions.yml"                              , emit: versions
+    path "versions.yml"                              , emit: versions_calculate_pocp, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

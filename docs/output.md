@@ -12,58 +12,54 @@ Here, we will assume it is called `outdir`.
 
 The `pathogensurveillance` pipeline has many steps and each will produce output files for most of the steps.
 Not all steps will be run for all input datasets.
-For example, core gene phylogenies are only made for prokaryotes and busco gene phylogenies are only made for eukaryotes, so a dataset without both prokaryotes and eukaryotes will not have both of these outputs.
+For example, multigene phylogenies use core genes for prokaryotes and BUSCO genes for eukaryotes, so a dataset without both prokaryotes and eukaryotes will not have both of these outputs.
 Below is the directory structure of the all possible outputs.
 
 ```tree
 outdir
-├── aligned_genes
-│   ├── busco_genes
-│   └── core_genes
 ├── aligned_reads
 ├── annotations
-│   └── bakta
+│   └── bakta
 ├── assemblies
-│   ├── flye
-│   └── spades
+│   ├── flye
+│   └── spades
 ├── busco
 ├── downloads
-│   ├── annotations
-│   ├── assemblies
-│   ├── databases
-│   │   ├── bakta
-│   │   └── busco
-│   └── reads
+│   ├── annotations
+│   ├── assemblies
+│   ├── databases
+│   │   ├── bakta
+│   │   └── busco
+│   └── reads
 ├── fastp
 ├── metadata
 ├── pipeline_info
 ├── pirate
 ├── pocp
 ├── quality_control
-│   ├── fastqc
-│   ├── multiqc
-│   ├── nanoplot
-│   └── quast
+│   ├── fastqc
+│   ├── multiqc
+│   ├── nanoplot
+│   └── quast
 ├── reference_data
-│   ├── considered
-│   ├── downloaded
-│   ├── indexes
-│   │   ├── bgzip
-│   │   ├── bwa
-│   │   ├── faidx
-│   │   ├── picard
-│   │   └── tabix
-│   └── selected
+│   ├── considered
+│   ├── downloaded
+│   ├── indexes
+│   │   ├── bwa
+│   │   ├── faidx
+│   │   ├── picard
+│   │   └── tabix
+│   └── selected
 ├── reports
 ├── report_group_data
 ├── sendsketch
+├── shared_genes
+│   ├── gene_metadata
+│   └── sequences
 ├── sketch_comparisons
-│   ├── ani_matricies
-│   └── sketches
+│   ├── ani_matricies
+│   └── sketches
 ├── trees
-│   ├── busco
-│   ├── core
-│   └── snp
 └── variants
 ```
 
@@ -79,16 +75,16 @@ Below is a more detailed description of each output directory.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `shared_genes/`
-  - `busco/`
-    - `<gene ID>.aligned.fas`: FASTA files of aligned genes used in the BUSCO gene phylogenies.
-  - `core/`
-    - `<gene ID>.aligned.fas`: FASTA files of aligned genes used in the core gene phylogenies.
+- `shared_genes/sequences/`
+  - `<Report ID>--<Source>--cluster_<Cluster ID>--<Gene ID>.fas`: FASTA files of aligned genes used in the multigene phylogenies.
+- `shared_genes/gene_metadata/`
+  - `<Report ID>--<Source>--cluster_<Cluster ID>_gene_list.tsv`: List of genes used in each multigene phylogeny cluster.
 
 </details>
 
 FASTA files for each gene extracted from assemblies that are shared among all samples and aligned with [mafft](https://mafft.cbrc.jp/alignment/server/index.html).
 Contains sequences for both samples and references.
+Source is `core` for prokaryotes and `busco` for eukaryotes.
 
 ### Aligned reads (`bwa mem`)
 
@@ -126,7 +122,7 @@ These read alignments are then filtered for quality and reformatted before being
 </details>
 
 [Bakta](https://github.com/oschwengers/bakta) is a tool for the rapid and standardised annotation of bacterial genomes and plasmids from both isolates and MAGs.
-It is used to annotate prokaryotic genomes for use in the core gene phylogeny.
+It is used to annotate prokaryotic genomes for use in the multigene phylogeny.
 
 ### Assemblies (`spades` and `flye`)
 
@@ -289,18 +285,15 @@ The outputs of these tools are compiled using [MultiQC](https://github.com/Multi
     - `<sample_id>.tsv`: The metadata for references selected for download
   - `selected/`
     - `<report ID>_mapping_references.tsv`: The IDs of references used to align reads to during variant calling
-    - `<report ID>_core_references.tsv`: The IDs of references used to provide context in core gene phylogenies
-    - `<report ID>_busco_references.tsv`: The IDs of references used to provide context in BUSCO gene phylogenies
+    - `<report ID>_contextual_references.tsv`: The IDs of references used to provide context in multigene phylogenies
   - `indexes/`
     - `bwa/`
       - `<Refernce ID>_bwa`: Index files used to align reads to references with `bwa mem`
     - `tabix/`
-      - `<Report ID>_<Reference ID>.vcf.gz.tbi`: Index files created by `tabix`, which is part of samtools
-    - `bgzip/`
-      - `<Reference ID>.fasta.gz.gzi`: Index files created by `bgzip`, which is part of samtools
+      - `<Report ID>_<Reference ID>.vcf.gz.tbi`: Index files created by `htslib bgziptabix`
     - `faidx`:
-      - `<Reference ID>.fasta.gz.fai`: Index files created by `faidx`, which is part of samtools
-      - `<Reference ID>.fasta.gz.gzi`: Index files created by `faidx`, which is part of samtools
+      - `<Reference ID>.fasta.gz.fai`: Index files created by `samtools faidx`
+      - `<Reference ID>.fasta.gz.gzi`: Index files created by `samtools faidx` for gzip-compressed references
     - `picard`:
       - `<Reference ID>.fasta.dict`: Index files created by `picard CreateSequenceDictionary`.
 
@@ -315,11 +308,14 @@ The `reference_data` folder contains information regarding references, including
 <summary>output files</summary>
 
 - `reports/`
-  - `<Report ID>_report.html`: The primary output report of the pipeline
+  - `<Report ID>_<Template directory name>/`: Directory containing the rendered report. When a report group is assigned more than one template in `--report_data`, one directory is written per template.
+  - `<Report ID>_<Template directory name>.<extension>`: When `render_target` is set, the exact matching file from the rendered output is published directly under `reports/`.
 
 </details>
 
 This is the primary output of the pipeline, containing the report meant to be understandable by non-bioinformaticians.
+
+Each full report directory contains the rendered report output(s), plus associated stylesheets and assets. If a `render_target` is set, only the exact matching rendered file is published to the report directory.
 
 ### Grouped report data
 
@@ -341,6 +337,7 @@ It contains selected and renamed outputs from the pipeline present in other outp
 
 - `sendsketch/`
   - `<Sample ID>.txt`: Table returned by BBmap `sendsketch` with initial identifications of samples.
+  - `<Sample ID>_taxa_found.tsv`: Table of taxa found in the sendsketch results that pass a rank-specific ANI threshold.
 
 </details>
 
@@ -366,15 +363,13 @@ In order to select references to use with samples and provide a rough identifica
 ### Trees (`iqtree2`)
 
 <details markdown="1">
-<summary>output files</summary>
+<summary>Output files</summary>
 
 - `trees/`
-  - `busco/`
-    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from BUSCO genes by `iqtree2`
-  - `core/`
-    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from core genes by `iqtree2`
+  - `multigene/`
+    - `<Report ID>--<Source>--cluster_<Cluster ID>.treefile`: Tree in Newick format inferred from shared genes by `iqtree2`
   - `snp/`
-    - `<Report ID>--<Cluster ID>.treefile`: Tree in Newick format inferred from variants by `iqtree2`
+    - `<Report ID>--<Reference ID>.treefile`: Tree in Newick format inferred from variants by `iqtree2`
 
 </details>
 

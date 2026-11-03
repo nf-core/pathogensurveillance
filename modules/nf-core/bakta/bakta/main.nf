@@ -3,9 +3,9 @@ process BAKTA_BAKTA {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container "${workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/bakta:1.11.4--pyhdfd78af_0'
-        : 'biocontainers/bakta:1.11.4--pyhdfd78af_0'}"
+    container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
+        ? 'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/50/50b75335f6394ae83fd05f364db27ee2eb75f4170e3525bb2aea47ad717a9e64/data'
+        : 'community.wave.seqera.io/library/bakta_diamond:7830b94718da4f96'}"
 
     input:
     tuple val(meta), path(fasta)
@@ -26,11 +26,12 @@ process BAKTA_BAKTA {
     tuple val(meta), path("${prefix}.hypotheticals.faa"), emit: hypotheticals_faa
     tuple val(meta), path("${prefix}.tsv"), emit: tsv
     tuple val(meta), path("${prefix}.txt"), emit: txt
-    path "versions.yml", emit: versions
+    tuple val(meta), path("${prefix}.json"), emit: json
+    tuple val("${task.process}"), val('bakta'), eval("bakta --version 2>&1 | sed 's/.*bakta //'"), emit: versions_bakta, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
-
+    
     script:
     def args = task.ext.args ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
@@ -38,8 +39,17 @@ process BAKTA_BAKTA {
     def prodigal_tf_opt = prodigal_tf ? "--prodigal-tf ${prodigal_tf[0]}" : ""
     def regions_opt = regions ? "--regions ${regions}" : ""
     def hmms_opt = hmms ? "--hmms ${hmms}" : ""
-
     """
+    ## Fake home due to fontconfig 'no writeable cache directory' issue
+    mkdir nxf_home
+    export HOME=\$PWD/nxf_home
+
+    db_real="\$(realpath "${db}")"
+    if [ ! -e "\$db_real/amrfinderplus-db/latest" ] || [ ! -L "\$db_real/amrfinderplus-db/latest" ]; then
+        rm -rf "\$db_real/amrfinderplus-db/latest"
+        amrfinder_update --force_update --database "\$db_real/amrfinderplus-db"
+    fi
+
     bakta \\
         ${fasta} \\
         ${args} \\
@@ -50,16 +60,18 @@ process BAKTA_BAKTA {
         ${regions_opt} \\
         ${hmms_opt} \\
         --db ${db}
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bakta: \$(echo \$(bakta --version) 2>&1 | cut -f '2' -d ' ')
-    END_VERSIONS
     """
 
     stub:
     prefix = task.ext.prefix ?: "${meta.id}"
     """
+    export MPLCONFIGDIR=\$PWD/.matplotlib
+    export FONTCONFIG_PATH=\$PWD/.fontconfig
+    export XDG_CACHE_HOME=\$PWD/.cache
+    mkdir .fontconfig .cache
+    mkdir nxf_home
+    export HOME=\$PWD/nxf_home
+
     touch ${prefix}.embl
     touch ${prefix}.faa
     touch ${prefix}.ffn
@@ -70,10 +82,6 @@ process BAKTA_BAKTA {
     touch ${prefix}.hypotheticals.faa
     touch ${prefix}.tsv
     touch ${prefix}.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bakta: \$(echo \$(bakta --version) 2>&1 | cut -f '2' -d ' ')
-    END_VERSIONS
+    touch ${prefix}.json
     """
 }

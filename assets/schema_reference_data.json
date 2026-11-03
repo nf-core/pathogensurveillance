@@ -1,0 +1,59 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/pathogensurveillance/main/assets/schema_reference_data.json",
+    "title": "nf-core/pathogensurveillance pipeline - params.reference_data schema",
+    "description": "Schema for the file provided with params.reference_data",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "ref_group_ids": {
+                "type": ["string", "integer"]
+            },
+            "ref_id": {
+                "type": "string"
+            },
+            "ref_name": {
+                "type": "string"
+            },
+            "ref_description": {
+                "type": "string"
+            },
+            "ref_path": {
+                "type": "string"
+            },
+            "ref_ncbi_accession": {
+                "type": "string"
+            },
+            "ref_ncbi_query": {
+                "type": "string"
+            },
+            "ref_ncbi_query_max": {
+                "type": "string",
+                "default": "100",
+                "pattern": "^([0-9]+%?)?$",
+                "errorMessage": "The `ref_ncbi_query_max` column must be a whole number, optionally followed by a '%' to indicate a percentage of results (e.g. '25' or '25%'). Leave blank to use the default."
+            },
+            "ref_primary_usage": {
+                "type": "string",
+                "default": "optional",
+                "pattern": "^((?i:optional|required|excluded|exclusive))?$",
+                "errorMessage": "The `ref_primary_usage` column must be one of 'optional', 'required', 'excluded', or 'exclusive'. Leave blank to use the default."
+            },
+            "ref_contextual_usage": {
+                "type": "string",
+                "default": "optional",
+                "pattern": "^((?i:optional|required|excluded|exclusive))?$",
+                "errorMessage": "The `ref_contextual_usage` column must be one of 'optional', 'required', 'excluded', or 'exclusive'. Leave blank to use the default."
+            },
+            "ref_color_by": {
+                "type": "string"
+            },
+            "ref_enabled": {
+                "type": ["boolean", "string"],
+                "default": true,
+                "errorMessage": "The `ref_enabled` column must be either 'TRUE' or 'FALSE'. Leave blank to use the default."
+            }
+        }
+    }
+}
