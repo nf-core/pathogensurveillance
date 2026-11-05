@@ -1,0 +1,45 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_size = 4
+indent_style = space
+
+[*.{md,yml,yaml,html,css,scss,js}]
+indent_size = 2
+
+[/assets/email*]
+indent_size = unset
+
+# ignore python and markdown
+[*.{py,md}]
+indent_style = unset
+
+# ignore ro-crate metadata files
+[**/ro-crate-metadata.json]
+insert_final_newline = unset
+
+# ignore embedded libraries and third-party code
+[assets/main_report/_extensions/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# Dont check nf-core assets since they should already be checked
+[/subworkflows/nf-core/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+[/modules/nf-core/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

@@ -1,0 +1,162 @@
+Changes in component 'nf-core/bakta/baktadbdownload'
+Changes in 'bakta/baktadbdownload/main.nf':
+--- modules/nf-core/bakta/baktadbdownload/main.nf
++++ modules/nf-core/bakta/baktadbdownload/main.nf
+@@ -7,8 +7,8 @@
+         : 'biocontainers/bakta:1.11.4--pyhdfd78af_0'}"
+ 
+     output:
+-    path "db*", emit: db
+-    path "versions.yml", emit: versions
++    path "db*"              , emit: db
++    path "versions.yml"     , emit: versions
+ 
+     when:
+     task.ext.when == null || task.ext.when
+@@ -16,22 +16,43 @@
+     script:
+     def args = task.ext.args ?: ''
+     """
+-    bakta_db \\
+-        download \\
+-        ${args}
++    # TODO: Remove this workaround when bakta adds a proper User-Agent header on next release
++    python3 -c "
++    # Patch requests first
++    import requests
++    _original_request = requests.Session.request
++    def patched_request(self, method, url, **kwargs):
++        headers = kwargs.get('headers', {})
++        if headers is None:
++            headers = {}
++        if 'User-Agent' not in headers:
++            headers['User-Agent'] = 'bakta/1.11.4'
++        kwargs['headers'] = headers
++        return _original_request(self, method, url, **kwargs)
++    requests.Session.request = patched_request
++    
++    # Import and run bakta
++    import sys
++    from bakta.db import main as bakta_main
++    
++    # Set up command line arguments
++    sys.argv = ['bakta_db', 'download'] + '''$args'''.split()
++    
++    # Run it
++    bakta_main()
++    "
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+         bakta: \$(echo \$(bakta_db --version) 2>&1 | cut -f '2' -d ' ')
+     END_VERSIONS
+     """
+-
+     stub:
+     def args = task.ext.args ?: ''
+     """
+     echo "bakta_db \\
+         download \\
+-        ${args}"
++        $args"
+ 
+     mkdir db
+ 
+
+'modules/nf-core/bakta/baktadbdownload/environment.yml' is unchanged
+Changes in 'bakta/baktadbdownload/meta.yml':
+--- modules/nf-core/bakta/baktadbdownload/meta.yml
++++ modules/nf-core/bakta/baktadbdownload/meta.yml
+@@ -17,18 +17,16 @@
+       licence: ["GPL v3"]
+       identifier: biotools:bakta
+ output:
+-  db:
+-    - db*:
+-        type: directory
+-        description: BAKTA database directory
+-        pattern: "db*/"
+-  versions:
+-    - versions.yml:
+-        type: file
+-        description: File containing software versions
+-        pattern: "versions.yml"
+-        ontologies:
+-          - edam: http://edamontology.org/format_3750 # YAML
++  - db:
++      - db*:
++          type: directory
++          description: BAKTA database directory
++          pattern: "db*/"
++  - versions:
++      - versions.yml:
++          type: file
++          description: File containing software versions
++          pattern: "versions.yml"
+ authors:
+   - "@jfy133"
+   - "@jasmezz"
+
+'modules/nf-core/bakta/baktadbdownload/tests/tags.yml' was created
+'modules/nf-core/bakta/baktadbdownload/tests/nextflow.config' is unchanged
+Changes in 'bakta/baktadbdownload/tests/main.nf.test':
+--- modules/nf-core/bakta/baktadbdownload/tests/main.nf.test
++++ modules/nf-core/bakta/baktadbdownload/tests/main.nf.test
+@@ -30,7 +30,7 @@
+     }
+ 
+     test("Bakta database download - stub") {
+-
++    
+         options "-stub"
+ 
+         when {
+@@ -44,7 +44,7 @@
+             assertAll(
+                 { assert process.success },
+                 { assert snapshot(
+-                    process.out.db +
++                    process.out.db + 
+                     process.out.versions
+                     ).match() }
+             )
+
+Changes in 'bakta/baktadbdownload/tests/main.nf.test.snap':
+--- modules/nf-core/bakta/baktadbdownload/tests/main.nf.test.snap
++++ modules/nf-core/bakta/baktadbdownload/tests/main.nf.test.snap
+@@ -2,14 +2,14 @@
+     "Bakta database download": {
+         "content": [
+             [
+-                "versions.yml:md5,e6f280a0deb9981dbf7f1d6270ab0908"
++                "versions.yml:md5,29d6ec77dc88492b2c53141e6541c289"
+             ]
+         ],
+         "meta": {
+             "nf-test": "0.9.2",
+-            "nextflow": "25.04.7"
++            "nextflow": "24.10.4"
+         },
+-        "timestamp": "2025-10-22T11:28:20.601164502"
++        "timestamp": "2025-01-25T12:30:51.853371"
+     },
+     "Bakta database download - stub": {
+         "content": [
+@@ -17,13 +17,13 @@
+                 [
+                     
+                 ],
+-                "versions.yml:md5,e6f280a0deb9981dbf7f1d6270ab0908"
++                "versions.yml:md5,29d6ec77dc88492b2c53141e6541c289"
+             ]
+         ],
+         "meta": {
+             "nf-test": "0.9.2",
+-            "nextflow": "25.04.7"
++            "nextflow": "24.10.4"
+         },
+-        "timestamp": "2025-10-22T11:28:26.466451602"
++        "timestamp": "2025-01-25T12:31:08.390845"
+     }
+ }
+************************************************************
