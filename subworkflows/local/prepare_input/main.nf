@@ -74,7 +74,7 @@ workflow PREPARE_INPUT {
         }
         .unique()
     SRATOOLS_FASTERQDUMP ( ncbi_acc, [], [] )
-    versions = versions.mix(SRATOOLS_FASTERQDUMP.out.versions)
+    // versions emitted via topic channel, no .out.versions available
     sample_data = SRATOOLS_FASTERQDUMP.out.reads
         .combine(ncbi_acc_sample_key, by: 0)
         .map { ncbi_acc_meta, reads_path, sample_meta, ref_metas ->
